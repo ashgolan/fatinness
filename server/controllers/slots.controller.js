@@ -40,20 +40,38 @@ export const getDaySlots = async (req, res) => {
     const { date } = req.params; // YYYY-MM-DD
     const day = new Date(date);
 
-    const slots = await Slot.find({ date: day, isBlocked: false }).sort({
-      startTime: 1,
-    });
+    // نحسب نطاق اليوم
+    const nextDay = new Date(day);
+    nextDay.setDate(day.getDate() + 1);
 
-    // حساب السعة المتبقية في كل ساعة
+    const slots = await Slot.find({
+      date: { $gte: day, $lt: nextDay },
+      isBlocked: false,
+    }).sort({ startTime: 1 });
+
+    const now = new Date();
+
     const enrichedSlots = await Promise.all(
       slots.map(async (slot) => {
         const bookedCount = await Booking.countDocuments({
           slot: slot._id,
           status: "booked",
         });
+
+        const slotDate = new Date(slot.date);
+        const [hour, minute] = slot.startTime.split(":").map(Number);
+        slotDate.setHours(hour, minute, 0, 0);
+
+        const isPast =
+          slotDate.toDateString() === now.toDateString() &&
+          slotDate.getTime() <= now.getTime();
+
         return {
           ...slot.toObject(),
           available: Math.max((slot.capacity || 0) - bookedCount, 0),
+          isBooked: bookedCount > 0,
+          time: slot.startTime,
+          isPast,
         };
       })
     );

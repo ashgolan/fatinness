@@ -111,3 +111,24 @@ export const cancelBooking = async (req, res) => {
     res.status(500).json({ message: "Error cancelling booking" });
   }
 };
+
+/**
+ * 🔹 عرض جميع الحجوزات (للمشرفة فقط)
+ */
+export const getAllBookings = async (req, res) => {
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const bookings = await Booking.find()
+      .populate("user", "username email role")
+      .populate("slot", "date startTime capacity")
+      .sort({ createdAt: -1 });
+
+    res.json(bookings);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching bookings" });
+  }
+};

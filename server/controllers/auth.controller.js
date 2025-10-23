@@ -59,42 +59,42 @@ export const registerUser = async (req, res) => {
 // 🔹 تسجيل الدخول
 export const loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // فحص المدخلات
-    if (!username || !password) {
+    // ✅ فحص المدخلات
+    if (!email || !password) {
       return res
         .status(400)
-        .json({ message: "Username and password are required" });
+        .json({ message: "Email and password are required" });
     }
-    // البحث عن المستخدم
+
+    // ✅ البحث عن المستخدم حسب البريد الإلكتروني (غير حساس لحالة الأحرف)
     const user = await User.findOne({
-      username: { $regex: new RegExp(`^${username.trim()}$`, "i") },
+      email: { $regex: new RegExp(`^${email.trim()}$`, "i") },
     });
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // تأكد أن الحقل موجود فعلاً في قاعدة البيانات
+    // ✅ تأكد أن كلمة المرور محفوظة
     if (!user.passwordHash) {
-      console.error(
-        "⚠️ user.passwordHash is missing in DB for user:",
-        username
-      );
+      console.error("⚠️ user.passwordHash is missing in DB for user:", email);
       return res
         .status(500)
         .json({ message: "User record invalid (missing password hash)" });
     }
 
-    // المقارنة الآمنة
+    // ✅ المقارنة الآمنة بين كلمة المرور المدخلة والمحفوظة
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // توليد التوكن
+    // ✅ توليد التوكن
     const token = generateToken(user);
 
+    // ✅ الرد بالبيانات الأساسية
     res.json({
       message: "Login successful",
       token,
@@ -111,3 +111,4 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+

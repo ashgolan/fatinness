@@ -152,3 +152,31 @@ export const getDashboardStats = async (req, res) => {
     res.status(500).json({ message: "Error fetching stats" });
   }
 };
+/**
+ * 🔹 جلب جميع القوالب الأسبوعية
+ */
+export const getWeekTemplates = async (req, res) => {
+  try {
+    const templates = await WeekTemplate.find().sort({ createdAt: -1 });
+    res.json(templates);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error fetching templates" });
+  }
+};
+
+/**
+ * 🔹 حذف قالب أسبوعي
+ */
+export const deleteWeekTemplate = async (req, res) => {
+  try {
+    const template = await WeekTemplate.findByIdAndDelete(req.params.id);
+    if (!template)
+      return res.status(404).json({ message: "Template not found" });
+
+    res.json({ message: "Template deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting template" });
+  }
+};

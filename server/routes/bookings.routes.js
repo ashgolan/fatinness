@@ -1,5 +1,5 @@
 import express from "express";
-import { createBooking, cancelBooking } from "../controllers/bookings.controller.js";
+import { createBooking, cancelBooking, getAllBookings } from "../controllers/bookings.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { apiLimiter } from "../middlewares/rateLimit.middleware.js";
 import { verifyActiveSubscription } from "../middlewares/subscription.middleware.js";
@@ -10,6 +10,8 @@ import { checkSlotTimeValidity } from "../middlewares/slotTime.middleware.js";
 const router = express.Router();
 
 router.use(authMiddleware);
+// 🔹 إرجاع جميع الحجوزات (للأدمن فقط)
+router.get("/", getAllBookings);
 
 // ✅ تسلسل كامل للحماية من جميع الحالات الممكنة
 router.post(
