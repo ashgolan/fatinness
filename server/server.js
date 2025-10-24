@@ -3,7 +3,7 @@ import express from 'express';
 import cors from "cors";
 import { connectDB } from './config/db.js';
 import { agenda } from './config/agenda.js';
-import { defineSchedulerJobs } from './utils/scheduler.js';
+import { defineSchedulerJobs, startScheduler } from './utils/scheduler.js';
 import usersRoutes from './routes/users.routes.js';
 import bookingsRouter from "./routes/bookings.routes.js";
 
@@ -48,6 +48,7 @@ app.use('/auth', authRoutes);
 app.use('/slots', slotRoutes);
 app.use('/bookings', bookingsRouter);
 app.use('/admin', adminRoutes);
+app.use("/uploads", express.static("uploads"));
 app.use('/payments', paymentsRoutes);
 app.use('/google', googleRoutes);
 app.use('/users', usersRoutes);
@@ -73,3 +74,5 @@ const PORT = process.env.PORT || 4000;
     process.exit(1);
   }
 })();
+defineSchedulerJobs();
+startScheduler();

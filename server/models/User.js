@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     height: Number,
     weight: Number,
     age: Number,
+    isBlocked: { type: Boolean, default: false },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     allowExtraBookings: { type: Boolean, default: false },
     fcmTokens: [String],

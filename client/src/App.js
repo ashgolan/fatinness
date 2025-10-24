@@ -14,6 +14,9 @@ import BookingsAdmin from "./pages/admin/BookingsAdmin";
 import TemplatesAdmin from "./pages/admin/TemplatesAdmin";
 import UsersAdmin from "./pages/admin/UsersAdmin";
 import SlotsAdmin from "./pages/admin/SlotsAdmin";
+import AdminNotifications from "./pages/admin/AdminNotifications";
+import AdminReports from "./pages/admin/AdminReports";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 export default function App() {
   return (
@@ -42,6 +45,10 @@ export default function App() {
   <Route path="/admin/templates" element={<TemplatesAdmin />} />
   <Route path="/admin/users" element={<UsersAdmin />} />
   <Route path="/admin/slots" element={<SlotsAdmin />} />
+<Route path="/admin/notifications" element={<AdminNotifications />} />
+<Route path="/admin/reports" element={<AdminReports />} />
+<Route path="/admin/settings" element={<AdminSettings />} />
+
 
 </Route>
 

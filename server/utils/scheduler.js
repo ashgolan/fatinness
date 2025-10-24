@@ -1,37 +1,46 @@
-import { agenda } from '../config/agenda.js';
-import Booking from '../models/Booking.js';
-import User from '../models/User.js';
-import { sendPushNotification } from './fcm.js'; // سننشئه لاحقًا
+import Agenda from "agenda";
+import Booking from "../models/Booking.js";
+import Slot from "../models/Slot.js";
+import { sendFcmToTokens } from "./fcm.js";
 
-// 🔹 جدولة تذكير قبل ساعتين من موعد التدريب
-export async function scheduleReminder(bookingId) {
-  const booking = await Booking.findById(bookingId).populate('user slot');
-  if (!booking || booking.status !== 'booked') return;
+// 🔹 إنشاء مجدول Agenda
+export const agenda = new Agenda({
+  db: { address: process.env.MONGO_URI, collection: "agendaJobs" },
+});
 
-  const slotDate = new Date(booking.slot.date);
-  const reminderTime = new Date(slotDate.getTime() - 2 * 60 * 60 * 1000); // ساعتين قبل
-
-  await agenda.schedule(reminderTime, 'sendBookingReminder', { bookingId });
-}
-
-// 🔹 تعريف مهمة التذكير (يتم تنفيذها من Agenda)
-export function defineSchedulerJobs() {
-  agenda.define('sendBookingReminder', async (job) => {
+// 🔹 تعريف الوظائف التي ينفذها المجدول
+export const defineSchedulerJobs = () => {
+  // 🕓 وظيفة إرسال التذكير
+  agenda.define("send-reminder", async (job) => {
     const { bookingId } = job.attrs.data;
-    const booking = await Booking.findById(bookingId).populate('user slot');
-    if (!booking || booking.status !== 'booked') return;
+    const booking = await Booking.findById(bookingId).populate("user slot");
 
-    const user = await User.findById(booking.user._id);
+    if (!booking || booking.status !== "booked" || booking.reminderSent) return;
 
-    // 🔔 إرسال إشعار للمستخدم
-    if (user?.fcmToken) {
-      await sendPushNotification(
-        user.fcmToken,
-        '⏰ Reminder: Training Session Soon!',
-        `Your session starts at ${new Date(booking.slot.date).toLocaleTimeString()}.`
-      );
+    const title = "تذكير: تدريبك بعد ساعتين 💪";
+    const body = `لديك تدريب اليوم ${booking.slot.date.toLocaleDateString(
+      "ar-EG"
+    )} الساعة ${booking.slot.startTime}`;
+
+    if (booking.user?.fcmTokens?.length) {
+      await sendFcmToTokens(booking.user.fcmTokens, { title, body });
     }
 
-    console.log(`Reminder sent to ${user?.email || 'unknown user'}`);
+    booking.reminderSent = true;
+    await booking.save();
+    console.log(`✅ Reminder sent for booking ${bookingId}`);
   });
-}
+};
+
+// 🔹 بدء تشغيل المجدول
+export const startScheduler = async () => {
+  await agenda.start();
+  console.log("🚀 Scheduler started successfully");
+};
+
+// 🔹 وظيفة مساعد لتحديد وقت التذكير
+export const scheduleReminder = async (bookingId, slotDate) => {
+  const reminderTime = new Date(slotDate.getTime() - 2 * 60 * 60 * 1000); // ساعتين قبل الموعد
+  await agenda.schedule(reminderTime, "send-reminder", { bookingId });
+  console.log(`⏰ Reminder scheduled for booking ${bookingId} at ${reminderTime}`);
+};

@@ -1,12 +1,39 @@
-import React, { useContext } from "react";
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { clearToken } from "../utils/tokensStorage";
+import { Api } from "../api/Api";
 
 export default function Navbar() {
   const { user, setUser } = useContext(UserContext);
+  const [status, setStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // 🕓 جلب حالة المجدول
+  const fetchStatus = async () => {
+    try {
+      const { data } = await Api.get("/admin/scheduler/status");
+      setStatus(data);
+    } catch {
+      setStatus({ active: false });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role === "admin") fetchStatus();
+  }, [user]);
 
   const logout = () => {
     clearToken();
@@ -14,7 +41,7 @@ export default function Navbar() {
     navigate("/login");
   };
 
-  // 🎨 إعداد الألوان حسب نوع المستخدم
+  // 🎨 ألوان الـ Navbar
   const isAdmin = user?.role === "admin";
   const navbarStyle = {
     backgroundColor: isAdmin ? "#1a1a1a" : "white",
@@ -28,85 +55,142 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar position="static" elevation={1} sx={navbarStyle}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography
-          variant="h6"
+    <>
+      {/* 🔔 تنبيه حالة المجدول يظهر فقط للمديرة */}
+      {isAdmin && !loading && (
+        <Box
           sx={{
-            flexGrow: 1,
-            fontWeight: 700,
-            color: isAdmin ? "gold" : "inherit",
+            width: "100%",
+            backgroundColor: status?.active ? "#2e7d32" : "#d32f2f",
+            color: "white",
+            textAlign: "center",
+            py: 0.5,
+            fontSize: "0.9rem",
           }}
         >
-          Fateness Studio
-          {isAdmin && (
-            <Typography
-              component="span"
-              sx={{
-                fontSize: "0.8rem",
-                color: "goldenrod",
-                marginLeft: "8px",
-                fontWeight: "400",
-              }}
-            >
-              (وضع الإدارة)
-            </Typography>
-          )}
-        </Typography>
-
-        <Box sx={{ display: "flex", gap: 1 }}>
-          {user ? (
+          {status?.active ? (
             <>
-              {/* 🔹 روابط المديرة */}
-              {isAdmin ? (
-                <>
-                  <Button component={Link} to="/admin/dashboard" sx={buttonStyle}>
-                    لوحة الإحصاءات
-                  </Button>
-                  <Button component={Link} to="/admin/templates" sx={buttonStyle}>
-                    القوالب الأسبوعية
-                  </Button>
-                  <Button component={Link} to="/admin/slots" sx={buttonStyle}>
-                    الجدول الأسبوعي
-                  </Button>
-                  <Button component={Link} to="/admin/bookings" sx={buttonStyle}>
-                    حجوزات المشتركات
-                  </Button>
-                </>
-              ) : (
-                /* 🔹 روابط المشتركة */
-                <>
-                  <Button component={Link} to="/dashboard" sx={buttonStyle}>
-                    لوحة التحكم
-                  </Button>
-                  <Button component={Link} to="/profile" sx={buttonStyle}>
-                    الملف الشخصي
-                  </Button>
-                  <Button component={Link} to="/bookings" sx={buttonStyle}>
-                    الحجوزات
-                  </Button>
-                  <Button component={Link} to="/my-bookings" sx={buttonStyle}>
-                    حجوزاتي
-                  </Button>
-                </>
+              🔔 نظام التذكيرات التلقائي يعمل الآن
+              {status?.lastRun && (
+                <span style={{ marginRight: "8px", fontSize: "0.8rem" }}>
+                  (آخر تشغيل: {new Date(status.lastRun).toLocaleString("ar-EG")}
+                  )
+                </span>
               )}
-
-              <Button onClick={logout} color="error">
-                تسجيل الخروج
-              </Button>
             </>
           ) : (
-            <>
-              <Button component={Link} to="/login" sx={buttonStyle}>
-                تسجيل الدخول
-              </Button>
-              <Button component={Link} to="/register" sx={buttonStyle}>
-                إنشاء حساب
-              </Button>
-            </>
+            "⚠️ نظام التذكيرات التلقائي غير فعّال حالياً"
           )}
         </Box>
-      </Toolbar>
-    </AppBar>
+      )}
+
+      <AppBar position="static" elevation={1} sx={navbarStyle}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              flexGrow: 1,
+              fontWeight: 700,
+              color: isAdmin ? "gold" : "inherit",
+            }}
+          >
+            Fateness Studio{" "}
+            {isAdmin && (
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "0.8rem",
+                  color: "goldenrod",
+                  marginLeft: "8px",
+                  fontWeight: "400",
+                }}
+              >
+                (وضع الإدارة)
+              </Typography>
+            )}
+          </Typography>
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            {user ? (
+              <>
+                {isAdmin ? (
+                  <>
+                    {/* 🔸 روابط المديرة */}
+                    <Button
+                  
+                      onClick={() => navigate("/admin/settings")}
+                    >
+                      ⚙️ الإعدادات
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/admin/dashboard"
+                      sx={buttonStyle}
+                    >
+                      لوحة التحكم
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/admin/templates"
+                      sx={buttonStyle}
+                    >
+                      القوالب الأسبوعية
+                    </Button>
+                    <Button component={Link} to="/admin/slots" sx={buttonStyle}>
+                      الجدول الأسبوعي
+                    </Button>
+                    <Button
+                      component={Link}
+                      to="/admin/bookings"
+                      sx={buttonStyle}
+                    >
+                      حجوزات المشتركات
+                    </Button>
+                    <Button component={Link} to="/admin/users" sx={buttonStyle}>
+                      قائمة المشتركات
+                    </Button>
+                    <Button
+                      sx={buttonStyle}
+                      onClick={() => navigate("/admin/notifications")}
+                    >
+                      🔔 الإشعارات
+                    </Button>
+                    <Button
+                      sx={buttonStyle}
+                      onClick={() => navigate("/admin/reports")}
+                    >
+                      📊 التقارير
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    {/* 🔸 روابط المشتركة */}
+                    <Button component={Link} to="/profile" sx={buttonStyle}>
+                      الملف الشخصي
+                    </Button>
+                    <Button component={Link} to="/my-bookings" sx={buttonStyle}>
+                      حجوزاتي
+                    </Button>
+                  </>
+                )}
+
+                <Button onClick={logout} color="error">
+                  تسجيل الخروج
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button component={Link} to="/login" sx={buttonStyle}>
+                  تسجيل الدخول
+                </Button>
+                <Button component={Link} to="/register" sx={buttonStyle}>
+                  إنشاء حساب
+                </Button>
+              </>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
+    </>
   );
 }
