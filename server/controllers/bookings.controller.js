@@ -24,15 +24,27 @@ export const createBooking = async (req, res) => {
       }
     }
 
+    // ✅ التحقق من الفتحة
     const slot = await Slot.findById(slotId);
     if (!slot || slot.isBlocked)
       return res.status(400).json({ message: "Slot not available" });
 
+    // ✅ لا يمكن الحجز في فترات ماضية
+    const now = new Date();
+    const slotDateTime = new Date(slot.date);
+    if (slotDateTime < now) {
+      return res
+        .status(400)
+        .json({ message: "لا يمكن حجز فترات انتهى موعدها." });
+    }
+
+    // ✅ حساب بداية ونهاية الأسبوع
     const startOfWeek = new Date(slot.date);
     startOfWeek.setDate(slot.date.getDate() - slot.date.getDay());
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
+    // ✅ الحد الأسبوعي
     const userBookingsThisWeek = await Booking.countDocuments({
       user: user._id,
       status: "booked",
@@ -44,6 +56,7 @@ export const createBooking = async (req, res) => {
     if (userBookingsThisWeek >= allowed)
       return res.status(403).json({ message: "Weekly booking limit reached" });
 
+    // ✅ فحص سعة الحصة
     const slotBookingsCount = await Booking.countDocuments({
       slot: slot._id,
       status: "booked",
@@ -51,24 +64,37 @@ export const createBooking = async (req, res) => {
     if (slotBookingsCount >= (slot.capacity || 9999))
       return res.status(400).json({ message: "This slot is full" });
 
+    // ✅ إنشاء الحجز
     const booking = await Booking.create({
       user: user._id,
       slot: slot._id,
       paymentRef,
     });
 
-    // ✅ إنشاء حدث في Google Calendar
-    await createGoogleEvent(user, booking);
+    // ✅ إنشاء حدث Google Calendar فقط إذا المستخدم فعلاً موصول
+    if (user.google?.accessToken) {
+      try {
+        await createGoogleEvent(user, booking);
+      } catch (err) {
+        console.warn("⚠️ Google Calendar skipped:", err.message);
+      }
+    }
 
-    // ✅ جدولة تذكير قبل ساعتين
-    await scheduleReminder(booking._id);
+    // ✅ جدولة تذكير فقط إذا كان لدى الفتحة تاريخ صالح
+    if (slot?.date) {
+      try {
+        await scheduleReminder(booking._id);
+      } catch (err) {
+        console.warn("⚠️ Reminder skipped:", err.message);
+      }
+    }
 
     res.status(201).json({
       message: "Booking created successfully",
       booking,
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in createBooking:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -105,13 +131,13 @@ export const cancelBooking = async (req, res) => {
       try {
         await deleteGoogleEvent(booking.user, booking.calendarEventId);
       } catch (e) {
-        console.error(e);
+        console.error("⚠️ Failed to delete calendar event:", e.message);
       }
     }
 
     res.json({ message: "Booking cancelled successfully" });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error cancelling booking:", error);
     res.status(500).json({ message: "Error cancelling booking" });
   }
 };
@@ -132,11 +158,14 @@ export const getAllBookings = async (req, res) => {
 
     res.json(bookings);
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error fetching all bookings:", error);
     res.status(500).json({ message: "Error fetching bookings" });
   }
 };
 
+/**
+ * 🔹 عرض حجوزات المستخدم الحالية
+ */
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
@@ -145,7 +174,7 @@ export const getMyBookings = async (req, res) => {
 
     res.json(bookings);
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error fetching user bookings:", error);
     res.status(500).json({ message: "Error fetching your bookings" });
   }
 };

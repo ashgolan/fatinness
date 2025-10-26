@@ -79,42 +79,62 @@ export const updateUserProfile = async (req, res) => {
  * 🔹 إضافة نقطة وزن جديدة لسجل المستخدم
  * تُستخدم لعرض تقدم المستخدم في الرسم البياني
  */
+// 🔹 إضافة نقطة وزن جديدة للمستخدم الحالي
 export const addWeightPoint = async (req, res) => {
   try {
     const { weight, note } = req.body;
-    if (!weight) return res.status(400).json({ message: "Weight required" });
 
+    if (!weight) {
+      return res.status(400).json({ message: "Weight is required" });
+    }
+
+    // ✅ المستخدم الحالي مأخوذ من الـ token
     const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // ✅ تحديث سجل الوزن
     user.weightHistory.push({ weight, note, date: new Date() });
     user.weight = weight;
 
     await user.save();
+
     res.json({
-      message: "Weight updated",
+      message: "Weight updated successfully",
       weightHistory: user.weightHistory,
     });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error in addWeightPoint:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /**
  * 🔹 جلب سجل الأوزان لعرضه في المخطط البياني
  */
 export const getWeightHistory = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("weightHistory");
-    if (!user) return res.status(404).json({ message: "User not found" });
+    // ✅ جلب المستخدم الحالي من الـ token
+    const user = await User.findById(req.user._id)
+      .select("weightHistory weight")
+      .lean();
 
-    res.json(user.weightHistory);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ✅ الرد المنسق والواضح
+    res.json({
+      success: true,
+      weightHistory: user.weightHistory,
+      currentWeight: user.weight,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error in getWeightHistory:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 /**
  * 🔹 تحديث رمز FCM Token الخاص بالمستخدم
@@ -136,6 +156,29 @@ export const updateFcmToken = async (req, res) => {
     }
 
     res.json({ message: "FCM token saved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+export const renewSubscription = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const now = new Date();
+    const newEnd = new Date();
+    newEnd.setMonth(now.getMonth() + 1); // تمديد شهر
+
+    user.subscription = {
+      ...user.subscription,
+      active: true,
+      currentPeriodStart: now,
+      currentPeriodEnd: newEnd,
+    };
+
+    await user.save();
+    res.json({ message: "Subscription renewed successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });

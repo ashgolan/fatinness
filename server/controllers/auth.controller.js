@@ -12,6 +12,12 @@ function generateToken(user) {
 // 🔹 تسجيل مستخدم جديد
 export const registerUser = async (req, res) => {
   try {
+
+    // ✅ فقط المدير يستطيع إنشاء حسابات جديدة
+if (!req.user || req.user.role?.toString() !== "admin") {
+  return res.status(403).json({ message: "Only admins can create new users" });
+}
+
     const { username, password, email, name, phone } = req.body;
 
     if (!username || !password || !email)
@@ -29,6 +35,7 @@ export const registerUser = async (req, res) => {
       email,
       name,
       phone,
+      role: "user", // 🔹 كل مستخدم جديد يكون مشتركة افتراضيًا
       subscription: {
         active: false,
         planId: null,
@@ -37,17 +44,18 @@ export const registerUser = async (req, res) => {
       },
     });
 
-    const token = generateToken(newUser);
+    // ✅ لا حاجة لإنشاء token للمشتركة الجديدة
+    // لأنها لن تسجّل الدخول مباشرة من هنا
 
     res.status(201).json({
-      message: "User registered successfully",
-      token,
+      message: "User created successfully by admin",
       user: {
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
         name: newUser.name,
         phone: newUser.phone,
+        role: newUser.role,
       },
     });
   } catch (err) {

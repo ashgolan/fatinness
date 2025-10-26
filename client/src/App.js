@@ -17,6 +17,9 @@ import SlotsAdmin from "./pages/admin/SlotsAdmin";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AvailableSlots from "./pages/AvailableSlots";
+import Subscription from "./pages/Subscription";
+import ControlCenter from "./pages/admin/ControlCenter";
 
 export default function App() {
   return (
@@ -29,28 +32,32 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
 
           <Route element={<PrivateRoute role="user" />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/bookings" element={<Booking />} />
             <Route path="/my-bookings" element={<MyBookings />} />
+            <Route path="/available-slots" element={<AvailableSlots />} />
+            <Route path="/subscription" element={<Subscription />} />
           </Route>
 
           {/* 🔹 مسارات المشرف */}
-       <Route element={<PrivateRoute role="admin" />}>
-  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-  <Route path="/admin/bookings" element={<BookingsAdmin />} />
-  <Route path="/admin/templates" element={<TemplatesAdmin />} />
-  <Route path="/admin/users" element={<UsersAdmin />} />
-  <Route path="/admin/slots" element={<SlotsAdmin />} />
-<Route path="/admin/notifications" element={<AdminNotifications />} />
-<Route path="/admin/reports" element={<AdminReports />} />
-<Route path="/admin/settings" element={<AdminSettings />} />
-
-
-</Route>
+          <Route element={<PrivateRoute role="admin" />}>
+            <Route path="/register" element={<Register />} />
+            <Route path="/admin/control" element={<ControlCenter />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="/admin/bookings" element={<BookingsAdmin />} />
+            <Route path="/admin/templates" element={<TemplatesAdmin />} />
+            <Route path="/admin/users" element={<UsersAdmin />} />
+            <Route path="/admin/slots" element={<SlotsAdmin />} />
+            <Route
+              path="/admin/notifications"
+              element={<AdminNotifications />}
+            />
+            <Route path="/admin/reports" element={<AdminReports />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+          </Route>
 
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

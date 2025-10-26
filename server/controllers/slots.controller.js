@@ -82,3 +82,22 @@ export const getDaySlots = async (req, res) => {
     res.status(500).json({ message: "Error fetching day slots" });
   }
 };
+export const getUpcomingSlots = async (req, res) => {
+  try {
+    const today = new Date();
+    const end = new Date();
+    end.setDate(today.getDate() + 14); // أسبوعين قادمين مثلاً
+
+    const slots = await Slot.find({
+      date: { $gte: today, $lte: end },
+      isBlocked: false,
+    })
+      .sort({ date: 1, startTime: 1 })
+      .lean();
+
+    res.json(slots); // ✅ مصفوفة نظيفة مباشرة
+  } catch (error) {
+    console.error("❌ Error in getUpcomingSlots:", error);
+    res.status(500).json({ message: "Error fetching upcoming slots" });
+  }
+};

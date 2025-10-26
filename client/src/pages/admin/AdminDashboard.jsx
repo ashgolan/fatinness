@@ -49,7 +49,15 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activePercentAnim, setActivePercentAnim] = useState(0);
   const [cancelledPercentAnim, setCancelledPercentAnim] = useState(0);
+  const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
 
+  // ✅ مسار الصورة الثابت
+  const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
+
+  // ✅ شعار افتراضي إذا لم توجد الصورة
+  const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F"; // أو يمكنك استبدالها بصورة من مجلد public
+
+  const [imgSrc, setImgSrc] = React.useState(logoUrl);
   // 🔹 جلب البيانات
   const fetchStats = async () => {
     setLoading(true);
@@ -147,6 +155,44 @@ export default function AdminDashboard() {
 
   return (
     <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4, pb: 5 }}>
+    {/* 🟢 بطاقة ترحيب المديرة */}
+<Paper
+  sx={{
+    p: 3,
+    mb: 4,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    background: "linear-gradient(90deg,#1976d2,#42a5f5)",
+    color: "white",
+    borderRadius: 3,
+    boxShadow: 3,
+  }}
+>
+  <Box>
+    <Typography variant="h5" sx={{ fontWeight: 700 }}>
+      👋 مرحبًا {stats?.adminName || "آلاء"}!
+    </Typography>
+    <Typography variant="body1">
+      لديكِ اليوم {stats?.todaySessions || 0} جلسات نشطة و{" "}
+      {stats?.newUsersToday || 0} مشتركات جديدات 💪
+    </Typography>
+  </Box>
+            <img
+              src={imgSrc}
+              alt="Fateness Logo"
+              onError={() => setImgSrc(fallbackLogo)} // 👈 في حال لم توجد الصورة
+              style={{
+                width: 70,
+                height: 70,
+                borderRadius: "50%",
+                objectFit: "cover",
+                backgroundColor: "#fff",
+                boxShadow: "0 0 5px rgba(0,0,0,0.1)",
+              }}
+            />
+</Paper>
+
       <Typography variant="h5" gutterBottom>
         📊 لوحة الإحصاءات العامة
       </Typography>

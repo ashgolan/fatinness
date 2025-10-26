@@ -25,7 +25,7 @@ export default function Login() {
       setUser(me.data);
       toast.success("تم تسجيل الدخول بنجاح");
       if (me.data.role === "admin") {
-        navigate("/admin/dashboard", { replace: true });
+        navigate("/admin/adminDashboard", { replace: true });
       } else {
         navigate(from, { replace: true });
       }

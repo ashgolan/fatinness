@@ -15,8 +15,7 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const filename = `logo-${Date.now()}${ext}`;
-    cb(null, filename);
+    cb(null, "logo" + ext); // اسم ثابت
   },
 });
 
@@ -171,8 +170,7 @@ export const exportAttendanceReport = async (req, res) => {
       createdAt: new Date(b.createdAt).toLocaleString("ar-EG"),
     }));
 
-    const csvData =
-      csv.getHeaderString() + csv.stringifyRecords(records);
+    const csvData = csv.getHeaderString() + csv.stringifyRecords(records);
 
     // 🔹 إعداد الرد للتنزيل
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -190,8 +188,6 @@ export const exportAttendanceReport = async (req, res) => {
 /**
  * 🔹 لوحة الإحصاءات: نسب الحضور وعدد المستخدمين والأنشطة
  */
-
-
 
 export const getDashboardStats = async (req, res) => {
   try {
@@ -225,11 +221,13 @@ export const getDashboardStats = async (req, res) => {
       const dateStr = day.toISOString().split("T")[0];
 
       const active =
-        last7Days.find((d) => d._id.date === dateStr && d._id.status === "booked")
-          ?.count || 0;
+        last7Days.find(
+          (d) => d._id.date === dateStr && d._id.status === "booked"
+        )?.count || 0;
       const cancelled =
-        last7Days.find((d) => d._id.date === dateStr && d._id.status === "cancelled")
-          ?.count || 0;
+        last7Days.find(
+          (d) => d._id.date === dateStr && d._id.status === "cancelled"
+        )?.count || 0;
 
       dailyBookings.push({ date: dateStr, active, cancelled });
     }
@@ -282,7 +280,6 @@ export const getDashboardStats = async (req, res) => {
     res.status(500).json({ message: "Error fetching stats" });
   }
 };
-
 
 /**
  * 🔹 جلب جميع القوالب الأسبوعية
@@ -391,7 +388,6 @@ export const toggleUserBlock = async (req, res) => {
   }
 };
 
-
 /**
  * 🔹 إرسال إشعار مخصص من لوحة الإدارة
  * الهدف: تمكين المديرة من إرسال إشعار عام أو خاص
@@ -406,13 +402,18 @@ export const sendCustomNotification = async (req, res) => {
     const adminUser = req.user?._id;
 
     if (!title || !body)
-      return res.status(400).json({ message: "الرجاء إدخال العنوان والمحتوى." });
+      return res
+        .status(400)
+        .json({ message: "الرجاء إدخال العنوان والمحتوى." });
 
     let users = [];
 
     // 🎯 تحديد الجهة المستهدفة
     if (target === "all") {
-      users = await User.find({ isBlocked: false, fcmTokens: { $exists: true, $ne: [] } });
+      users = await User.find({
+        isBlocked: false,
+        fcmTokens: { $exists: true, $ne: [] },
+      });
     } else {
       const user = await User.findById(target);
       if (!user)
@@ -421,13 +422,17 @@ export const sendCustomNotification = async (req, res) => {
     }
 
     if (!users.length)
-      return res.status(400).json({ message: "لم يتم العثور على أي مشتركات مستهدفات." });
+      return res
+        .status(400)
+        .json({ message: "لم يتم العثور على أي مشتركات مستهدفات." });
 
     // 📱 جمع جميع الرموز (tokens)
     const allTokens = users.flatMap((u) => u.fcmTokens || []);
 
     if (!allTokens.length)
-      return res.status(400).json({ message: "لا توجد أجهزة مسجلة لاستقبال الإشعارات." });
+      return res
+        .status(400)
+        .json({ message: "لا توجد أجهزة مسجلة لاستقبال الإشعارات." });
 
     // 🚀 إرسال الإشعار عبر FCM
     const payload = { title, body };
@@ -494,8 +499,12 @@ export const getSettings = async (req, res) => {
  */
 export const updateSettings = async (req, res) => {
   try {
-    const { clubName, contactNumber, autoMessage, allowExtraBookingsByDefault } =
-      req.body;
+    const {
+      clubName,
+      contactNumber,
+      autoMessage,
+      allowExtraBookingsByDefault,
+    } = req.body;
 
     let settings = await Setting.findOne();
     if (!settings) {
