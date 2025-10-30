@@ -1,21 +1,33 @@
 import React, { useState } from "react";
-import { Box, Button, Paper, TextField, Typography } from "@mui/material";
+import { Box, Button, Paper, TextField, Typography, MenuItem } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: "",
+    phone: "",
+    gender: "female",
+    height: "",
+    weight: "",
+    age: "",
+  });
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await Api.post("/auth/register", { email, password, username }); // عدّل المسار إذا لزم
+      await Api.post("/auth/register", form);
       toast.success("تم إنشاء الحساب — سجلي الدخول الآن");
       navigate("/login");
     } catch (err) {
@@ -38,23 +50,63 @@ export default function Register() {
         >
           <TextField
             label="اسم المستخدم"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            name="username"
+            value={form.username}
+            onChange={handleChange}
             required
           />
           <TextField
             label="البريد الإلكتروني"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            value={form.email}
+            onChange={handleChange}
             required
           />
           <TextField
             label="كلمة المرور"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
             required
+          />
+          <TextField
+            label="رقم الهاتف"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+          />
+          <TextField
+            select
+            label="الجنس"
+            name="gender"
+            value={form.gender}
+            onChange={handleChange}
+          >
+            <MenuItem value="female">أنثى</MenuItem>
+            <MenuItem value="male">ذكر</MenuItem>
+          </TextField>
+          <TextField
+            label="الطول (سم)"
+            name="height"
+            type="number"
+            value={form.height}
+            onChange={handleChange}
+          />
+          <TextField
+            label="الوزن (كغ)"
+            name="weight"
+            type="number"
+            value={form.weight}
+            onChange={handleChange}
+          />
+          <TextField
+            label="العمر"
+            name="age"
+            type="number"
+            value={form.age}
+            onChange={handleChange}
           />
 
           <Button

@@ -38,17 +38,20 @@ const cards = [
   { key: "blockedUsers", label: "المشتركات المحظورات", color: "error", icon: "🚫" },
   { key: "totalBookings", label: "إجمالي الحجوزات", color: "info", icon: "📅" },
   { key: "activeBookings", label: "الحجوزات النشطة", color: "secondary", icon: "📌" },
+  { key: "completedBookings", label: "الحجوزات المنجزة", color: "success", icon: "🏁" }, // ✅ أضفنا هذه
   { key: "cancelled", label: "الحجوزات الملغاة", color: "error", icon: "❌" },
   { key: "totalSlots", label: "عدد الجلسات", color: "primary", icon: "🏋️" },
   { key: "todaySessions", label: "جلسات اليوم", color: "warning", icon: "☀️" },
   { key: "upcomingWeekSessions", label: "جلسات الأسبوع القادم", color: "success", icon: "📆" },
 ];
 
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activePercentAnim, setActivePercentAnim] = useState(0);
   const [cancelledPercentAnim, setCancelledPercentAnim] = useState(0);
+  
   const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
 
   // ✅ مسار الصورة الثابت

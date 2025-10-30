@@ -13,7 +13,7 @@ import { clearToken } from "../utils/tokensStorage";
 import { Api } from "../api/Api";
 
 export default function Navbar() {
-  const { user, setUser } = useContext(UserContext);
+  const { user, setUser, loadingUser } = useContext(UserContext); // ✅ نضيف حالة التحميل من الـ context
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -23,9 +23,11 @@ export default function Navbar() {
   const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
 
   // ✅ شعار افتراضي إذا لم توجد الصورة
-  const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F"; // أو يمكنك استبدالها بصورة من مجلد public
+  const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F";
 
   const [imgSrc, setImgSrc] = React.useState(logoUrl);
+
+  // ✅ فحص حالة نظام التذكيرات (للأدمن فقط)
   const fetchStatus = async () => {
     try {
       const { data } = await Api.get("/admin/scheduler/status");
@@ -41,12 +43,14 @@ export default function Navbar() {
     if (user?.role === "admin") fetchStatus();
   }, [user]);
 
+  // ✅ تسجيل الخروج
   const logout = () => {
     clearToken();
     setUser(null);
     navigate("/login");
   };
 
+  // ✅ منطق الألوان حسب الدور
   const isAdmin = user?.role === "admin";
   const navbarStyle = {
     backgroundColor: isAdmin ? "#1a1a1a" : "white",
@@ -59,9 +63,20 @@ export default function Navbar() {
     fontWeight: 600,
   };
 
+  // ✅ أثناء تحميل بيانات المستخدم من الـ context
+  if (loadingUser) {
+    return (
+      <AppBar position="static" elevation={1} sx={navbarStyle}>
+        <Toolbar sx={{ display: "flex", justifyContent: "center" }}>
+          <CircularProgress size={22} />
+        </Toolbar>
+      </AppBar>
+    );
+  }
+
   return (
     <>
-      {/* 🔔 شريط حالة نظام التذكيرات */}
+      {/* 🔔 شريط حالة نظام التذكيرات (للأدمن فقط) */}
       {isAdmin && !loading && (
         <Box
           sx={{
@@ -96,7 +111,7 @@ export default function Navbar() {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <img
               src={imgSrc}
-              alt="Fateness Logo"
+              alt="Fatiness Logo"
               onError={() => setImgSrc(fallbackLogo)} // 👈 في حال لم توجد الصورة
               style={{
                 width: 36,
@@ -114,7 +129,7 @@ export default function Navbar() {
                 color: isAdmin ? "gold" : "inherit",
               }}
             >
-              Fateness Studio{" "}
+              Fatiness Studio{" "}
               {isAdmin && (
                 <Typography
                   component="span"
@@ -132,8 +147,11 @@ export default function Navbar() {
           </Box>
 
           {/* 🔹 الأزرار */}
+          {/* 🔹 الأزرار */}
           <Box sx={{ display: "flex", gap: 1 }}>
-            {user ? (
+            {loadingUser ? (
+              <CircularProgress size={20} />
+            ) : user ? (
               <>
                 {isAdmin ? (
                   <Button component={Link} to="/admin/control" sx={buttonStyle}>
@@ -144,7 +162,6 @@ export default function Navbar() {
                     لوحة التحكم
                   </Button>
                 )}
-
                 <Button onClick={logout} color="error">
                   تسجيل الخروج
                 </Button>

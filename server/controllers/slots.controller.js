@@ -2,15 +2,18 @@ import Slot from "../models/Slot.js";
 import Booking from "../models/Booking.js";
 
 // 🔹 تجميع النتائج حسب اليوم
-function groupByDate(slots) {
-  const grouped = {};
-  slots.forEach((slot) => {
-    const dateKey = new Date(slot.date).toISOString().split("T")[0];
-    if (!grouped[dateKey]) grouped[dateKey] = [];
-    grouped[dateKey].push(slot);
-  });
-  return grouped;
-}
+import { fmtLocal } from "../utils/date.js"; // المسار حسب مكان الملف
+
+// function groupByDate(slots) {
+//   const grouped = {};
+//   slots.forEach((slot) => {
+//     const dateKey = fmtLocal(slot.date); // ✅ التاريخ المحلي الصحيح
+//     if (!grouped[dateKey]) grouped[dateKey] = [];
+//     grouped[dateKey].push(slot);
+//   });
+//   return grouped;
+// }
+
 
 // 🔹 إرجاع الأيام والساعات المتاحة للأسبوع الحالي أو المحدد
 export const getWeekSlots = async (req, res) => {
@@ -82,11 +85,26 @@ export const getDaySlots = async (req, res) => {
     res.status(500).json({ message: "Error fetching day slots" });
   }
 };
+
+// 🔹 تجميع الحصص حسب اليوم (محليًا)
+function groupByDate(slots) {
+  const grouped = {};
+  slots.forEach((slot) => {
+    const dateKey = fmtLocal(slot.date);
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(slot);
+  });
+  return grouped;
+}
+
+// 🔹 جلب الحصص القادمة للأسبوعين القادمين
 export const getUpcomingSlots = async (req, res) => {
   try {
     const today = new Date();
-    const end = new Date();
-    end.setDate(today.getDate() + 14); // أسبوعين قادمين مثلاً
+    today.setHours(0, 0, 0, 0); // ✅ نبدأ من بداية اليوم المحلي
+
+    const end = new Date(today);
+    end.setDate(today.getDate() + 14); // أسبوعين قادمين
 
     const slots = await Slot.find({
       date: { $gte: today, $lte: end },
@@ -95,7 +113,14 @@ export const getUpcomingSlots = async (req, res) => {
       .sort({ date: 1, startTime: 1 })
       .lean();
 
-    res.json(slots); // ✅ مصفوفة نظيفة مباشرة
+    // ✅ تجميع الساعات لكل يوم
+    const groupedSlots = groupByDate(slots);
+
+    res.json({
+      start: today,
+      end,
+      slots: groupedSlots,
+    });
   } catch (error) {
     console.error("❌ Error in getUpcomingSlots:", error);
     res.status(500).json({ message: "Error fetching upcoming slots" });

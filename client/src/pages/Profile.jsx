@@ -53,7 +53,10 @@ export default function Profile() {
     if (!newWeight) return toast.warning("الرجاء إدخال الوزن الجديد");
     setSaving(true);
     try {
-      await Api.post("/users/me/weight", { weight: parseFloat(newWeight), note });
+      await Api.post("/users/me/weight", {
+        weight: parseFloat(newWeight),
+        note,
+      });
       toast.success("تم حفظ الوزن بنجاح ✅");
       setNewWeight("");
       setNote("");
@@ -73,10 +76,16 @@ export default function Profile() {
     );
   }
 
+  // ✅ منطق عرض حالة الاشتراك
+  const isSubscriptionActive =
+    user?.role === "admin" || user?.subscription?.active !== false;
+
   // 🧮 بيانات الرسم البياني
   const weightHistory = user?.weightHistory || [];
   const chartData = {
-    labels: weightHistory.map((w) => new Date(w.date).toLocaleDateString("ar-EG")),
+    labels: weightHistory.map((w) =>
+      new Date(w.date).toLocaleDateString("ar-EG")
+    ),
     datasets: [
       {
         label: "الوزن (كغ)",
@@ -118,10 +127,11 @@ export default function Profile() {
           alignItems: "center",
           mb: 3,
           flexDirection: "row-reverse",
+          backgroundColor: "#fafafa",
         }}
       >
         <Avatar sx={{ width: 80, height: 80, ml: 2 }} src={user?.avatar || ""}>
-          {user?.username?.charAt(0).toUpperCase()}
+          {user?.username?.charAt(0)?.toUpperCase()}
         </Avatar>
         <Box>
           <Typography variant="h6">{user?.username}</Typography>
@@ -153,7 +163,9 @@ export default function Profile() {
             <Typography variant="subtitle2" color="text.secondary">
               الحصص المنجزة
             </Typography>
-            <Typography variant="h6">{user?.stats?.totalBookings || 0}</Typography>
+            <Typography variant="h6">
+              {user?.stats?.completedBookings || 0}
+            </Typography>
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
@@ -163,9 +175,12 @@ export default function Profile() {
             </Typography>
             <Typography
               variant="h6"
-              color={user?.subscription?.active ? "green" : "red"}
+              sx={{
+                color: isSubscriptionActive ? "green" : "red",
+                fontWeight: "bold",
+              }}
             >
-              {user?.subscription?.active ? "نشط ✅" : "منتهي ❌"}
+              {isSubscriptionActive ? "نشط (تجريبي) ✅" : "منتهي ❌"}
             </Typography>
           </Paper>
         </Grid>
@@ -179,7 +194,9 @@ export default function Profile() {
         {weightHistory.length > 0 ? (
           <Line data={chartData} options={chartOptions} />
         ) : (
-          <Typography color="text.secondary">لا توجد بيانات وزن بعد</Typography>
+          <Typography color="text.secondary">
+            لا توجد بيانات وزن بعد
+          </Typography>
         )}
       </Paper>
 

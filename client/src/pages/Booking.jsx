@@ -11,6 +11,7 @@ import {
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { colors, labels } from "../theme/theme";
+import { fmtLocal } from "../utils/date";
 
 // 🔹 دالة مساعدة لتوليد الأيام السبعة القادمة
 function getWeekDays(start = new Date()) {
@@ -37,32 +38,34 @@ export default function Booking() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [weekDays, setWeekDays] = useState(getWeekDays());
 
-  const fetchSlots = async (date) => {
-    setLoading(true);
-    try {
-      const dateStr = date.toISOString().split("T")[0];
-      const { data } = await Api.get(`/slots/day/${dateStr}`);
-      setSlots(data);
-    } catch (err) {
-      toast.error("حدث خطأ أثناء جلب المواعيد");
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchSlots = async (date) => {
+  setLoading(true);
+  try {
+    // 🔹 نستخدم fmtLocal بدل toISOString لتفادي انزلاق اليوم
+    const dateStr = fmtLocal(date);
+
+    const { data } = await Api.get(`/slots/day/${dateStr}`);
+    setSlots(data);
+  } catch (err) {
+    toast.error("حدث خطأ أثناء جلب المواعيد");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchSlots(selectedDate);
   }, [selectedDate]);
 
-  const handleBook = async (slotId) => {
-    try {
-      const { data } = await Api.post("/bookings", { slotId });
-      toast.success("تم حجز الموعد بنجاح");
-      fetchSlots(selectedDate);
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "حدث خطأ أثناء الحجز");
-    }
-  };
+const handleBook = async (slotId) => {
+  try {
+    await Api.post("/bookings", { slotId });
+    toast.success("تم حجز الموعد بنجاح");
+    await fetchSlots(selectedDate); // ✅ انتظر حتى تكتمل إعادة التحميل
+  } catch (err) {
+    toast.error(err?.response?.data?.message || "حدث خطأ أثناء الحجز");
+  }
+};
 
   return (
     <Box sx={{ maxWidth: 950, mx: "auto", mt: 3 }}>

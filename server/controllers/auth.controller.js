@@ -12,30 +12,49 @@ function generateToken(user) {
 // 🔹 تسجيل مستخدم جديد
 export const registerUser = async (req, res) => {
   try {
-
     // ✅ فقط المدير يستطيع إنشاء حسابات جديدة
-if (!req.user || req.user.role?.toString() !== "admin") {
-  return res.status(403).json({ message: "Only admins can create new users" });
-}
+    if (!req.user || req.user.role?.toString() !== "admin") {
+      return res.status(403).json({ message: "Only admins can create new users" });
+    }
 
-    const { username, password, email, name, phone } = req.body;
+    const {
+      username,
+      password,
+      email,
+      name,
+      phone,
+      gender,
+      height,
+      weight,
+      age,
+    } = req.body;
 
-    if (!username || !password || !email)
+    // ✅ التحقق من الحقول الأساسية
+    if (!username || !password || !email) {
       return res.status(400).json({ message: "Missing required fields" });
+    }
 
+    // ✅ التحقق من وجود المستخدم
     const existing = await User.findOne({ $or: [{ username }, { email }] });
-    if (existing)
+    if (existing) {
       return res.status(409).json({ message: "User already exists" });
+    }
 
+    // ✅ تشفير كلمة المرور
     const passwordHash = await bcrypt.hash(password, 10);
 
+    // ✅ إنشاء المستخدم الجديد
     const newUser = await User.create({
       username,
       passwordHash,
       email,
       name,
       phone,
-      role: "user", // 🔹 كل مستخدم جديد يكون مشتركة افتراضيًا
+      gender: gender || "female",
+      height: height || null,
+      weight: weight || null,
+      age: age || null,
+      role: "user", // كل مستخدمة جديدة تكون مشتركة عادية
       subscription: {
         active: false,
         planId: null,
@@ -43,9 +62,6 @@ if (!req.user || req.user.role?.toString() !== "admin") {
         providerCustomerId: null,
       },
     });
-
-    // ✅ لا حاجة لإنشاء token للمشتركة الجديدة
-    // لأنها لن تسجّل الدخول مباشرة من هنا
 
     res.status(201).json({
       message: "User created successfully by admin",
@@ -55,6 +71,10 @@ if (!req.user || req.user.role?.toString() !== "admin") {
         email: newUser.email,
         name: newUser.name,
         phone: newUser.phone,
+        gender: newUser.gender,
+        height: newUser.height,
+        weight: newUser.weight,
+        age: newUser.age,
         role: newUser.role,
       },
     });

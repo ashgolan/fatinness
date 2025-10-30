@@ -14,22 +14,22 @@ export const createBooking = async (req, res) => {
     const user = req.user;
     const { slotId, paymentRef } = req.body;
 
-    // ✅ تحقق من الاشتراك الشهري
-    if (user.role !== "admin") {
-      if (!user.subscription?.active) {
-        return res.status(403).json({
-          message:
-            "Your subscription is inactive. Please renew before booking.",
-        });
-      }
-    }
+    // ✅ تحقق من الاشتراك الشهري (معلق مؤقتًا)
+    // if (user.role !== "admin") {
+    //   if (!user.subscription?.active) {
+    //     return res.status(403).json({
+    //       message:
+    //         "Your subscription is inactive. Please renew before booking.",
+    //     });
+    //   }
+    // }
 
-    // ✅ التحقق من الفتحة
+    // ✅ التحقق من وجود الفتحة وصلاحيتها
     const slot = await Slot.findById(slotId);
     if (!slot || slot.isBlocked)
       return res.status(400).json({ message: "Slot not available" });
 
-    // ✅ لا يمكن الحجز في فترات ماضية
+    // ✅ لا يمكن الحجز في مواعيد منتهية
     const now = new Date();
     const slotDateTime = new Date(slot.date);
     if (slotDateTime < now) {
@@ -44,7 +44,7 @@ export const createBooking = async (req, res) => {
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    // ✅ الحد الأسبوعي
+    // ✅ التحقق من الحد الأسبوعي للمستخدم
     const userBookingsThisWeek = await Booking.countDocuments({
       user: user._id,
       status: "booked",
@@ -54,24 +54,24 @@ export const createBooking = async (req, res) => {
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
     if (userBookingsThisWeek >= allowed)
-      return res.status(403).json({ message: "Weekly booking limit reached" });
+      return res.status(403).json({ message: "لقد وصلت إلى الحد الأقصى للحجوزات الأسبوعية." });
 
-    // ✅ فحص سعة الحصة
+    // ✅ التحقق من سعة الحصة
     const slotBookingsCount = await Booking.countDocuments({
       slot: slot._id,
       status: "booked",
     });
     if (slotBookingsCount >= (slot.capacity || 9999))
-      return res.status(400).json({ message: "This slot is full" });
+      return res.status(400).json({ message: "هذه الحصة ممتلئة بالفعل." });
 
-    // ✅ إنشاء الحجز
+    // ✅ إنشاء الحجز الجديد
     const booking = await Booking.create({
       user: user._id,
       slot: slot._id,
       paymentRef,
     });
 
-    // ✅ إنشاء حدث Google Calendar فقط إذا المستخدم فعلاً موصول
+    // ✅ إنشاء حدث في Google Calendar إذا كان المستخدم موصولًا
     if (user.google?.accessToken) {
       try {
         await createGoogleEvent(user, booking);
@@ -80,22 +80,27 @@ export const createBooking = async (req, res) => {
       }
     }
 
-    // ✅ جدولة تذكير فقط إذا كان لدى الفتحة تاريخ صالح
+    // ✅ جدولة التذكير قبل ساعتين من موعد الحصة
     if (slot?.date) {
       try {
-        await scheduleReminder(booking._id);
+        const slotDate = new Date(slot.date);
+        await scheduleReminder(booking._id, slotDate);
+        console.log(`⏰ Reminder scheduled for booking ${booking._id} (${slotDate.toISOString()})`);
       } catch (err) {
-        console.warn("⚠️ Reminder skipped:", err.message);
+        console.warn("⚠️ Reminder scheduling failed:", err.message);
       }
+    } else {
+      console.warn(`⚠️ Skipped reminder: slot.date missing for booking ${booking._id}`);
     }
 
+    // ✅ الرد النهائي للواجهة
     res.status(201).json({
-      message: "Booking created successfully",
+      message: "تم إنشاء الحجز بنجاح ✅",
       booking,
     });
   } catch (error) {
     console.error("❌ Error in createBooking:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "حدث خطأ في إنشاء الحجز" });
   }
 };
 
@@ -107,6 +112,7 @@ export const cancelBooking = async (req, res) => {
     const booking = await Booking.findById(req.params.id).populate("slot user");
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
+    // السماح فقط لصاحب الحجز أو المدير
     if (!booking.user._id.equals(req.user._id) && req.user.role !== "admin")
       return res.status(403).json({ message: "Forbidden" });
 
@@ -116,7 +122,7 @@ export const cancelBooking = async (req, res) => {
       slotDate.getTime() - 12 * 60 * 60 * 1000
     );
 
-    // 🔹 لا تسمح بالإلغاء خلال 12 ساعة إلا إذا كان المستخدم مديرة
+    // 🔹 لا تسمح بالإلغاء خلال 12 ساعة إلا للمسؤول
     if (req.user.role !== "admin" && now > twelveHoursBefore) {
       return res
         .status(403)
@@ -135,10 +141,10 @@ export const cancelBooking = async (req, res) => {
       }
     }
 
-    res.json({ message: "Booking cancelled successfully" });
+    res.json({ message: "تم إلغاء الحجز بنجاح ❌" });
   } catch (error) {
     console.error("❌ Error cancelling booking:", error);
-    res.status(500).json({ message: "Error cancelling booking" });
+    res.status(500).json({ message: "تعذر إلغاء الحجز" });
   }
 };
 

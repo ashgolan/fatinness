@@ -1,233 +1,255 @@
 import Slot from "../models/Slot.js";
-import Booking from "../models/Booking.js";
-import { sendFcmToTokens } from "../utils/fcm.js"; // إن كنا نستخدم FCM للإشعارات
+import { fmtLocal } from "../utils/date.js";
 
-/**
- * 🔹 جلب جميع الحصص بشكل مرتب حسب التاريخ
- */
-export const getAllSlots = async (req, res) => {
+//
+// 🧮 دوال مساعدة لتاريخ الأسبوع (الأحد كبداية ثابتة دائمًا)
+//
+function startOfWeek(date = new Date()) {
+  const d = new Date(date);
+  // نعيد نسخة من التاريخ بدون توقيت UTC
+  const local = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+  // 🔹 اجعل الأحد دائمًا بداية الأسبوع
+  const day = local.getDay(); // 0 = الأحد
+  local.setDate(local.getDate() - day);
+  local.setHours(0, 0, 0, 0);
+  return local;
+}
+
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
+}
+
+//
+// ✅ دالة مساعدة للتحقق من التداخل الزمني في نفس اليوم
+//
+async function hasOverlap(date, startTime, endTime) {
+  const overlap = await Slot.findOne({
+    date: new Date(date),
+    $or: [
+      {
+        $and: [
+          { startTime: { $lt: endTime } },
+          { endTime: { $gt: startTime } },
+        ],
+      },
+    ],
+  });
+  return !!overlap;
+}
+
+//
+// =====================================================
+// 🔹 GET /admin/slots/week?start=YYYY-MM-DD
+// =====================================================
+export const adminGetWeekSlots = async (req, res) => {
   try {
-    const { startDate } = req.query;
+    const { start } = req.query;
 
-    // إذا تم تمرير تاريخ بداية الأسبوع
-    let filter = {};
-    if (startDate) {
-      const start = new Date(startDate);
-      const end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      filter.date = { $gte: start, $lte: end };
+    // ✅ معالجة التاريخ الآمنة (مع دعم ISO الكامل)
+    let inputDate;
+    if (start && !isNaN(Date.parse(start))) {
+      // هنا نتأكد أن التاريخ يفسر محليًا لا UTC
+      inputDate = new Date(`${start}T00:00:00`);
+    } else {
+      inputDate = new Date();
     }
 
-    const slots = await Slot.find(filter).sort({ date: 1, startTime: 1 });
+    // ✅ اجعل الأسبوع دائمًا يبدأ من الأحد
+    const weekStart = startOfWeek(inputDate);
+    const weekEnd = addDays(weekStart, 6);
 
-    // أضف بيانات الحجز
-    const result = await Promise.all(
-      slots.map(async (slot) => {
-        const booked = await Booking.countDocuments({
-          slot: slot._id,
-          status: "booked",
-        });
-        return {
-          ...slot.toObject(),
-          booked,
-          remaining: Math.max((slot.capacity || 0) - booked, 0),
-        };
-      })
-    );
+    console.log("======================================");
+    console.log("🗓️ طلب جلب الأسبوع:");
+    console.log("start param:", start);
+    console.log("inputDate:", inputDate.toISOString());
+    console.log("weekStart:", weekStart.toISOString());
+    console.log("weekEnd:", weekEnd.toISOString());
+    console.log("======================================");
 
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching slots" });
+    // ✅ جلب الحصص من Mongo
+    // نستخدم $gte و $lt (بدلاً من $lte) لضمان عدم شمول اليوم التالي خطأً
+    const slots = await Slot.find({
+      date: { $gte: weekStart, $lt: addDays(weekEnd, 1) },
+    }).sort({ date: 1, startTime: 1 });
+
+    console.log("📦 عدد الحصص المسترجعة من Mongo:", slots.length);
+
+    // 🧩 تجميع الأيام داخل الأسبوع
+    const days = {};
+    for (let i = 0; i < 7; i++) {
+      const key = fmtLocal(addDays(weekStart, i)); // صيغة اليوم المحلي yyyy-mm-dd
+      days[key] = [];
+    }
+
+    slots.forEach((s) => {
+      const key = fmtLocal(new Date(s.date));
+      if (!days[key]) days[key] = [];
+      days[key].push(s);
+    });
+
+    // ✅ نعيد النتائج بترتيب الأيام
+    res.json({
+      weekStart: fmtLocal(weekStart),
+      weekEnd: fmtLocal(weekEnd),
+      days,
+    });
+  } catch (e) {
+    console.error("❌ adminGetWeekSlots error details:", e);
+    res.status(500).json({
+      message: "Error fetching admin week slots",
+      error: e.message,
+      stack: e.stack,
+    });
   }
 };
 
-/**
- * 🔹 تعطيل أو تفعيل حصة
- */
-export const toggleSlotBlock = async (req, res) => {
+//
+// =====================================================
+// 🔹 POST /admin/slots
+// body: { date: 'YYYY-MM-DD', startTime, endTime, capacity }
+// =====================================================
+export const adminCreateSlot = async (req, res) => {
+  try {
+    const { date, startTime, endTime, capacity = 20 } = req.body;
+    if (!date || !startTime || !endTime)
+      return res.status(400).json({ message: "Missing required fields" });
+
+    const d = new Date(`${date}T00:00:00`);
+    d.setHours(0, 0, 0, 0);
+
+    // ✅ تحقق من التداخل الزمني
+    if (await hasOverlap(d, startTime, endTime)) {
+      return res.status(409).json({
+        message: "⚠️ يوجد تداخل مع حصة أخرى في نفس اليوم والوقت",
+      });
+    }
+
+    // ✅ إنشاء الحصة الجديدة
+    const slot = await Slot.create({
+      date: d,
+      startTime,
+      endTime,
+      capacity: Number(capacity) || 20,
+    });
+
+    res.status(201).json(slot);
+  } catch (e) {
+    if (e.code === 11000) {
+      return res.status(409).json({ message: "⚠️ توجد حصة بنفس الوقت مسبقًا" });
+    }
+    console.error("❌ adminCreateSlot error:", e);
+    res.status(500).json({ message: "Error creating slot" });
+  }
+};
+
+//
+// =====================================================
+// 🔹 DELETE /admin/slots/:id
+// =====================================================
+export const adminDeleteSlot = async (req, res) => {
+  try {
+    await Slot.findByIdAndDelete(req.params.id);
+    res.json({ message: "🗑️ Deleted successfully" });
+  } catch (e) {
+    console.error("❌ adminDeleteSlot error:", e);
+    res.status(500).json({ message: "Error deleting slot" });
+  }
+};
+
+//
+// =====================================================
+// 🔹 POST /admin/slots/next-week/bulk
+// body: { items: [ { dayOffset, startTime, endTime, capacity } ] }
+// =====================================================
+export const adminCreateNextWeekBulk = async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items) || !items.length)
+      return res.status(400).json({ message: "No items provided" });
+
+    // ✅ تحديد بداية الأسبوع القادم (الأحد القادم)
+    const base = startOfWeek(new Date());
+    const nextSunday = addDays(base, 7);
+    nextSunday.setHours(0, 0, 0, 0);
+
+    console.log("📆 إنشاء الأسبوع القادم يبدأ من:", nextSunday.toLocaleDateString("ar-EG"));
+
+    const created = [];
+    let skippedOverlap = 0;
+    let skippedDuplicate = 0;
+
+    for (const it of items) {
+      const d = addDays(nextSunday, it.dayOffset || 0);
+      d.setHours(0, 0, 0, 0);
+
+      // ✅ تحقق من التداخل الزمني
+      if (await hasOverlap(d, it.startTime, it.endTime)) {
+        skippedOverlap++;
+        continue;
+      }
+
+      // ✅ تحقق من وجود نفس الحصة تمامًا
+      const exists = await Slot.findOne({
+        date: d,
+        startTime: it.startTime,
+        endTime: it.endTime,
+      });
+      if (exists) {
+        skippedDuplicate++;
+        continue;
+      }
+
+      // ✅ إنشاء الحصة الجديدة
+      try {
+        const s = await Slot.create({
+          date: d,
+          startTime: it.startTime,
+          endTime: it.endTime,
+          capacity: Number(it.capacity) || 20,
+        });
+        created.push(s._id);
+      } catch (e) {
+        if (e.code === 11000) skippedDuplicate++;
+        else throw e;
+      }
+    }
+
+    console.log(`✅ تم إنشاء ${created.length} حصة للأسبوع القادم`);
+
+    res.status(201).json({
+      created: created.length,
+      skippedOverlap,
+      skippedDuplicate,
+      message: `✅ Created: ${created.length}, ⛔ Overlaps: ${skippedOverlap}, 🔁 Duplicates: ${skippedDuplicate}`,
+    });
+  } catch (e) {
+    console.error("❌ adminCreateNextWeekBulk error:", e);
+    res.status(500).json({ message: "Error creating next week slots" });
+  }
+};
+// =====================================================
+// 🔹 PUT /admin/slots/:id/block
+// ✅ تفعيل أو تعطيل الحصة
+// =====================================================
+export const adminToggleBlock = async (req, res) => {
   try {
     const slot = await Slot.findById(req.params.id);
-    if (!slot) return res.status(404).json({ message: "Slot not found" });
+    if (!slot) return res.status(404).json({ message: "الحصة غير موجودة" });
 
+    // ✅ عكس الحالة الحالية
     slot.isBlocked = !slot.isBlocked;
     await slot.save();
 
     res.json({
-      message: slot.isBlocked ? "تم تعطيل الحصة بنجاح" : "تم تفعيل الحصة بنجاح",
+      message: slot.isBlocked
+        ? "🚫 تم تعطيل الحصة بنجاح"
+        : "✅ تم تفعيل الحصة من جديد",
       slot,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error toggling slot block" });
-  }
-};
-
-export const deleteSlot = async (req, res) => {
-  try {
-    const slot = await Slot.findById(req.params.id);
-    if (!slot) return res.status(404).json({ message: "Slot not found" });
-
-    // احذف كل الحجوزات المرتبطة بهذه الحصة
-    await Booking.deleteMany({ slot: slot._id });
-
-    // احذف الحصة نفسها
-    await slot.deleteOne();
-
-    res.json({ message: "تم حذف الحصة وكل حجوزاتها بنجاح" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error deleting slot and bookings" });
-  }
-};
-// 🔹 إرجاع قائمة بأسابيع متوفرة حسب تواريخ الـ Slots
-export const getAvailableWeeks = async (req, res) => {
-  try {
-    const slots = await Slot.find({}, "date").sort({ date: 1 });
-    const weeks = new Set();
-
-    slots.forEach((s) => {
-      const d = new Date(s.date);
-      const sunday = new Date(d);
-      sunday.setDate(d.getDate() - d.getDay()); // بداية الأسبوع (الأحد)
-      weeks.add(sunday.toISOString().split("T")[0]);
-    });
-
-    res.json([...weeks]);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching weeks" });
-  }
-};
-
-// 🔹 جلب المشتركات المحجوزات في حصة معينة
-export const getSlotBookings = async (req, res) => {
-  try {
-    const slot = await Slot.findById(req.params.id);
-    if (!slot) return res.status(404).json({ message: "Slot not found" });
-
-    const bookings = await Booking.find({ slot: slot._id, status: "booked" })
-      .populate("user", "name email phone")
-      .sort({ createdAt: 1 });
-
-    res.json({
-      slot: {
-        date: slot.date,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        capacity: slot.capacity,
-      },
-      bookings: bookings.map((b) => b.user),
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Error fetching slot bookings" });
-  }
-};
-
-export const cancelUserBookingInSlot = async (req, res) => {
-  try {
-    const { slotId, userId } = req.params;
-
-    const booking = await Booking.findOne({
-      slot: slotId,
-      user: userId,
-      status: "booked",
-    });
-    if (!booking)
-      return res
-        .status(404)
-        .json({ message: "الحجز غير موجود أو ملغي مسبقًا" });
-
-    booking.status = "cancelled";
-    await booking.save();
-
-    res.json({ message: "تم إلغاء حجز المشتركة بنجاح" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "حدث خطأ أثناء إلغاء الحجز" });
-  }
-};
-
-/**
- * 🔔 إرسال تذكير لكل المشتركات في حصة معينة
- * يدعم 3 طرق: FCM / بريد إلكتروني / واتساب
- */
-export const sendSlotReminder = async (req, res) => {
-  try {
-    // 👇 نقرأ نوع الطريقة من الطلب (افتراضيًا FCM)
-    const { method = "fcm" } = req.body;
-
-    // ✅ التحقق من وجود الحصة
-    const slot = await Slot.findById(req.params.id);
-    if (!slot)
-      return res
-        .status(404)
-        .json({ message: "لم يتم العثور على الحصة المطلوبة" });
-if (new Date(slot.date) < new Date()) {
-  return res.status(400).json({
-    message: "لا يمكن إرسال تذكير لأن موعد الحصة قد انتهى بالفعل.",
-  });
-}
-    // ✅ البحث عن المشتركات المحجوزات في هذه الحصة
-    const bookings = await Booking.find({ slot: slot._id, status: "booked" })
-      .populate("user", "name email phone")
-      .sort({ createdAt: 1 })
-      .lean();
-
-    // إزالة الحجوزات التي ليس لديها مستخدم
-    const validBookings = bookings.filter((b) => b.user);
-    if (!bookings.length)
-      return res
-        .status(400)
-        .json({ message: "لا توجد مشتركات محجوزات في هذه الحصة" });
-
-    // 📄 إعداد نص التذكير
-    const title = "تذكير: تدريبك اليوم 💪";
-    const body = `موعد تدريبك في ${slot.startTime} بتاريخ ${new Date(
-      slot.date
-    ).toLocaleDateString("ar-EG")}`;
-
-    // 📨 عدّاد لعدد الرسائل التي تم إرسالها فعلياً
-    let sentCount = 0;
-
-    // 🔄 إرسال التذكيرات بحسب النوع المختار
-    for (const b of bookings) {
-      const user = b.user;
-
-      if (method === "fcm" && user?.fcmTokens?.length) {
-        await sendFcmToTokens(user.fcmTokens, { title, body });
-        sentCount++;
-      } else if (method === "email" && user?.email) {
-        await sendEmail(user.email, title, body, `<p>${body}</p>`);
-        sentCount++;
-      } else if (method === "whatsapp" && user?.phone) {
-        await sendWhatsAppMessage(user.phone, body);
-        sentCount++;
-      }
-    }
-
-    // ✅ الرد النهائي
-    if (sentCount > 0) {
-      res.json({
-        slot: {
-          date: slot.date,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          capacity: slot.capacity,
-        },
-        bookings: validBookings.map((b) => b.user),
-      });
-    } else {
-      res.status(400).json({
-        message: `لم يتم إرسال أي تذكير لأن بيانات الاتصال غير متوفرة`,
-      });
-    }
-  } catch (err) {
-    console.error("❌ Error sending reminders:", err);
-    res.status(500).json({
-      message: "حدث خطأ أثناء محاولة إرسال التذكيرات",
-      error: err.message,
-    });
+  } catch (e) {
+    console.error("❌ adminToggleBlock error:", e);
+    res.status(500).json({ message: "فشل تحديث حالة الحصة" });
   }
 };

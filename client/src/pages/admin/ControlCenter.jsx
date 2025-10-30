@@ -59,7 +59,7 @@ export default function ControlCenter() {
     {
       title: "القوالب الأسبوعية",
       icon: <LayersIcon />,
-      path: "/admin/templates",
+      path: "/admin/schedule",
       color: "#009688",
     },
     {

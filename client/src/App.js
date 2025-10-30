@@ -11,7 +11,6 @@ import Booking from "./pages/Booking";
 import MyBookings from "./pages/MyBookings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import BookingsAdmin from "./pages/admin/BookingsAdmin";
-import TemplatesAdmin from "./pages/admin/TemplatesAdmin";
 import UsersAdmin from "./pages/admin/UsersAdmin";
 import SlotsAdmin from "./pages/admin/SlotsAdmin";
 import AdminNotifications from "./pages/admin/AdminNotifications";
@@ -20,6 +19,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AvailableSlots from "./pages/AvailableSlots";
 import Subscription from "./pages/Subscription";
 import ControlCenter from "./pages/admin/ControlCenter";
+import AdminSchedule from "./pages/admin/AdminSchedule";
 
 export default function App() {
   return (
@@ -48,7 +48,7 @@ export default function App() {
             <Route path="/admin/control" element={<ControlCenter />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/bookings" element={<BookingsAdmin />} />
-            <Route path="/admin/templates" element={<TemplatesAdmin />} />
+            <Route path="/admin/schedule" element={<AdminSchedule />} />
             <Route path="/admin/users" element={<UsersAdmin />} />
             <Route path="/admin/slots" element={<SlotsAdmin />} />
             <Route

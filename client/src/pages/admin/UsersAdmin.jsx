@@ -10,6 +10,11 @@ import {
   Switch,
   FormControlLabel,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
 } from "@mui/material";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
@@ -19,6 +24,19 @@ export default function UsersAdmin() {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+
+  // ✅ حالات تعديل المستخدم
+  const [editOpen, setEditOpen] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [editData, setEditData] = useState({
+    username: "",
+    email: "",
+    phone: "",
+    height: "",
+    weight: "",
+    age: "",
+    gender: "female",
+  });
 
   // 🔹 تحميل جميع المشتركات
   const fetchUsers = async () => {
@@ -64,7 +82,6 @@ export default function UsersAdmin() {
       });
 
       toast.success(data.message || "تم تحديث حالة الحجز الإضافي");
-      // تحديث المستخدم فقط
       setUsers((prev) =>
         prev.map((u) =>
           u._id === user._id
@@ -91,30 +108,61 @@ export default function UsersAdmin() {
       const { data } = await Api.put(`/admin/users/${user._id}/block`);
       toast.success(data.message);
 
-      // ✅ استخدم نسخة جديدة تمامًا من المستخدم
       const updatedUser = {
         ...user,
         isBlocked: !user.isBlocked,
         ...(data.user || {}),
       };
 
-      // ✅ أعد بناء state بمصفوفة جديدة بالكامل (إجبار React على rerender)
-      setUsers((prev) => {
-        const newArr = prev.map((u) =>
-          u._id === user._id ? { ...updatedUser } : { ...u }
-        );
-        return [...newArr];
-      });
-
-      setFiltered((prev) => {
-        const newArr = prev.map((u) =>
-          u._id === user._id ? { ...updatedUser } : { ...u }
-        );
-        return [...newArr];
-      });
+      setUsers((prev) =>
+        prev.map((u) => (u._id === user._id ? { ...updatedUser } : { ...u }))
+      );
+      setFiltered((prev) =>
+        prev.map((u) => (u._id === user._id ? { ...updatedUser } : { ...u }))
+      );
     } catch (err) {
       console.error(err);
       toast.error("حدث خطأ أثناء تعديل حالة الحظر");
+    }
+  };
+
+  // ✏️ فتح نافذة التعديل
+  const handleEdit = (user) => {
+    setEditUser(user);
+    setEditData({
+      username: user.username || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      height: user.height || "",
+      weight: user.weight || "",
+      age: user.age || "",
+      gender: user.gender || "female",
+    });
+    setEditOpen(true);
+  };
+
+  // 📥 تغيير قيم الإدخال
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // 💾 حفظ التعديلات
+  const handleSave = async () => {
+    try {
+      const { data } = await Api.put(`/admin/users/${editUser._id}`, editData);
+      toast.success("تم تحديث بيانات المشتركة بنجاح ✅");
+      setEditOpen(false);
+      // تحديث القائمة
+      setUsers((prev) =>
+        prev.map((u) => (u._id === editUser._id ? data.user : u))
+      );
+      setFiltered((prev) =>
+        prev.map((u) => (u._id === editUser._id ? data.user : u))
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("فشل تحديث بيانات المشتركة");
     }
   };
 
@@ -204,14 +252,24 @@ export default function UsersAdmin() {
                     }
                     label="الحجز الإضافي"
                   />
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color={user.isBlocked ? "success" : "error"}
-                    onClick={() => toggleUserBlock(user)}
-                  >
-                    {user.isBlocked ? "🔓 إلغاء الحظر" : "🚫 حظر"}
-                  </Button>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => handleEdit(user)}
+                    >
+                      ✏️ تعديل
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color={user.isBlocked ? "success" : "error"}
+                      onClick={() => toggleUserBlock(user)}
+                    >
+                      {user.isBlocked ? "🔓 إلغاء الحظر" : "🚫 حظر"}
+                    </Button>
+                  </Box>
                 </Box>
               </Paper>
             </Grid>
@@ -220,6 +278,68 @@ export default function UsersAdmin() {
       ) : (
         <Typography sx={{ mt: 3 }}>لا توجد مشتركات مطابقة للبحث.</Typography>
       )}
+
+      {/* 🔹 نافذة تعديل بيانات المشتركة */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>✏️ تعديل بيانات المشتركة</DialogTitle>
+        <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+          <TextField
+            label="اسم المستخدم"
+            name="username"
+            value={editData.username}
+            onChange={handleChange}
+          />
+          <TextField
+            label="البريد الإلكتروني"
+            name="email"
+            value={editData.email}
+            onChange={handleChange}
+          />
+          <TextField
+            label="رقم الهاتف"
+            name="phone"
+            value={editData.phone}
+            onChange={handleChange}
+          />
+          <TextField
+            select
+            label="الجنس"
+            name="gender"
+            value={editData.gender}
+            onChange={handleChange}
+          >
+            <MenuItem value="female">أنثى</MenuItem>
+            <MenuItem value="male">ذكر</MenuItem>
+          </TextField>
+          <TextField
+            label="الطول (سم)"
+            name="height"
+            type="number"
+            value={editData.height}
+            onChange={handleChange}
+          />
+          <TextField
+            label="الوزن (كغ)"
+            name="weight"
+            type="number"
+            value={editData.weight}
+            onChange={handleChange}
+          />
+          <TextField
+            label="العمر"
+            name="age"
+            type="number"
+            value={editData.age}
+            onChange={handleChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>إلغاء</Button>
+          <Button variant="contained" onClick={handleSave}>
+            حفظ التعديلات
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

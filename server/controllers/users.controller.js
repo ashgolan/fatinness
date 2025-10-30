@@ -13,33 +13,44 @@ export const getUserProfile = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // حساب الإحصائيات العامة للمستخدم
-    const totalBookings = await Booking.countDocuments({ user: user._id });
-    const activeBookings = await Booking.countDocuments({
+    // ✅ حساب الإحصائيات العامة للمستخدمة
+    const completedBookings = await Booking.countDocuments({
       user: user._id,
-      status: "booked",
+      status: "completed", // الحصص المنجزة فقط
     });
 
-    // ✅ استخراج آخر نقطة وزن (إن وُجدت)
+    const cancelledBookings = await Booking.countDocuments({
+      user: user._id,
+      status: "cancelled", // الحصص الملغاة
+    });
+
+    const activeBookings = await Booking.countDocuments({
+      user: user._id,
+      status: "booked", // الحصص القادمة (النشطة)
+    });
+
+    // ✅ استخراج آخر وزن تم تسجيله
     const lastWeight =
       user.weightHistory?.length > 0
         ? user.weightHistory[user.weightHistory.length - 1]
         : null;
 
+    // ✅ الرد النهائي
     res.json({
       ...user,
       stats: {
-        totalBookings,
-        activeBookings,
+        completedBookings, // ✅ عدد الحصص المنجزة
+        cancelledBookings, // ❌ عدد الحصص الملغاة
+        activeBookings, // 🔹 عدد الحصص النشطة (القادمة)
         lastWeight: lastWeight?.weight || null,
         lastWeightNote: lastWeight?.note || null,
         lastWeightDate: lastWeight?.date || null,
       },
-      // ✅ مصفوفة الأوزان الكاملة لعرضها في الرسم البياني
+      // 🔹 مصفوفة الأوزان الكاملة لعرضها في الرسم البياني
       weightHistory: user.weightHistory || [],
     });
   } catch (err) {
-    console.error(err);
+    console.error("❌ getUserProfile Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
