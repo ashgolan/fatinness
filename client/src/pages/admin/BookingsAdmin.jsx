@@ -27,13 +27,31 @@ export default function BookingsAdmin() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [filter, setFilter] = useState("all");
 
-  // 🔹 جلب ملخص الحجوزات
+  // 🔹 نسب متحركة
+  const [animated, setAnimated] = useState({
+    active: 0,
+    completed: 0,
+    cancelled: 0,
+    blocked: 0,
+  });
+
+  const getDisplayStatus = (b) => {
+    if (!b.slot) return "unknown";
+    if (b.slot.isBlocked) return "blocked";
+    const now = new Date();
+    const end = new Date(b.slot.date);
+    if (b.slot.endTime) {
+      const [h, m] = b.slot.endTime.split(":");
+      end.setHours(Number(h), Number(m), 0, 0);
+    }
+    if (b.status === "booked" && now > end) return "completed";
+    return b.status;
+  };
+
   const fetchSummary = async () => {
     setLoading(true);
     try {
       const { data } = await Api.get("/admin/bookings/summary");
-
-      // ✅ ترتيب المشتركين: من لديهم حجوزات نشطة أولًا، ثم أبجديًا
       const sorted = [...data].sort((a, b) => {
         if (a.active > 0 && b.active === 0) return -1;
         if (a.active === 0 && b.active > 0) return 1;
@@ -41,7 +59,6 @@ export default function BookingsAdmin() {
         const nameB = (b.username || "").trim().toLowerCase();
         return nameA.localeCompare(nameB, "ar");
       });
-
       setSummary(sorted);
     } catch {
       toast.error("حدث خطأ أثناء تحميل بيانات المشتركات");
@@ -50,20 +67,17 @@ export default function BookingsAdmin() {
     }
   };
 
-  // 🔹 جلب تفاصيل مشتركة
   const openDetails = async (userId, username) => {
     setSelectedUser({ id: userId, name: username });
     setLoadingDetails(true);
     try {
       const { data } = await Api.get(`/admin/bookings/user/${userId}`);
-
       const sorted = [...data].sort((a, b) => {
-        const order = { booked: 1, completed: 2, cancelled: 3 };
-        const statusDiff = order[a.status] - order[b.status];
-        if (statusDiff !== 0) return statusDiff;
-        return new Date(a.slot?.date || 0) - new Date(b.slot?.date || 0);
+        const order = { booked: 1, completed: 2, cancelled: 3, blocked: 4 };
+        const aStatus = getDisplayStatus(a);
+        const bStatus = getDisplayStatus(b);
+        return order[aStatus] - order[bStatus];
       });
-
       setBookings(sorted);
     } catch {
       toast.error("حدث خطأ أثناء جلب تفاصيل الحجوزات");
@@ -86,24 +100,159 @@ export default function BookingsAdmin() {
     fetchSummary();
   }, []);
 
+  // 🔹 فلترة الحجوزات حسب الحالة
   const filteredBookings =
     filter === "all"
       ? bookings
-      : bookings.filter((b) => b.status === filter);
+      : bookings.filter((b) => getDisplayStatus(b) === filter);
 
-  // 🔹 حساب الإحصاءات داخل النافذة
+  // 🔹 حساب الإحصاءات
   const stats = {
-    booked: bookings.filter((b) => b.status === "booked").length,
-    completed: bookings.filter((b) => b.status === "completed").length,
-    cancelled: bookings.filter((b) => b.status === "cancelled").length,
-    blocked: bookings.filter((b) => b.slot?.isBlocked).length, // ⚠️ معطلة
+    booked: bookings.filter((b) => getDisplayStatus(b) === "booked").length,
+    completed: bookings.filter((b) => getDisplayStatus(b) === "completed").length,
+    cancelled: bookings.filter((b) => getDisplayStatus(b) === "cancelled").length,
+    blocked: bookings.filter((b) => getDisplayStatus(b) === "blocked").length,
   };
+
+  const getColorByStatus = (b) => {
+    const s = getDisplayStatus(b);
+    if (s === "blocked") return "#eeeeee";
+    if (s === "booked") return "#e8f5e9";
+    if (s === "completed") return "#fffde7";
+    if (s === "cancelled") return "#ffebee";
+    return "#fafafa";
+  };
+
+  const getLabelByStatus = (b) => {
+    const s = getDisplayStatus(b);
+    if (s === "blocked") return "معطلة ⚠️";
+    if (s === "booked") return "نشطة ✅";
+    if (s === "completed") return "منجزة 🏁";
+    if (s === "cancelled") return "ملغاة ❌";
+    return "غير معروفة";
+  };
+
+  // 🔹 حساب نسب الحالات من summary
+  const totalAll = summary.reduce(
+    (acc, s) => acc + s.active + s.cancelled + s.completed,
+    0
+  );
+  const totalActive = summary.reduce((acc, s) => acc + s.active, 0);
+  const totalCompleted = summary.reduce((acc, s) => acc + s.completed, 0);
+  const totalCancelled = summary.reduce((acc, s) => acc + s.cancelled, 0);
+  const totalBlocked = 0;
+
+  const activePercent = totalAll ? (totalActive / totalAll) * 100 : 0;
+  const completedPercent = totalAll ? (totalCompleted / totalAll) * 100 : 0;
+  const cancelledPercent = totalAll ? (totalCancelled / totalAll) * 100 : 0;
+  const blockedPercent = totalAll ? (totalBlocked / totalAll) * 100 : 0;
+
+  // 🔸 تشغيل الأنيميشن التدريجي
+  useEffect(() => {
+    let frame = 0;
+    const duration = 25; // عدد الإطارات
+    const animate = setInterval(() => {
+      frame++;
+      setAnimated({
+        active: (activePercent / duration) * frame,
+        completed: (completedPercent / duration) * frame,
+        cancelled: (cancelledPercent / duration) * frame,
+        blocked: (blockedPercent / duration) * frame,
+      });
+      if (frame >= duration) clearInterval(animate);
+    }, 25);
+    return () => clearInterval(animate);
+  }, [activePercent, completedPercent, cancelledPercent, blockedPercent]);
 
   return (
     <Box sx={{ maxWidth: 1000, mx: "auto", mt: 3 }}>
       <Typography variant="h5" gutterBottom>
         📋 جميع المشتركات وحجوزاتهن
       </Typography>
+
+      {/* 🔹 شريط النسب المتحرك */}
+      {summary.length > 0 && (
+        <Paper
+          sx={{
+            p: 3,
+            mb: 4,
+            borderRadius: 3,
+            boxShadow: 3,
+            background: "#fafafa",
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>
+            🔸 توزيع الحالات بين جميع الحجوزات:
+          </Typography>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              height: 24,
+              borderRadius: 12,
+              overflow: "hidden",
+              backgroundColor: "#eee",
+              boxShadow: "inset 0 2px 5px rgba(0,0,0,0.15)",
+            }}
+          >
+            <Box
+              sx={{
+                width: `${animated.active}%`,
+                background: "linear-gradient(90deg, #4caf50, #81c784)",
+                height: "100%",
+                transition: "width 0.3s ease",
+              }}
+            />
+            <Box
+              sx={{
+                width: `${animated.completed}%`,
+                background: "linear-gradient(90deg, #fff176, #fbc02d)",
+                height: "100%",
+                transition: "width 0.3s ease",
+              }}
+            />
+            <Box
+              sx={{
+                width: `${animated.cancelled}%`,
+                background: "linear-gradient(90deg, #ef9a9a, #f44336)",
+                height: "100%",
+                transition: "width 0.3s ease",
+              }}
+            />
+            <Box
+              sx={{
+                width: `${animated.blocked}%`,
+                background: "linear-gradient(90deg, #ffb74d, #ff9800)",
+                height: "100%",
+                transition: "width 0.3s ease",
+              }}
+            />
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              mt: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              ✅ نشطة: {animated.active.toFixed(1)}%
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              🏁 منجزة: {animated.completed.toFixed(1)}%
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              ❌ ملغاة: {animated.cancelled.toFixed(1)}%
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              ⚠️ معطلة: {animated.blocked.toFixed(1)}%
+            </Typography>
+          </Box>
+        </Paper>
+      )}
 
       {/* ✅ جدول ملخص الحجوزات */}
       {loading ? (
@@ -161,7 +310,7 @@ export default function BookingsAdmin() {
             </Box>
           ) : bookings.length ? (
             <>
-              {/* 🔹 العداد الموجز */}
+              {/* 🔹 العداد */}
               <Box
                 sx={{
                   display: "flex",
@@ -184,7 +333,7 @@ export default function BookingsAdmin() {
                 </Typography>
               </Box>
 
-              {/* 🔹 أزرار الفلترة */}
+              {/* 🔹 الفلاتر */}
               <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
                 <ToggleButtonGroup
                   value={filter}
@@ -207,13 +356,7 @@ export default function BookingsAdmin() {
                   sx={{
                     p: 1.5,
                     mb: 1.5,
-                    backgroundColor: b.slot?.isBlocked
-                      ? "#eeeeee"
-                      : b.status === "booked"
-                      ? "#e8f5e9"
-                      : b.status === "cancelled"
-                      ? "#ffebee"
-                      : "#fffde7",
+                    backgroundColor: getColorByStatus(b),
                   }}
                 >
                   <Typography>
@@ -226,14 +369,7 @@ export default function BookingsAdmin() {
                     <b>🕒 الوقت:</b> {b.slot?.startTime || "—"}
                   </Typography>
                   <Typography>
-                    <b>⚙️ الحالة:</b>{" "}
-                    {b.slot?.isBlocked
-                      ? "معطلة ⚠️"
-                      : b.status === "booked"
-                      ? "نشطة ✅"
-                      : b.status === "cancelled"
-                      ? "ملغاة ❌"
-                      : "منجزة 🏁"}
+                    <b>⚙️ الحالة:</b> {getLabelByStatus(b)}
                   </Typography>
                 </Paper>
               ))}

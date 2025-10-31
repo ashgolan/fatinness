@@ -20,7 +20,6 @@ import {
   Legend,
 } from "chart.js";
 
-// ✅ تسجيل مكونات Chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -31,20 +30,18 @@ ChartJS.register(
   Legend
 );
 
-// 🎯 البطاقات العلوية
 const cards = [
-  { key: "totalUsers", label: "إجمالي المشتركات", color: "primary", icon: "👩‍💼" },
-  { key: "activeUsers", label: "المشتركات النشِطات", color: "success", icon: "✅" },
-  { key: "blockedUsers", label: "المشتركات المحظورات", color: "error", icon: "🚫" },
-  { key: "totalBookings", label: "إجمالي الحجوزات", color: "info", icon: "📅" },
-  { key: "activeBookings", label: "الحجوزات النشطة", color: "secondary", icon: "📌" },
-  { key: "completedBookings", label: "الحجوزات المنجزة", color: "success", icon: "🏁" }, // ✅ أضفنا هذه
-  { key: "cancelled", label: "الحجوزات الملغاة", color: "error", icon: "❌" },
-  { key: "totalSlots", label: "عدد الجلسات", color: "primary", icon: "🏋️" },
-  { key: "todaySessions", label: "جلسات اليوم", color: "warning", icon: "☀️" },
-  { key: "upcomingWeekSessions", label: "جلسات الأسبوع القادم", color: "success", icon: "📆" },
+  { key: "totalUsers", label: "إجمالي المشتركات", gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", icon: "👩‍💼" },
+  { key: "activeUsers", label: "المشتركات النشِطات", gradient: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)", icon: "✅" },
+  { key: "blockedUsers", label: "المشتركات المحظورات", gradient: "linear-gradient(135deg, #ef5350 0%, #c62828 100%)", icon: "🚫" },
+  { key: "totalBookings", label: "إجمالي الحجوزات", gradient: "linear-gradient(135deg, #29b6f6 0%, #0288d1 100%)", icon: "📅" },
+  { key: "activeBookings", label: "الحجوزات النشطة", gradient: "linear-gradient(135deg, #ab47bc 0%, #8e24aa 100%)", icon: "📌" },
+  { key: "completedBookings", label: "الحجوزات المنجزة", gradient: "linear-gradient(135deg, #26a69a 0%, #00897b 100%)", icon: "🏁" },
+  { key: "cancelled", label: "الحجوزات الملغاة", gradient: "linear-gradient(135deg, #ff7043 0%, #f4511e 100%)", icon: "❌" },
+  { key: "totalSlots", label: "عدد الجلسات", gradient: "linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%)", icon: "🏋️" },
+  { key: "todaySessions", label: "جلسات اليوم", gradient: "linear-gradient(135deg, #ffa726 0%, #fb8c00 100%)", icon: "☀️" },
+  { key: "upcomingWeekSessions", label: "جلسات الأسبوع القادم", gradient: "linear-gradient(135deg, #66bb6a 0%, #43a047 100%)", icon: "📆" },
 ];
-
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -53,15 +50,10 @@ export default function AdminDashboard() {
   const [cancelledPercentAnim, setCancelledPercentAnim] = useState(0);
   
   const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
-
-  // ✅ مسار الصورة الثابت
   const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
-
-  // ✅ شعار افتراضي إذا لم توجد الصورة
-  const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F"; // أو يمكنك استبدالها بصورة من مجلد public
-
+  const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F";
   const [imgSrc, setImgSrc] = React.useState(logoUrl);
-  // 🔹 جلب البيانات
+
   const fetchStats = async () => {
     setLoading(true);
     try {
@@ -78,7 +70,6 @@ export default function AdminDashboard() {
     fetchStats();
   }, []);
 
-  // 🌀 تحريك شريط النسب تدريجيًا
   useEffect(() => {
     if (stats?.dailyBookings) {
       const totalActive = stats.dailyBookings.reduce((a, b) => a + b.active, 0);
@@ -97,7 +88,6 @@ export default function AdminDashboard() {
     }
   }, [stats]);
 
-  // 🔹 إعداد بيانات الرسم البياني بخطّين
   const chartData = stats?.dailyBookings
     ? {
         labels: stats.dailyBookings.map((d) =>
@@ -110,19 +100,29 @@ export default function AdminDashboard() {
             label: "الحجوزات النشطة",
             data: stats.dailyBookings.map((d) => d.active),
             fill: true,
-            borderColor: "#1976d2",
-            backgroundColor: "rgba(25, 118, 210, 0.15)",
-            pointBackgroundColor: "#1976d2",
+            borderColor: "#667eea",
+            backgroundColor: "rgba(102, 126, 234, 0.1)",
+            pointBackgroundColor: "#667eea",
+            pointBorderColor: "#fff",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
             tension: 0.4,
+            borderWidth: 3,
           },
           {
             label: "الحجوزات الملغاة",
             data: stats.dailyBookings.map((d) => d.cancelled),
             fill: true,
-            borderColor: "#ff9800",
-            backgroundColor: "rgba(255, 152, 0, 0.1)",
-            pointBackgroundColor: "#ff9800",
+            borderColor: "#ff7043",
+            backgroundColor: "rgba(255, 112, 67, 0.1)",
+            pointBackgroundColor: "#ff7043",
+            pointBorderColor: "#fff",
+            pointBorderWidth: 2,
+            pointRadius: 5,
+            pointHoverRadius: 7,
             tension: 0.4,
+            borderWidth: 3,
           },
         ],
       }
@@ -130,184 +130,432 @@ export default function AdminDashboard() {
 
   const chartOptions = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       legend: {
         position: "top",
-        labels: { font: { size: 13 } },
+        labels: {
+          font: { size: 14, weight: "600" },
+          padding: 15,
+          usePointStyle: true,
+        },
       },
       tooltip: {
-        backgroundColor: "#fff",
-        titleColor: "#1976d2",
-        bodyColor: "#000",
-        borderColor: "#ccc",
+        backgroundColor: "rgba(255, 255, 255, 0.95)",
+        titleColor: "#333",
+        bodyColor: "#666",
+        borderColor: "#ddd",
         borderWidth: 1,
-        cornerRadius: 8,
+        cornerRadius: 10,
+        padding: 12,
+        displayColors: true,
+        titleFont: { size: 14, weight: "bold" },
+        bodyFont: { size: 13 },
       },
     },
     scales: {
       x: {
-        ticks: { color: "#555" },
+        ticks: { 
+          color: "#666",
+          font: { size: 12, weight: "500" },
+        },
         grid: { display: false },
       },
       y: {
-        ticks: { color: "#555" },
-        grid: { color: "#eee" },
+        ticks: { 
+          color: "#666",
+          font: { size: 12 },
+        },
+        grid: { color: "rgba(0,0,0,0.05)" },
+        beginAtZero: true,
       },
     },
   };
 
   return (
-    <Box sx={{ maxWidth: 1100, mx: "auto", mt: 4, pb: 5 }}>
-    {/* 🟢 بطاقة ترحيب المديرة */}
-<Paper
-  sx={{
-    p: 3,
-    mb: 4,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    background: "linear-gradient(90deg,#1976d2,#42a5f5)",
-    color: "white",
-    borderRadius: 3,
-    boxShadow: 3,
-  }}
->
-  <Box>
-    <Typography variant="h5" sx={{ fontWeight: 700 }}>
-      👋 مرحبًا {stats?.adminName || "آلاء"}!
-    </Typography>
-    <Typography variant="body1">
-      لديكِ اليوم {stats?.todaySessions || 0} جلسات نشطة و{" "}
-      {stats?.newUsersToday || 0} مشتركات جديدات 💪
-    </Typography>
-  </Box>
-            <img
-              src={imgSrc}
-              alt="Fateness Logo"
-              onError={() => setImgSrc(fallbackLogo)} // 👈 في حال لم توجد الصورة
-              style={{
-                width: 70,
-                height: 70,
-                borderRadius: "50%",
-                objectFit: "cover",
-                backgroundColor: "#fff",
-                boxShadow: "0 0 5px rgba(0,0,0,0.1)",
-              }}
-            />
-</Paper>
-
-      <Typography variant="h5" gutterBottom>
-        📊 لوحة الإحصاءات العامة
-      </Typography>
-
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <CircularProgress />
+    <Box
+      dir="rtl"
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 50%, #fce4ec 100%)",
+        py: { xs: 3, sm: 4, md: 6 },
+        px: { xs: 2, sm: 3, md: 4 },
+      }}
+    >
+      <Box sx={{ maxWidth: 1400, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ textAlign: "center", mb: { xs: 3, sm: 4, md: 5 } }}>
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 800,
+              fontSize: { xs: "1.75rem", sm: "2.25rem", md: "2.75rem" },
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              mb: 1,
+            }}
+          >
+            📊 لوحة الإحصاءات العامة
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              color: "text.secondary",
+              fontSize: { xs: "0.95rem", sm: "1rem" },
+            }}
+          >
+            نظرة شاملة على أداء Fateness Studio
+          </Typography>
         </Box>
-      ) : stats ? (
-        <>
-          {/* 🔹 البطاقات */}
-          <Grid container spacing={2}>
-            {cards.map((card) => (
-              <Grid item xs={12} sm={6} md={4} key={card.key}>
-                <Paper
-                  sx={{
-                    p: 3,
-                    textAlign: "center",
-                    borderTop: `5px solid var(--mui-palette-${card.color}-main)`,
-                    boxShadow: 2,
-                    transition: "0.3s",
-                    "&:hover": {
-                      transform: "translateY(-5px)",
-                      boxShadow: 6,
-                    },
-                  }}
-                >
-                  <Typography variant="h3" sx={{ mb: 1 }}>
-                    {card.icon}
-                  </Typography>
-                  <Typography variant="h6" color={`${card.color}.main`}>
-                    {card.label}
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    sx={{ mt: 1, fontWeight: "bold", color: "text.primary" }}
-                  >
-                    {stats[card.key]}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
 
-          {/* 🔹 المخطط البياني */}
-          {chartData && (
-            <Box sx={{ mt: 6 }}>
-              <Typography variant="h6" gutterBottom>
-                📈 عدد الحجوزات خلال آخر 7 أيام
-              </Typography>
-
-              <Paper sx={{ p: 3, boxShadow: 3, borderRadius: 3 }}>
-                <Line data={chartData} options={chartOptions} height={90} />
-
-                {/* 🔹 شريط النسبة المتحرك */}
-                {stats.dailyBookings && (
-                  <Box sx={{ mt: 4 }}>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                      🔸 نسبة الحجوزات خلال الأسبوع الأخير:
+        {loading ? (
+          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+            <CircularProgress size={60} thickness={4} sx={{ color: "#667eea" }} />
+          </Box>
+        ) : stats ? (
+          <>
+            {/* Welcome Card */}
+            <Box sx={{ position: "relative", mb: 4 }}>
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  borderRadius: 4,
+                  filter: "blur(20px)",
+                  opacity: 0.3,
+                  transform: "scale(0.98)",
+                }}
+              />
+              <Paper
+                elevation={0}
+                sx={{
+                  position: "relative",
+                  p: { xs: 3, sm: 4 },
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                  color: "white",
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    width: "300px",
+                    height: "300px",
+                    background: "radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)",
+                    borderRadius: "50%",
+                    transform: "translate(30%, -30%)",
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 2 }}>
+                  <Box sx={{ zIndex: 1 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, fontSize: { xs: "1.5rem", sm: "2rem" } }}>
+                      👋 مرحبًا {stats?.adminName || "آلاء"}!
                     </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        height: 22,
-                        borderRadius: 12,
-                        overflow: "hidden",
-                        backgroundColor: "#eee",
-                        boxShadow: "inset 0 2px 5px rgba(0,0,0,0.15)",
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: `${activePercentAnim}%`,
-                          background: "linear-gradient(90deg, #2196f3, #42a5f5)",
-                          height: "100%",
-                          transition: "width 0.3s ease",
-                        }}
-                      />
-                      <Box
-                        sx={{
-                          width: `${cancelledPercentAnim}%`,
-                          background: "linear-gradient(90deg, #ffb74d, #ff9800)",
-                          height: "100%",
-                          transition: "width 0.3s ease",
-                        }}
-                      />
-                    </Box>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        mt: 1,
-                      }}
-                    >
-                      <Typography variant="body2" color="text.secondary">
-                        ✅ نشطة: {activePercentAnim.toFixed(1)}%
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ❌ ملغاة: {cancelledPercentAnim.toFixed(1)}%
-                      </Typography>
-                    </Box>
+                    <Typography variant="h6" sx={{ opacity: 0.95, fontSize: { xs: "0.95rem", sm: "1.1rem" }, fontWeight: 500 }}>
+                      لديكِ اليوم <strong>{stats?.todaySessions || 0}</strong> جلسة نشطة و{" "}
+                      <strong>{stats?.newUsersToday || 0}</strong> مشتركة جديدة 💪
+                    </Typography>
                   </Box>
-                )}
+                  <Box
+                    sx={{
+                      position: "relative",
+                      zIndex: 1,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        inset: -2,
+                        background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+                        borderRadius: "50%",
+                        filter: "blur(10px)",
+                        opacity: 0.6,
+                      }}
+                    />
+                    <img
+                      src={imgSrc}
+                      alt="Fateness Logo"
+                      onError={() => setImgSrc(fallbackLogo)}
+                      style={{
+                        position: "relative",
+                        width: 80,
+                        height: 80,
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "4px solid rgba(255,255,255,0.3)",
+                        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                      }}
+                    />
+                  </Box>
+                </Box>
               </Paper>
             </Box>
-          )}
-        </>
-      ) : (
-        <Typography sx={{ mt: 3 }}>لا توجد بيانات متاحة حالياً.</Typography>
-      )}
+
+            {/* Stats Cards */}
+            <Grid container spacing={{ xs: 2, sm: 2.5, md: 3 }} sx={{ mb: 5 }}>
+              {cards.map((card, index) => (
+                <Grid item xs={12} sm={6} md={4} lg={2.4} key={card.key}>
+                  <Box
+                    sx={{
+                      position: "relative",
+                      height: "100%",
+                      animation: `fadeInUp 0.5s ease-out ${index * 0.1}s both`,
+                      "@keyframes fadeInUp": {
+                        from: { opacity: 0, transform: "translateY(20px)" },
+                        to: { opacity: 1, transform: "translateY(0)" },
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        inset: 0,
+                        background: card.gradient,
+                        borderRadius: 3,
+                        filter: "blur(15px)",
+                        opacity: 0.2,
+                        transition: "opacity 0.3s",
+                      }}
+                    />
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        position: "relative",
+                        p: { xs: 2.5, sm: 3 },
+                        height: "100%",
+                        textAlign: "center",
+                        background: "rgba(255, 255, 255, 0.95)",
+                        backdropFilter: "blur(10px)",
+                        borderRadius: 3,
+                        border: "1px solid rgba(255,255,255,0.3)",
+                        transition: "all 0.3s ease",
+                        cursor: "pointer",
+                        "&:hover": {
+                          transform: "translateY(-8px)",
+                          boxShadow: "0 12px 40px rgba(0,0,0,0.12)",
+                          "& .icon-box": {
+                            transform: "scale(1.1) rotate(5deg)",
+                          },
+                        },
+                      }}
+                    >
+                      <Box
+                        className="icon-box"
+                        sx={{
+                          width: { xs: 60, sm: 70 },
+                          height: { xs: 60, sm: 70 },
+                          mx: "auto",
+                          mb: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          background: card.gradient,
+                          borderRadius: 3,
+                          fontSize: { xs: "1.75rem", sm: "2rem" },
+                          transition: "transform 0.3s ease",
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                        }}
+                      >
+                        {card.icon}
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: "text.secondary",
+                          fontSize: { xs: "0.85rem", sm: "0.9rem" },
+                          fontWeight: 600,
+                          mb: 1,
+                        }}
+                      >
+                        {card.label}
+                      </Typography>
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: { xs: "1.75rem", sm: "2rem" },
+                          background: card.gradient,
+                          backgroundClip: "text",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                        }}
+                      >
+                        {stats[card.key]}
+                      </Typography>
+                    </Paper>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
+
+            {/* Chart Section */}
+            {chartData && (
+              <Box sx={{ position: "relative" }}>
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    borderRadius: 4,
+                    filter: "blur(20px)",
+                    opacity: 0.15,
+                    transform: "scale(0.98)",
+                  }}
+                />
+                <Paper
+                  elevation={0}
+                  sx={{
+                    position: "relative",
+                    p: { xs: 3, sm: 4 },
+                    background: "rgba(255, 255, 255, 0.95)",
+                    backdropFilter: "blur(10px)",
+                    borderRadius: 4,
+                    border: "1px solid rgba(255,255,255,0.3)",
+                  }}
+                >
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      mb: 3,
+                      fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                      background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                      backgroundClip: "text",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                    }}
+                  >
+                    📈 عدد الحجوزات خلال آخر 7 أيام
+                  </Typography>
+
+                  <Box sx={{ position: "relative", height: { xs: 250, sm: 300 }, mb: 4 }}>
+                    <Line data={chartData} options={chartOptions} />
+                  </Box>
+
+                  {/* Progress Bar */}
+                  {stats.dailyBookings && (
+                    <Box>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          mb: 2,
+                          fontWeight: 600,
+                          color: "text.primary",
+                        }}
+                      >
+                        🔸 نسبة الحجوزات خلال الأسبوع الأخير
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          height: 28,
+                          borderRadius: 20,
+                          overflow: "hidden",
+                          backgroundColor: "#f5f5f5",
+                          boxShadow: "inset 0 2px 8px rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: `${activePercentAnim}%`,
+                            background: "linear-gradient(90deg, #667eea, #764ba2)",
+                            height: "100%",
+                            transition: "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                            position: "relative",
+                            "&::after": {
+                              content: '""',
+                              position: "absolute",
+                              top: 0,
+                              right: 0,
+                              bottom: 0,
+                              width: "50%",
+                              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3))",
+                            },
+                          }}
+                        />
+                        <Box
+                          sx={{
+                            width: `${cancelledPercentAnim}%`,
+                            background: "linear-gradient(90deg, #ff7043, #f4511e)",
+                            height: "100%",
+                            transition: "width 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
+                            position: "relative",
+                            "&::after": {
+                              content: '""',
+                              position: "absolute",
+                              top: 0,
+                              right: 0,
+                              bottom: 0,
+                              width: "50%",
+                              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3))",
+                            },
+                          }}
+                        />
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mt: 2,
+                          gap: 2,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Box
+                            sx={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: 1,
+                              background: "linear-gradient(135deg, #667eea, #764ba2)",
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                            نشطة: {activePercentAnim.toFixed(1)}%
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                          <Box
+                            sx={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: 1,
+                              background: "linear-gradient(135deg, #ff7043, #f4511e)",
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+                            ملغاة: {cancelledPercentAnim.toFixed(1)}%
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                  )}
+                </Paper>
+              </Box>
+            )}
+          </>
+        ) : (
+          <Paper
+            sx={{
+              p: 6,
+              textAlign: "center",
+              background: "rgba(255, 255, 255, 0.95)",
+              borderRadius: 4,
+            }}
+          >
+            <Typography variant="h6" color="text.secondary">
+              لا توجد بيانات متاحة حالياً
+            </Typography>
+          </Paper>
+        )}
+      </Box>
     </Box>
   );
 }

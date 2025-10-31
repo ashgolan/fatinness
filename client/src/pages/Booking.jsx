@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
-import { colors, labels } from "../theme/theme";
 import { fmtLocal } from "../utils/date";
+import { colors, labels } from "../theme/colors";
 
 // 🔹 دالة مساعدة لتوليد الأيام السبعة القادمة
 function getWeekDays(start = new Date()) {

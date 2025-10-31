@@ -56,7 +56,9 @@ export default function SlotsAdmin() {
       weekEnd.setDate(weekStart.getDate() + 6);
 
       arr.push({
-        label: `${weekStart.toLocaleDateString("ar-EG")} → ${weekEnd.toLocaleDateString("ar-EG")}`,
+        label: `${weekStart.toLocaleDateString(
+          "ar-EG"
+        )} → ${weekEnd.toLocaleDateString("ar-EG")}`,
         start: weekStart.toISOString().split("T")[0],
       });
     }
@@ -95,19 +97,33 @@ export default function SlotsAdmin() {
   // 📊 تحديد حالة الحصة
   const getSlotStatus = (slot) => {
     if (!slot) return { label: "غير معروفة", color: "#999", type: "unknown" };
-    if (slot.isBlocked) return { label: "معطّلة", color: "#ff9800", type: "blocked" };
+    if (slot.isBlocked)
+      return { label: "معطّلة", color: "#ff9800", type: "blocked" };
 
+    // 🕒 إنشاء وقت البداية والنهاية بشكل دقيق
     const start = new Date(slot.date);
     const [sh, sm] = slot.startTime.split(":");
-    start.setHours(sh, sm, 0, 0);
+    start.setHours(Number(sh), Number(sm), 0, 0);
 
     const end = new Date(slot.date);
-    const [eh, em] = slot.endTime.split(":");
-    end.setHours(eh, em, 0, 0);
+    const [eh, em] = slot.endTime
+      ? slot.endTime.split(":")
+      : [Number(sh) + 1, Number(sm)]; // في حال لم يوجد endTime نضيف ساعة افتراضية
+    end.setHours(Number(eh), Number(em), 0, 0);
 
-    if (end < now) return { label: "منتهية", color: "#f44336", type: "ended" };
-    if (start <= now && end >= now)
+    const now = new Date();
+
+    // 🔴 منتهية (انتهى وقتها)
+    if (now > end) {
+      return { label: "منتهية", color: "#f44336", type: "ended" };
+    }
+
+    // 🟠 جارية الآن
+    if (now >= start && now <= end) {
       return { label: "جارية الآن", color: "#ed6c02", type: "running" };
+    }
+
+    // 🟢 قادمة
     return { label: "قادمة", color: "#4caf50", type: "upcoming" };
   };
 
@@ -135,7 +151,10 @@ export default function SlotsAdmin() {
   // 📈 الإحصاءات العامة
   const total = slots.length || 1;
   const activeCount = slots.filter(
-    (s) => !s.isBlocked && (getSlotStatus(s).type === "upcoming" || getSlotStatus(s).type === "running")
+    (s) =>
+      !s.isBlocked &&
+      (getSlotStatus(s).type === "upcoming" ||
+        getSlotStatus(s).type === "running")
   ).length;
   const endedCount = slots.filter(
     (s) => !s.isBlocked && getSlotStatus(s).type === "ended"
@@ -219,17 +238,56 @@ export default function SlotsAdmin() {
         </Typography>
 
         {/* شريط الألوان */}
-        <Box sx={{ position: "relative", height: 24, borderRadius: 1, overflow: "hidden" }}>
-          <Box sx={{ position: "absolute", left: 0, width: `${activePercent}%`, bgcolor: "#4caf50", height: "100%" }} />
-          <Box sx={{ position: "absolute", left: `${activePercent}%`, width: `${endedPercent}%`, bgcolor: "#f44336", height: "100%" }} />
-          <Box sx={{ position: "absolute", left: `${activePercent + endedPercent}%`, width: `${blockedPercent}%`, bgcolor: "#ff9800", height: "100%" }} />
+        <Box
+          sx={{
+            position: "relative",
+            height: 24,
+            borderRadius: 1,
+            overflow: "hidden",
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              left: 0,
+              width: `${activePercent}%`,
+              bgcolor: "#4caf50",
+              height: "100%",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              left: `${activePercent}%`,
+              width: `${endedPercent}%`,
+              bgcolor: "#f44336",
+              height: "100%",
+            }}
+          />
+          <Box
+            sx={{
+              position: "absolute",
+              left: `${activePercent + endedPercent}%`,
+              width: `${blockedPercent}%`,
+              bgcolor: "#ff9800",
+              height: "100%",
+            }}
+          />
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}>
-          <Typography color="green">✅ نشطة: {activeCount} ({activePercent}%)</Typography>
-          <Typography color="red">❌ منتهية: {endedCount} ({endedPercent}%)</Typography>
-          <Typography color="#ff9800">⚠️ معطلة: {blockedCount} ({blockedPercent}%)</Typography>
-          <Typography color="text.primary">🔢 الإجمالي: {slots.length}</Typography>
+          <Typography color="green">
+            ✅ نشطة: {activeCount} ({activePercent}%)
+          </Typography>
+          <Typography color="red">
+            ❌ منتهية: {endedCount} ({endedPercent}%)
+          </Typography>
+          <Typography color="#ff9800">
+            ⚠️ معطلة: {blockedCount} ({blockedPercent}%)
+          </Typography>
+          <Typography color="text.primary">
+            🔢 الإجمالي: {slots.length}
+          </Typography>
         </Box>
       </Paper>
 
@@ -299,7 +357,9 @@ export default function SlotsAdmin() {
                       <Typography>
                         السعة: {slot.capacity} / المتبقي: {slot.available}
                       </Typography>
-                      <Typography sx={{ mt: 1, fontStyle: "italic", color: "#555" }}>
+                      <Typography
+                        sx={{ mt: 1, fontStyle: "italic", color: "#555" }}
+                      >
                         {status.label} — {getTimeDiff(slot)}
                       </Typography>
                     </Paper>
@@ -334,8 +394,12 @@ export default function SlotsAdmin() {
                   {bookings.map((b) => (
                     <ListItem key={b._id}>
                       <ListItemText
-                        primary={`🧍‍♀️ ${b.user?.name || "غير معروف"} — ${b.user?.phone || ""}`}
-                        secondary={`الحالة: ${b.status === "booked" ? "محجوزة ✅" : "ألغيت ❌"}`}
+                        primary={`🧍‍♀️ ${b.user?.name || "غير معروف"} — ${
+                          b.user?.phone || ""
+                        }`}
+                        secondary={`الحالة: ${
+                          b.status === "booked" ? "محجوزة ✅" : "ألغيت ❌"
+                        }`}
                       />
                     </ListItem>
                   ))}
@@ -350,11 +414,16 @@ export default function SlotsAdmin() {
         </DialogContent>
 
         <DialogActions>
-          {selectedSlot && !isNaN(selectedSlot.date) && !selectedSlot.isBlocked && (
-            <Button color={selectedSlot?.isBlocked ? "success" : "error"} onClick={handleToggleBlock}>
-              {selectedSlot?.isBlocked ? "🔁 تفعيل الحصة" : "🚫 تعطيل الحصة"}
-            </Button>
-          )}
+          {selectedSlot &&
+            !isNaN(selectedSlot.date) &&
+            !selectedSlot.isBlocked && (
+              <Button
+                color={selectedSlot?.isBlocked ? "success" : "error"}
+                onClick={handleToggleBlock}
+              >
+                {selectedSlot?.isBlocked ? "🔁 تفعيل الحصة" : "🚫 تعطيل الحصة"}
+              </Button>
+            )}
           <Button onClick={() => setOpen(false)}>إغلاق</Button>
         </DialogActions>
       </Dialog>
