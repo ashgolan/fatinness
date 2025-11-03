@@ -24,6 +24,7 @@ import {
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { adminMiddleware } from "../middlewares/admin.middleware.js";
 import { admin } from "googleapis/build/src/apis/admin/index.js";
+import { updateUserRole } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
@@ -66,6 +67,8 @@ router.get("/bookings/user/:id", authMiddleware, adminMiddleware, getUserBooking
 //
 router.post("/notify", sendCustomNotification);
 router.get("/notifications", getNotificationsHistory);
+
+router.put("/users/role", adminMiddleware, updateUserRole);
 
 //
 // 🕓 حالة المجدول (Scheduler)

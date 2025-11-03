@@ -10,6 +10,7 @@ import {
 // ✅ أضف هذين السطرين (هما المفقودان)
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { adminMiddleware } from "../middlewares/admin.middleware.js";
+import { adminGetSlotBookings } from "../controllers/admin.controller.js";
 
 const router = express.Router();
 
@@ -24,6 +25,9 @@ router.post("/", adminCreateSlot);
 
 // ❌ حذف حصة معينة
 router.delete("/:id", adminDeleteSlot);
+
+router.get("/:id/bookings", adminGetSlotBookings);
+
 
 // 📆 إنشاء حصص الأسبوع القادم دفعة واحدة
 router.post("/next-week/bulk", adminCreateNextWeekBulk);

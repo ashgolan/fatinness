@@ -1,3 +1,4 @@
+// client/src/pages/Login.jsx
 import React, { useContext, useState } from "react";
 import {
   Box,
@@ -13,6 +14,8 @@ import { Api } from "../api/Api";
 import { setToken } from "../utils/tokensStorage";
 import { UserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
+import { useThemeMode } from "../context/ThemeContext"; // ✅ نظام الثيم العام
+
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -20,6 +23,9 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import LoginIcon from "@mui/icons-material/Login";
 
 export default function Login() {
+  const { mode, BRAND } = useThemeMode();
+  const isDark = mode === "dark";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -43,7 +49,7 @@ export default function Login() {
       const me = await Api.get("/users/me");
       setUser(me.data);
       toast.success("تم تسجيل الدخول بنجاح");
-      navigate(me.data.role === "admin" ? "/admin/adminDashboard" : from, {
+      navigate(me.data.role === "admin" ? "/admin/control" : from, {
         replace: true,
       });
     } catch (err) {
@@ -65,11 +71,13 @@ export default function Login() {
         py: 4,
         position: "relative",
         overflow: "hidden",
-        background:
-          "radial-gradient(circle at 20% 20%, rgba(255,206,84,0.25), transparent 60%), radial-gradient(circle at 80% 80%, rgba(160,24,96,0.25), transparent 60%), #fff",
+        background: isDark
+          ? `linear-gradient(180deg, ${BRAND.bgDarkTop}, ${BRAND.bgDarkBottom})`
+          : "linear-gradient(135deg, #fff8fd, #fffdf7)",
+        transition: "all 0.4s ease",
       }}
     >
-      {/* خلفيات ضبابية ناعمة */}
+      {/* دوائر ضبابية متحركة */}
       <Box
         sx={{
           position: "absolute",
@@ -78,7 +86,7 @@ export default function Login() {
           width: 200,
           height: 200,
           borderRadius: "50%",
-          background: "rgba(160,24,96,0.1)",
+          background: isDark ? "rgba(251,192,45,0.07)" : "rgba(160,24,96,0.08)",
           filter: "blur(60px)",
           animation: "float 8s ease-in-out infinite",
         }}
@@ -91,7 +99,7 @@ export default function Login() {
           width: 220,
           height: 220,
           borderRadius: "50%",
-          background: "rgba(255,206,84,0.15)",
+          background: isDark ? "rgba(160,24,96,0.08)" : "rgba(251,192,45,0.1)",
           filter: "blur(60px)",
           animation: "float 10s ease-in-out infinite reverse",
         }}
@@ -114,9 +122,13 @@ export default function Login() {
           width: "100%",
           p: { xs: 3, sm: 4 },
           borderRadius: "20px",
-          background: "rgba(255, 255, 255, 0.9)",
+          background: isDark
+            ? "rgba(25,25,28,0.95)"
+            : "rgba(255, 255, 255, 0.9)",
           backdropFilter: "blur(12px)",
-          boxShadow: "0 8px 30px rgba(160,24,96,0.15)",
+          boxShadow: isDark
+            ? "0 8px 25px rgba(251,192,45,0.1)"
+            : "0 8px 30px rgba(160,24,96,0.15)",
           animation: "fadeIn 0.7s ease-out",
           "@keyframes fadeIn": {
             from: { opacity: 0, transform: "translateY(20px)" },
@@ -146,8 +158,10 @@ export default function Login() {
                 height: 80,
                 borderRadius: "50%",
                 objectFit: "cover",
-                border: "3px solid #fff",
-                boxShadow: "0 6px 20px rgba(160,24,96,0.25)",
+                border: isDark ? "3px solid #222" : "3px solid #fff",
+                boxShadow: isDark
+                  ? "0 6px 20px rgba(251,192,45,0.3)"
+                  : "0 6px 20px rgba(160,24,96,0.25)",
               }}
             />
           </Box>
@@ -156,19 +170,20 @@ export default function Login() {
             sx={{
               fontWeight: 800,
               fontSize: { xs: "1.8rem", sm: "2rem" },
-              background:
-                "linear-gradient(135deg, #A01860 0%, #FFCE54 100%)",
+              background: `linear-gradient(135deg, ${
+                isDark ? BRAND.gold : BRAND.purple
+              } 0%, ${isDark ? BRAND.purple : BRAND.gold} 100%)`,
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
             }}
           >
-            Fateness Studio
+            Fatiness Studio
           </Typography>
           <Typography
             variant="body1"
             sx={{
-              color: "#555",
+              color: isDark ? BRAND.subDark : "#555",
               mt: 1,
               fontWeight: 500,
             }}
@@ -183,7 +198,21 @@ export default function Login() {
           onSubmit={onSubmit}
           sx={{ display: "grid", gap: 2.5 }}
         >
-          {/* البريد */}
+          <style>
+            {`
+/* إزالة لون الخلفية الأزرق من الحقول المعبأة تلقائيًا */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  background-color: transparent !important;
+  -webkit-text-fill-color: inherit !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}
+`}
+          </style>
           <TextField
             fullWidth
             label="البريد الإلكتروني"
@@ -194,28 +223,38 @@ export default function Login() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <EmailIcon sx={{ color: "#A01860" }} />
+                  <EmailIcon
+                    sx={{ color: isDark ? BRAND.gold : BRAND.purple }}
+                  />
                 </InputAdornment>
               ),
             }}
             sx={{
-              backgroundColor: "rgba(160, 24, 96, 0.05)",
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.05)"
+                : "rgba(160, 24, 96, 0.05)",
               borderRadius: "10px",
-              transition: "all 0.3s ease",
               "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: "#ddd" },
-                "&:hover fieldset": { borderColor: "#A01860" },
+                "& fieldset": {
+                  borderColor: isDark ? "#444" : "#ddd",
+                },
+                "&:hover fieldset": {
+                  borderColor: isDark ? BRAND.gold : BRAND.purple,
+                },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#A01860",
+                  borderColor: isDark ? BRAND.gold : BRAND.purple,
                   borderWidth: 2,
-                  boxShadow: "0 0 8px rgba(160,24,96,0.25)", // ✨ ظل ناعم عند التركيز
+                  boxShadow: `0 0 8px ${
+                    isDark ? "rgba(251,192,45,0.25)" : "rgba(160,24,96,0.25)"
+                  }`,
                 },
               },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#A01860" },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: isDark ? BRAND.gold : BRAND.purple,
+              },
             }}
           />
 
-          {/* كلمة المرور */}
           <TextField
             fullWidth
             label="كلمة المرور"
@@ -226,7 +265,9 @@ export default function Login() {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <LockIcon sx={{ color: "#A01860" }} />
+                  <LockIcon
+                    sx={{ color: isDark ? BRAND.gold : BRAND.purple }}
+                  />
                 </InputAdornment>
               ),
               endAdornment: (
@@ -234,7 +275,7 @@ export default function Login() {
                   <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     edge="end"
-                    sx={{ color: "#A01860" }}
+                    sx={{ color: isDark ? BRAND.gold : BRAND.purple }}
                   >
                     {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                   </IconButton>
@@ -242,51 +283,69 @@ export default function Login() {
               ),
             }}
             sx={{
-              backgroundColor: "rgba(160, 24, 96, 0.05)",
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.05)"
+                : "rgba(160, 24, 96, 0.05)",
               borderRadius: "10px",
-              transition: "all 0.3s ease",
               "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: "#ddd" },
-                "&:hover fieldset": { borderColor: "#A01860" },
+                "& fieldset": {
+                  borderColor: isDark ? "#444" : "#ddd",
+                },
+                "&:hover fieldset": {
+                  borderColor: isDark ? BRAND.gold : BRAND.purple,
+                },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#A01860",
+                  borderColor: isDark ? BRAND.gold : BRAND.purple,
                   borderWidth: 2,
-                  boxShadow: "0 0 8px rgba(160,24,96,0.25)",
+                  boxShadow: `0 0 8px ${
+                    isDark ? "rgba(251,192,45,0.25)" : "rgba(160,24,96,0.25)"
+                  }`,
                 },
               },
-              "& .MuiInputLabel-root.Mui-focused": { color: "#A01860" },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: isDark ? BRAND.gold : BRAND.purple,
+              },
             }}
           />
 
-          {/* الزر */}
-         <Button
-  type="submit"
-  fullWidth
-  disabled={loading}
-  startIcon={<LoginIcon />}
-  sx={{
-    mt: 1,
-    py: 1.4,
-    fontSize: "1.05rem",
-    fontWeight: 700,
-    borderRadius: "10px",
-    backgroundColor: "#A01860",
-    color: "#fff",
-    textTransform: "none",
-    transition: "0.3s",
-    "&:hover": { backgroundColor: "#FFCE54", color: "#000" },
-    "& .MuiButton-startIcon": { marginLeft: "8px", marginRight: "12px" }, // ← هذه تضبط المسافة ✨
-  }}
->
-  {loading ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
-</Button>
-          {/* رابط التسجيل */}
+          <Button
+            type="submit"
+            fullWidth
+            disabled={loading}
+            startIcon={<LoginIcon />}
+            sx={{
+              mt: 1,
+              py: 1.4,
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              borderRadius: "10px",
+              background: `linear-gradient(135deg, ${
+                isDark ? BRAND.gold : BRAND.purple
+              }, ${isDark ? BRAND.purple : BRAND.gold})`,
+              color: "#fff",
+              textTransform: "none",
+              transition: "0.3s",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px", // ✅ هذه تضبط المسافة بين الأيقونة والكلمة
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: isDark
+                  ? "0 6px 15px rgba(251,192,45,0.25)"
+                  : "0 6px 15px rgba(160,24,96,0.25)",
+              },
+            }}
+          >
+            {loading ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
+          </Button>
+
           <Typography
             variant="body2"
             sx={{
               textAlign: "center",
               mt: 3,
-              color: "#666",
+              color: isDark ? BRAND.subDark : "#666",
               lineHeight: 1.6,
             }}
           >
@@ -294,11 +353,13 @@ export default function Login() {
             <Link
               to="/register"
               style={{
-                color: "#A01860",
+                color: isDark ? BRAND.gold : BRAND.purple,
                 fontWeight: 700,
                 textDecoration: "none",
               }}
-              onMouseEnter={(e) => (e.target.style.textDecoration = "underline")}
+              onMouseEnter={(e) =>
+                (e.target.style.textDecoration = "underline")
+              }
               onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
             >
               أنشئي حسابًا جديدًا
@@ -307,13 +368,12 @@ export default function Login() {
         </Box>
       </Paper>
 
-      {/* الفوتر */}
       <Typography
         variant="body2"
         sx={{
           position: "absolute",
           bottom: 14,
-          color: "rgba(0,0,0,0.55)",
+          color: isDark ? BRAND.subDark : "rgba(0,0,0,0.55)",
           fontSize: "0.85rem",
           textAlign: "center",
           width: "100%",
@@ -322,8 +382,14 @@ export default function Login() {
         }}
       >
         © 2025 &nbsp;
-        <b style={{ color: "#A01860" }}>Fateness Studio</b>
-        &nbsp; - استوديو اللياقة النسائي
+        <b
+          style={{
+            color: isDark ? BRAND.gold : BRAND.purple,
+          }}
+        >
+          Fateness Studio
+        </b>{" "}
+        - استوديو اللياقة النسائي
       </Typography>
     </Box>
   );

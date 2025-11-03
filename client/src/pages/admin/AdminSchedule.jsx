@@ -1,3 +1,4 @@
+// client/src/pages/admin/AdminSchedule.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
@@ -11,11 +12,30 @@ import {
   Chip,
   CircularProgress,
   Stack,
+  IconButton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Tooltip,
 } from "@mui/material";
+
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import { useThemeMode } from "../../context/ThemeContext";
 
-// 🗓️ أدوات التاريخ
+// Icons
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SaveIcon from "@mui/icons-material/Save";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import CloseIcon from "@mui/icons-material/Close";
+
+// ===================== أدوات التاريخ =====================
 function startOfWeek(date = new Date()) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -40,6 +60,15 @@ function isPastDay(date) {
   d.setHours(0, 0, 0, 0);
   return d < today;
 }
+function isToday(date) {
+  const d = new Date(date);
+  const t = new Date();
+  return (
+    d.getFullYear() === t.getFullYear() &&
+    d.getMonth() === t.getMonth() &&
+    d.getDate() === t.getDate()
+  );
+}
 
 const dayNames = [
   "الأحد",
@@ -52,6 +81,35 @@ const dayNames = [
 ];
 
 export default function AdminSchedule() {
+  const { mode, BRAND } = useThemeMode();
+  const isDark = mode === "dark";
+
+  // 🎨 ألوان هادئة ومريحة
+  const COLORS = {
+    // ألوان أساسية هادئة
+    primary: isDark ? "#B794F6" : "#9B6FD6",
+    secondary: isDark ? "#F6C86E" : "#E8B54D",
+    
+    // خلفيات
+    bgMain: isDark ? "#1a1a1f" : "#FAFAFA",
+    bgCard: isDark ? "#25252b" : "#FFFFFF",
+    bgSoft: isDark ? "#2d2d35" : "#F5F5F7",
+    
+    // حدود
+    border: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
+    borderAccent: isDark ? "rgba(183,148,246,0.25)" : "rgba(155,111,214,0.25)",
+    
+    // نصوص
+    text: isDark ? "#E5E5E5" : "#2D2D2D",
+    textSoft: isDark ? "#A0A0A0" : "#666666",
+    
+    // حالات هادئة
+    success: isDark ? "#6EAF87" : "#4CAF50",
+    warning: isDark ? "#D4A76A" : "#FFB74D",
+    error: isDark ? "#D57373" : "#E57373",
+  };
+
+  // ===================== الحالة العامة =====================
   const [tab, setTab] = useState(0);
   const weekStart = useMemo(() => startOfWeek(new Date()), []);
   const [weekData, setWeekData] = useState(null);
@@ -59,8 +117,9 @@ export default function AdminSchedule() {
   const [loading, setLoading] = useState(true);
   const [currentEdits, setCurrentEdits] = useState({});
   const [nextWeek, setNextWeek] = useState([]);
+  const [expandedDay, setExpandedDay] = useState(null);
 
-  // === تحميل الأسبوع الحالي ===
+  // ===================== جلب البيانات =====================
   const fetchCurrentWeek = async () => {
     setLoading(true);
     try {
@@ -75,7 +134,6 @@ export default function AdminSchedule() {
     }
   };
 
-  // === تحميل الأسبوع القادم ===
   const fetchNextWeek = async () => {
     try {
       const nextStart = addDays(weekStart, 7);
@@ -96,17 +154,21 @@ export default function AdminSchedule() {
       items: [],
     }));
     setNextWeek(arr);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // === إضافة أو تعديل ===
+  // ===================== إدارة الأسبوع الحالي =====================
   const addSlot = (dayIndex) => {
     const key = fmt(addDays(weekStart, dayIndex));
     setCurrentEdits((prev) => ({
       ...prev,
-      [key]: [...(prev[key] || []), { startTime: "", endTime: "", capacity: "20" }],
+      [key]: [
+        ...(prev[key] || []),
+        { startTime: "", endTime: "", capacity: "20" },
+      ],
     }));
   };
-
+  
   const updateSlot = (dayKey, idx, field, value) => {
     setCurrentEdits((prev) => {
       const list = [...(prev[dayKey] || [])];
@@ -114,7 +176,7 @@ export default function AdminSchedule() {
       return { ...prev, [dayKey]: list };
     });
   };
-
+  
   const removeSlot = (dayKey, idx) => {
     setCurrentEdits((prev) => {
       const list = [...(prev[dayKey] || [])];
@@ -127,9 +189,9 @@ export default function AdminSchedule() {
       return { ...prev, [dayKey]: list };
     });
   };
-
+  
   const deleteSlot = async (id) => {
-    if (!window.confirm("هل تريد حذف هذه الحصة؟")) return;
+    if (!window.confirm("هل تريدين حذف هذه الحصة؟")) return;
     try {
       await Api.delete(`/admin/slots/${id}`);
       toast.success("تم الحذف بنجاح");
@@ -139,7 +201,6 @@ export default function AdminSchedule() {
     }
   };
 
-  // === حفظ الأسبوع الحالي ===
   const saveChanges = async () => {
     const changes = [];
     Object.keys(currentEdits).forEach((key) => {
@@ -154,9 +215,7 @@ export default function AdminSchedule() {
         }
       });
     });
-
     if (!changes.length) return toast.info("لا توجد تغييرات صالحة للحفظ");
-
     try {
       await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
       toast.success("✅ تم حفظ التغييرات بنجاح");
@@ -167,25 +226,25 @@ export default function AdminSchedule() {
     }
   };
 
-  // === إدارة الأسبوع القادم ===
+  // ===================== إدارة الأسبوع القادم =====================
   const addNextSlot = (dayIndex) => {
     const copy = [...nextWeek];
     copy[dayIndex].items.push({ startTime: "", endTime: "", capacity: "20" });
     setNextWeek(copy);
   };
-
+  
   const updateNextSlot = (dayIndex, idx, field, value) => {
     const copy = [...nextWeek];
     copy[dayIndex].items[idx][field] = value;
     setNextWeek(copy);
   };
-
+  
   const removeNextSlot = (dayIndex, idx) => {
     const copy = [...nextWeek];
     copy[dayIndex].items.splice(idx, 1);
     setNextWeek(copy);
   };
-
+  
   const saveNextWeek = async () => {
     const items = nextWeek.flatMap((d) =>
       d.items
@@ -197,224 +256,649 @@ export default function AdminSchedule() {
           capacity: Number(s.capacity) || 20,
         }))
     );
-
     if (!items.length) return toast.warn("أضيفي حصصاً صالحة قبل الحفظ");
-
     try {
       const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
       toast.success(`✅ تم إنشاء ${data.created} حصة للأسبوع القادم`);
-
-      await fetchNextWeek(); // ✅ عرضها مباشرة
-      setNextWeek(Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] })));
+      await fetchNextWeek();
+      setNextWeek(
+        Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] }))
+      );
       setTab(1);
     } catch {
       toast.error("❌ فشل إنشاء الأسبوع القادم");
     }
   };
 
-  // === العرض ===
-  return (
-    <Box sx={{ maxWidth: 1200, mx: "auto", mt: 3, mb: 6 }}>
-      <Typography variant="h5" gutterBottom>
-        🗓️ إدارة الجدول الأسبوعي
-      </Typography>
+  // ===================== بطاقة اليوم =====================
+  const DayCard = ({
+    dayIndex,
+    dayKey,
+    existing,
+    pending,
+    isPast,
+    isNextWeek = false,
+  }) => {
+    const isTodayFlag = isToday(new Date(dayKey));
 
-      <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 3 }}>
-        <Tab label="الأسبوع الحالي" />
-        <Tab label="الأسبوع القادم" />
-      </Tabs>
-
-      {/* الأسبوع الحالي */}
-      {tab === 0 && (
-        <>
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Grid container spacing={3} rowGap={4}>
-              {Array.from({ length: 7 }, (_, i) => {
-                const d = addDays(weekStart, i);
-                const key = fmt(d);
-                const existing = weekData?.days?.[key] || [];
-                const pending = currentEdits[key] || [];
-                const past = isPastDay(d);
-
-                return (
-                  <Grid item xs={12} sm={6} md={4} key={key}>
-                    <Paper
+    const cardContent = (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* الحصص الموجودة */}
+        {!!existing.length && (
+          <Stack spacing={1.5}>
+            {existing.map((s) => (
+              <Paper
+                key={s._id}
+                elevation={0}
+                sx={{
+                  p: 2,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderRadius: 2,
+                  background: COLORS.bgSoft,
+                  border: `1px solid ${COLORS.border}`,
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: COLORS.borderAccent,
+                  },
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <AccessTimeIcon sx={{ fontSize: 18, color: COLORS.primary }} />
+                  <Typography sx={{ fontWeight: 600, fontSize: 14, color: COLORS.text }}>
+                    {s.startTime} - {s.endTime}
+                  </Typography>
+                  <Chip
+                    size="small"
+                    label={`سعة ${s.capacity}`}
+                    sx={{
+                      height: 22,
+                      fontSize: 11,
+                      background: isDark ? "rgba(183,148,246,0.15)" : "rgba(155,111,214,0.1)",
+                      color: COLORS.primary,
+                      fontWeight: 600,
+                      border: "none",
+                    }}
+                  />
+                  {s.isBlocked && (
+                    <Chip
+                      size="small"
+                      label="معطلة"
                       sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        minHeight: 220,
-                        backgroundColor: past ? "#f2f2f2" : "white",
-                        opacity: past ? 0.7 : 1,
+                        height: 22,
+                        fontSize: 11,
+                        background: isDark ? "rgba(213,115,115,0.15)" : "rgba(229,115,115,0.1)",
+                        color: COLORS.error,
+                        fontWeight: 600,
+                        border: "none",
+                      }}
+                    />
+                  )}
+                </Box>
+
+                {!isNextWeek && (
+                  <Tooltip title={isPast ? "لا يمكن حذف حصة منتهية" : "حذف الحصة"}>
+                    <span>
+                      <IconButton
+                        onClick={() => !isPast && deleteSlot(s._id)}
+                        size="small"
+                        disabled={isPast}
+                        sx={{
+                          color: "#fff",
+                          backgroundColor: isPast ? COLORS.textSoft : COLORS.error,
+                          "&:hover": {
+                            backgroundColor: isPast ? COLORS.textSoft : "#C62828",
+                          },
+                          opacity: isPast ? 0.5 : 1,
+                        }}
+                      >
+                        <DeleteIcon sx={{ fontSize: 16 }} />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
+              </Paper>
+            ))}
+          </Stack>
+        )}
+
+        {/* الحصص الجديدة */}
+        {!!pending.length && (
+          <Stack spacing={1.5}>
+            {pending.map((s, idx) => (
+              <Paper
+                key={idx}
+                elevation={0}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  background: isDark ? "rgba(183,148,246,0.08)" : "rgba(155,111,214,0.05)",
+                  border: `1px dashed ${COLORS.borderAccent}`,
+                }}
+              >
+                <Grid container spacing={1.5} alignItems="center">
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      type="time"
+                      size="small"
+                      fullWidth
+                      value={s.startTime}
+                      onChange={(e) =>
+                        isNextWeek
+                          ? updateNextSlot(dayIndex, idx, "startTime", e.target.value)
+                          : updateSlot(dayKey, idx, "startTime", e.target.value)
+                      }
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 1.5,
+                          backgroundColor: COLORS.bgCard,
+                          "& fieldset": {
+                            borderColor: COLORS.border,
+                          },
+                          "&:hover fieldset": {
+                            borderColor: COLORS.borderAccent,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      type="time"
+                      size="small"
+                      fullWidth
+                      value={s.endTime}
+                      onChange={(e) =>
+                        isNextWeek
+                          ? updateNextSlot(dayIndex, idx, "endTime", e.target.value)
+                          : updateSlot(dayKey, idx, "endTime", e.target.value)
+                      }
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 1.5,
+                          backgroundColor: COLORS.bgCard,
+                          "& fieldset": {
+                            borderColor: COLORS.border,
+                          },
+                          "&:hover fieldset": {
+                            borderColor: COLORS.borderAccent,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={8} sm={3}>
+                    <TextField
+                      type="number"
+                      size="small"
+                      fullWidth
+                      value={s.capacity}
+                      onChange={(e) =>
+                        isNextWeek
+                          ? updateNextSlot(dayIndex, idx, "capacity", e.target.value)
+                          : updateSlot(dayKey, idx, "capacity", e.target.value)
+                      }
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 1.5,
+                          backgroundColor: COLORS.bgCard,
+                          "& fieldset": {
+                            borderColor: COLORS.border,
+                          },
+                          "&:hover fieldset": {
+                            borderColor: COLORS.borderAccent,
+                          },
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={4} sm={1}>
+                    <IconButton
+                      onClick={() =>
+                        isNextWeek ? removeNextSlot(dayIndex, idx) : removeSlot(dayKey, idx)
+                      }
+                      size="small"
+                      sx={{
+                        color: "#fff",
+                        backgroundColor: COLORS.error,
+                        "&:hover": { backgroundColor: "#C62828" },
                       }}
                     >
-                      <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, textAlign: "center" }}>
-                        {dayNames[i]} — {key}
-                      </Typography>
+                      <DeleteIcon sx={{ fontSize: 16 }} />
+                    </IconButton>
+                  </Grid>
+                </Grid>
+              </Paper>
+            ))}
+          </Stack>
+        )}
 
-                      <Stack spacing={0.6} sx={{ mb: 2 }}>
-                        {existing.map((s) => (
-                          <Chip
-                            key={s._id}
-                            label={`${s.startTime} - ${s.endTime} (سعة ${s.capacity})`}
-                            onDelete={() => deleteSlot(s._id)}
-                            color="primary"
-                            sx={{ fontSize: 13 }}
-                          />
-                        ))}
+        {/* زر الإضافة */}
+        <Button
+          variant="outlined"
+          fullWidth
+          onClick={() => (isNextWeek ? addNextSlot(dayIndex) : addSlot(dayIndex))}
+          disabled={isPast}
+          startIcon={<AddCircleIcon />}
+          sx={{
+            mt: 0.5,
+            textTransform: "none",
+            fontWeight: 600,
+            borderRadius: 2,
+            py: 1.2,
+            borderColor: COLORS.borderAccent,
+            color: COLORS.primary,
+            "&:hover": {
+              borderColor: COLORS.primary,
+              background: isDark ? "rgba(183,148,246,0.08)" : "rgba(155,111,214,0.05)",
+            },
+            "&:disabled": {
+              opacity: 0.4,
+            },
+          }}
+        >
+          إضافة حصة جديدة
+        </Button>
+      </Box>
+    );
 
-                        {pending.map((s, idx) => (
-                          <Box
-                            key={idx}
-                            sx={{
-                              display: "grid",
-                              gridTemplateColumns: "1fr 1fr 0.7fr auto",
-                              gap: 0.3,
-                              alignItems: "center",
-                            }}
-                          >
-                            <TextField
-                              type="time"
-                              size="small"
-                              value={s.startTime}
-                              onChange={(e) => updateSlot(key, idx, "startTime", e.target.value)}
-                              sx={{ "& input": { fontSize: 13, py: 0.3 } }}
-                            />
-                            <TextField
-                              type="time"
-                              size="small"
-                              value={s.endTime}
-                              onChange={(e) => updateSlot(key, idx, "endTime", e.target.value)}
-                              sx={{ "& input": { fontSize: 13, py: 0.3 } }}
-                            />
-                            <TextField
-                              type="number"
-                              size="small"
-                              value={s.capacity}
-                              onChange={(e) => updateSlot(key, idx, "capacity", e.target.value)}
-                              sx={{ "& input": { fontSize: 13, py: 0.3, textAlign: "center" } }}
-                            />
-                            <Button
-                              color="error"
-                              size="small"
-                              onClick={() => removeSlot(key, idx)}
-                              sx={{ minWidth: 25 }}
-                            >
-                              ✕
-                            </Button>
-                          </Box>
-                        ))}
-                      </Stack>
+    return (
+      <>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 2.5,
+            height: "100%",
+            minHeight: 400,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            border: `1px solid ${isTodayFlag ? COLORS.borderAccent : COLORS.border}`,
+            background: COLORS.bgCard,
+            transition: "all 0.3s ease",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: isDark
+                ? "0 8px 24px rgba(0,0,0,0.4)"
+                : "0 8px 24px rgba(0,0,0,0.06)",
+              borderColor: COLORS.borderAccent,
+            },
+            opacity: isPast ? 0.6 : 1,
+          }}
+        >
+          {/* خط علوي */}
+          {isTodayFlag && (
+            <Box
+              sx={{
+                height: 3,
+                background: COLORS.primary,
+              }}
+            />
+          )}
 
-                      <Button variant="outlined" fullWidth onClick={() => addSlot(i)} disabled={past}>
-                        + أضف ساعة
-                      </Button>
-                    </Paper>
+          {/* رأس اليوم */}
+          <Box
+            sx={{
+              p: 2,
+              borderBottom: `1px solid ${COLORS.border}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: isTodayFlag
+                ? isDark
+                  ? "rgba(183,148,246,0.05)"
+                  : "rgba(155,111,214,0.03)"
+                : "transparent",
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: 15, color: COLORS.text }}>
+                {dayNames[dayIndex]}
+              </Typography>
+              <Typography sx={{ fontSize: 11, color: COLORS.textSoft, mt: 0.3 }}>
+                {new Date(dayKey).toLocaleDateString("ar-EG", {
+                  day: "numeric",
+                  month: "short",
+                })}
+              </Typography>
+            </Box>
+
+            <Tooltip title="عرض موسّع">
+              <IconButton
+                onClick={() =>
+                  setExpandedDay({
+                    dayIndex,
+                    dayKey,
+                    existing,
+                    pending,
+                    isPast,
+                    isNextWeek,
+                  })
+                }
+                size="small"
+                sx={{
+                  color: COLORS.primary,
+                  "&:hover": {
+                    background: isDark ? "rgba(183,148,246,0.1)" : "rgba(155,111,214,0.08)",
+                  },
+                }}
+              >
+                <ZoomInIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          {/* محتوى اليوم */}
+          <Box sx={{ p: 2, flex: 1, overflowY: "auto" }}>{cardContent}</Box>
+        </Paper>
+
+        {/* نافذة التكبير */}
+        <Dialog
+          open={expandedDay?.dayKey === dayKey}
+          onClose={() => setExpandedDay(null)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            sx:{
+              borderRadius: 3,
+              background: COLORS.bgCard,
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderBottom: `1px solid ${COLORS.border}`,
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontWeight: 800, fontSize: 18, color: COLORS.text }}>
+                {dayNames[dayIndex]}
+              </Typography>
+              <Typography sx={{ fontSize: 12, color: COLORS.textSoft }}>
+                {new Date(dayKey).toLocaleDateString("ar-EG", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setExpandedDay(null)} sx={{ color: COLORS.textSoft }}>
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>{cardContent}</DialogContent>
+        </Dialog>
+      </>
+    );
+  };
+
+  // ===================== الواجهة =====================
+  return (
+    <Box
+      dir="rtl"
+      sx={{
+        minHeight: "100vh",
+        py: 4,
+        px: { xs: 2, sm: 3, md: 4 },
+        background: COLORS.bgMain,
+      }}
+    >
+      <Box sx={{ maxWidth: 1600, mx: "auto" }}>
+        {/* العنوان + Tabs */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 4,
+            borderRadius: 2.5,
+            background: COLORS.bgCard,
+            border: `1px solid ${COLORS.border}`,
+          }}
+        >
+          {/* العنوان */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+            <Box
+              sx={{
+                width: 48,
+                height: 48,
+                borderRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: isDark ? "rgba(183,148,246,0.15)" : "rgba(155,111,214,0.1)",
+              }}
+            >
+              <CalendarTodayIcon sx={{ color: COLORS.primary, fontSize: 24 }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5, color: COLORS.text }}>
+                الرزنامة الأسبوعية
+              </Typography>
+              <Typography sx={{ color: COLORS.textSoft, fontSize: 13 }}>
+                إدارة وتنظيم جدول الحصص الرياضية
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Tabs */}
+          <Tabs
+            value={tab}
+            onChange={(_, v) => setTab(v)}
+            TabIndicatorProps={{
+              style: {
+                height: 3,
+                borderRadius: 3,
+                background: COLORS.primary,
+              },
+            }}
+            sx={{
+              "& .MuiTab-root": {
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: 14,
+                minHeight: 44,
+                mr: 2,
+                color: COLORS.textSoft,
+              },
+              "& .Mui-selected": {
+                color: COLORS.primary,
+              },
+            }}
+          >
+            <Tab
+              icon={<EventAvailableIcon sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="الأسبوع الحالي"
+            />
+            <Tab
+              icon={<NavigateNextIcon sx={{ fontSize: 18 }} />}
+              iconPosition="start"
+              label="الأسبوع القادم"
+            />
+          </Tabs>
+        </Paper>
+
+        {/* الأسبوع الحالي */}
+        {tab === 0 && (
+          <>
+            {loading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: 400,
+                }}
+              >
+                <CircularProgress sx={{ color: COLORS.primary }} />
+              </Box>
+            ) : (
+              <>
+                {/* نطاق الأسبوع */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    mb: 3,
+                    color: COLORS.textSoft,
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  <NavigateBeforeIcon fontSize="small" />
+                  <Typography>
+                    {weekData?.weekStart} → {weekData?.weekEnd}
+                  </Typography>
+                  <Chip
+                    label="الحالي"
+                    size="small"
+                    sx={{
+                      ml: "auto",
+                      background: COLORS.primary,
+                      color: "#fff",
+                      fontWeight: 600,
+                      border: "none",
+                    }}
+                  />
+                </Box>
+
+                {/* البطاقات */}
+                <Grid container spacing={2.5} sx={{ mb: 3 }}>
+                  {Array.from({ length: 7 }, (_, i) => {
+                    const d = addDays(weekStart, i);
+                    const key = fmt(d);
+                    const existing = weekData?.days?.[key] || [];
+                    const pending = currentEdits[key] || [];
+                    const past = isPastDay(d);
+                    return (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={key}>
+                        <DayCard
+                          dayIndex={i}
+                          dayKey={key}
+                          existing={existing}
+                          pending={pending}
+                          isPast={past}
+                        />
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+
+                {/* زر الحفظ */}
+                <Box sx={{ textAlign: "center" }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={saveChanges}
+                    startIcon={<SaveIcon />}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 700,
+                      px: 5,
+                      py: 1.5,
+                      borderRadius: 2,
+                      background: COLORS.primary,
+                      color: "#fff",
+                      boxShadow: "none",
+                      "&:hover": {
+                        background: isDark ? "#9F7BD9" : "#8058C2",
+                        boxShadow: "none",
+                      },
+                    }}
+                  >
+                    حفظ جميع التغييرات
+                  </Button>
+                </Box>
+              </>
+            )}
+          </>
+        )}
+
+        {/* الأسبوع القادم */}
+        {tab === 1 && (
+          <>
+            {/* نطاق الأسبوع */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                mb: 3,
+                color: COLORS.textSoft,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              <NavigateNextIcon fontSize="small" />
+              <Typography>
+                {nextWeekData?.weekStart} → {nextWeekData?.weekEnd}
+              </Typography>
+              <Chip
+                label="القادم"
+                size="small"
+                sx={{
+                  ml: "auto",
+                  background: COLORS.secondary,
+                  color: isDark ? "#2D2D2D" : "#fff",
+                  fontWeight: 600,
+                  border: "none",
+                }}
+              />
+            </Box>
+
+            {/* البطاقات */}
+            <Grid container spacing={2.5} sx={{ mb: 3 }}>
+              {Array.from({ length: 7 }, (_, i) => {
+                const date = fmt(addDays(addDays(weekStart, 7), i));
+                const slots = nextWeekData?.days?.[date] || [];
+                return (
+                  <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+                    <DayCard
+                      dayIndex={i}
+                      dayKey={date}
+                      existing={slots}
+                      pending={nextWeek[i]?.items || []}
+                      isPast={false}
+                      isNextWeek={true}
+                    />
                   </Grid>
                 );
               })}
             </Grid>
-          )}
-          <Box sx={{ mt: 4, textAlign: "center" }}>
-            <Button variant="contained" color="success" onClick={saveChanges}>
-              💾 حفظ التغييرات
-            </Button>
-          </Box>
-        </>
-      )}
 
-      {/* الأسبوع القادم */}
-      {tab === 1 && (
-        <>
-          <Grid container spacing={3} rowGap={4}>
-            {Array.from({ length: 7 }, (_, i) => {
-              const date = fmt(addDays(addDays(weekStart, 7), i));
-              const slots = nextWeekData?.days?.[date] || [];
-              return (
-                <Grid item xs={12} sm={6} md={4} key={i}>
-                  <Paper sx={{ p: 2, borderRadius: 2, minHeight: 220 }}>
-                    <Typography variant="h6" sx={{ mb: 1, fontWeight: 600, textAlign: "center" }}>
-                      {dayNames[i]} — {date}
-                    </Typography>
-
-                    <Stack spacing={0.6} sx={{ mb: 2 }}>
-                      {slots.map((s) => (
-                        <Chip
-                          key={s._id}
-                          label={`${s.startTime} - ${s.endTime} (سعة ${s.capacity})`}
-                          color="primary"
-                          sx={{ fontSize: 13 }}
-                        />
-                      ))}
-
-                      {nextWeek[i]?.items.map((s, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            display: "grid",
-                            gridTemplateColumns: "1fr 1fr 0.7fr auto",
-                            gap: 0.3,
-                            alignItems: "center",
-                          }}
-                        >
-                          <TextField
-                            type="time"
-                            size="small"
-                            value={s.startTime}
-                            onChange={(e) =>
-                              updateNextSlot(i, idx, "startTime", e.target.value)
-                            }
-                            sx={{ "& input": { fontSize: 13, py: 0.3 } }}
-                          />
-                          <TextField
-                            type="time"
-                            size="small"
-                            value={s.endTime}
-                            onChange={(e) =>
-                              updateNextSlot(i, idx, "endTime", e.target.value)
-                            }
-                            sx={{ "& input": { fontSize: 13, py: 0.3 } }}
-                          />
-                          <TextField
-                            type="number"
-                            size="small"
-                            value={s.capacity}
-                            onChange={(e) =>
-                              updateNextSlot(i, idx, "capacity", e.target.value)
-                            }
-                            sx={{ "& input": { fontSize: 13, py: 0.3, textAlign: "center" } }}
-                          />
-                          <Button
-                            color="error"
-                            size="small"
-                            onClick={() => removeNextSlot(i, idx)}
-                            sx={{ minWidth: 25 }}
-                          >
-                            ✕
-                          </Button>
-                        </Box>
-                      ))}
-                    </Stack>
-
-                    <Button variant="outlined" fullWidth onClick={() => addNextSlot(i)}>
-                      + أضف ساعة
-                    </Button>
-                  </Paper>
-                </Grid>
-              );
-            })}
-          </Grid>
-
-          <Box sx={{ mt: 4, textAlign: "center" }}>
-            <Button variant="contained" color="success" onClick={saveNextWeek}>
-              💾 حفظ الأسبوع القادم
-            </Button>
-          </Box>
-        </>
-      )}
+            {/* زر الحفظ */}
+            <Box sx={{ textAlign: "center" }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={saveNextWeek}
+                startIcon={<SaveIcon />}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 700,
+                  px: 5,
+                  py: 1.5,
+                  borderRadius: 2,
+                  background: COLORS.secondary,
+                  color: isDark ? "#2D2D2D" : "#fff",
+                  boxShadow: "none",
+                  "&:hover": {
+                    background: isDark ? "#DEB05A" : "#D4A043",
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                حفظ الأسبوع القادم
+              </Button>
+            </Box>
+          </>
+        )}
+      </Box>
     </Box>
   );
 }

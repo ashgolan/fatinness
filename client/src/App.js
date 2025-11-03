@@ -1,7 +1,11 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider, CssBaseline } from "@mui/material";
-import { theme } from "./theme/theme"; // 🟣 استيراد الثيم الموحد
+
+// 🔹 مكونات التصميم
+import { CssBaseline } from "@mui/material";
+
+// 🔹 مزود الوضع العام
+import { ThemeModeProvider } from "./context/ThemeContext"; // 🟣 هذا هو المزود الذي أنشأناه
 
 // 🔹 المكونات العامة
 import Navbar from "./components/Navbar";
@@ -33,9 +37,8 @@ import AdminSchedule from "./pages/admin/AdminSchedule";
 
 export default function App() {
   return (
-    // 🟢 تغليف التطبيق بالكامل داخل ThemeProvider
-    <ThemeProvider theme={theme}>
-      {/* 🔹 CssBaseline لضبط الألوان والخلفية الافتراضية */}
+    // 🟣 لفّ التطبيق بالكامل داخل ThemeModeProvider بدلاً من ThemeProvider المحلي
+    <ThemeModeProvider>
       <CssBaseline />
 
       <div
@@ -44,7 +47,6 @@ export default function App() {
           minHeight: "100vh",
           display: "flex",
           flexDirection: "column",
-          backgroundColor: theme.palette.background.default,
         }}
       >
         <Navbar />
@@ -88,6 +90,6 @@ export default function App() {
 
         <Footer />
       </div>
-    </ThemeProvider>
+    </ThemeModeProvider>
   );
 }

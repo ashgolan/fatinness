@@ -9,6 +9,7 @@ import Setting from "../models/Setting.js";
 import multer from "multer";
 import path from "path";
 import { fmtLocal } from "../utils/date.js";
+import mongoose from "mongoose";
 
 // 📸 إعداد مكان حفظ الصور
 const storage = multer.diskStorage({
@@ -176,9 +177,9 @@ export const getDashboardStats = async (req, res) => {
   try {
     const now = new Date();
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - 6); // آخر 7 أيام
+    startOfWeek.setDate(now.getDate() - 6);
 
-    // 📌 نحسب حسب تاريخ الإنشاء (createdAt) لتتبع نشاط النظام
+    // 🔹 الحجوزات الأسبوعية للرسم البياني
     const last7 = await Booking.aggregate([
       { $match: { createdAt: { $gte: startOfWeek } } },
       {
@@ -192,7 +193,6 @@ export const getDashboardStats = async (req, res) => {
       },
     ]);
 
-    // بناء مصفوفة الأيام مع active/cancelled/completed
     const dailyBookings = [];
     for (let i = 0; i < 7; i++) {
       const day = new Date(startOfWeek);
@@ -200,7 +200,8 @@ export const getDashboardStats = async (req, res) => {
       const dateStr = fmtLocal(day);
 
       const getCount = (status) =>
-        last7.find((d) => d._id.date === dateStr && d._id.status === status)?.count || 0;
+        last7.find((d) => d._id.date === dateStr && d._id.status === status)
+          ?.count || 0;
 
       dailyBookings.push({
         date: dateStr,
@@ -210,56 +211,70 @@ export const getDashboardStats = async (req, res) => {
       });
     }
 
-    // إحصاءات عامة
+    // 🧮 حساب جلسات اليوم (كل جلسات اليوم حتى المنتهية)
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const todaySessions = await Slot.countDocuments({
+      date: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    // 🧮 حساب الحجوزات النشطة فعليًا (التي لم تنتهِ بعد)
+    const booked = await Booking.find({ status: "booked" }).populate("slot");
+    const activeBookings = booked.filter((b) => {
+      if (!b.slot || !b.slot.endTime) return false;
+      const [h, m] = b.slot.endTime.split(":").map(Number);
+      const end = new Date(b.slot.date);
+      end.setHours(h, m, 0, 0);
+      return end >= now;
+    }).length;
+
+    // 🧮 بقية الإحصاءات
     const [
       totalUsers,
       blockedUsers,
       totalBookings,
-      activeBookings,
       cancelled,
       completedBookings,
       totalSlots,
-      todaySessions,
       upcomingWeekSessions,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ isBlocked: true }),
-      Booking.countDocuments(), // إجمالي كل الحجوزات
-      Booking.countDocuments({ status: "booked" }),
+      Booking.countDocuments(),
       Booking.countDocuments({ status: "cancelled" }),
-      Booking.countDocuments({ status: "completed" }), // ✅ جديد
+      Booking.countDocuments({ status: "completed" }),
       Slot.countDocuments(),
-      // جلسات اليوم (حسب التاريخ فقط)
       Slot.countDocuments({
         date: {
-          $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+          $gte: new Date(),
+          $lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         },
-      }),
-      // جلسات الأسبوع القادم (7 أيام)
-      Slot.countDocuments({
-        date: { $gte: new Date(), $lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
       }),
     ]);
 
+    // 🔹 الإخراج النهائي
     res.json({
       totalUsers,
       activeUsers: totalUsers - blockedUsers,
       blockedUsers,
-      totalBookings,       // مجموع كل شيء (booked+cancelled+completed)
-      activeBookings,      // الحجوزات النشطة الآن
-      cancelled,           // الحجوزات الملغاة
-      completedBookings,   // ✅ الحجوزات المنجزة
+      totalBookings,
+      activeBookings, // ✅ الآن فعليًا صحيحة
+      cancelled,
+      completedBookings,
       totalSlots,
-      todaySessions,
+      todaySessions, // ✅ الآن تُظهر عدد جلسات اليوم الحقيقي
       upcomingWeekSessions,
-      dailyBookings,       // يحتوي على active/cancelled/completed لكل يوم
+      dailyBookings,
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in getDashboardStats:", error);
     res.status(500).json({ message: "Error fetching stats" });
   }
 };
+
 
 /**
  * 🔹 جلب جميع القوالب الأسبوعية
@@ -501,11 +516,22 @@ export const updateUserByAdmin = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { username, email, phone, gender, height, weight, age } = req.body;
+    const { username, email, phone, gender, height, weight, age, role } = req.body;
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // 🔒 منع إزالة آخر مديرة
+    if (user.role === "admin" && role === "user") {
+      const adminCount = await User.countDocuments({ role: "admin" });
+      if (adminCount <= 1) {
+        return res
+          .status(400)
+          .json({ message: "❌ لا يمكن إزالة آخر مديرة في النظام" });
+      }
+    }
+
+    // ✅ تحديث البيانات الأساسية
     if (username !== undefined) user.username = username;
     if (email !== undefined) user.email = email;
     if (phone !== undefined) user.phone = phone;
@@ -513,6 +539,11 @@ export const updateUserByAdmin = async (req, res) => {
     if (height !== undefined) user.height = height;
     if (weight !== undefined) user.weight = weight;
     if (age !== undefined) user.age = age;
+
+    // ✅ تحديث الدور إن وجد
+    if (role !== undefined && ["admin", "user"].includes(role)) {
+      user.role = role;
+    }
 
     await user.save();
 
@@ -522,17 +553,44 @@ export const updateUserByAdmin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 /**
  * 🔹 تلخيص الحجوزات لكل مشتركة (عدد النشطة / الملغاة / المنجزة)
  */
 export const getBookingsSummary = async (req, res) => {
   try {
     const users = await User.find({ role: "user" }).select("username email");
+
+    const now = new Date();
     const data = await Promise.all(
       users.map(async (u) => {
-        const active = await Booking.countDocuments({ user: u._id, status: "booked" });
-        const cancelled = await Booking.countDocuments({ user: u._id, status: "cancelled" });
-        const completed = await Booking.countDocuments({ user: u._id, status: "completed" });
+        const bookings = await Booking.find({ user: u._id }).populate("slot");
+
+        // 🔹 نفس منطق الواجهة لتحديد الحالة الفعلية
+        const getDisplayStatus = (b) => {
+          if (!b.slot) return "unknown";
+          if (b.slot.isBlocked) return "blocked";
+          const end = new Date(b.slot.date);
+          if (b.slot.endTime) {
+            const [h, m] = b.slot.endTime.split(":");
+            end.setHours(Number(h), Number(m), 0, 0);
+          }
+          if (b.status === "booked" && now > end) return "completed";
+          return b.status;
+        };
+
+        // 🔹 حساب الحالات الدقيقة
+        let active = 0;
+        let cancelled = 0;
+        let completed = 0;
+
+        bookings.forEach((b) => {
+          const status = getDisplayStatus(b);
+          if (status === "booked") active++;
+          else if (status === "cancelled") cancelled++;
+          else if (status === "completed") completed++;
+        });
+
         return {
           userId: u._id,
           username: u.username,
@@ -550,6 +608,7 @@ export const getBookingsSummary = async (req, res) => {
     res.status(500).json({ message: "Error fetching booking summary" });
   }
 };
+
 /**
  * 🔹 جلب تفاصيل حجوزات مشتركة معينة (لعرضها عند الضغط على "عرض")
  */
@@ -564,5 +623,22 @@ export const getUserBookings = async (req, res) => {
   } catch (err) {
     console.error("❌ Error in getUserBookings:", err);
     res.status(500).json({ message: "Error fetching user bookings" });
+  }
+};
+
+
+export const adminGetSlotBookings = async (req, res) => {
+  try {
+    // ✅ تحويل id إلى ObjectId لضمان التطابق الصحيح
+    const slotId = new mongoose.Types.ObjectId(req.params.id);
+
+    const bookings = await Booking.find({ slot: slotId })
+      .populate("user", "username phone name email");
+
+    // 🔹 إرسال النتيجة بالشكل المتوقع للواجهة
+    res.json({ bookings });
+  } catch (err) {
+    console.error("❌ Error loading slot bookings:", err);
+    res.status(500).json({ message: "خطأ في تحميل حجوزات الحصة" });
   }
 };

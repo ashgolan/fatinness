@@ -1,3 +1,4 @@
+import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
 import { fmtLocal } from "../utils/date.js";
 
@@ -43,20 +44,20 @@ async function hasOverlap(date, startTime, endTime) {
 // =====================================================
 // 🔹 GET /admin/slots/week?start=YYYY-MM-DD
 // =====================================================
+
 export const adminGetWeekSlots = async (req, res) => {
   try {
     const { start } = req.query;
 
-    // ✅ معالجة التاريخ الآمنة (مع دعم ISO الكامل)
+    // ✅ معالجة التاريخ الآمنة
     let inputDate;
     if (start && !isNaN(Date.parse(start))) {
-      // هنا نتأكد أن التاريخ يفسر محليًا لا UTC
       inputDate = new Date(`${start}T00:00:00`);
     } else {
       inputDate = new Date();
     }
 
-    // ✅ اجعل الأسبوع دائمًا يبدأ من الأحد
+    // ✅ الأسبوع يبدأ من الأحد
     const weekStart = startOfWeek(inputDate);
     const weekEnd = addDays(weekStart, 6);
 
@@ -68,28 +69,54 @@ export const adminGetWeekSlots = async (req, res) => {
     console.log("weekEnd:", weekEnd.toISOString());
     console.log("======================================");
 
-    // ✅ جلب الحصص من Mongo
-    // نستخدم $gte و $lt (بدلاً من $lte) لضمان عدم شمول اليوم التالي خطأً
+    // ✅ جلب الحصص ضمن مدى الأسبوع
     const slots = await Slot.find({
       date: { $gte: weekStart, $lt: addDays(weekEnd, 1) },
     }).sort({ date: 1, startTime: 1 });
 
     console.log("📦 عدد الحصص المسترجعة من Mongo:", slots.length);
 
+    // 🧮 احسب الحجوزات المؤكدة لكل Slot بتجميعة واحدة
+    const slotIds = slots.map((s) => s._id);
+    let bookedBySlot = [];
+    if (slotIds.length) {
+      bookedBySlot = await Booking.aggregate([
+        { $match: { slot: { $in: slotIds }, status: "booked" } },
+        { $group: { _id: "$slot", bookedCount: { $sum: 1 } } },
+      ]);
+    }
+
+    // 🗺️ خريطة سريعة للوصول إلى عدد الحجوزات
+    const bookedMap = bookedBySlot.reduce((acc, cur) => {
+      acc[cur._id.toString()] = cur.bookedCount;
+      return acc;
+    }, {});
+
+    // ➕ أضف الحقول المحسوبة لكل Slot: bookedCount & available
+    const enhancedSlots = slots.map((s) => {
+      const bookedCount = bookedMap[s._id.toString()] || 0;
+      const available = Math.max((s.capacity || 0) - bookedCount, 0);
+      return {
+        ...s.toObject(),
+        bookedCount,
+        available,
+      };
+    });
+
     // 🧩 تجميع الأيام داخل الأسبوع
     const days = {};
     for (let i = 0; i < 7; i++) {
-      const key = fmtLocal(addDays(weekStart, i)); // صيغة اليوم المحلي yyyy-mm-dd
+      const key = fmtLocal(addDays(weekStart, i));
       days[key] = [];
     }
 
-    slots.forEach((s) => {
+    enhancedSlots.forEach((s) => {
       const key = fmtLocal(new Date(s.date));
       if (!days[key]) days[key] = [];
       days[key].push(s);
     });
 
-    // ✅ نعيد النتائج بترتيب الأيام
+    // ✅ إعادة النتائج
     res.json({
       weekStart: fmtLocal(weekStart),
       weekEnd: fmtLocal(weekEnd),
@@ -104,6 +131,7 @@ export const adminGetWeekSlots = async (req, res) => {
     });
   }
 };
+
 
 //
 // =====================================================

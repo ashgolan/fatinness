@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
+import { maintenanceMode } from "./maintenance.controller.js";
 
 // 🔹 توليد التوكن
 function generateToken(user) {
@@ -10,11 +11,20 @@ function generateToken(user) {
 }
 
 // 🔹 تسجيل مستخدم جديد
+// 🔹 تسجيل مستخدم جديد (فقط المدير أو أول حساب)
 export const registerUser = async (req, res) => {
   try {
-    // ✅ فقط المدير يستطيع إنشاء حسابات جديدة
-    if (!req.user || req.user.role?.toString() !== "admin") {
-      return res.status(403).json({ message: "Only admins can create new users" });
+    // ✅ إذا لم يكن هناك أي مستخدم بعد → هذا أول حساب (سيصبح مدير تلقائيًا)
+    const userCount = await User.countDocuments();
+    const isFirstUser = userCount === 0;
+
+    // ✅ إن لم يكن أول مستخدم، تأكد أن الطلب من مدير حالي فقط
+    if (!isFirstUser) {
+      if (!req.user || req.user.role?.toString() !== "admin") {
+        return res
+          .status(403)
+          .json({ message: "Only admins can create new users" });
+      }
     }
 
     const {
@@ -27,6 +37,7 @@ export const registerUser = async (req, res) => {
       height,
       weight,
       age,
+      role: requestedRole, // 👈 المدير يستطيع تحديد نوع الحساب الجديد
     } = req.body;
 
     // ✅ التحقق من الحقول الأساسية
@@ -34,7 +45,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // ✅ التحقق من وجود المستخدم
+    // ✅ التحقق من وجود المستخدم مسبقًا
     const existing = await User.findOne({ $or: [{ username }, { email }] });
     if (existing) {
       return res.status(409).json({ message: "User already exists" });
@@ -42,6 +53,14 @@ export const registerUser = async (req, res) => {
 
     // ✅ تشفير كلمة المرور
     const passwordHash = await bcrypt.hash(password, 10);
+
+    // ✅ تحديد الدور (الوظيفة)
+    let role = "user";
+    if (isFirstUser) {
+      role = "admin"; // أول حساب في النظام 👑
+    } else if (req.user?.role === "admin" && requestedRole === "admin") {
+      role = "admin"; // المدير يستطيع إنشاء مدير آخر 👩‍💼
+    }
 
     // ✅ إنشاء المستخدم الجديد
     const newUser = await User.create({
@@ -54,7 +73,7 @@ export const registerUser = async (req, res) => {
       height: height || null,
       weight: weight || null,
       age: age || null,
-      role: "user", // كل مستخدمة جديدة تكون مشتركة عادية
+      role, // 👈 تم تحديده بدقة
       subscription: {
         active: false,
         planId: null,
@@ -63,8 +82,15 @@ export const registerUser = async (req, res) => {
       },
     });
 
+    // ✅ توليد التوكن (اختياري حسب الاستخدام)
+    const token = generateToken(newUser);
+
+    // ✅ الرد النهائي
     res.status(201).json({
-      message: "User created successfully by admin",
+      message:
+        role === "admin"
+          ? "✅ Admin account created successfully"
+          : "User created successfully by admin",
       user: {
         id: newUser._id,
         username: newUser.username,
@@ -77,6 +103,7 @@ export const registerUser = async (req, res) => {
         age: newUser.age,
         role: newUser.role,
       },
+      token,
     });
   } catch (err) {
     console.error("❌ Register Error:", err);
@@ -105,6 +132,19 @@ export const loginUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // 🚫 فحص إذا كان المستخدم محظورًا
+    if (user.isBlocked) {
+      return res
+        .status(403)
+        .json({
+          message: "تم حظر حسابك مؤقتًا 🚫، الرجاء التواصل مع الإدارة.",
+        });
+    }
+    if (maintenanceMode && user.role !== "admin") {
+      return res.status(503).json({
+        message: "🚧 النظام تحت الصيانة مؤقتًا، يرجى المحاولة لاحقًا.",
+      });
+    }
     // ✅ تأكد أن كلمة المرور محفوظة
     if (!user.passwordHash) {
       console.error("⚠️ user.passwordHash is missing in DB for user:", email);
@@ -140,3 +180,25 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// 🔹 ترقية مستخدم إلى مدير أو العكس
+export const updateUserRole = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const { userId, role } = req.body;
+
+    if (!["admin", "user"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const user = await User.findByIdAndUpdate(userId, { role }, { new: true });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({ message: `Role updated to ${role}`, user });
+  } catch (err) {
+    console.error("Role update error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

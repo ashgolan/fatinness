@@ -6,6 +6,7 @@ import { agenda } from "./config/agenda.js";
 import { defineSchedulerJobs, startScheduler } from "./utils/scheduler.js";
 import { handleWebhook } from "./controllers/payments.controller.js";
 import mainRoutes from "./routes/index.js";
+import maintenanceRoutes from "./routes/maintenance.routes.js";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.get("/health", (req, res) => res.json({ ok: true, time: new Date() }));
 app.use("/uploads", express.static("uploads"));
 
 // ✅ جميع المسارات عبر index.js
+app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
 
 // ✅ تشغيل السيرفر

@@ -10,9 +10,12 @@ import {
   CircularProgress,
   Avatar,
   Fade,
+  Divider,
 } from "@mui/material";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import BuildIcon from "@mui/icons-material/Build"; // رمز الصيانة
+import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // رمز التشغيل
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState(null);
@@ -21,6 +24,10 @@ export default function AdminSettings() {
   const [uploading, setUploading] = useState(false);
   const [fadeKey, setFadeKey] = useState(0);
 
+  const [maintenance, setMaintenance] = useState(false);
+  const [loadingMaintenance, setLoadingMaintenance] = useState(false);
+
+  // 🔹 جلب الإعدادات العامة
   const fetchSettings = async () => {
     try {
       const { data } = await Api.get("/admin/settings");
@@ -32,10 +39,22 @@ export default function AdminSettings() {
     }
   };
 
+  // 🔹 جلب حالة الصيانة
+  const fetchMaintenance = async () => {
+    try {
+      const { data } = await Api.get("/maintenance/status");
+      setMaintenance(data.maintenanceMode);
+    } catch {
+      toast.error("فشل تحميل حالة النظام");
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
+    fetchMaintenance();
   }, []);
 
+  // 💾 حفظ الإعدادات
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -48,8 +67,8 @@ export default function AdminSettings() {
     }
   };
 
+  // 🖼️ رفع الشعار
   const handleLogoUpload = async () => {
-    // إنشاء input يدوي خارج React
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
@@ -57,12 +76,10 @@ export default function AdminSettings() {
       const file = e.target.files[0];
       if (!file) return;
 
-      // 🔹 عرض فوري داخل نفس الدائرة
       const preview = URL.createObjectURL(file);
       setSettings((prev) => ({ ...prev, previewLogo: preview }));
       setFadeKey((prev) => prev + 1);
 
-      // 🔹 رفع الصورة للسيرفر
       setUploading(true);
       try {
         const formData = new FormData();
@@ -85,6 +102,25 @@ export default function AdminSettings() {
       }
     };
     input.click();
+  };
+
+  // ⚙️ تفعيل أو إيقاف وضع الصيانة
+  const toggleMaintenance = async () => {
+    const confirmMsg = maintenance
+      ? "هل ترغبين في إيقاف وضع الصيانة وتشغيل النظام؟"
+      : "هل ترغبين في تفعيل وضع الصيانة؟ سيتم حظر جميع المشتركات مؤقتًا.";
+    if (!window.confirm(confirmMsg)) return;
+
+    setLoadingMaintenance(true);
+    try {
+      const { data } = await Api.put("/maintenance/toggle");
+      setMaintenance(data.maintenanceMode);
+      toast.success(data.message);
+    } catch {
+      toast.error("فشل تبديل وضع الصيانة ❌");
+    } finally {
+      setLoadingMaintenance(false);
+    }
   };
 
   if (loading)
@@ -123,7 +159,6 @@ export default function AdminSettings() {
             />
           </Fade>
 
-          {/* ✅ الزر يستدعي رفع الشعار */}
           <Button
             variant="outlined"
             disabled={uploading}
@@ -164,30 +199,142 @@ export default function AdminSettings() {
           sx={{ mb: 2 }}
         />
 
-        <FormControlLabel
-          control={
-            <Switch
-              checked={settings.allowExtraBookingsByDefault}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  allowExtraBookingsByDefault: e.target.checked,
-                })
-              }
-            />
-          }
-          label="السماح بالحجوزات الإضافية افتراضيًا"
-        />
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSave}
-          sx={{ mt: 3 }}
-          disabled={saving}
+        {/* 🧩 السماح بالحجوزات الإضافية */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            mt: 4,
+            mb: 3,
+          }}
         >
-          {saving ? <CircularProgress size={24} /> : "💾 حفظ التغييرات"}
-        </Button>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings.allowExtraBookingsByDefault}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    allowExtraBookingsByDefault: e.target.checked,
+                  })
+                }
+                color="primary"
+              />
+            }
+            label="السماح بالحجوزات الإضافية افتراضيًا"
+            sx={{
+              textAlign: "center",
+              "& .MuiFormControlLabel-label": {
+                fontWeight: 600,
+                fontSize: "1rem",
+              },
+            }}
+          />
+        </Box>
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* ⚙️ زر وضع الصيانة */}
+        <Box sx={{ textAlign: "center", mt: 4 }}>
+          <Typography
+            variant="subtitle1"
+            sx={{
+              mb: 2,
+              fontWeight: 600,
+              color: maintenance ? "#d32f2f" : "#2e7d32",
+            }}
+          >
+            حالة النظام الحالية:{" "}
+            {maintenance ? (
+              <span style={{ color: "#d32f2f" }}>🚧 تحت الصيانة</span>
+            ) : (
+              <span style={{ color: "#2e7d32" }}>✅ يعمل بشكل طبيعي</span>
+            )}
+          </Typography>
+
+          <Button
+            variant="outlined"
+            onClick={toggleMaintenance}
+            disabled={loadingMaintenance}
+            startIcon={maintenance ? <CheckCircleIcon /> : <BuildIcon />}
+            sx={{
+              px: 4,
+              py: 1.3,
+              borderRadius: "40px",
+              textTransform: "none",
+              fontWeight: 800,
+              letterSpacing: "0.5px",
+              fontSize: "1rem",
+              position: "relative",
+              overflow: "hidden",
+              transition: "all 0.4s ease",
+              borderWidth: 2,
+              borderStyle: "solid",
+              borderColor: maintenance ? "#d32f2f" : "#1976d2",
+              color: maintenance ? "#d32f2f" : "#1976d2",
+              background: "transparent",
+              "&::before": {
+                content: '""',
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: 0,
+                height: "100%",
+                background: maintenance
+                  ? "linear-gradient(90deg, #d32f2f, #ff9800)"
+                  : "linear-gradient(90deg, #1976d2, #42a5f5)",
+                zIndex: 0,
+                transition: "width 0.4s ease",
+                borderRadius: "40px",
+              },
+              "&:hover::before": {
+                width: "100%",
+              },
+              "&:hover": {
+                color: "#fff",
+                boxShadow: maintenance
+                  ? "0 0 12px rgba(211,47,47,0.4)"
+                  : "0 0 12px rgba(25,118,210,0.4)",
+              },
+              "& .MuiButton-startIcon": {
+                zIndex: 1,
+              },
+              "& span": {
+                zIndex: 1,
+              },
+            }}
+          >
+            {loadingMaintenance ? (
+              <CircularProgress size={24} color="inherit" sx={{ zIndex: 1 }} />
+            ) : maintenance ? (
+              "🔓 إيقاف وضع الصيانة"
+            ) : (
+              "🚧 تفعيل وضع الصيانة"
+            )}
+          </Button>
+        </Box>
+
+        {/* 💾 زر الحفظ */}
+        <Box sx={{ textAlign: "center", mt: 5 }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            disabled={saving}
+            sx={{
+              px: 4,
+              py: 1.2,
+              borderRadius: 3,
+              textTransform: "none",
+              fontWeight: 900,
+              background: "linear-gradient(135deg, #9B1D6F, #FFD93D)",
+              "&:hover": { filter: "brightness(1.08)" },
+            }}
+          >
+            {saving ? <CircularProgress size={24} /> : "💾 حفظ التغييرات"}
+          </Button>
+        </Box>
       </Paper>
     </Box>
   );

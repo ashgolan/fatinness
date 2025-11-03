@@ -15,11 +15,17 @@ import {
   DialogContent,
   ToggleButton,
   ToggleButtonGroup,
+  Chip,
+  useTheme,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search"; // 👈 أضف هذا الاستيراد بالأعلى
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 
 export default function BookingsAdmin() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
+
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -27,7 +33,6 @@ export default function BookingsAdmin() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [filter, setFilter] = useState("all");
 
-  // 🔹 نسب متحركة
   const [animated, setAnimated] = useState({
     active: 0,
     completed: 0,
@@ -61,7 +66,7 @@ export default function BookingsAdmin() {
       });
       setSummary(sorted);
     } catch {
-      toast.error("حدث خطأ أثناء تحميل بيانات المشتركات");
+      toast.error("حدث خطأ أثناء تحميل بيانات الحجوزات");
     } finally {
       setLoading(false);
     }
@@ -74,9 +79,7 @@ export default function BookingsAdmin() {
       const { data } = await Api.get(`/admin/bookings/user/${userId}`);
       const sorted = [...data].sort((a, b) => {
         const order = { booked: 1, completed: 2, cancelled: 3, blocked: 4 };
-        const aStatus = getDisplayStatus(a);
-        const bStatus = getDisplayStatus(b);
-        return order[aStatus] - order[bStatus];
+        return order[getDisplayStatus(a)] - order[getDisplayStatus(b)];
       });
       setBookings(sorted);
     } catch {
@@ -100,39 +103,46 @@ export default function BookingsAdmin() {
     fetchSummary();
   }, []);
 
-  // 🔹 فلترة الحجوزات حسب الحالة
   const filteredBookings =
     filter === "all"
       ? bookings
       : bookings.filter((b) => getDisplayStatus(b) === filter);
 
-  // 🔹 حساب الإحصاءات
   const stats = {
     booked: bookings.filter((b) => getDisplayStatus(b) === "booked").length,
-    completed: bookings.filter((b) => getDisplayStatus(b) === "completed").length,
-    cancelled: bookings.filter((b) => getDisplayStatus(b) === "cancelled").length,
+    completed: bookings.filter((b) => getDisplayStatus(b) === "completed")
+      .length,
+    cancelled: bookings.filter((b) => getDisplayStatus(b) === "cancelled")
+      .length,
     blocked: bookings.filter((b) => getDisplayStatus(b) === "blocked").length,
-  };
-
-  const getColorByStatus = (b) => {
-    const s = getDisplayStatus(b);
-    if (s === "blocked") return "#eeeeee";
-    if (s === "booked") return "#e8f5e9";
-    if (s === "completed") return "#fffde7";
-    if (s === "cancelled") return "#ffebee";
-    return "#fafafa";
   };
 
   const getLabelByStatus = (b) => {
     const s = getDisplayStatus(b);
-    if (s === "blocked") return "معطلة ⚠️";
-    if (s === "booked") return "نشطة ✅";
-    if (s === "completed") return "منجزة 🏁";
-    if (s === "cancelled") return "ملغاة ❌";
+    if (s === "blocked") return "معطلة";
+    if (s === "booked") return "نشطة";
+    if (s === "completed") return "منجزة";
+    if (s === "cancelled") return "ملغاة";
     return "غير معروفة";
   };
 
-  // 🔹 حساب نسب الحالات من summary
+  const getStatusChipStyle = (b) => {
+    const s = getDisplayStatus(b);
+    const base = {
+      fontWeight: 600,
+      border: "1px solid transparent",
+    };
+    if (s === "blocked")
+      return { ...base, backgroundColor: "#fff3e0", color: "#e65100" };
+    if (s === "booked")
+      return { ...base, backgroundColor: "#e8f5e9", color: "#2e7d32" };
+    if (s === "completed")
+      return { ...base, backgroundColor: "#fff9c4", color: "#b8860b" };
+    if (s === "cancelled")
+      return { ...base, backgroundColor: "#ffebee", color: "#c62828" };
+    return { ...base, backgroundColor: "#f5f5f5", color: "#757575" };
+  };
+
   const totalAll = summary.reduce(
     (acc, s) => acc + s.active + s.cancelled + s.completed,
     0
@@ -147,10 +157,9 @@ export default function BookingsAdmin() {
   const cancelledPercent = totalAll ? (totalCancelled / totalAll) * 100 : 0;
   const blockedPercent = totalAll ? (totalBlocked / totalAll) * 100 : 0;
 
-  // 🔸 تشغيل الأنيميشن التدريجي
   useEffect(() => {
     let frame = 0;
-    const duration = 25; // عدد الإطارات
+    const duration = 25;
     const animate = setInterval(() => {
       frame++;
       setAnimated({
@@ -160,187 +169,449 @@ export default function BookingsAdmin() {
         blocked: (blockedPercent / duration) * frame,
       });
       if (frame >= duration) clearInterval(animate);
-    }, 25);
+    }, 20);
     return () => clearInterval(animate);
   }, [activePercent, completedPercent, cancelledPercent, blockedPercent]);
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: "auto", mt: 3 }}>
-      <Typography variant="h5" gutterBottom>
-        📋 جميع المشتركات وحجوزاتهن
-      </Typography>
-
-      {/* 🔹 شريط النسب المتحرك */}
-      {summary.length > 0 && (
-        <Paper
+    <Box
+      dir="rtl"
+      sx={{
+        minHeight: "100vh",
+        background: isDark
+          ? "linear-gradient(180deg, #0d1117, #1a1f25)"
+          : "linear-gradient(180deg, #fdfcf8, #f5f5f5)",
+        py: 4,
+        px: { xs: 2, sm: 4 },
+        transition: "background 0.5s ease",
+      }}
+    >
+      <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+        {/* العنوان */}
+        <Typography
+          variant="h5"
           sx={{
-            p: 3,
-            mb: 4,
-            borderRadius: 3,
-            boxShadow: 3,
-            background: "#fafafa",
+            mb: 3,
+            fontWeight: 700,
+            color: isDark ? "#FFD700" : "#A01860",
+            textShadow: isDark
+              ? "0 0 10px rgba(255,215,0,0.4)"
+              : "0 0 6px rgba(160,24,96,0.2)",
           }}
         >
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>
-            🔸 توزيع الحالات بين جميع الحجوزات:
-          </Typography>
-
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              height: 24,
-              borderRadius: 12,
-              overflow: "hidden",
-              backgroundColor: "#eee",
-              boxShadow: "inset 0 2px 5px rgba(0,0,0,0.15)",
-            }}
-          >
-            <Box
-              sx={{
-                width: `${animated.active}%`,
-                background: "linear-gradient(90deg, #4caf50, #81c784)",
-                height: "100%",
-                transition: "width 0.3s ease",
-              }}
-            />
-            <Box
-              sx={{
-                width: `${animated.completed}%`,
-                background: "linear-gradient(90deg, #fff176, #fbc02d)",
-                height: "100%",
-                transition: "width 0.3s ease",
-              }}
-            />
-            <Box
-              sx={{
-                width: `${animated.cancelled}%`,
-                background: "linear-gradient(90deg, #ef9a9a, #f44336)",
-                height: "100%",
-                transition: "width 0.3s ease",
-              }}
-            />
-            <Box
-              sx={{
-                width: `${animated.blocked}%`,
-                background: "linear-gradient(90deg, #ffb74d, #ff9800)",
-                height: "100%",
-                transition: "width 0.3s ease",
-              }}
-            />
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              mt: 1,
-              flexWrap: "wrap",
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              ✅ نشطة: {animated.active.toFixed(1)}%
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              🏁 منجزة: {animated.completed.toFixed(1)}%
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              ❌ ملغاة: {animated.cancelled.toFixed(1)}%
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              ⚠️ معطلة: {animated.blocked.toFixed(1)}%
-            </Typography>
-          </Box>
-        </Paper>
-      )}
-
-      {/* ✅ جدول ملخص الحجوزات */}
-      {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : summary.length ? (
-        <Paper sx={{ mt: 2 }}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-                <TableCell>المشتركة</TableCell>
-                <TableCell align="center">النشطة ✅</TableCell>
-                <TableCell align="center">الملغاة ❌</TableCell>
-                <TableCell align="center">المنجزة 🏁</TableCell>
-                <TableCell align="center">التفاصيل 🔍</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {summary.map((row) => (
-                <TableRow key={row.userId}>
-                  <TableCell>{row.username}</TableCell>
-                  <TableCell align="center">{row.active}</TableCell>
-                  <TableCell align="center">{row.cancelled}</TableCell>
-                  <TableCell align="center">{row.completed}</TableCell>
-                  <TableCell align="center">
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => openDetails(row.userId, row.username)}
-                    >
-                      عرض
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-      ) : (
-        <Typography sx={{ textAlign: "center", mt: 3 }}>
-          لا توجد بيانات حاليًا.
+          📋 إدارة الحجوزات
         </Typography>
-      )}
 
-      {/* 🪟 نافذة تفاصيل المشتركة */}
-      <Dialog open={!!selectedUser} onClose={closeDialog} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ pb: 1 }}>
-          📅 تفاصيل حجوزات {selectedUser?.name}
+        {/* 🌈 شريط نسب الحجوزات المتطور */}
+        {!loading && summary.length > 0 && (
+          <Paper
+            sx={{
+              p: 3,
+              mb: 4,
+              borderRadius: "14px",
+              background: isDark
+                ? "linear-gradient(145deg, #11161b, #1e242b)"
+                : "linear-gradient(145deg, #ffffff, #fafafa)",
+              border: "1.5px solid rgba(255,215,0,0.3)",
+              boxShadow: isDark
+                ? "0 0 12px rgba(255,215,0,0.15)"
+                : "0 2px 10px rgba(0,0,0,0.05)",
+              overflow: "hidden",
+            }}
+          >
+            <Typography
+              variant="subtitle1"
+              sx={{
+                mb: 2,
+                fontWeight: 700,
+                color: isDark ? "#FFD700" : "#A01860",
+                textAlign: "center",
+              }}
+            >
+              🔸 نسب الحجوزات الإجمالية:
+            </Typography>
+
+            {/* 🟩 الشريط المتدرج */}
+            <Box
+              sx={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                height: 32,
+                borderRadius: 16,
+                overflow: "hidden",
+                backgroundColor: isDark ? "#3a2d4f" : "#f3e5f5",
+                boxShadow: "inset 0 0 8px rgba(0,0,0,0.1)",
+              }}
+            >
+              {/* نشطة */}
+              <Box
+                sx={{
+                  width: `${animated.active}%`,
+                  background: isDark
+                    ? "linear-gradient(90deg,#7b1fa2,#ce93d8)"
+                    : "linear-gradient(90deg,#ec407a,#ab47bc)",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  transition: "width 0.4s ease",
+                  borderRight:
+                    animated.active > 0
+                      ? "1px solid rgba(255,255,255,0.2)"
+                      : "none",
+                }}
+              >
+                {animated.active >= 8 && `${animated.active.toFixed(0)}%`}
+              </Box>
+
+              {/* منجزة */}
+              <Box
+                sx={{
+                  width: `${animated.completed}%`,
+                  background: isDark
+                    ? "linear-gradient(90deg,#fff59d,#fbc02d)"
+                    : "linear-gradient(90deg,#fff176,#ffd54f)",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: isDark ? "#333" : "#333",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  transition: "width 0.4s ease",
+                  borderRight:
+                    animated.completed > 0
+                      ? "1px solid rgba(255,255,255,0.3)"
+                      : "none",
+                }}
+              >
+                {animated.completed >= 8 && `${animated.completed.toFixed(0)}%`}
+              </Box>
+
+              {/* ملغاة */}
+              <Box
+                sx={{
+                  width: `${animated.cancelled}%`,
+                  background: isDark
+                    ? "linear-gradient(90deg,#e57373,#ef5350)"
+                    : "linear-gradient(90deg,#ef9a9a,#f44336)",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: 13,
+                  transition: "width 0.4s ease",
+                }}
+              >
+                {animated.cancelled >= 8 && `${animated.cancelled.toFixed(0)}%`}
+              </Box>
+            </Box>
+
+            {/* 🔹 دلالات الألوان والنسب */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-around",
+                mt: 2.5,
+                flexWrap: "wrap",
+                gap: 1.5,
+                textAlign: "center",
+              }}
+            >
+              {/* نشطة */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: "linear-gradient(90deg,#ec407a,#ab47bc)",
+                    boxShadow: "0 0 5px rgba(236,64,122,0.5)",
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isDark ? "#fff" : "#333",
+                    fontWeight: 600,
+                  }}
+                >
+                  ✅ نشطة ({animated.active.toFixed(1)}%)
+                </Typography>
+              </Box>
+
+              {/* منجزة */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: "linear-gradient(90deg,#fff176,#ffd54f)",
+                    boxShadow: "0 0 5px rgba(255,213,79,0.6)",
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isDark ? "#fff" : "#333",
+                    fontWeight: 600,
+                  }}
+                >
+                  🏆 منجزة ({animated.completed.toFixed(1)}%)
+                </Typography>
+              </Box>
+
+              {/* ملغاة */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: "linear-gradient(90deg,#ef5350,#f44336)",
+                    boxShadow: "0 0 5px rgba(244,67,54,0.5)",
+                  }}
+                />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: isDark ? "#fff" : "#333",
+                    fontWeight: 600,
+                  }}
+                >
+                  ❌ ملغاة ({animated.cancelled.toFixed(1)}%)
+                </Typography>
+              </Box>
+            </Box>
+          </Paper>
+        )}
+
+        {/* الجدول الرئيسي */}
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: 400,
+            }}
+          >
+            <CircularProgress sx={{ color: "#FFD700" }} />
+          </Box>
+        ) : summary.length ? (
+          <Paper
+            sx={{
+              background: isDark
+                ? "linear-gradient(145deg, #11161b, #1e242b)"
+                : "linear-gradient(145deg, #ffffff, #fafafa)",
+              borderRadius: "14px",
+              border: "1.5px solid rgba(255,215,0,0.3)",
+              boxShadow: isDark
+                ? "0 0 14px rgba(255,215,0,0.15)"
+                : "0 2px 10px rgba(0,0,0,0.05)",
+              overflow: "hidden",
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow
+                  sx={{ backgroundColor: isDark ? "#222831" : "#fdfdfd" }}
+                >
+                  {[
+                    "المشتركة",
+                    "النشطة",
+                    "الملغاة",
+                    "المنجزة",
+                    "الإجراءات",
+                  ].map((header) => (
+                    <TableCell
+                      key={header}
+                      align="center"
+                      sx={{
+                        color: isDark ? "#FFD700" : "#444",
+                        fontWeight: 600,
+                        fontSize: 14,
+                        py: 2,
+                        borderBottom: "1px solid rgba(255,215,0,0.2)",
+                      }}
+                    >
+                      {header}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {summary.map((row) => (
+                  <TableRow
+                    key={row.userId}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: isDark
+                          ? "rgba(255,215,0,0.05)"
+                          : "rgba(160,24,96,0.05)",
+                      },
+                      transition: "0.3s",
+                    }}
+                  >
+                    <TableCell
+                      align="center" // ✅ يوسّط الاسم أفقيًا داخل العمود
+                      sx={{
+                        color: isDark ? "#fff" : "#111",
+                        fontSize: 14,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {row.username}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#4caf50" }}>
+                      {row.active}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#c62828" }}>
+                      {row.cancelled}
+                    </TableCell>
+                    <TableCell align="center" sx={{ color: "#b8860b" }}>
+                      {row.completed}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Button
+                        onClick={() => openDetails(row.userId, row.username)}
+                        sx={{
+                          minWidth: 0,
+                          p: 1,
+                          borderRadius: "50%",
+                          backgroundColor: isDark
+                            ? "rgba(255,215,0,0.15)"
+                            : "rgba(160,24,96,0.1)",
+                          color: isDark ? "#FFD700" : "#A01860",
+                          "&:hover": {
+                            backgroundColor: isDark
+                              ? "rgba(255,215,0,0.25)"
+                              : "rgba(160,24,96,0.2)",
+                            transform: "scale(1.1)",
+                            transition: "all 0.2s ease",
+                          },
+                        }}
+                      >
+                        <SearchIcon sx={{ fontSize: 22 }} />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        ) : (
+          <Typography
+            sx={{
+              mt: 5,
+              textAlign: "center",
+              color: isDark ? "#999" : "#777",
+            }}
+          >
+            لا توجد بيانات حاليًا
+          </Typography>
+        )}
+      </Box>
+
+      {/* نافذة التفاصيل */}
+      <Dialog
+        open={!!selectedUser}
+        onClose={closeDialog}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: "12px",
+            background: isDark
+              ? "linear-gradient(145deg, #11161b, #1e242b)"
+              : "linear-gradient(145deg, #ffffff, #fafafa)",
+            border: "1.5px solid rgba(255,215,0,0.3)",
+            boxShadow: isDark
+              ? "0 0 14px rgba(255,215,0,0.15)"
+              : "0 2px 10px rgba(0,0,0,0.05)",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            color: isDark ? "#FFD700" : "#A01860",
+            borderBottom: "1px solid rgba(255,215,0,0.2)",
+          }}
+        >
+          تفاصيل حجوزات {selectedUser?.name}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ mt: 3, pb: 3 }}>
           {loadingDetails ? (
-            <Box sx={{ display: "flex", justifyContent: "center", my: 3 }}>
-              <CircularProgress />
+            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+              <CircularProgress sx={{ color: "#FFD700" }} />
             </Box>
           ) : bookings.length ? (
             <>
-              {/* 🔹 العداد */}
+              {/* الإحصائيات */}
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-around",
-                  mb: 2,
-                  mt: 1,
-                  background: "#f7f7f7",
-                  p: 1.2,
-                  borderRadius: 2,
+                  mb: 3,
+                  p: 2,
+                  borderRadius: "8px",
+                  background: isDark
+                    ? "rgba(255,215,0,0.05)"
+                    : "rgba(160,24,96,0.05)",
                 }}
               >
-                <Typography>نشطة: ✅ {stats.booked}</Typography>
-                <Typography>منجزة: 🏁 {stats.completed}</Typography>
-                <Typography>ملغاة: ❌ {stats.cancelled}</Typography>
-                <Typography sx={{ color: "#ff9800" }}>
-                  معطلة: ⚠️ {stats.blocked}
-                </Typography>
-                <Typography sx={{ fontWeight: "bold" }}>
-                  الإجمالي: {bookings.length}
-                </Typography>
+                {[
+                  { label: "نشطة", value: stats.booked, color: "#4caf50" },
+                  { label: "منجزة", value: stats.completed, color: "#b8860b" },
+                  { label: "ملغاة", value: stats.cancelled, color: "#c62828" },
+                  { label: "معطلة", value: stats.blocked, color: "#e65100" },
+                ].map((s) => (
+                  <Box key={s.label} sx={{ textAlign: "center" }}>
+                    <Typography
+                      sx={{ fontSize: "22px", fontWeight: 700, color: s.color }}
+                    >
+                      {s.value}
+                    </Typography>
+                    <Typography sx={{ fontSize: "13px", color: "#888" }}>
+                      {s.label}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
 
-              {/* 🔹 الفلاتر */}
-              <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+              {/* الفلاتر */}
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
                 <ToggleButtonGroup
                   value={filter}
                   exclusive
                   onChange={handleFilterChange}
                   size="small"
-                  color="primary"
+                  sx={{
+                    "& .MuiToggleButton-root": {
+                      textTransform: "none",
+                      fontSize: "13px",
+                      px: 2,
+                      py: 0.5,
+                      color: isDark ? "#ccc" : "#666",
+                      borderColor: "rgba(255,215,0,0.3)",
+                      "&.Mui-selected": {
+                        backgroundColor: isDark ? "#FFD700" : "#A01860",
+                        color: isDark ? "#111" : "#fff",
+                        borderColor: isDark ? "#FFD700" : "#A01860",
+                        "&:hover": {
+                          backgroundColor: isDark ? "#e6c300" : "#8a1450",
+                        },
+                      },
+                    },
+                  }}
                 >
                   <ToggleButton value="all">الكل</ToggleButton>
                   <ToggleButton value="booked">نشطة</ToggleButton>
@@ -349,33 +620,92 @@ export default function BookingsAdmin() {
                 </ToggleButtonGroup>
               </Box>
 
-              {/* 🔹 عرض الحجوزات */}
-              {filteredBookings.map((b) => (
-                <Paper
-                  key={b._id}
-                  sx={{
-                    p: 1.5,
-                    mb: 1.5,
-                    backgroundColor: getColorByStatus(b),
-                  }}
-                >
-                  <Typography>
-                    <b>📆 التاريخ:</b>{" "}
-                    {b.slot?.date
-                      ? new Date(b.slot.date).toLocaleDateString("ar-EG")
-                      : "—"}
-                  </Typography>
-                  <Typography>
-                    <b>🕒 الوقت:</b> {b.slot?.startTime || "—"}
-                  </Typography>
-                  <Typography>
-                    <b>⚙️ الحالة:</b> {getLabelByStatus(b)}
-                  </Typography>
-                </Paper>
-              ))}
+              {/* جدول الحجوزات */}
+              <Paper
+                sx={{
+                  background: isDark
+                    ? "linear-gradient(145deg, #11161b, #1e242b)"
+                    : "linear-gradient(145deg, #ffffff, #fafafa)",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid rgba(255,215,0,0.2)",
+                }}
+              >
+                <Table>
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        backgroundColor: isDark
+                          ? "rgba(255,215,0,0.05)"
+                          : "rgba(160,24,96,0.05)",
+                      }}
+                    >
+                      <TableCell align="center" sx={{ fontWeight: 600, fontSize: 13 }}>
+                        التاريخ
+                      </TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 600, fontSize: 13 }}>
+                        الوقت
+                      </TableCell>
+                      <TableCell
+                        align="center"
+                        sx={{ fontWeight: 600, fontSize: 13 }}
+                      >
+                        الحالة
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {filteredBookings.map((b) => (
+                      <TableRow
+                        key={b._id}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: isDark
+                              ? "rgba(255,215,0,0.03)"
+                              : "rgba(160,24,96,0.03)",
+                          },
+                        }}
+                      >
+                        <TableCell align="center" sx={{ fontSize: 14 }}>
+                          {b.slot?.date
+                            ? new Date(b.slot.date).toLocaleDateString("ar-EG")
+                            : "—"}
+                        </TableCell>
+                        <TableCell
+                        align="center"
+                          sx={{
+                            fontSize: 14,
+                            color: isDark ? "#FFD700" : "#A01860",
+                            fontWeight: 600,
+                          }}
+                        >
+                          {b.slot
+                            ? `${b.slot.startTime || "—"}${
+                                b.slot.endTime ? ` - ${b.slot.endTime}` : ""
+                              }`
+                            : "—"}
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={getLabelByStatus(b)}
+                            size="small"
+                            sx={{
+                              ...getStatusChipStyle(b),
+                              fontSize: 12,
+                              height: 24,
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Paper>
             </>
           ) : (
-            <Typography sx={{ my: 2 }}>لا توجد حجوزات لهذه المشتركة.</Typography>
+            <Typography sx={{ textAlign: "center", py: 4, color: "#999" }}>
+              لا توجد حجوزات لهذه المشتركة
+            </Typography>
           )}
         </DialogContent>
       </Dialog>

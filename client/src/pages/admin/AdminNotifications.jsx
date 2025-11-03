@@ -20,12 +20,31 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  useTheme,
 } from "@mui/material";
 import { Replay } from "@mui/icons-material";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 
 export default function AdminNotifications() {
+  const theme = useTheme();
+  const mode = theme.palette.mode;
+
+  // 🎨 ألوان الهوية البصرية (Fatiness)
+  const BRAND = {
+    gold: "#FFD93D",
+    goldDark: "#FFC300",
+    purple: "#9B1D6F",
+    purpleDark: "#7A1558",
+    fuchsia: "#C2185B",
+    pink: "#EC407A",
+    line: mode === "dark" ? "rgba(255,217,61,0.15)" : "rgba(155,29,111,0.12)",
+    bgSoft: mode === "dark" ? "#0f1115" : "#FFF9E6",
+    card: mode === "dark" ? "rgba(18,20,28,.95)" : "rgba(255,255,255,.95)",
+    text: mode === "dark" ? "#FFFFFF" : "#1a1a1a",
+    sub: mode === "dark" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.6)",
+  };
+
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [target, setTarget] = useState("all");
@@ -33,14 +52,13 @@ export default function AdminNotifications() {
   const [history, setHistory] = useState([]);
   const [users, setUsers] = useState([]);
 
-  // 🔹 للحوار التأكيدي مع التحرير
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editBody, setEditBody] = useState("");
   const [notificationToResend, setNotificationToResend] = useState(null);
   const [resending, setResending] = useState(false);
 
-  // 🔹 جلب السجل والمشتركات
+  // 📥 جلب السجل والمشتركات
   const fetchHistory = async () => {
     try {
       const [{ data: historyData }, { data: usersData }] = await Promise.all([
@@ -58,7 +76,7 @@ export default function AdminNotifications() {
     fetchHistory();
   }, []);
 
-  // 🔹 إرسال إشعار جديد
+  // 🚀 إرسال إشعار جديد
   const handleSend = async () => {
     if (!title.trim() || !body.trim())
       return toast.error("أدخل عنوانًا ومحتوى قبل الإرسال.");
@@ -77,7 +95,6 @@ export default function AdminNotifications() {
     }
   };
 
-  // 🔁 فتح حوار التأكيد مع إمكانية التحرير
   const confirmResend = (n) => {
     setNotificationToResend(n);
     setEditTitle(n.title);
@@ -85,7 +102,6 @@ export default function AdminNotifications() {
     setConfirmOpen(true);
   };
 
-  // ✅ تأكيد إعادة الإرسال (بعد التحرير)
   const handleConfirmResend = async () => {
     if (!notificationToResend) return;
     if (!editTitle.trim() || !editBody.trim())
@@ -113,114 +129,230 @@ export default function AdminNotifications() {
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", mt: 4 }}>
-      <Typography variant="h5" gutterBottom>
-        🔔 إرسال إشعار مخصص
-      </Typography>
-
-      {/* 📤 مربع إنشاء إشعار */}
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <TextField
-          fullWidth
-          label="عنوان الإشعار"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <TextField
-          fullWidth
-          multiline
-          minRows={3}
-          label="محتوى الإشعار"
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel>الفئة المستهدفة</InputLabel>
-          <Select
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            MenuProps={{ PaperProps: { style: { maxHeight: 350 } } }}
-          >
-            <MenuItem value="all">📢 جميع المشتركات</MenuItem>
-            <Divider sx={{ my: 1 }} />
-            {users.length > 0 ? (
-              users.map((u) => (
-                <MenuItem key={u._id} value={u._id}>
-                  👩 {u.username}
-                </MenuItem>
-              ))
-            ) : (
-              <MenuItem disabled>لا يوجد مشتركات</MenuItem>
-            )}
-          </Select>
-        </FormControl>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleSend}
-          disabled={loading}
+    <Box
+      dir="rtl"
+      sx={{
+        minHeight: "100vh",
+        py: 4,
+        px: { xs: 2, sm: 4 },
+        backgroundImage:
+          mode === "dark"
+            ? `linear-gradient(180deg, #0b0d12, #12151c)`
+            : `linear-gradient(180deg, #FFF9E6, #FCE4EC)`,
+      }}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          maxWidth: 900,
+          mx: "auto",
+          p: { xs: 2.5, sm: 4 },
+          borderRadius: 4,
+          border: `1px solid ${BRAND.line}`,
+          background: BRAND.card,
+          boxShadow:
+            mode === "dark"
+              ? "0 10px 30px rgba(0,0,0,.4)"
+              : "0 10px 30px rgba(155,29,111,.08)",
+        }}
+      >
+        {/* العنوان */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            mb: 3,
+          }}
         >
-          {loading ? <CircularProgress size={24} /> : "إرسال الإشعار"}
-        </Button>
-      </Paper>
+          <Typography
+            variant="h5"
+            sx={{ fontWeight: 900, color: BRAND.text, display: "flex", gap: 1 }}
+          >
+            🔔 إرسال إشعار مخصص
+          </Typography>
+        </Box>
 
-      <Divider sx={{ mb: 3 }} />
-
-      {/* 🕘 سجل الإشعارات */}
-      <Typography variant="h6" gutterBottom>
-        🕘 سجل آخر الإشعارات
-      </Typography>
-
-      <Paper sx={{ maxHeight: 400, overflowY: "auto" }}>
-        <List>
-          {history.map((n) => (
-            <ListItem
-              key={n._id}
-              divider
-              secondaryAction={
-                <Tooltip title="إعادة الإرسال مع تعديل">
-                  <IconButton
-                    edge="end"
-                    color="primary"
-                    onClick={() => confirmResend(n)}
-                  >
-                    <Replay />
-                  </IconButton>
-                </Tooltip>
-              }
+        {/* 📤 إنشاء إشعار */}
+        <Box sx={{ mb: 4 }}>
+          <TextField
+            fullWidth
+            label="عنوان الإشعار"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            sx={{ mb: 2 }}
+            inputProps={{ style: { textAlign: "right" } }}
+          />
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            label="محتوى الإشعار"
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel
+              shrink
+              sx={{
+                right: 14,
+                left: "auto",
+                background: mode === "dark" ? BRAND.card : "#fff",
+                px: 1,
+                fontWeight: 600,
+              }}
             >
-              <ListItemText
-                primary={`${n.title} (${
-                  n.targetType === "all"
-                    ? "جميع المشتركات"
-                    : n.targetUser?.username
-                })`}
-                secondary={
-                  <>
-                    <Typography variant="body2" color="text.secondary">
-                      {n.body}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{ display: "block", mt: 0.5 }}
+              الفئة المستهدفة
+            </InputLabel>
+            <Select
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              sx={{ textAlign: "right" }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    borderRadius: 2,
+                    mt: 1,
+                    border: `1px solid ${BRAND.line}`,
+                    backgroundColor: BRAND.card,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="all">📢 جميع المشتركات</MenuItem>
+              <Divider sx={{ my: 1 }} />
+              {users.length > 0 ? (
+                users.map((u) => (
+                  <MenuItem key={u._id} value={u._id}>
+                    👩 {u.username}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>لا يوجد مشتركات</MenuItem>
+              )}
+            </Select>
+          </FormControl>
+
+          <Button
+            variant="contained"
+            onClick={handleSend}
+            disabled={loading}
+            sx={{
+              textTransform: "none",
+              fontWeight: 900,
+              px: 4,
+              py: 1.2,
+              borderRadius: 3,
+              background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
+              color: "#fff",
+              boxShadow: `0 6px 20px ${BRAND.purple}55`,
+              "&:hover": {
+                filter: "brightness(1.1)",
+              },
+            }}
+          >
+            {loading ? <CircularProgress size={24} /> : "📤 إرسال الإشعار"}
+          </Button>
+        </Box>
+
+        <Divider sx={{ my: 3 }} />
+
+        {/* 🕘 سجل الإشعارات */}
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 900,
+            color: BRAND.text,
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          🕘 سجل آخر الإشعارات
+        </Typography>
+
+        <Paper
+          elevation={0}
+          sx={{
+            maxHeight: 400,
+            overflowY: "auto",
+            borderRadius: 3,
+            border: `1px solid ${BRAND.line}`,
+            background: BRAND.card,
+          }}
+        >
+          <List>
+            {history.map((n) => (
+              <ListItem
+                key={n._id}
+                divider
+                secondaryAction={
+                  <Tooltip title="إعادة الإرسال مع تعديل">
+                    <IconButton
+                      edge="start"
+                      onClick={() => confirmResend(n)}
+                      sx={{
+                        color: BRAND.purple,
+                        "&:hover": { color: BRAND.fuchsia },
+                      }}
                     >
-                      📅 {new Date(n.createdAt).toLocaleString("ar-EG")} — 👑{" "}
-                      {n.sentBy?.username}
-                    </Typography>
-                  </>
+                      <Replay />
+                    </IconButton>
+                  </Tooltip>
                 }
-              />
-            </ListItem>
-          ))}
-          {!history.length && (
-            <Typography sx={{ p: 2, textAlign: "center" }}>
-              لا يوجد إشعارات بعد.
-            </Typography>
-          )}
-        </List>
+              >
+                <ListItemText
+                  primaryTypographyProps={{
+                    sx: {
+                      textAlign: "right",
+                      fontWeight: 800,
+                      color: BRAND.text,
+                    },
+                  }}
+                  secondaryTypographyProps={{
+                    sx: { textAlign: "right", color: BRAND.sub },
+                  }}
+                  primary={`${n.title} (${
+                    n.targetType === "all"
+                      ? "جميع المشتركات"
+                      : n.targetUser?.username
+                  })`}
+                  secondary={
+                    <>
+                      <Typography
+                        variant="body2"
+                        sx={{ textAlign: "right", color: BRAND.sub }}
+                      >
+                        {n.body}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{ display: "block", mt: 0.5, textAlign: "right" }}
+                      >
+                        📅 {new Date(n.createdAt).toLocaleString("ar-EG")} — 👑{" "}
+                        {n.sentBy?.username}
+                      </Typography>
+                    </>
+                  }
+                />
+              </ListItem>
+            ))}
+            {!history.length && (
+              <Typography
+                sx={{
+                  p: 2,
+                  textAlign: "center",
+                  color: BRAND.sub,
+                  fontWeight: 700,
+                }}
+              >
+                لا يوجد إشعارات بعد.
+              </Typography>
+            )}
+          </List>
+        </Paper>
       </Paper>
 
       {/* 🧩 نافذة التأكيد مع التحرير */}
@@ -229,19 +361,30 @@ export default function AdminNotifications() {
         onClose={() => setConfirmOpen(false)}
         fullWidth
         maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            border: `1px solid ${BRAND.line}`,
+            background: BRAND.card,
+          },
+        }}
       >
-        <DialogTitle>🔁 إعادة إرسال الإشعار</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
+        <DialogTitle
+          sx={{ textAlign: "right", fontWeight: 900, color: BRAND.text }}
+        >
+          🔁 إعادة إرسال الإشعار
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "right" }}>
+          <Typography sx={{ mb: 2, color: BRAND.sub }}>
             يمكنك تعديل العنوان أو المحتوى قبل إعادة الإرسال:
           </Typography>
-
           <TextField
             fullWidth
             label="عنوان الإشعار"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             sx={{ mb: 2 }}
+            inputProps={{ style: { textAlign: "right" } }}
           />
           <TextField
             fullWidth
@@ -250,21 +393,36 @@ export default function AdminNotifications() {
             label="محتوى الإشعار"
             value={editBody}
             onChange={(e) => setEditBody(e.target.value)}
+            inputProps={{ style: { textAlign: "right" } }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions sx={{ p: 2, justifyContent: "flex-start" }}>
           <Button
             onClick={() => setConfirmOpen(false)}
             disabled={resending}
-            color="inherit"
+            sx={{
+              textTransform: "none",
+              color: BRAND.sub,
+              border: `1px solid ${BRAND.line}`,
+              borderRadius: 2,
+              px: 3,
+            }}
           >
             إلغاء
           </Button>
           <Button
             variant="contained"
-            color="primary"
             onClick={handleConfirmResend}
             disabled={resending}
+            sx={{
+              textTransform: "none",
+              fontWeight: 900,
+              background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
+              color: "#fff",
+              borderRadius: 2,
+              px: 3,
+              "&:hover": { filter: "brightness(1.1)" },
+            }}
           >
             {resending ? <CircularProgress size={22} /> : "📤 تأكيد الإرسال"}
           </Button>
