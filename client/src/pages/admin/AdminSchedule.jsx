@@ -89,20 +89,20 @@ export default function AdminSchedule() {
     // ألوان أساسية هادئة
     primary: isDark ? "#B794F6" : "#9B6FD6",
     secondary: isDark ? "#F6C86E" : "#E8B54D",
-    
+
     // خلفيات
     bgMain: isDark ? "#1a1a1f" : "#FAFAFA",
     bgCard: isDark ? "#25252b" : "#FFFFFF",
     bgSoft: isDark ? "#2d2d35" : "#F5F5F7",
-    
+
     // حدود
     border: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
     borderAccent: isDark ? "rgba(183,148,246,0.25)" : "rgba(155,111,214,0.25)",
-    
+
     // نصوص
     text: isDark ? "#E5E5E5" : "#2D2D2D",
     textSoft: isDark ? "#A0A0A0" : "#666666",
-    
+
     // حالات هادئة
     success: isDark ? "#6EAF87" : "#4CAF50",
     warning: isDark ? "#D4A76A" : "#FFB74D",
@@ -168,7 +168,7 @@ export default function AdminSchedule() {
       ],
     }));
   };
-  
+
   const updateSlot = (dayKey, idx, field, value) => {
     setCurrentEdits((prev) => {
       const list = [...(prev[dayKey] || [])];
@@ -176,7 +176,7 @@ export default function AdminSchedule() {
       return { ...prev, [dayKey]: list };
     });
   };
-  
+
   const removeSlot = (dayKey, idx) => {
     setCurrentEdits((prev) => {
       const list = [...(prev[dayKey] || [])];
@@ -189,7 +189,7 @@ export default function AdminSchedule() {
       return { ...prev, [dayKey]: list };
     });
   };
-  
+
   const deleteSlot = async (id) => {
     if (!window.confirm("هل تريدين حذف هذه الحصة؟")) return;
     try {
@@ -232,19 +232,19 @@ export default function AdminSchedule() {
     copy[dayIndex].items.push({ startTime: "", endTime: "", capacity: "20" });
     setNextWeek(copy);
   };
-  
+
   const updateNextSlot = (dayIndex, idx, field, value) => {
     const copy = [...nextWeek];
     copy[dayIndex].items[idx][field] = value;
     setNextWeek(copy);
   };
-  
+
   const removeNextSlot = (dayIndex, idx) => {
     const copy = [...nextWeek];
     copy[dayIndex].items.splice(idx, 1);
     setNextWeek(copy);
   };
-  
+
   const saveNextWeek = async () => {
     const items = nextWeek.flatMap((d) =>
       d.items
@@ -270,6 +270,7 @@ export default function AdminSchedule() {
     }
   };
 
+  // ===================== بطاقة اليوم =====================
   // ===================== بطاقة اليوم =====================
   const DayCard = ({
     dayIndex,
@@ -305,8 +306,12 @@ export default function AdminSchedule() {
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <AccessTimeIcon sx={{ fontSize: 18, color: COLORS.primary }} />
-                  <Typography sx={{ fontWeight: 600, fontSize: 14, color: COLORS.text }}>
+                  <AccessTimeIcon
+                    sx={{ fontSize: 18, color: COLORS.primary }}
+                  />
+                  <Typography
+                    sx={{ fontWeight: 600, fontSize: 14, color: COLORS.text }}
+                  >
                     {s.startTime} - {s.endTime}
                   </Typography>
                   <Chip
@@ -315,7 +320,9 @@ export default function AdminSchedule() {
                     sx={{
                       height: 22,
                       fontSize: 11,
-                      background: isDark ? "rgba(183,148,246,0.15)" : "rgba(155,111,214,0.1)",
+                      background: isDark
+                        ? "rgba(183,148,246,0.15)"
+                        : "rgba(155,111,214,0.1)",
                       color: COLORS.primary,
                       fontWeight: 600,
                       border: "none",
@@ -328,7 +335,9 @@ export default function AdminSchedule() {
                       sx={{
                         height: 22,
                         fontSize: 11,
-                        background: isDark ? "rgba(213,115,115,0.15)" : "rgba(229,115,115,0.1)",
+                        background: isDark
+                          ? "rgba(213,115,115,0.15)"
+                          : "rgba(229,115,115,0.1)",
                         color: COLORS.error,
                         fontWeight: 600,
                         border: "none",
@@ -338,7 +347,9 @@ export default function AdminSchedule() {
                 </Box>
 
                 {!isNextWeek && (
-                  <Tooltip title={isPast ? "لا يمكن حذف حصة منتهية" : "حذف الحصة"}>
+                  <Tooltip
+                    title={isPast ? "لا يمكن حذف حصة منتهية" : "حذف الحصة"}
+                  >
                     <span>
                       <IconButton
                         onClick={() => !isPast && deleteSlot(s._id)}
@@ -346,9 +357,13 @@ export default function AdminSchedule() {
                         disabled={isPast}
                         sx={{
                           color: "#fff",
-                          backgroundColor: isPast ? COLORS.textSoft : COLORS.error,
+                          backgroundColor: isPast
+                            ? COLORS.textSoft
+                            : COLORS.error,
                           "&:hover": {
-                            backgroundColor: isPast ? COLORS.textSoft : "#C62828",
+                            backgroundColor: isPast
+                              ? COLORS.textSoft
+                              : "#C62828",
                           },
                           opacity: isPast ? 0.5 : 1,
                         }}
@@ -373,7 +388,9 @@ export default function AdminSchedule() {
                 sx={{
                   p: 2,
                   borderRadius: 2,
-                  background: isDark ? "rgba(183,148,246,0.08)" : "rgba(155,111,214,0.05)",
+                  background: isDark
+                    ? "rgba(183,148,246,0.08)"
+                    : "rgba(155,111,214,0.05)",
                   border: `1px dashed ${COLORS.borderAccent}`,
                 }}
               >
@@ -386,16 +403,19 @@ export default function AdminSchedule() {
                       value={s.startTime}
                       onChange={(e) =>
                         isNextWeek
-                          ? updateNextSlot(dayIndex, idx, "startTime", e.target.value)
+                          ? updateNextSlot(
+                              dayIndex,
+                              idx,
+                              "startTime",
+                              e.target.value
+                            )
                           : updateSlot(dayKey, idx, "startTime", e.target.value)
                       }
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 1.5,
                           backgroundColor: COLORS.bgCard,
-                          "& fieldset": {
-                            borderColor: COLORS.border,
-                          },
+                          "& fieldset": { borderColor: COLORS.border },
                           "&:hover fieldset": {
                             borderColor: COLORS.borderAccent,
                           },
@@ -411,16 +431,19 @@ export default function AdminSchedule() {
                       value={s.endTime}
                       onChange={(e) =>
                         isNextWeek
-                          ? updateNextSlot(dayIndex, idx, "endTime", e.target.value)
+                          ? updateNextSlot(
+                              dayIndex,
+                              idx,
+                              "endTime",
+                              e.target.value
+                            )
                           : updateSlot(dayKey, idx, "endTime", e.target.value)
                       }
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 1.5,
                           backgroundColor: COLORS.bgCard,
-                          "& fieldset": {
-                            borderColor: COLORS.border,
-                          },
+                          "& fieldset": { borderColor: COLORS.border },
                           "&:hover fieldset": {
                             borderColor: COLORS.borderAccent,
                           },
@@ -436,16 +459,19 @@ export default function AdminSchedule() {
                       value={s.capacity}
                       onChange={(e) =>
                         isNextWeek
-                          ? updateNextSlot(dayIndex, idx, "capacity", e.target.value)
+                          ? updateNextSlot(
+                              dayIndex,
+                              idx,
+                              "capacity",
+                              e.target.value
+                            )
                           : updateSlot(dayKey, idx, "capacity", e.target.value)
                       }
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 1.5,
                           backgroundColor: COLORS.bgCard,
-                          "& fieldset": {
-                            borderColor: COLORS.border,
-                          },
+                          "& fieldset": { borderColor: COLORS.border },
                           "&:hover fieldset": {
                             borderColor: COLORS.borderAccent,
                           },
@@ -456,7 +482,9 @@ export default function AdminSchedule() {
                   <Grid item xs={4} sm={1}>
                     <IconButton
                       onClick={() =>
-                        isNextWeek ? removeNextSlot(dayIndex, idx) : removeSlot(dayKey, idx)
+                        isNextWeek
+                          ? removeNextSlot(dayIndex, idx)
+                          : removeSlot(dayKey, idx)
                       }
                       size="small"
                       sx={{
@@ -478,7 +506,9 @@ export default function AdminSchedule() {
         <Button
           variant="outlined"
           fullWidth
-          onClick={() => (isNextWeek ? addNextSlot(dayIndex) : addSlot(dayIndex))}
+          onClick={() =>
+            isNextWeek ? addNextSlot(dayIndex) : addSlot(dayIndex)
+          }
           disabled={isPast}
           startIcon={<AddCircleIcon />}
           sx={{
@@ -487,15 +517,16 @@ export default function AdminSchedule() {
             fontWeight: 600,
             borderRadius: 2,
             py: 1.2,
+            gap: 1,
             borderColor: COLORS.borderAccent,
             color: COLORS.primary,
             "&:hover": {
               borderColor: COLORS.primary,
-              background: isDark ? "rgba(183,148,246,0.08)" : "rgba(155,111,214,0.05)",
+              background: isDark
+                ? "rgba(183,148,246,0.08)"
+                : "rgba(155,111,214,0.05)",
             },
-            "&:disabled": {
-              opacity: 0.4,
-            },
+            "&:disabled": { opacity: 0.4 },
           }}
         >
           إضافة حصة جديدة
@@ -508,31 +539,54 @@ export default function AdminSchedule() {
         <Paper
           elevation={0}
           sx={{
-            borderRadius: 2.5,
+            borderRadius: 3,
             height: "100%",
             minHeight: 400,
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            border: `1px solid ${isTodayFlag ? COLORS.borderAccent : COLORS.border}`,
             background: COLORS.bgCard,
-            transition: "all 0.3s ease",
+
+            /* 👇 إطار ناعم لكل البطاقات + إطار متدرج مميز لليوم الحالي */
+            border: isTodayFlag
+  ? "2px solid transparent"
+  : `1.3px solid ${isDark ? COLORS.border : "rgba(0,0,0,0.15)"}`,
+backgroundImage: isTodayFlag
+  ? isDark
+    ? `linear-gradient(${COLORS.bgCard}, ${COLORS.bgCard}), linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`
+    : `linear-gradient(${COLORS.bgCard}, ${COLORS.bgCard}), linear-gradient(90deg, #9B6FD6, #E8B54D)`
+  : "none",
+
+            backgroundOrigin: "border-box",
+            backgroundClip: isTodayFlag
+              ? "content-box, border-box"
+              : "border-box",
+
+            /* 👇 ظل راقي */
+            boxShadow: isTodayFlag
+              ? `0 0 14px ${COLORS.primary}50`
+              : isDark
+              ? "0 2px 8px rgba(0,0,0,0.3)"
+              : "0 2px 8px rgba(0,0,0,0.05)",
+
+            transition: "all 0.35s ease",
             "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: isDark
-                ? "0 8px 24px rgba(0,0,0,0.4)"
-                : "0 8px 24px rgba(0,0,0,0.06)",
-              borderColor: COLORS.borderAccent,
+              transform: "translateY(-3px)",
+              boxShadow: isTodayFlag
+                ? `0 0 18px ${COLORS.primary}70`
+                : isDark
+                ? "0 6px 16px rgba(0,0,0,0.35)"
+                : "0 6px 16px rgba(0,0,0,0.08)",
             },
             opacity: isPast ? 0.6 : 1,
           }}
         >
-          {/* خط علوي */}
+          {/* شريط علوي لليوم الحالي */}
           {isTodayFlag && (
             <Box
               sx={{
-                height: 3,
-                background: COLORS.primary,
+                height: 4,
+                background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`,
               }}
             />
           )}
@@ -547,16 +601,20 @@ export default function AdminSchedule() {
               justifyContent: "space-between",
               background: isTodayFlag
                 ? isDark
-                  ? "rgba(183,148,246,0.05)"
-                  : "rgba(155,111,214,0.03)"
+                  ? "rgba(183,148,246,0.06)"
+                  : "rgba(155,111,214,0.04)"
                 : "transparent",
             }}
           >
             <Box>
-              <Typography sx={{ fontWeight: 700, fontSize: 15, color: COLORS.text }}>
+              <Typography
+                sx={{ fontWeight: 700, fontSize: 15, color: COLORS.text }}
+              >
                 {dayNames[dayIndex]}
               </Typography>
-              <Typography sx={{ fontSize: 11, color: COLORS.textSoft, mt: 0.3 }}>
+              <Typography
+                sx={{ fontSize: 11, color: COLORS.textSoft, mt: 0.3 }}
+              >
                 {new Date(dayKey).toLocaleDateString("ar-EG", {
                   day: "numeric",
                   month: "short",
@@ -580,7 +638,9 @@ export default function AdminSchedule() {
                 sx={{
                   color: COLORS.primary,
                   "&:hover": {
-                    background: isDark ? "rgba(183,148,246,0.1)" : "rgba(155,111,214,0.08)",
+                    background: isDark
+                      ? "rgba(183,148,246,0.1)"
+                      : "rgba(155,111,214,0.08)",
                   },
                 }}
               >
@@ -589,7 +649,7 @@ export default function AdminSchedule() {
             </Tooltip>
           </Box>
 
-          {/* محتوى اليوم */}
+          {/* المحتوى */}
           <Box sx={{ p: 2, flex: 1, overflowY: "auto" }}>{cardContent}</Box>
         </Paper>
 
@@ -599,12 +659,7 @@ export default function AdminSchedule() {
           onClose={() => setExpandedDay(null)}
           maxWidth="md"
           fullWidth
-          PaperProps={{
-            sx:{
-              borderRadius: 3,
-              background: COLORS.bgCard,
-            },
-          }}
+          PaperProps={{ sx: { borderRadius: 3, background: COLORS.bgCard } }}
         >
           <DialogTitle
             sx={{
@@ -615,7 +670,9 @@ export default function AdminSchedule() {
             }}
           >
             <Box>
-              <Typography sx={{ fontWeight: 800, fontSize: 18, color: COLORS.text }}>
+              <Typography
+                sx={{ fontWeight: 800, fontSize: 18, color: COLORS.text }}
+              >
                 {dayNames[dayIndex]}
               </Typography>
               <Typography sx={{ fontSize: 12, color: COLORS.textSoft }}>
@@ -626,7 +683,10 @@ export default function AdminSchedule() {
                 })}
               </Typography>
             </Box>
-            <IconButton onClick={() => setExpandedDay(null)} sx={{ color: COLORS.textSoft }}>
+            <IconButton
+              onClick={() => setExpandedDay(null)}
+              sx={{ color: COLORS.textSoft }}
+            >
               <CloseIcon />
             </IconButton>
           </DialogTitle>
@@ -669,13 +729,18 @@ export default function AdminSchedule() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: isDark ? "rgba(183,148,246,0.15)" : "rgba(155,111,214,0.1)",
+                background: isDark
+                  ? "rgba(183,148,246,0.15)"
+                  : "rgba(155,111,214,0.1)",
               }}
             >
               <CalendarTodayIcon sx={{ color: COLORS.primary, fontSize: 24 }} />
             </Box>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.5, color: COLORS.text }}>
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 800, mb: 0.5, color: COLORS.text }}
+              >
                 الرزنامة الأسبوعية
               </Typography>
               <Typography sx={{ color: COLORS.textSoft, fontSize: 13 }}>
@@ -801,6 +866,7 @@ export default function AdminSchedule() {
                       fontWeight: 700,
                       px: 5,
                       py: 1.5,
+                      gap: 1,
                       borderRadius: 2,
                       background: COLORS.primary,
                       color: "#fff",

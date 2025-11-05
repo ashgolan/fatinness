@@ -1,24 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  CircularProgress,
-  Divider,
-} from "@mui/material";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
+import { useThemeMode } from "../context/ThemeContext";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 export default function MyBookings() {
+  const { mode, BRAND } = useThemeMode();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState("upcoming");
 
   // 🔹 جلب الحجوزات
   const fetchBookings = async () => {
@@ -26,8 +20,7 @@ export default function MyBookings() {
     try {
       const { data } = await Api.get("/bookings/me");
       setBookings(data);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("حدث خطأ أثناء جلب الحجوزات");
     } finally {
       setLoading(false);
@@ -53,7 +46,7 @@ export default function MyBookings() {
     }
   };
 
-  // 🔹 تقسيم الحجوزات إلى قادمة وسابقة
+  // 🔹 تصنيف الحجوزات
   const now = new Date();
   const upcoming = bookings.filter(
     (b) =>
@@ -61,156 +54,248 @@ export default function MyBookings() {
   );
   const past = bookings.filter(
     (b) =>
-      new Date(b.slot.date) < now || b.status === "cancelled" || b.slot.isBlocked
+      new Date(b.slot.date) < now &&
+      b.status !== "cancelled" &&
+      !b.slot.isBlocked
+  );
+  const cancelled = bookings.filter(
+    (b) => b.status === "cancelled" || b.slot.isBlocked
   );
 
+  const filteredBookings =
+    filter === "upcoming" ? upcoming : filter === "past" ? past : cancelled;
+
   return (
-    <Box
+    <div
       dir="rtl"
-      sx={{
-        maxWidth: 950,
-        mx: "auto",
-        mt: 4,
-        px: 2,
+      style={{
+        minHeight: "100vh",
+        background:
+          mode === "dark"
+            ? `linear-gradient(135deg, ${BRAND.bgDarkTop}, ${BRAND.bgDarkBottom})`
+            : "linear-gradient(135deg, #fafaff, #fffdf9)",
         fontFamily: "Tajawal, Cairo, sans-serif",
+        color: mode === "dark" ? "#f3f3f3" : "#111",
+        padding: "20px",
+        transition: "all 0.4s ease",
       }}
     >
-      <Typography variant="h5" gutterBottom textAlign="center">
-        📅 حجوزاتي
-      </Typography>
+      {/* 🔶 العنوان */}
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <h1
+          style={{
+            fontSize: "clamp(22px, 5vw, 30px)",
+            fontWeight: "bold",
+            background: mode === "dark"
+              ? `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.purple})`
+              : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          📅 حجوزاتي
+        </h1>
+        <p style={{ color: mode === "dark" ? "#aaa" : "#555", fontSize: "0.95rem" }}>
+          استعرضي حجوزاتك القادمة، السابقة، أو الملغاة
+        </p>
+      </div>
 
+      {/* 🔘 أزرار الفلترة */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: "10px",
+          marginBottom: "26px",
+        }}
+      >
+        {[
+          { value: "upcoming", label: "📆 القادمة" },
+          { value: "past", label: "✅ السابقة" },
+          { value: "cancelled", label: "❌ الملغاة" },
+        ].map((btn) => (
+          <button
+            key={btn.value}
+            onClick={() => setFilter(btn.value)}
+            style={{
+              padding: "10px 18px",
+              borderRadius: "25px",
+              border:
+                filter === btn.value
+                  ? "none"
+                  : mode === "dark"
+                  ? "1.5px solid #555"
+                  : "1.5px solid #ddd",
+              background:
+                filter === btn.value
+                  ? mode === "dark"
+                    ? `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.purple})`
+                    : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`
+                  : "transparent",
+              color: filter === btn.value ? "#fff" : mode === "dark" ? "#ddd" : "#444",
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              minWidth: 120,
+            }}
+          >
+            {btn.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 🔄 تحميل */}
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <>
-          {/* 🔹 الحجوزات القادمة */}
-          <Section
-            title="الحجوزات القادمة"
-            emptyText="لا توجد حجوزات قادمة."
-            color="#e3f2fd"
-            bookings={upcoming}
-            handleCancel={handleCancel}
-            refreshing={refreshing}
+        <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
+          <div
+            style={{
+              width: 50,
+              height: 50,
+              border: "4px solid #ddd",
+              borderTopColor: BRAND.purple,
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
           />
-
-          <Divider sx={{ my: 4 }} />
-
-          {/* 🔹 الحجوزات السابقة */}
-          <Section
-            title="الحجوزات السابقة"
-            emptyText="لا توجد حجوزات سابقة."
-            color="#f5f5f5"
-            bookings={past}
-            isPast
-          />
-        </>
-      )}
-    </Box>
-  );
-}
-
-// 🔸 مكوّن فرعي لعرض مجموعة من الحجوزات
-function Section({
-  title,
-  bookings,
-  emptyText,
-  color,
-  handleCancel,
-  isPast = false,
-  refreshing,
-}) {
-  return (
-    <Box>
-      <Typography variant="h6" mb={2}>
-        {title}
-      </Typography>
-      {bookings.length === 0 ? (
-        <Typography color="text.secondary">{emptyText}</Typography>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : filteredBookings.length === 0 ? (
+        <p style={{ textAlign: "center", opacity: 0.7, marginTop: 40 }}>
+          لا توجد حجوزات في هذا القسم.
+        </p>
       ) : (
-        <Grid container spacing={2}>
-          {bookings.map((b) => {
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              window.innerWidth < 768 ? "1fr" : "repeat(2, 1fr)",
+            gap: 18,
+          }}
+        >
+          {filteredBookings.map((b) => {
             const slotDate = new Date(b.slot.date);
-            const date = slotDate.toLocaleDateString("ar-EG");
+            const date = slotDate.toLocaleDateString("ar-EG", {
+              weekday: "long",
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            });
             const time = b.slot.startTime;
-            const isCancelled = b.status === "cancelled";
-            return (
-              <Grid item xs={12} md={6} key={b._id}>
-                <Paper
-                  elevation={2}
-                  sx={{
-                    p: 2,
-                    backgroundColor: color,
-                    borderRight: "5px solid #1976d2",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      <EventAvailableIcon
-                        fontSize="small"
-                        sx={{ verticalAlign: "middle", ml: 0.5 }}
-                      />
-                      {date}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <AccessTimeIcon
-                        fontSize="small"
-                        sx={{ verticalAlign: "middle", ml: 0.5 }}
-                      />
-                      الساعة: {time}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mt: 0.5 }}>
-                      {isCancelled ? (
-                        <>
-                          <CancelIcon
-                            fontSize="small"
-                            sx={{
-                              verticalAlign: "middle",
-                              ml: 0.5,
-                              color: "red",
-                            }}
-                          />
-                          <span style={{ color: "red" }}>ملغاة</span>
-                        </>
-                      ) : isPast ? (
-                        <>
-                          <DoneAllIcon
-                            fontSize="small"
-                            sx={{
-                              verticalAlign: "middle",
-                              ml: 0.5,
-                              color: "green",
-                            }}
-                          />
-                          <span style={{ color: "green" }}>منتهية</span>
-                        </>
-                      ) : (
-                        <span>محجوزة ✅</span>
-                      )}
-                    </Typography>
-                  </Box>
+            const isCancelled = b.status === "cancelled" || b.slot.isBlocked;
+            const isPast = new Date(b.slot.date) < now && !isCancelled;
 
-                  {!isPast && !isCancelled && (
-                    <Button
-                      color="error"
-                      variant="contained"
-                      size="small"
-                      disabled={refreshing}
-                      onClick={() => handleCancel(b._id)}
-                    >
-                      {refreshing ? "..." : "إلغاء"}
-                    </Button>
-                  )}
-                </Paper>
-              </Grid>
+            // 🎨 الألوان حسب الحالة
+            let borderColor = BRAND.purple;
+            let glow = `${BRAND.purple}55`;
+            if (isPast) {
+              borderColor = "#9e9e9e";
+              glow = "transparent";
+            } else if (isCancelled) {
+              borderColor = "#f44336";
+              glow = "#f4433622";
+            }
+
+            return (
+              <div
+                key={b._id}
+                style={{
+                  border: `2.5px solid ${borderColor}`,
+                  borderRadius: "20px",
+                  padding: "18px",
+                  background: mode === "dark"
+                    ? BRAND.paperDark
+                    : "#ffffffaa",
+                  boxShadow: `0 0 8px ${glow}`,
+                  transition: "all 0.3s ease",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: 10,
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 4,
+                      fontWeight: 700,
+                      fontSize: "1rem",
+                    }}
+                  >
+                    <EventAvailableIcon sx={{ color: BRAND.purple }} />
+                    <span>{date}</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      marginBottom: 4,
+                      color: mode === "dark" ? "#ccc" : "#555",
+                    }}
+                  >
+                    <AccessTimeIcon sx={{ color: BRAND.purple }} />
+                    <span>الساعة: {time}</span>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      marginTop: 6,
+                      fontWeight: 600,
+                      fontSize: "0.95rem",
+                    }}
+                  >
+                    {isCancelled ? (
+                      <>
+                        <CancelIcon sx={{ color: "#f44336" }} />
+                        <span style={{ color: "#f44336" }}>ملغاة</span>
+                      </>
+                    ) : isPast ? (
+                      <>
+                        <DoneAllIcon sx={{ color: "#10b981" }} />
+                        <span style={{ color: "#10b981" }}>منتهية</span>
+                      </>
+                    ) : (
+                      <>
+                        <DoneAllIcon sx={{ color: BRAND.purple }} />
+                        <span style={{ color: BRAND.purple }}>محجوزة ✅</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 🔘 زر الإلغاء */}
+                {!isPast && !isCancelled && (
+                  <button
+                    onClick={() => handleCancel(b._id)}
+                    disabled={refreshing}
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      borderRadius: "12px",
+                      border: `2px solid ${BRAND.gold}`,
+                      background: "transparent",
+                      color: BRAND.gold,
+                      fontWeight: 700,
+                      cursor: refreshing ? "not-allowed" : "pointer",
+                      transition: "all 0.25s ease",
+                    }}
+                  >
+                    {refreshing ? "..." : "إلغاء الحجز"}
+                  </button>
+                )}
+              </div>
             );
           })}
-        </Grid>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }

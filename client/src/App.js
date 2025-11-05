@@ -18,7 +18,6 @@ import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Booking from "./pages/Booking";
 import MyBookings from "./pages/MyBookings";
-import AvailableSlots from "./pages/AvailableSlots";
 import Subscription from "./pages/Subscription";
 
 // 🔹 أدوات
@@ -34,6 +33,7 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ControlCenter from "./pages/admin/ControlCenter";
 import AdminSchedule from "./pages/admin/AdminSchedule";
+import BookingsHub from "./pages/BookingsHub";
 
 export default function App() {
   return (
@@ -62,7 +62,7 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/bookings" element={<Booking />} />
               <Route path="/my-bookings" element={<MyBookings />} />
-              <Route path="/available-slots" element={<AvailableSlots />} />
+              <Route path="/bookings-Hub" element={<BookingsHub/>} />
               <Route path="/subscription" element={<Subscription />} />
             </Route>
 

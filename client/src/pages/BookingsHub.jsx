@@ -365,10 +365,22 @@ export default function BookingsHub() {
 
 // 🟣 الحجوزات المتاحة
 function AvailableView({
-  mode, BRAND, animateIn, gridDates, todayKey, dayNames,
-  selectedDate, setSelectedDate, view, setView,
-  slotsByDay, myBookings, handleBook, handleCancel,
-  bookingId, toLocalKey,
+  mode,
+  BRAND,
+  animateIn,
+  gridDates,
+  todayKey,
+  dayNames,
+  selectedDate,
+  setSelectedDate,
+  view,
+  setView,
+  slotsByDay,
+  myBookings,
+  handleBook,
+  handleCancel,
+  bookingId,
+  toLocalKey,
 }) {
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
@@ -423,110 +435,110 @@ function AvailableView({
         }}
       >
         {gridDates.map((d) => {
-  const key = toLocalKey(d);
-  const isToday = key === todayKey;
-  const isAvailable = !!slotsByDay[key];
-  const isSelected = selectedDate === key;
-  const slotsCount = slotsByDay[key]?.length || 0;
-  const hasMyBooking = slotsByDay[key]?.some((s) =>
-    myBookings.includes(s._id)
-  );
+          const key = toLocalKey(d);
+          const isToday = key === todayKey;
+          const isAvailable = !!slotsByDay[key];
+          const isSelected = selectedDate === key;
+          const slotsCount = slotsByDay[key]?.length || 0;
+          const hasMyBooking = slotsByDay[key]?.some((s) =>
+            myBookings.includes(s._id)
+          );
 
-  return (
-    <div
-  key={key}
-  onClick={() => isAvailable && setSelectedDate(isSelected ? null : key)}
-  style={{
-    aspectRatio: "1",
-    borderRadius: 18,
-    border: `2px solid ${
-      isSelected
-        ? BRAND.gold
-        : isAvailable
-        ? `${BRAND.purple}CC`
-        : mode === "dark"
-        ? "rgba(255,255,255,0.08)"
-        : "#ddd"
-    }`,
-    background: mode === "dark"
-      ? "rgba(255,255,255,0.03)"
-      : "rgba(255,255,255,0.8)",
-    color: isAvailable ? BRAND.purple : "#999",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
-    cursor: isAvailable ? "pointer" : "default",
-    boxShadow:
-      isSelected
-        ? `0 0 14px ${BRAND.gold}88`
-        : isAvailable
-        ? `0 0 10px ${BRAND.purple}55`
-        : mode === "dark"
-        ? "0 0 6px rgba(255,255,255,0.06)"
-        : "0 0 4px rgba(0,0,0,0.05)",
-    transition: "all 0.25s ease",
-    position: "relative",
-  }}
->
+          return (
+            <div
+              key={key}
+              onClick={() =>
+                isAvailable && setSelectedDate(isSelected ? null : key)
+              }
+              style={{
+                aspectRatio: "1",
+                borderRadius: 18,
+                border: `2px solid ${
+                  isSelected
+                    ? BRAND.gold
+                    : isAvailable
+                    ? `${BRAND.purple}CC`
+                    : mode === "dark"
+                    ? "rgba(255,255,255,0.08)"
+                    : "#ddd"
+                }`,
+                background:
+                  mode === "dark"
+                    ? "rgba(255,255,255,0.03)"
+                    : "rgba(255,255,255,0.8)",
+                color: isAvailable ? BRAND.purple : "#999",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "column",
+                cursor: isAvailable ? "pointer" : "default",
+                boxShadow: isSelected
+                  ? `0 0 14px ${BRAND.gold}88`
+                  : isAvailable
+                  ? `0 0 10px ${BRAND.purple}55`
+                  : mode === "dark"
+                  ? "0 0 6px rgba(255,255,255,0.06)"
+                  : "0 0 4px rgba(0,0,0,0.05)",
+                transition: "all 0.25s ease",
+                position: "relative",
+              }}
+            >
+              {/* 🔹 رقم اليوم */}
+              <strong style={{ fontSize: 18 }}>{d.getDate()}</strong>
 
-      {/* 🔹 رقم اليوم */}
-      <strong style={{ fontSize: 18 }}>{d.getDate()}</strong>
+              {/* 🟣 عدد الحصص (أسفل الرقم مباشرة) */}
+              {isAvailable && (
+                <span
+                  style={{
+                    fontSize: 12,
+                    opacity: 0.8,
+                    marginTop: 2,
+                    color: mode === "dark" ? "#ddd" : "#555",
+                    fontWeight: 600,
+                  }}
+                >
+                  {slotsCount}
+                </span>
+              )}
 
-      {/* 🟣 عدد الحصص (أسفل الرقم مباشرة) */}
-      {isAvailable && (
-        <span
-          style={{
-            fontSize: 12,
-            opacity: 0.8,
-            marginTop: 2,
-            color: mode === "dark" ? "#ddd" : "#555",
-            fontWeight: 600,
-          }}
-        >
-          {slotsCount}
-        </span>
-      )}
+              {/* 🔴 نقطة اليوم الحالي */}
+              {isToday && (
+                <div
+                  style={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#ef4444",
+                    marginTop: 3,
+                  }}
+                />
+              )}
 
-      {/* 🔴 نقطة اليوم الحالي */}
-      {isToday && (
-        <div
-          style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: "#ef4444",
-            marginTop: 3,
-          }}
-        />
-      )}
-
-      {/* ✅ رمز الحجز في الزاوية اليمنى العليا */}
-      {hasMyBooking && (
-        <div
-          style={{
-            position: "absolute",
-            top: 5,
-            right: 5,
-            width: 20,
-            height: 20,
-            borderRadius: "50%",
-            background: `linear-gradient(135deg, #10b981, #059669)`,
-            color: "white",
-            fontSize: 12,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 0 6px rgba(16,185,129,0.6)",
-          }}
-        >
-          ✓
-        </div>
-      )}
-    </div>
-  );
-})}
-
+              {/* ✅ رمز الحجز في الزاوية اليمنى العليا */}
+              {hasMyBooking && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 5,
+                    right: 5,
+                    width: 20,
+                    height: 20,
+                    borderRadius: "50%",
+                    background: `linear-gradient(135deg, #10b981, #059669)`,
+                    color: "white",
+                    fontSize: 12,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 0 6px rgba(16,185,129,0.6)",
+                  }}
+                >
+                  ✓
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* 💜 المواعيد عند تحديد يوم */}
@@ -540,8 +552,7 @@ function AvailableView({
         >
           <div
             style={{
-              background:
-                mode === "dark" ? "rgba(255,255,255,0.05)" : "white",
+              background: mode === "dark" ? "rgba(255,255,255,0.05)" : "white",
               borderRadius: "20px",
               padding: "20px",
               marginBottom: 24,
@@ -550,9 +561,7 @@ function AvailableView({
                   ? "0 8px 24px rgba(0,0,0,0.3)"
                   : "0 8px 24px rgba(0,0,0,0.08)",
               border:
-                mode === "dark"
-                  ? "1px solid rgba(255,255,255,0.1)"
-                  : "none",
+                mode === "dark" ? "1px solid rgba(255,255,255,0.1)" : "none",
               textAlign: "center",
             }}
           >
@@ -572,7 +581,9 @@ function AvailableView({
             style={{
               display: "grid",
               gridTemplateColumns:
-                window.innerWidth < 768 ? "1fr" : "repeat(auto-fit, minmax(280px, 1fr))",
+                window.innerWidth < 768
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(280px, 1fr))",
               gap: 16,
               maxWidth: "1000px",
               margin: "0 auto",
@@ -626,9 +637,7 @@ function AvailableView({
 
                   <button
                     onClick={() =>
-                      isBooked
-                        ? handleCancel(slot._id)
-                        : handleBook(slot._id)
+                      isBooked ? handleCancel(slot._id) : handleBook(slot._id)
                     }
                     disabled={isProcessing || (isFull && !isBooked)}
                     style={{
@@ -673,7 +682,6 @@ function AvailableView({
     </div>
   );
 }
-
 
 // 🟡 حجوزاتي
 function MyBookingsView({

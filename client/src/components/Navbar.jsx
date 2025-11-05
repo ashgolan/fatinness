@@ -22,6 +22,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"; // ⬅️ جديد: أيقونة مركز الحجوزات
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { clearToken } from "../utils/tokensStorage";
@@ -36,6 +37,7 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
+  // ملاحظة: في Vite عادة نستخدم import.meta.env.VITE_API_URL
   const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
   const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
   const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F";
@@ -64,101 +66,115 @@ export default function Navbar() {
 
   const isAdmin = user?.role === "admin";
 
-  // 🧠 بدل هذا الجزء القديم من الكود بالكامل بـ التالي:
+  // =========================
+  // الروابط (سطح مكتب + موبايل)
+  // =========================
+  const navLinks = useMemo(() => {
+    if (loadingUser) return [];
 
+    // غير مسجل
+    if (!user) {
+      return [
+        { label: "تسجيل الدخول", to: "/login", icon: <LogoutIcon /> },
+      ];
+    }
 
-// ⚙️ داخل المكون:
-const navLinks = useMemo(() => {
-  if (loadingUser) return []; // لا نظهر شيء أثناء التحميل
+    // الأدمن
+    if (user.role === "admin") {
+      return [
+        { label: "لوحة الإدارة", to: "/admin/control", icon: <DashboardIcon /> },
+        // ⬅️ نضيف مركز الحجوزات للأدمن أيضًا إن أردت تجربة الصفحة
+        { label: "مركز الحجوزات", to: "/bookings-hub", icon: <CalendarMonthIcon /> },
+        { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
+      ];
+    }
 
-  if (!user) {
+    // المستخدم العادي
     return [
-      { label: "تسجيل الدخول", to: "/login", icon: <LogoutIcon /> },
-    ];
-  }
-
-  if (user.role === "admin") {
-    return [
-      { label: "لوحة الإدارة", to: "/admin/control", icon: <DashboardIcon /> },
+      { label: "الرئيسية", to: "/dashboard", icon: <HomeIcon /> },
+      // ✅ الزر الموحد الجديد
+      { label: "مركز الحجوزات", to: "/bookings-hub", icon: <CalendarMonthIcon /> },
       { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
     ];
+  }, [user, loadingUser]); 
+
+  // أثناء تحميل المستخدم نظهر شريط بسيط
+  if (loadingUser) {
+    return (
+      <AppBar
+        position="sticky"
+        elevation={0}
+        sx={{
+          backgroundColor: mode === "dark" ? BRAND.paperDark : "#fff",
+          color: mode === "dark" ? BRAND.textDark : "#333",
+          borderBottom: `1px solid ${mode === "dark" ? BRAND.lineDark : "#ddd"}`,
+        }}
+      >
+        <Toolbar sx={{ justifyContent: "center" }}>
+          <CircularProgress
+            size={22}
+            sx={{
+              color: mode === "dark" ? BRAND.gold : BRAND.purple,
+            }}
+          />
+        </Toolbar>
+      </AppBar>
+    );
   }
-
-  return [
-    { label: "الرئيسية", to: "/dashboard", icon: <HomeIcon /> },
-    { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
-  ];
-}, [user, loadingUser]); // 🔁 يعاد الحساب فقط عند تغيّر user أو loadingUser
-
-// 🔄 أثناء تحميل المستخدم نظهر فقط شريط التحميل
-if (loadingUser) {
-  return (
-    <AppBar
-      position="sticky"
-      elevation={0}
-      sx={{
-        backgroundColor: mode === "dark" ? BRAND.paperDark : "#fff",
-        color: mode === "dark" ? BRAND.textDark : "#333",
-        borderBottom: `1px solid ${mode === "dark" ? BRAND.lineDark : "#ddd"}`,
-      }}
-    >
-      <Toolbar sx={{ justifyContent: "center" }}>
-        <CircularProgress
-          size={22}
-          sx={{
-            color: mode === "dark" ? BRAND.gold : BRAND.purple,
-          }}
-        />
-      </Toolbar>
-    </AppBar>
-  );
-}
-
 
   return (
     <>
-      {/* 🔔 شريط حالة النظام للأدمن */}
+      {/* شريط حالة النظام للأدمن */}
       {isAdmin && !loading && (
-        <Box sx={{
-          width: "100%",
-          backgroundColor: status?.active ? "#22C55E" : "#d32f2f",
-          color: "#fff",
-          textAlign: "center",
-          py: 0.5,
-          fontSize: { xs: "0.75rem", sm: "0.85rem" },
-          fontWeight: 500,
-        }}>
+        <Box
+          sx={{
+            width: "100%",
+            backgroundColor: status?.active ? "#22C55E" : "#d32f2f",
+            color: "#fff",
+            textAlign: "center",
+            py: 0.5,
+            fontSize: { xs: "0.75rem", sm: "0.85rem" },
+            fontWeight: 500,
+          }}
+        >
           {status?.active
             ? "🔔 نظام التذكيرات يعمل الآن"
             : "⚠️ نظام التذكيرات غير فعّال حالياً"}
         </Box>
       )}
 
-      {/* 🔹 الـ Navbar */}
+      {/* الـ Navbar */}
       <AppBar
         position="sticky"
         elevation={0}
         sx={{
           backgroundColor: mode === "dark" ? BRAND.paperDark : "#ffffff",
           color: mode === "dark" ? BRAND.textDark : "#222",
-          borderBottom: `1px solid ${mode === "dark" ? BRAND.lineDark : "#ddd"}`,
+          borderBottom: `1px solid ${
+            mode === "dark" ? BRAND.lineDark : "#ddd"
+          }`,
           transition: "all 0.3s ease",
         }}
       >
-        <Toolbar sx={{
-          justifyContent: "space-between",
-          px: { xs: 2, sm: 3, md: 6 },
-          minHeight: { xs: 56, sm: 64 },
-        }}>
-          {/* 🟡 الشعار */}
-          <Box component={Link} to="/"
+        <Toolbar
+          sx={{
+            justifyContent: "space-between",
+            px: { xs: 2, sm: 3, md: 6 },
+            minHeight: { xs: 56, sm: 64 },
+          }}
+        >
+          {/* الشعار */}
+          <Box
+            component={Link}
+            to="/"
             sx={{
               display: "flex",
               alignItems: "center",
               gap: 1,
               textDecoration: "none",
               color: "inherit",
-            }}>
+            }}
+          >
             <img
               src={imgSrc}
               onError={() => setImgSrc(fallbackLogo)}
@@ -187,7 +203,7 @@ if (loadingUser) {
             </Typography>
           </Box>
 
-          {/* 🌞🌙 التبديل بين الليل والنهار */}
+          {/* مفتاح الوضع */}
           <Box
             sx={{
               display: "flex",
@@ -216,9 +232,10 @@ if (loadingUser) {
                   color: BRAND.gold,
                 },
                 "& .MuiSwitch-track": {
-                  background: mode === "dark"
-                    ? "linear-gradient(90deg, #FBC02D, #A01860)"
-                    : "linear-gradient(90deg, #A01860, #FBC02D)",
+                  background:
+                    mode === "dark"
+                      ? "linear-gradient(90deg, #FBC02D, #A01860)"
+                      : "linear-gradient(90deg, #A01860, #FBC02D)",
                 },
               }}
             />
@@ -242,14 +259,23 @@ if (loadingUser) {
                   startIcon={link.icon}
                   sx={{
                     color: mode === "dark" ? BRAND.textDark : "#333",
-                    fontWeight: 500,
-                    px: 2,
-                    py: 0.75,
-                    borderRadius: "6px",
+                    fontWeight: 600,
+                    px: 2.2,
+                    py: 0.9,
+                    borderRadius: "999px",
+                    border:
+                      link.to === "/bookings-hub"
+                        ? `2px solid ${BRAND.purple}55`
+                        : "2px solid transparent",
                     "&:hover": {
-                      backgroundColor: mode === "dark"
-                        ? "rgba(255,255,255,0.08)"
-                        : "#f5f5f5",
+                      backgroundColor:
+                        link.to === "/bookings-hub"
+                          ? (mode === "dark"
+                              ? "rgba(255,255,255,0.06)"
+                              : "#f7f3ff")
+                          : mode === "dark"
+                          ? "rgba(255,255,255,0.08)"
+                          : "#f5f5f5",
                     },
                   }}
                 >
@@ -264,15 +290,17 @@ if (loadingUser) {
                     color: "#fff",
                     backgroundColor:
                       mode === "dark" ? BRAND.gold : BRAND.purple,
-                    fontWeight: 600,
+                    fontWeight: 700,
                     px: 2.5,
-                    py: 0.75,
-                    borderRadius: "6px",
+                    py: 0.9,
+                    borderRadius: "999px",
+                    boxShadow:
+                      mode === "dark"
+                        ? `0 6px 16px ${BRAND.gold}33`
+                        : `0 6px 16px ${BRAND.purple}33`,
                     "&:hover": {
                       backgroundColor:
-                        mode === "dark"
-                          ? BRAND.goldDark
-                          : BRAND.purpleDark,
+                        mode === "dark" ? BRAND.goldDark : BRAND.purpleDark,
                     },
                   }}
                 >
@@ -295,7 +323,7 @@ if (loadingUser) {
         </Toolbar>
       </AppBar>
 
-      {/* 📱 القائمة الجانبية للموبايل */}
+      {/* القائمة الجانبية للموبايل */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -310,13 +338,15 @@ if (loadingUser) {
       >
         <Box sx={{ p: 2 }}>
           {/* رأس القائمة */}
-          <Box sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 1,
-            pb: 1,
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 1,
+              pb: 1,
+            }}
+          >
             <Typography
               variant="h6"
               sx={{
@@ -327,12 +357,14 @@ if (loadingUser) {
               Fateness
             </Typography>
 
-            {/* 🌙🌞 مفتاح الوضع داخل القائمة */}
-            <Box sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 0.5,
-            }}>
+            {/* مفتاح الوضع داخل القائمة */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+              }}
+            >
               <LightModeIcon
                 sx={{ color: mode === "dark" ? "#777" : BRAND.gold, fontSize: 20 }}
               />
@@ -341,9 +373,10 @@ if (loadingUser) {
                 onChange={toggleMode}
                 sx={{
                   "& .MuiSwitch-track": {
-                    background: mode === "dark"
-                      ? "linear-gradient(90deg, #FBC02D, #A01860)"
-                      : "linear-gradient(90deg, #A01860, #FBC02D)",
+                    background:
+                      mode === "dark"
+                        ? "linear-gradient(90deg, #FBC02D, #A01860)"
+                        : "linear-gradient(90deg, #A01860, #FBC02D)",
                   },
                 }}
               />
@@ -356,10 +389,12 @@ if (loadingUser) {
             </Box>
           </Box>
 
-          <Divider sx={{
-            mb: 1.5,
-            borderColor: mode === "dark" ? "rgba(255,255,255,0.1)" : "#ddd",
-          }} />
+          <Divider
+            sx={{
+              mb: 1.5,
+              borderColor: mode === "dark" ? "rgba(255,255,255,0.1)" : "#ddd",
+            }}
+          />
 
           {/* عناصر القائمة */}
           <List>
@@ -372,7 +407,7 @@ if (loadingUser) {
                     setDrawerOpen(false);
                   }}
                   sx={{
-                    borderRadius: "6px",
+                    borderRadius: "8px",
                     "&:hover": {
                       backgroundColor:
                         mode === "dark"
@@ -381,16 +416,20 @@ if (loadingUser) {
                     },
                   }}
                 >
-                  <Box sx={{
-                    mr: 1.5,
-                    color: mode === "dark" ? BRAND.gold : BRAND.purple,
-                  }}>
+                  <Box
+                    sx={{
+                      mr: 1.5,
+                      color: link.to === "/bookings-hub"
+                        ? (mode === "dark" ? BRAND.gold : BRAND.purple)
+                        : (mode === "dark" ? BRAND.textDark : "#555"),
+                    }}
+                  >
                     {link.icon}
                   </Box>
                   <ListItemText
                     primary={link.label}
                     primaryTypographyProps={{
-                      fontWeight: 500,
+                      fontWeight: 600,
                       fontSize: "1rem",
                     }}
                   />
