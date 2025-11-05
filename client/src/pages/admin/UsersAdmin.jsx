@@ -9,7 +9,6 @@ import {
   Grid,
   Switch,
   FormControlLabel,
-  Chip,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -26,13 +25,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
 import PhoneIcon from "@mui/icons-material/Phone";
-import WcIcon from "@mui/icons-material/Wc";
-import HeightIcon from "@mui/icons-material/Height";
-import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
-import CakeIcon from "@mui/icons-material/Cake";
 import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 
 export default function UsersAdmin() {
