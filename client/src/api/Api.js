@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const Api = axios.create({
   baseURL:
     process.env.NODE_ENV === "production"
-      ? "https://fateness-production.up.railway.app"
+      ? "https://fatinness-server-production.up.railway.app"
       : "http://localhost:4000",
 });
 
