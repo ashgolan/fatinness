@@ -34,7 +34,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import ControlCenter from "./pages/admin/ControlCenter";
 import AdminSchedule from "./pages/admin/AdminSchedule";
 import BookingsHub from "./pages/BookingsHub";
-import Splash from "./pages/Splash";
+// import Splash from "./pages/Splash";
 
 export default function App() {
   return (
@@ -63,7 +63,7 @@ export default function App() {
 
         <div style={{ flex: 1, padding: "16px" }}>
           <Routes>
-            <Route path="/" element={<Splash />} />
+            {/* <Route path="/" element={<Splash />} /> */}
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
