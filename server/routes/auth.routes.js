@@ -5,7 +5,7 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
   apiLimiter,
   loginLimiter,
-} from "../middlewares/rateLimit.middleware.js";
+} from "../middlewares/temp.middleware.js";
 
 const router = express.Router();
 
