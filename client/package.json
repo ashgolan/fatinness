@@ -15,6 +15,7 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.12.2",
     "chart.js": "^4.5.1",
+    "firebase": "^12.5.0",
     "jotai": "^2.15.0",
     "js-cookie": "^3.0.5",
     "jspdf": "^3.0.3",
@@ -28,12 +29,12 @@
     "serve": "^14.2.5",
     "web-vitals": "^2.1.4"
   },
-"scripts": {
-  "start": "react-scripts start",
-  "build": "CI=false react-scripts build",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
-},
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "CI=false react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "eslintConfig": {
     "extends": [
       "react-app",

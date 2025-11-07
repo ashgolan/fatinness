@@ -1,3 +1,4 @@
+// client/src/pages/admin/AdminSettings.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -12,27 +13,41 @@ import {
   Fade,
   Divider,
 } from "@mui/material";
+import { uploadBrandImage } from "../../firebase/uploadImage";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
-import BuildIcon from "@mui/icons-material/Build"; // رمز الصيانة
-import CheckCircleIcon from "@mui/icons-material/CheckCircle"; // رمز التشغيل
+import BuildIcon from "@mui/icons-material/Build";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [fadeKey, setFadeKey] = useState(0);
-
   const [maintenance, setMaintenance] = useState(false);
   const [loadingMaintenance, setLoadingMaintenance] = useState(false);
 
   // 🔹 جلب الإعدادات العامة
   const fetchSettings = async () => {
+    console.log("🚀 بدء تحميل الإعدادات...");
     try {
       const { data } = await Api.get("/admin/settings");
-      setSettings(data);
-    } catch {
+      console.log("📦 البيانات القادمة من السيرفر:", data);
+      
+      const settingsData = Array.isArray(data) ? data[0] : data.settings || data;
+      console.log("🧩 رابط الكارت من السيرفر:", settingsData.cardUrl || settingsData.CardUrl);
+
+
+      // ✅ توحيد الأسماء (LogoUrl/CardUrl → logoUrl/cardUrl)
+      const normalized = {
+        ...settingsData,
+        logoUrl: settingsData.logoUrl || settingsData.LogoUrl,
+        cardUrl: settingsData.cardUrl || settingsData.CardUrl,
+      };
+
+      setSettings(normalized);
+    } catch (error) {
+      console.error("❌ فشل تحميل الإعدادات:", error);
       toast.error("فشل تحميل الإعدادات");
     } finally {
       setLoading(false);
@@ -67,8 +82,8 @@ export default function AdminSettings() {
     }
   };
 
-  // 🖼️ رفع الشعار
-  const handleLogoUpload = async () => {
+  // 🔹 دالة عامة لرفع أي نوع من الصور (logo أو card)
+  const handleImageUpload = async (type) => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
@@ -76,27 +91,36 @@ export default function AdminSettings() {
       const file = e.target.files[0];
       if (!file) return;
 
+      // ✅ عرض معاينة فورية
       const preview = URL.createObjectURL(file);
-      setSettings((prev) => ({ ...prev, previewLogo: preview }));
-      setFadeKey((prev) => prev + 1);
+      setSettings((prev) => ({
+        ...prev,
+        [type === "logo" ? "previewLogo" : "previewCard"]: preview,
+      }));
 
       setUploading(true);
       try {
-        const formData = new FormData();
-        formData.append("logo", file);
-        const { data } = await Api.post("/admin/settings/logo", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+        console.log(`🔥 رفع ${type} إلى Firebase:`, file.name);
+
+        // ✅ رفع الصورة إلى Firebase
+        const downloadURL = await uploadBrandImage(file, type);
+
+        // ✅ تحديث قاعدة البيانات
+        await Api.put("/admin/settings", {
+          [`${type}Url`]: downloadURL,
         });
 
+        // ✅ تحديث الحالة لعرض الصورة فورًا
         setSettings((prev) => ({
           ...prev,
-          logoUrl: data.logoUrl,
-          previewLogo: null,
+          [`${type}Url`]: downloadURL,
+          [`preview${type === "logo" ? "Logo" : "Card"}`]: null,
         }));
-        setFadeKey((prev) => prev + 1);
-        toast.success("تم رفع الشعار بنجاح ✅");
-      } catch {
-        toast.error("فشل رفع الشعار ❌");
+
+        toast.success(`✅ تم رفع ${type === "logo" ? "الشعار" : "صورة الكارت"} بنجاح`);
+      } catch (error) {
+        console.error(error);
+        toast.error(`❌ فشل رفع ${type === "logo" ? "الشعار" : "صورة الكارت"}`);
       } finally {
         setUploading(false);
       }
@@ -104,7 +128,7 @@ export default function AdminSettings() {
     input.click();
   };
 
-  // ⚙️ تفعيل أو إيقاف وضع الصيانة
+  // ⚙️ تبديل وضع الصيانة
   const toggleMaintenance = async () => {
     const confirmMsg = maintenance
       ? "هل ترغبين في إيقاف وضع الصيانة وتشغيل النظام؟"
@@ -137,15 +161,61 @@ export default function AdminSettings() {
       </Typography>
 
       <Paper sx={{ p: 3 }}>
-        {/* 🖼️ قسم الشعار */}
+        {/* 🪪 صورة الكارت */}
         <Box sx={{ textAlign: "center", mb: 3 }}>
-          <Fade in key={fadeKey} timeout={500}>
+          <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+            🪪 صورة الكارت
+          </Typography>
+
+          <Fade in={!!(settings.previewCard || settings.cardUrl)} timeout={500}>
+            <Box
+              sx={{
+                width: 220,
+                height: 140,
+                mx: "auto",
+                mb: 1.5,
+                borderRadius: 2,
+                overflow: "hidden",
+                border: "2px solid #ddd",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                backgroundColor: "#f9f9f9",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {settings.previewCard || settings.cardUrl ? (
+                <img
+                  src={settings.previewCard || settings.cardUrl}
+                  alt="Card Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  لا توجد صورة حالية
+                </Typography>
+              )}
+            </Box>
+          </Fade>
+
+          <Button
+            variant="outlined"
+            disabled={uploading}
+            onClick={() => handleImageUpload("card")}
+          >
+            {uploading ? <CircularProgress size={22} /> : "🪪 تغيير صورة الكارت"}
+          </Button>
+        </Box>
+
+        {/* 🖼️ شعار النادي */}
+        <Box sx={{ textAlign: "center", mb: 3 }}>
+          <Fade in={!!(settings.previewLogo || settings.logoUrl)} timeout={500}>
             <Avatar
-              src={
-                settings.previewLogo
-                  ? settings.previewLogo
-                  : settings.logoUrl || ""
-              }
+              src={settings.previewLogo || settings.logoUrl || ""}
               alt="Club Logo"
               sx={{
                 width: 120,
@@ -162,29 +232,25 @@ export default function AdminSettings() {
           <Button
             variant="outlined"
             disabled={uploading}
-            onClick={handleLogoUpload}
+            onClick={() => handleImageUpload("logo")}
           >
             {uploading ? <CircularProgress size={22} /> : "📸 تغيير الشعار"}
           </Button>
         </Box>
 
-        {/* 🧾 باقي الإعدادات */}
+        {/* 🧾 الإعدادات العامة */}
         <TextField
           fullWidth
           label="🏷️ اسم النادي"
-          value={settings.clubName}
-          onChange={(e) =>
-            setSettings({ ...settings, clubName: e.target.value })
-          }
+          value={settings.clubName || ""}
+          onChange={(e) => setSettings({ ...settings, clubName: e.target.value })}
           sx={{ mb: 2 }}
         />
         <TextField
           fullWidth
           label="📞 رقم التواصل"
-          value={settings.contactNumber}
-          onChange={(e) =>
-            setSettings({ ...settings, contactNumber: e.target.value })
-          }
+          value={settings.contactNumber || ""}
+          onChange={(e) => setSettings({ ...settings, contactNumber: e.target.value })}
           sx={{ mb: 2 }}
         />
         <TextField
@@ -192,27 +258,17 @@ export default function AdminSettings() {
           multiline
           minRows={3}
           label="💬 الرسالة التلقائية"
-          value={settings.autoMessage}
-          onChange={(e) =>
-            setSettings({ ...settings, autoMessage: e.target.value })
-          }
+          value={settings.autoMessage || ""}
+          onChange={(e) => setSettings({ ...settings, autoMessage: e.target.value })}
           sx={{ mb: 2 }}
         />
 
         {/* 🧩 السماح بالحجوزات الإضافية */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            mt: 4,
-            mb: 3,
-          }}
-        >
+        <Box sx={{ textAlign: "center", mt: 4, mb: 3 }}>
           <FormControlLabel
             control={
               <Switch
-                checked={settings.allowExtraBookingsByDefault}
+                checked={!!settings.allowExtraBookingsByDefault}
                 onChange={(e) =>
                   setSettings({
                     ...settings,
@@ -235,7 +291,7 @@ export default function AdminSettings() {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* ⚙️ زر وضع الصيانة */}
+        {/* ⚙️ وضع الصيانة */}
         <Box sx={{ textAlign: "center", mt: 4 }}>
           <Typography
             variant="subtitle1"
@@ -288,21 +344,15 @@ export default function AdminSettings() {
                 transition: "width 0.4s ease",
                 borderRadius: "40px",
               },
-              "&:hover::before": {
-                width: "100%",
-              },
+              "&:hover::before": { width: "100%" },
               "&:hover": {
                 color: "#fff",
                 boxShadow: maintenance
                   ? "0 0 12px rgba(211,47,47,0.4)"
                   : "0 0 12px rgba(25,118,210,0.4)",
               },
-              "& .MuiButton-startIcon": {
-                zIndex: 1,
-              },
-              "& span": {
-                zIndex: 1,
-              },
+              "& .MuiButton-startIcon": { zIndex: 1 },
+              "& span": { zIndex: 1 },
             }}
           >
             {loadingMaintenance ? (

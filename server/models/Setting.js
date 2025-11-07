@@ -6,6 +6,7 @@ const settingSchema = new mongoose.Schema(
     contactNumber: { type: String, default: "" },
     autoMessage: { type: String, default: "مرحباً بك في نادينا الرياضي 💪" },
     logoUrl: { type: String, default: "" },
+    cardUrl: { type: String, default: "" }, // ✅ تمت إضافته هنا
     allowExtraBookingsByDefault: { type: Boolean, default: true },
   },
   { timestamps: true }

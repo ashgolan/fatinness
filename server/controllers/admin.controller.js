@@ -35,7 +35,9 @@ export const createWeekTemplate = async (req, res) => {
   try {
     const { name, slots } = req.body;
     if (!name || !slots?.length) {
-      return res.status(400).json({ message: "Template name and slots required" });
+      return res
+        .status(400)
+        .json({ message: "Template name and slots required" });
     }
     const template = await WeekTemplate.create({ name, slots });
     res.status(201).json({ message: "Template created", template });
@@ -52,7 +54,8 @@ export const applyTemplate = async (req, res) => {
   try {
     const { templateId, startDate } = req.body;
     const template = await WeekTemplate.findById(templateId);
-    if (!template) return res.status(404).json({ message: "Template not found" });
+    if (!template)
+      return res.status(404).json({ message: "Template not found" });
 
     const start = new Date(startDate);
     const createdSlots = [];
@@ -78,11 +81,16 @@ export const applyTemplate = async (req, res) => {
       }
     }
 
-    res.json({ message: "Template applied successfully", created: createdSlots.length });
+    res.json({
+      message: "Template applied successfully",
+      created: createdSlots.length,
+    });
   } catch (error) {
     console.error(error);
     // لا نكرر الرد مرتين
-    res.status(500).json({ message: "Error applying template", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error applying template", error: error.message });
   }
 };
 
@@ -153,7 +161,9 @@ export const exportAttendanceReport = async (req, res) => {
         username: b.user?.username || "—",
         email: b.user?.email || "—",
         phone: b.user?.phone || "—",
-        date: b.slot?.date ? new Date(b.slot.date).toLocaleDateString("ar-EG") : "—",
+        date: b.slot?.date
+          ? new Date(b.slot.date).toLocaleDateString("ar-EG")
+          : "—",
         time: timeStr,
         status: statusStr,
         createdAt: new Date(b.createdAt).toLocaleString("ar-EG"),
@@ -162,7 +172,10 @@ export const exportAttendanceReport = async (req, res) => {
 
     const csvData = csv.getHeaderString() + csv.stringifyRecords(records);
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
-    res.setHeader("Content-Disposition", "attachment; filename=bookings-report.csv");
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=bookings-report.csv"
+    );
     res.status(200).end("\uFEFF" + csvData); // BOM لترميز عربي صحيح
   } catch (error) {
     console.error("خطأ أثناء تصدير التقرير:", error);
@@ -275,7 +288,6 @@ export const getDashboardStats = async (req, res) => {
   }
 };
 
-
 /**
  * 🔹 جلب جميع القوالب الأسبوعية
  */
@@ -295,7 +307,8 @@ export const getWeekTemplates = async (req, res) => {
 export const deleteWeekTemplate = async (req, res) => {
   try {
     const template = await WeekTemplate.findByIdAndDelete(req.params.id);
-    if (!template) return res.status(404).json({ message: "Template not found" });
+    if (!template)
+      return res.status(404).json({ message: "Template not found" });
     res.json({ message: "Template deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -325,7 +338,9 @@ export const getSchedulerStatus = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
-      .select("username email phone allowExtraBookings role isBlocked createdAt")
+      .select(
+        "username email phone allowExtraBookings role isBlocked createdAt"
+      )
       .sort({ createdAt: -1 });
 
     const usersWithBookings = await Promise.all(
@@ -363,7 +378,9 @@ export const toggleUserBlock = async (req, res) => {
     );
 
     return res.json({
-      message: newStatus ? "🚫 تم حظر المشتركة بنجاح" : "🔓 تم إلغاء الحظر عن المشتركة",
+      message: newStatus
+        ? "🚫 تم حظر المشتركة بنجاح"
+        : "🔓 تم إلغاء الحظر عن المشتركة",
       user: updatedUser,
     });
   } catch (error) {
@@ -381,7 +398,9 @@ export const sendCustomNotification = async (req, res) => {
     const adminUser = req.user?._id;
 
     if (!title || !body) {
-      return res.status(400).json({ message: "الرجاء إدخال العنوان والمحتوى." });
+      return res
+        .status(400)
+        .json({ message: "الرجاء إدخال العنوان والمحتوى." });
     }
 
     let users = [];
@@ -392,15 +411,19 @@ export const sendCustomNotification = async (req, res) => {
       });
     } else {
       const user = await User.findById(target);
-      if (!user) return res.status(404).json({ message: "لم يتم العثور على المشتركة." });
+      if (!user)
+        return res.status(404).json({ message: "لم يتم العثور على المشتركة." });
       users = [user];
     }
 
-    if (!users.length) return res.status(400).json({ message: "لا توجد مشتركات مستهدفات." });
+    if (!users.length)
+      return res.status(400).json({ message: "لا توجد مشتركات مستهدفات." });
 
     const allTokens = users.flatMap((u) => u.fcmTokens || []);
     if (!allTokens.length) {
-      return res.status(400).json({ message: "لا توجد أجهزة مسجلة لاستقبال الإشعارات." });
+      return res
+        .status(400)
+        .json({ message: "لا توجد أجهزة مسجلة لاستقبال الإشعارات." });
     }
 
     const payload = { title, body };
@@ -450,45 +473,82 @@ export const getNotificationsHistory = async (req, res) => {
  */
 export const getSettings = async (req, res) => {
   try {
+    // 🔹 البحث عن الإعدادات
     let settings = await Setting.findOne();
-    if (!settings) settings = await Setting.create({});
+
+    // 🔹 إذا لم توجد، أنشئ إعدادات جديدة فارغة وأعدها مباشرة
+    if (!settings) {
+      settings = await Setting.create({
+        clubName: "",
+        contactNumber: "",
+        autoMessage: "",
+        allowExtraBookingsByDefault: false,
+        logoUrl: "",
+        cardUrl: "",
+      });
+      console.log("✅ تم إنشاء إعدادات جديدة افتراضيًا");
+    }
+
+    // ✅ إعادة الإعدادات كما هي (وليس داخل كائن)
     res.json(settings);
   } catch (error) {
-    console.error(error);
+    console.error("❌ خطأ أثناء جلب الإعدادات:", error);
     res.status(500).json({ message: "فشل جلب الإعدادات" });
   }
 };
+
 
 /**
  * 🔹 تحديث الإعدادات
  */
 export const updateSettings = async (req, res) => {
   try {
-    const { clubName, contactNumber, autoMessage, allowExtraBookingsByDefault } = req.body;
+    const {
+      clubName,
+      contactNumber,
+      autoMessage,
+      allowExtraBookingsByDefault,
+      logoUrl,
+      cardUrl, // ✅ أضفناه هنا مباشرة بدل req.body.cardUrl
+    } = req.body;
 
+    // ✅ جلب الإعدادات الحالية أو إنشاء جديدة إن لم توجد
     let settings = await Setting.findOne();
     if (!settings) settings = new Setting({});
 
-    settings.clubName = clubName ?? settings.clubName;
-    settings.contactNumber = contactNumber ?? settings.contactNumber;
-    settings.autoMessage = autoMessage ?? settings.autoMessage;
-    settings.allowExtraBookingsByDefault =
-      allowExtraBookingsByDefault ?? settings.allowExtraBookingsByDefault;
+    // ✅ تحديث الحقول الأساسية فقط إن وُجدت قيم جديدة
+    if (clubName !== undefined) settings.clubName = clubName;
+    if (contactNumber !== undefined) settings.contactNumber = contactNumber;
+    if (autoMessage !== undefined) settings.autoMessage = autoMessage;
+    if (allowExtraBookingsByDefault !== undefined)
+      settings.allowExtraBookingsByDefault = allowExtraBookingsByDefault;
 
+    // ✅ تحديث روابط الصور
+    if (logoUrl !== undefined) settings.logoUrl = logoUrl;
+    if (cardUrl !== undefined) settings.cardUrl = cardUrl;
+
+    // ✅ حفظ التغييرات
     await settings.save();
-    res.json({ message: "تم تحديث الإعدادات بنجاح ✅", settings });
+
+    // ✅ إعادة الإعدادات كاملة بعد التحديث
+    res.json({
+      message: "تم تحديث الإعدادات بنجاح ✅",
+      settings,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("❌ خطأ أثناء تحديث الإعدادات:", error);
     res.status(500).json({ message: "فشل تحديث الإعدادات" });
   }
 };
+
 
 /**
  * 🔹 رفع شعار جديد للنادي
  */
 export const uploadLogo = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: "يرجى اختيار صورة للشعار" });
+    if (!req.file)
+      return res.status(400).json({ message: "يرجى اختيار صورة للشعار" });
 
     const baseUrl = `${req.protocol}://${req.get("host")}`;
     const logoUrl = `${baseUrl}/uploads/${req.file.filename}`;
@@ -516,7 +576,8 @@ export const updateUserByAdmin = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { username, email, phone, gender, height, weight, age, role } = req.body;
+    const { username, email, phone, gender, height, weight, age, role } =
+      req.body;
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -616,7 +677,7 @@ export const getUserBookings = async (req, res) => {
   try {
     const { id } = req.params; // userId
     const bookings = await Booking.find({ user: id })
-  .populate("slot", "date startTime endTime isBlocked") // ← أضف isBlocked هنا
+      .populate("slot", "date startTime endTime isBlocked") // ← أضف isBlocked هنا
       .sort({ "slot.date": -1 });
 
     res.json(bookings);
@@ -626,14 +687,15 @@ export const getUserBookings = async (req, res) => {
   }
 };
 
-
 export const adminGetSlotBookings = async (req, res) => {
   try {
     // ✅ تحويل id إلى ObjectId لضمان التطابق الصحيح
     const slotId = new mongoose.Types.ObjectId(req.params.id);
 
-    const bookings = await Booking.find({ slot: slotId })
-      .populate("user", "username phone name email");
+    const bookings = await Booking.find({ slot: slotId }).populate(
+      "user",
+      "username phone name email"
+    );
 
     // 🔹 إرسال النتيجة بالشكل المتوقع للواجهة
     res.json({ bookings });
