@@ -1,5 +1,4 @@
-// client/src/pages/Login.jsx
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -14,7 +13,8 @@ import { Api } from "../api/Api";
 import { setToken } from "../utils/tokensStorage";
 import { UserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
-import { useThemeMode } from "../context/ThemeContext"; // ✅ نظام الثيم العام
+import { useThemeMode } from "../context/ThemeContext";
+import { useBrand } from "../context/BrandContext";
 
 import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
@@ -25,6 +25,7 @@ import LoginIcon from "@mui/icons-material/Login";
 export default function Login() {
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
+  const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ نأخذ الشعار وحالة التحميل
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,10 +36,14 @@ export default function Login() {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
 
-  const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
-  const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
-  const fallbackLogo = "https://via.placeholder.com/80x80.png?text=F";
-  const [imgSrc, setImgSrc] = React.useState(logoUrl);
+  // ✅ شعار افتراضي فوري
+  const fallbackLogo = "/uploads/logo-placeholder.png";
+  const [imgSrc, setImgSrc] = useState(fallbackLogo);
+
+  // ✅ عند تحديث الشعار من BrandContext، نحدّث الصورة فوراً
+  useEffect(() => {
+    if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
+  }, [logoUrl, loadingBrand]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -65,10 +70,11 @@ export default function Login() {
       sx={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
+        alignItems: { xs: "flex-start", sm: "center" }, // ✅ الأعلى في الموبايل، المنتصف في الشاشات الكبيرة
         justifyContent: "center",
         px: 2,
         py: 4,
+        pt: { xs: 4, sm: 4 }, // ✅ مسافة من الأعلى في الموبايل
         position: "relative",
         overflow: "hidden",
         background: isDark
@@ -77,7 +83,7 @@ export default function Login() {
         transition: "all 0.4s ease",
       }}
     >
-      {/* دوائر ضبابية متحركة */}
+      {/* خلفيات ضبابية */}
       <Box
         sx={{
           position: "absolute",
@@ -136,7 +142,7 @@ export default function Login() {
           },
         }}
       >
-        {/* الشعار والعنوان */}
+        {/* ✅ الشعار */}
         <Box sx={{ textAlign: "center", mb: 4 }}>
           <Box
             sx={{
@@ -144,7 +150,6 @@ export default function Login() {
               alignItems: "center",
               justifyContent: "center",
               mb: 2,
-              position: "relative",
               transition: "transform 0.6s ease",
               "&:hover": { transform: "scale(1.05) rotate(5deg)" },
             }}
@@ -158,6 +163,8 @@ export default function Login() {
                 height: 80,
                 borderRadius: "50%",
                 objectFit: "cover",
+                transition: "opacity 0.6s ease",
+                opacity: loadingBrand ? 0.5 : 1,
                 border: isDark ? "3px solid #222" : "3px solid #fff",
                 boxShadow: isDark
                   ? "0 6px 20px rgba(251,192,45,0.3)"
@@ -165,6 +172,7 @@ export default function Login() {
               }}
             />
           </Box>
+
           <Typography
             variant="h4"
             sx={{
@@ -178,7 +186,7 @@ export default function Login() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Fatiness Studio
+            Fateness Studio
           </Typography>
           <Typography
             variant="body1"
@@ -192,27 +200,12 @@ export default function Login() {
           </Typography>
         </Box>
 
-        {/* النموذج */}
+        {/* نموذج تسجيل الدخول */}
         <Box
           component="form"
           onSubmit={onSubmit}
           sx={{ display: "grid", gap: 2.5 }}
         >
-          <style>
-            {`
-/* إزالة لون الخلفية الأزرق من الحقول المعبأة تلقائيًا */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
-  box-shadow: 0 0 0px 1000px transparent inset !important;
-  background-color: transparent !important;
-  -webkit-text-fill-color: inherit !important;
-  transition: background-color 5000s ease-in-out 0s !important;
-}
-`}
-          </style>
           <TextField
             fullWidth
             label="البريد الإلكتروني"
@@ -235,9 +228,7 @@ input:-webkit-autofill:active {
                 : "rgba(160, 24, 96, 0.05)",
               borderRadius: "10px",
               "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: isDark ? "#444" : "#ddd",
-                },
+                "& fieldset": { borderColor: isDark ? "#444" : "#ddd" },
                 "&:hover fieldset": {
                   borderColor: isDark ? BRAND.gold : BRAND.purple,
                 },
@@ -288,9 +279,7 @@ input:-webkit-autofill:active {
                 : "rgba(160, 24, 96, 0.05)",
               borderRadius: "10px",
               "& .MuiOutlinedInput-root": {
-                "& fieldset": {
-                  borderColor: isDark ? "#444" : "#ddd",
-                },
+                "& fieldset": { borderColor: isDark ? "#444" : "#ddd" },
                 "&:hover fieldset": {
                   borderColor: isDark ? BRAND.gold : BRAND.purple,
                 },
@@ -324,11 +313,7 @@ input:-webkit-autofill:active {
               }, ${isDark ? BRAND.purple : BRAND.gold})`,
               color: "#fff",
               textTransform: "none",
-              transition: "0.3s",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "10px", // ✅ هذه تضبط المسافة بين الأيقونة والكلمة
+              gap: "10px",
               "&:hover": {
                 transform: "translateY(-2px)",
                 boxShadow: isDark
@@ -346,16 +331,32 @@ input:-webkit-autofill:active {
               textAlign: "center",
               mt: 3,
               color: isDark ? BRAND.subDark : "#666",
-              lineHeight: 1.6,
             }}
           >
             ليس لديكِ حساب؟{" "}
             <Link
-              to="/register"
+              to="#"
+              onClick={(e) => {
+                e.preventDefault();
+                toast.info("يرجى التواصل مع الإدارة لإنشاء حساب جديد 🙏", {
+                  position: "top-center",
+                  autoClose: 4000,
+                  style: {
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    direction: "rtl",
+                    background: isDark ? "#333" : "#fff8e1",
+                    color: isDark ? BRAND.gold : "#a01860",
+                    border: `2px solid ${isDark ? BRAND.gold : BRAND.purple}`,
+                    borderRadius: "10px",
+                  },
+                });
+              }}
               style={{
                 color: isDark ? BRAND.gold : BRAND.purple,
                 fontWeight: 700,
                 textDecoration: "none",
+                cursor: "pointer",
               }}
               onMouseEnter={(e) =>
                 (e.target.style.textDecoration = "underline")
@@ -367,30 +368,6 @@ input:-webkit-autofill:active {
           </Typography>
         </Box>
       </Paper>
-
-      <Typography
-        variant="body2"
-        sx={{
-          position: "absolute",
-          bottom: 14,
-          color: isDark ? BRAND.subDark : "rgba(0,0,0,0.55)",
-          fontSize: "0.85rem",
-          textAlign: "center",
-          width: "100%",
-          letterSpacing: "0.3px",
-          lineHeight: 1.6,
-        }}
-      >
-        © 2025 &nbsp;
-        <b
-          style={{
-            color: isDark ? BRAND.gold : BRAND.purple,
-          }}
-        >
-          Fateness Studio
-        </b>{" "}
-        - استوديو اللياقة النسائي
-      </Typography>
     </Box>
   );
 }

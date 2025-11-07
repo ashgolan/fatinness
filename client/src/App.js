@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 // 🔹 مكونات التصميم
-import { CssBaseline } from "@mui/material";
+import { CssBaseline, GlobalStyles } from "@mui/material";
 
 // 🔹 مزود الوضع العام
 import { ThemeModeProvider } from "./context/ThemeContext"; // 🟣 هذا هو المزود الذي أنشأناه
@@ -39,6 +39,15 @@ export default function App() {
   return (
     // 🟣 لفّ التطبيق بالكامل داخل ThemeModeProvider بدلاً من ThemeProvider المحلي
     <ThemeModeProvider>
+      <GlobalStyles
+        styles={{
+          "input:-webkit-autofill": {
+            WebkitBoxShadow: "0 0 0 1000px transparent inset !important",
+            WebkitTextFillColor: "inherit !important",
+            transition: "background-color 9999s ease-in-out 0s",
+          },
+        }}
+      />
       <CssBaseline />
 
       <div
@@ -62,7 +71,7 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/bookings" element={<Booking />} />
               <Route path="/my-bookings" element={<MyBookings />} />
-              <Route path="/bookings-Hub" element={<BookingsHub/>} />
+              <Route path="/bookings-Hub" element={<BookingsHub />} />
               <Route path="/subscription" element={<Subscription />} />
             </Route>
 

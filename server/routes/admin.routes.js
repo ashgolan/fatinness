@@ -23,11 +23,18 @@ import {
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { adminMiddleware } from "../middlewares/admin.middleware.js";
-import { admin } from "googleapis/build/src/apis/admin/index.js";
 import { updateUserRole } from "../controllers/auth.controller.js";
 
 const router = express.Router();
 
+//
+// ⚙️ الإعدادات (عام)
+// 🔓 هذا المسار مسموح لأي مستخدم (حتى بدون تسجيل الدخول)
+router.get("/settings", getSettings);
+
+//
+// 🧩 المسارات المحمية بعد تسجيل الدخول كأدمن
+//
 router.use(authMiddleware);
 router.use(adminMiddleware);
 
@@ -53,14 +60,13 @@ router.get("/dashboard", getDashboardStats);
 router.get("/reports/attendance", exportAttendanceReport);
 
 //
-// ⚙️ الإعدادات
+// ⚙️ الإعدادات (محمي للتعديل فقط)
 //
-router.get("/settings", getSettings);
 router.put("/settings", updateSettings);
 router.post("/settings/logo", upload.single("logo"), uploadLogo);
 
-router.get("/bookings/summary", authMiddleware, adminMiddleware, getBookingsSummary);
-router.get("/bookings/user/:id", authMiddleware, adminMiddleware, getUserBookings);
+router.get("/bookings/summary", getBookingsSummary);
+router.get("/bookings/user/:id", getUserBookings);
 
 //
 // 🔔 الإشعارات
@@ -68,13 +74,13 @@ router.get("/bookings/user/:id", authMiddleware, adminMiddleware, getUserBooking
 router.post("/notify", sendCustomNotification);
 router.get("/notifications", getNotificationsHistory);
 
-router.put("/users/role", adminMiddleware, updateUserRole);
+router.put("/users/role", updateUserRole);
 
 //
 // 🕓 حالة المجدول (Scheduler)
 //
 router.get("/scheduler/status", getSchedulerStatus);
 
-router.put("/users/:id", authMiddleware, adminMiddleware, updateUserByAdmin);
+router.put("/users/:id", updateUserByAdmin);
 
 export default router;

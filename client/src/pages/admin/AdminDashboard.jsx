@@ -3,7 +3,8 @@ import { Box, Paper, Typography, CircularProgress } from "@mui/material";
 import { Line } from "react-chartjs-2";
 import { toast } from "react-toastify";
 import { Api } from "../../api/Api";
-import { useThemeMode } from "../../context/ThemeContext"; // ✅ الثيم العام
+import { useThemeMode } from "../../context/ThemeContext";
+import { useBrand } from "../../context/BrandContext"; // ✅ شعار النادي
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -44,16 +45,17 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activePercentAnim, setActivePercentAnim] = useState(0);
   const [cancelledPercentAnim, setCancelledPercentAnim] = useState(0);
-  const { mode, BRAND } = useThemeMode(); // ✅ استخدام الثيم
+  const { mode, BRAND } = useThemeMode();
+  const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ الشعار من السياق
   const isDark = mode === "dark";
 
-  const BASE_URL =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_URL) ||
-    process.env?.VITE_API_URL ||
-    "http://localhost:4000";
-  const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
-  const fallbackLogo = "https://via.placeholder.com/72x72.png?text=F";
-  const [imgSrc, setImgSrc] = useState(logoUrl);
+  const fallbackLogo = "/uploads/logo-placeholder.png";
+  const [imgSrc, setImgSrc] = useState(fallbackLogo);
+
+  // ✅ عند توفر الشعار من السياق نحدّث الصورة
+  useEffect(() => {
+    if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
+  }, [logoUrl, loadingBrand]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -79,7 +81,9 @@ export default function AdminDashboard() {
         0
       );
       const total = totalActive + totalCancelled;
-      const activePercent = total ? ((totalActive / total) * 100).toFixed(1) : 0;
+      const activePercent = total
+        ? ((totalActive / total) * 100).toFixed(1)
+        : 0;
       const cancelledPercent = total
         ? ((totalCancelled / total) * 100).toFixed(1)
         : 0;
@@ -130,7 +134,10 @@ export default function AdminDashboard() {
   const chartOptions = {
     responsive: true,
     plugins: {
-      legend: { position: "top", labels: { color: isDark ? "#f3e5f5" : "#444" } },
+      legend: {
+        position: "top",
+        labels: { color: isDark ? "#f3e5f5" : "#444" },
+      },
       tooltip: {
         backgroundColor: isDark ? "#2a2139" : "#fff8fc",
         titleColor: isDark ? BRAND.gold : "#9c27b0",
@@ -199,6 +206,8 @@ export default function AdminDashboard() {
             objectFit: "cover",
             backgroundColor: "#fff",
             boxShadow: "0 0 10px rgba(255,255,255,0.5)",
+            opacity: loadingBrand ? 0.5 : 1,
+            transition: "opacity 0.6s ease",
           }}
         />
       </Paper>
@@ -286,7 +295,52 @@ export default function AdminDashboard() {
 
           {/* 📈 المخطط */}
           {chartData && (
-            <Box sx={{ mt: 6 }}>
+            <Box sx={{ mt: 6, position: "relative" }}>
+              {/* 🖼️ شعار صغير في الزاوية العليا */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: -25,
+                  right: 10,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  background: isDark
+                    ? "rgba(30, 20, 40, 0.5)"
+                    : "rgba(255, 255, 255, 0.6)",
+                  borderRadius: "40px",
+                  px: 1.8,
+                  py: 0.8,
+                  boxShadow: isDark
+                    ? "0 0 10px rgba(0,0,0,0.6)"
+                    : "0 0 8px rgba(200,150,255,0.3)",
+                  backdropFilter: "blur(6px)",
+                  zIndex: 2,
+                }}
+              >
+                <img
+                  src={imgSrc}
+                  alt="Brand Logo"
+                  onError={() => setImgSrc(fallbackLogo)}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    backgroundColor: "#fff",
+                  }}
+                />
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    color: isDark ? BRAND.gold : "#7b1fa2",
+                  }}
+                >
+                  {stats?.clubName || "Fateness"}
+                </Typography>
+              </Box>
+
               <Typography
                 variant="h6"
                 sx={{

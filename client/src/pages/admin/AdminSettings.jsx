@@ -1,4 +1,3 @@
-// client/src/pages/admin/AdminSettings.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -18,8 +17,11 @@ import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useBrand } from "../../context/BrandContext"; // ✅ لا نغيرها
 
 export default function AdminSettings() {
+  const { updateBrand } = useBrand(); // ✅ تحديث الشعار والكارت في كل التطبيق
+
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -29,16 +31,10 @@ export default function AdminSettings() {
 
   // 🔹 جلب الإعدادات العامة
   const fetchSettings = async () => {
-    console.log("🚀 بدء تحميل الإعدادات...");
     try {
       const { data } = await Api.get("/admin/settings");
-      console.log("📦 البيانات القادمة من السيرفر:", data);
-      
       const settingsData = Array.isArray(data) ? data[0] : data.settings || data;
-      console.log("🧩 رابط الكارت من السيرفر:", settingsData.cardUrl || settingsData.CardUrl);
 
-
-      // ✅ توحيد الأسماء (LogoUrl/CardUrl → logoUrl/cardUrl)
       const normalized = {
         ...settingsData,
         logoUrl: settingsData.logoUrl || settingsData.LogoUrl,
@@ -69,7 +65,7 @@ export default function AdminSettings() {
     fetchMaintenance();
   }, []);
 
-  // 💾 حفظ الإعدادات
+  // 💾 حفظ الإعدادات النصية
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -82,7 +78,7 @@ export default function AdminSettings() {
     }
   };
 
-  // 🔹 دالة عامة لرفع أي نوع من الصور (logo أو card)
+  // 🔹 رفع الصور (الشعار أو الكارت)
   const handleImageUpload = async (type) => {
     const input = document.createElement("input");
     input.type = "file";
@@ -91,18 +87,18 @@ export default function AdminSettings() {
       const file = e.target.files[0];
       if (!file) return;
 
-      // ✅ عرض معاينة فورية
       const preview = URL.createObjectURL(file);
       setSettings((prev) => ({
         ...prev,
         [type === "logo" ? "previewLogo" : "previewCard"]: preview,
       }));
 
+      toast.info(`جارٍ رفع ${type === "logo" ? "الشعار" : "صورة الكارت"}...`, {
+        autoClose: 1500,
+      });
+
       setUploading(true);
       try {
-        console.log(`🔥 رفع ${type} إلى Firebase:`, file.name);
-
-        // ✅ رفع الصورة إلى Firebase
         const downloadURL = await uploadBrandImage(file, type);
 
         // ✅ تحديث قاعدة البيانات
@@ -110,17 +106,27 @@ export default function AdminSettings() {
           [`${type}Url`]: downloadURL,
         });
 
-        // ✅ تحديث الحالة لعرض الصورة فورًا
+        // ✅ تحديث الحالة محليًا
         setSettings((prev) => ({
           ...prev,
           [`${type}Url`]: downloadURL,
           [`preview${type === "logo" ? "Logo" : "Card"}`]: null,
         }));
 
-        toast.success(`✅ تم رفع ${type === "logo" ? "الشعار" : "صورة الكارت"} بنجاح`);
+        // ✅ تحديث الـ context العام (يُحدث كل الصفحات)
+        updateBrand((prev) => ({
+          ...prev,
+          [`${type}Url`]: downloadURL,
+        }));
+
+        toast.success(
+          `✅ تم رفع ${type === "logo" ? "الشعار" : "صورة الكارت"} بنجاح`
+        );
       } catch (error) {
         console.error(error);
-        toast.error(`❌ فشل رفع ${type === "logo" ? "الشعار" : "صورة الكارت"}`);
+        toast.error(
+          `❌ فشل رفع ${type === "logo" ? "الشعار" : "صورة الكارت"}`
+        );
       } finally {
         setUploading(false);
       }
@@ -128,7 +134,7 @@ export default function AdminSettings() {
     input.click();
   };
 
-  // ⚙️ تبديل وضع الصيانة
+  // ⚙️ وضع الصيانة
   const toggleMaintenance = async () => {
     const confirmMsg = maintenance
       ? "هل ترغبين في إيقاف وضع الصيانة وتشغيل النظام؟"
@@ -182,6 +188,8 @@ export default function AdminSettings() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                opacity: uploading ? 0.6 : 1,
+                transition: "opacity 0.5s ease",
               }}
             >
               {settings.previewCard || settings.cardUrl ? (
@@ -225,6 +233,8 @@ export default function AdminSettings() {
                 border: "3px solid #ccc",
                 boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                 objectFit: "cover",
+                opacity: uploading ? 0.6 : 1,
+                transition: "opacity 0.5s ease",
               }}
             />
           </Fade>
@@ -243,14 +253,18 @@ export default function AdminSettings() {
           fullWidth
           label="🏷️ اسم النادي"
           value={settings.clubName || ""}
-          onChange={(e) => setSettings({ ...settings, clubName: e.target.value })}
+          onChange={(e) =>
+            setSettings({ ...settings, clubName: e.target.value })
+          }
           sx={{ mb: 2 }}
         />
         <TextField
           fullWidth
           label="📞 رقم التواصل"
           value={settings.contactNumber || ""}
-          onChange={(e) => setSettings({ ...settings, contactNumber: e.target.value })}
+          onChange={(e) =>
+            setSettings({ ...settings, contactNumber: e.target.value })
+          }
           sx={{ mb: 2 }}
         />
         <TextField
@@ -259,7 +273,9 @@ export default function AdminSettings() {
           minRows={3}
           label="💬 الرسالة التلقائية"
           value={settings.autoMessage || ""}
-          onChange={(e) => setSettings({ ...settings, autoMessage: e.target.value })}
+          onChange={(e) =>
+            setSettings({ ...settings, autoMessage: e.target.value })
+          }
           sx={{ mb: 2 }}
         />
 
@@ -320,43 +336,18 @@ export default function AdminSettings() {
               borderRadius: "40px",
               textTransform: "none",
               fontWeight: 800,
-              letterSpacing: "0.5px",
-              fontSize: "1rem",
-              position: "relative",
-              overflow: "hidden",
-              transition: "all 0.4s ease",
               borderWidth: 2,
               borderStyle: "solid",
               borderColor: maintenance ? "#d32f2f" : "#1976d2",
               color: maintenance ? "#d32f2f" : "#1976d2",
-              background: "transparent",
-              "&::before": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: 0,
-                height: "100%",
-                background: maintenance
-                  ? "linear-gradient(90deg, #d32f2f, #ff9800)"
-                  : "linear-gradient(90deg, #1976d2, #42a5f5)",
-                zIndex: 0,
-                transition: "width 0.4s ease",
-                borderRadius: "40px",
-              },
-              "&:hover::before": { width: "100%" },
               "&:hover": {
+                backgroundColor: maintenance ? "#d32f2f" : "#1976d2",
                 color: "#fff",
-                boxShadow: maintenance
-                  ? "0 0 12px rgba(211,47,47,0.4)"
-                  : "0 0 12px rgba(25,118,210,0.4)",
               },
-              "& .MuiButton-startIcon": { zIndex: 1 },
-              "& span": { zIndex: 1 },
             }}
           >
             {loadingMaintenance ? (
-              <CircularProgress size={24} color="inherit" sx={{ zIndex: 1 }} />
+              <CircularProgress size={24} color="inherit" />
             ) : maintenance ? (
               "🔓 إيقاف وضع الصيانة"
             ) : (

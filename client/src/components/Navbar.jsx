@@ -15,6 +15,7 @@ import {
   Switch,
   Divider,
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import DashboardIcon from "@mui/icons-material/Dashboard";
@@ -22,26 +23,32 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import HomeIcon from "@mui/icons-material/Home";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth"; // ⬅️ جديد: أيقونة مركز الحجوزات
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 import { clearToken } from "../utils/tokensStorage";
 import { Api } from "../api/Api";
 import { useThemeMode } from "../context/ThemeContext";
+import { useBrand } from "../context/BrandContext"; // ✅ الشعار من هنا
 
 export default function Navbar() {
   const { user, setUser, loadingUser } = useContext(UserContext);
   const { mode, toggleMode, BRAND } = useThemeMode();
+  const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ جلب الشعار وحالة التحميل
+
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
-  // ملاحظة: في Vite عادة نستخدم import.meta.env.VITE_API_URL
-  const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
-  const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
-  const fallbackLogo = "https://via.placeholder.com/36x36.png?text=F";
-  const [imgSrc, setImgSrc] = useState(logoUrl);
+  // ✅ شعار افتراضي ثابت أثناء التحميل أو عند عدم وجود شعار
+  const fallbackLogo = "/uploads/logo-placeholder.png"; // ضع صورة افتراضية محلية جميلة داخل public/uploads
+  const [imgSrc, setImgSrc] = useState(fallbackLogo);
+const location = useLocation();
+
+  useEffect(() => {
+    if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
+  }, [logoUrl, loadingBrand]);
 
   const fetchStatus = async () => {
     try {
@@ -67,38 +74,37 @@ export default function Navbar() {
   const isAdmin = user?.role === "admin";
 
   // =========================
-  // الروابط (سطح مكتب + موبايل)
+  // الروابط
   // =========================
   const navLinks = useMemo(() => {
     if (loadingUser) return [];
 
-    // غير مسجل
-    if (!user) {
-      return [
-        { label: "تسجيل الدخول", to: "/login", icon: <LogoutIcon /> },
-      ];
-    }
+if (!user) {
+  // 🔹 لا نظهر أي زر في صفحات login أو register
+  const currentPath = location.pathname;
+  const isAuthPage =
+    currentPath === "/login" || currentPath === "/register";
 
-    // الأدمن
+  return isAuthPage
+    ? [] // لا شيء في شريط التنقل
+    : [{ label: "تسجيل الدخول", to: "/login", icon: <LogoutIcon /> }];
+}
+
+
     if (user.role === "admin") {
       return [
         { label: "لوحة الإدارة", to: "/admin/control", icon: <DashboardIcon /> },
-        // ⬅️ نضيف مركز الحجوزات للأدمن أيضًا إن أردت تجربة الصفحة
-        { label: "مركز الحجوزات", to: "/bookings-hub", icon: <CalendarMonthIcon /> },
         { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
       ];
     }
 
-    // المستخدم العادي
     return [
       { label: "الرئيسية", to: "/dashboard", icon: <HomeIcon /> },
-      // ✅ الزر الموحد الجديد
       { label: "مركز الحجوزات", to: "/bookings-hub", icon: <CalendarMonthIcon /> },
       { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
     ];
-  }, [user, loadingUser]); 
+  }, [user, loadingUser]);
 
-  // أثناء تحميل المستخدم نظهر شريط بسيط
   if (loadingUser) {
     return (
       <AppBar
@@ -113,9 +119,7 @@ export default function Navbar() {
         <Toolbar sx={{ justifyContent: "center" }}>
           <CircularProgress
             size={22}
-            sx={{
-              color: mode === "dark" ? BRAND.gold : BRAND.purple,
-            }}
+            sx={{ color: mode === "dark" ? BRAND.gold : BRAND.purple }}
           />
         </Toolbar>
       </AppBar>
@@ -163,7 +167,7 @@ export default function Navbar() {
             minHeight: { xs: 56, sm: 64 },
           }}
         >
-          {/* الشعار */}
+          {/* ✅ الشعار من BrandContext */}
           <Box
             component={Link}
             to="/"
@@ -180,10 +184,16 @@ export default function Navbar() {
               onError={() => setImgSrc(fallbackLogo)}
               alt="Logo"
               style={{
-                width: 36,
-                height: 36,
+                width: 40,
+                height: 40,
                 borderRadius: "50%",
                 objectFit: "cover",
+                transition: "opacity 0.5s ease",
+                opacity: loadingBrand ? 0.5 : 1,
+                boxShadow:
+                  mode === "dark"
+                    ? "0 0 10px rgba(255, 255, 255, 0.15)"
+                    : "0 0 8px rgba(0, 0, 0, 0.1)",
               }}
             />
             <Typography
@@ -228,9 +238,7 @@ export default function Navbar() {
               checked={mode === "dark"}
               onChange={toggleMode}
               sx={{
-                "& .MuiSwitch-switchBase.Mui-checked": {
-                  color: BRAND.gold,
-                },
+                "& .MuiSwitch-switchBase.Mui-checked": { color: BRAND.gold },
                 "& .MuiSwitch-track": {
                   background:
                     mode === "dark"
@@ -270,9 +278,9 @@ export default function Navbar() {
                     "&:hover": {
                       backgroundColor:
                         link.to === "/bookings-hub"
-                          ? (mode === "dark"
-                              ? "rgba(255,255,255,0.06)"
-                              : "#f7f3ff")
+                          ? mode === "dark"
+                            ? "rgba(255,255,255,0.06)"
+                            : "#f7f3ff"
                           : mode === "dark"
                           ? "rgba(255,255,255,0.08)"
                           : "#f5f5f5",
@@ -323,7 +331,7 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* القائمة الجانبية للموبايل */}
+      {/* Drawer الموبايل */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -347,6 +355,19 @@ export default function Navbar() {
               pb: 1,
             }}
           >
+            <img
+              src={imgSrc}
+              alt="MiniLogo"
+              onError={() => setImgSrc(fallbackLogo)}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                objectFit: "cover",
+                opacity: loadingBrand ? 0.5 : 1,
+                transition: "opacity 0.5s ease",
+              }}
+            />
             <Typography
               variant="h6"
               sx={{
@@ -357,36 +378,9 @@ export default function Navbar() {
               Fateness
             </Typography>
 
-            {/* مفتاح الوضع داخل القائمة */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.5,
-              }}
-            >
-              <LightModeIcon
-                sx={{ color: mode === "dark" ? "#777" : BRAND.gold, fontSize: 20 }}
-              />
-              <Switch
-                checked={mode === "dark"}
-                onChange={toggleMode}
-                sx={{
-                  "& .MuiSwitch-track": {
-                    background:
-                      mode === "dark"
-                        ? "linear-gradient(90deg, #FBC02D, #A01860)"
-                        : "linear-gradient(90deg, #A01860, #FBC02D)",
-                  },
-                }}
-              />
-              <DarkModeIcon
-                sx={{ color: mode === "dark" ? BRAND.gold : "#777", fontSize: 20 }}
-              />
-              <IconButton onClick={() => setDrawerOpen(false)}>
-                <CloseIcon sx={{ color: mode === "dark" ? BRAND.textDark : "#333" }} />
-              </IconButton>
-            </Box>
+            <IconButton onClick={() => setDrawerOpen(false)}>
+              <CloseIcon sx={{ color: mode === "dark" ? BRAND.textDark : "#333" }} />
+            </IconButton>
           </Box>
 
           <Divider
@@ -396,7 +390,6 @@ export default function Navbar() {
             }}
           />
 
-          {/* عناصر القائمة */}
           <List>
             {navLinks.map((link, index) => (
               <ListItem key={index} disablePadding sx={{ mb: 1 }}>
@@ -419,9 +412,14 @@ export default function Navbar() {
                   <Box
                     sx={{
                       mr: 1.5,
-                      color: link.to === "/bookings-hub"
-                        ? (mode === "dark" ? BRAND.gold : BRAND.purple)
-                        : (mode === "dark" ? BRAND.textDark : "#555"),
+                      color:
+                        link.to === "/bookings-hub"
+                          ? mode === "dark"
+                            ? BRAND.gold
+                            : BRAND.purple
+                          : mode === "dark"
+                          ? BRAND.textDark
+                          : "#555",
                     }}
                   >
                     {link.icon}
