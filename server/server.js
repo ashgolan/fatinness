@@ -55,8 +55,9 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(clientPath));
 
   // 🟢 أي مسار غير API يرجع index.html
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(clientPath, "index.html"));
+  // 🟢 في حال لم يُطابق أي مسار API → أعد index.html
+  app.use((req, res, next) => {
+    res.sendFile(path.join(__dirname, "../client/build", "index.html"));
   });
 } else {
   // 🟣 في وضع التطوير فقط
