@@ -3,7 +3,6 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-
 import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
 import { agenda } from "./config/agenda.js";
@@ -14,10 +13,10 @@ import maintenanceRoutes from "./routes/maintenance.routes.js";
 
 const app = express();
 
-// ✅ CORS
+// ✅ تفعيل CORS
 app.use(cors());
 
-// ✅ Stripe webhook (raw)
+// ✅ Stripe Webhook قبل JSON middleware
 app.post(
   "/payments/webhook",
   express.raw({ type: "application/json" }),
@@ -33,45 +32,20 @@ app.post(
   handleWebhook
 );
 
-// ✅ JSON middleware
+// ✅ تفعيل JSON لباقي المسارات
 app.use(express.json());
 
-// ✅ Health check route — ضروري يكون فوق أي شيء آخر
-app.get("/health", (req, res) => {
-  res.json({
-    ok: true,
-    message: "Server running fine 🚀",
-    time: new Date(),
-  });
-});
+// ✅ Health Check
+app.get("/health", (req, res) => res.json({ ok: true, time: new Date() }));
 
-// ✅ Static uploads folder
+// ✅ عرض ملفات الصور الثابتة
 app.use("/uploads", express.static("uploads"));
 
-// ✅ App routes
+// ✅ جميع المسارات عبر index.js
 app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
 
-// ✅ React frontend serving (Production only)
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-if (process.env.NODE_ENV === "production") {
-  const clientPath = path.join(__dirname, "../client/build");
-  app.use(express.static(clientPath));
-
-  // ✅ catch-all route for React
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(clientPath, "index.html"));
-  });
-} else {
-  // ✅ development mode message
-  app.get("/", (req, res) => {
-    res.send("🚧 Fateness API running in development mode...");
-  });
-}
-
-// ✅ Start server
+// 🟢 تشغيل السيرفر فقط (بدون React)
 const PORT = process.env.PORT || 4000;
 
 (async () => {
@@ -81,7 +55,6 @@ const PORT = process.env.PORT || 4000;
     await agenda.start();
     startScheduler();
 
-    // ✅ مهم جداً: استخدم 0.0.0.0 بدلاً من localhost
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
