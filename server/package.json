@@ -1,17 +1,21 @@
 {
   "name": "fateness-server",
   "version": "1.0.0",
+  "description": "Unified Fateness project (server + client) for Railway deployment",
   "main": "server.js",
   "type": "module",
-  "description": "Unified Fateness project (server + client) for Railway deployment",
+  "author": "Alaa Shaalan",
+  "license": "ISC",
+  "engines": {
+    "node": "20.x",
+    "npm": "10.x"
+  },
   "scripts": {
     "start": "node server.js",
     "build-client": "cd ../client && npm install && npm run build",
-    "deploy": "npm run build-client && npm install && npm start"
+    "deploy": "npm run build-client && npm install && npm start",
+    "postinstall": "npm run build-client"
   },
-  "keywords": [],
-  "author": "Alaa Shaalan",
-  "license": "ISC",
   "dependencies": {
     "agenda": "^5.0.0",
     "axios": "^1.12.2",
