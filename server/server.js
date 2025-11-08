@@ -45,17 +45,25 @@ app.use("/uploads", express.static("uploads"));
 app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
 
-// ✅ إعدادات لتقديم واجهة React
+// ✅ إعدادات لتقديم واجهة React (في الإنتاج فقط)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 🟢 تقديم ملفات React من client/build
-app.use(express.static(path.join(__dirname, "../client/build")));
+if (process.env.NODE_ENV === "production") {
+  // 🟢 تقديم ملفات React الجاهزة من client/build
+  const clientPath = path.join(__dirname, "../client/build");
+  app.use(express.static(clientPath));
 
-// 🟢 في حال لم يُطابق أي مسار API → أعد index.html
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
-});
+  // 🟢 أي مسار غير API يرجع index.html
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(clientPath, "index.html"));
+  });
+} else {
+  // 🟣 في وضع التطوير فقط
+  app.get("/", (req, res) => {
+    res.send("🚧 Fateness API is running in development mode...");
+  });
+}
 
 // ✅ تشغيل السيرفر
 const PORT = process.env.PORT || 4000;
@@ -70,7 +78,13 @@ const PORT = process.env.PORT || 4000;
     await agenda.start();
     startScheduler();
 
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () =>
+      console.log(
+        `🚀 Server running on port ${PORT} (${
+          process.env.NODE_ENV || "development"
+        })`
+      )
+    );
   } catch (err) {
     console.error("❌ Server startup failed:", err);
     process.exit(1);
