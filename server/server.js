@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import { connectDB } from "./config/db.js";
 import { agenda } from "./config/agenda.js";
 import { defineSchedulerJobs, startScheduler } from "./utils/scheduler.js";
@@ -42,8 +45,21 @@ app.use("/uploads", express.static("uploads"));
 app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
 
+// ✅ إعدادات لتقديم واجهة React
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 🟢 تقديم ملفات React من client/build
+app.use(express.static(path.join(__dirname, "../client/build")));
+
+// 🟢 في حال لم يُطابق أي مسار API → أعد index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+});
+
 // ✅ تشغيل السيرفر
 const PORT = process.env.PORT || 4000;
+
 (async () => {
   try {
     // 🔹 الاتصال بقاعدة البيانات

@@ -1,15 +1,17 @@
 {
-  "name": "server",
+  "name": "fateness-server",
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
+  "description": "Unified Fateness project (server + client) for Railway deployment",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "build-client": "cd ../client && npm install && npm run build",
+    "deploy": "npm run build-client && npm install && npm start"
   },
   "keywords": [],
-  "author": "",
+  "author": "Alaa Shaalan",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "agenda": "^5.0.0",
     "axios": "^1.12.2",
