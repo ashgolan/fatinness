@@ -36,8 +36,9 @@ app.post(
 app.use(express.json());
 
 // ✅ Health Check
-app.get("/health", (req, res) => res.json({ ok: true, time: new Date() }));
-
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 // ✅ عرض ملفات الصور الثابتة
 app.use("/uploads", express.static("uploads"));
 
