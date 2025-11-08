@@ -1,15 +1,26 @@
 // server/config/firebase.js
 import admin from "firebase-admin";
 
-// 🟢 قراءة بيانات الحساب من متغير البيئة في Railway
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+const projectId = process.env.FIREBASE_PROJECT_ID;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-// 🟢 تهيئة Firebase Admin
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-  console.log("✅ Firebase Admin initialized successfully");
+if (!projectId || !clientEmail || !privateKey) {
+  console.error("❌ Missing Firebase environment variables");
+} else {
+  // استبدال \n النصية بأسطر حقيقية
+  privateKey = privateKey.replace(/\\n/g, "\n");
+
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    });
+    console.log("✅ Firebase Admin initialized successfully");
+  }
 }
 
-export const firebaseAdmin = admin;
+export default admin;

@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import "./config/firebase.js"; // ✅ هذا فقط لتفعيل التهيئة
+import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
 import { agenda } from "./config/agenda.js";
 import { defineSchedulerJobs, startScheduler } from "./utils/scheduler.js";
