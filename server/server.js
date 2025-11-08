@@ -70,20 +70,13 @@ const PORT = process.env.PORT || 4000;
 
 (async () => {
   try {
-    // 🔹 الاتصال بقاعدة البيانات
     await connectDB();
-
-    // 🔹 تعريف وتشغيل المهام المجدولة
     defineSchedulerJobs();
     await agenda.start();
     startScheduler();
 
-    app.listen(PORT, () =>
-      console.log(
-        `🚀 Server running on port ${PORT} (${
-          process.env.NODE_ENV || "development"
-        })`
-      )
+    app.listen(PORT, "0.0.0.0", () =>
+      console.log(`🚀 Server running on port ${PORT}`)
     );
   } catch (err) {
     console.error("❌ Server startup failed:", err);
