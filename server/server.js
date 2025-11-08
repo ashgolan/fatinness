@@ -67,6 +67,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 // ✅ تشغيل السيرفر
+// ✅ تشغيل السيرفر
 const PORT = process.env.PORT || 4000;
 
 (async () => {
@@ -76,9 +77,10 @@ const PORT = process.env.PORT || 4000;
     await agenda.start();
     startScheduler();
 
-    app.listen(PORT, "0.0.0.0", () =>
-      console.log(`🚀 Server running on port ${PORT}`)
-    );
+    // 🔹 لاحظ هنا: بدلنا localhost بـ 0.0.0.0
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   } catch (err) {
     console.error("❌ Server startup failed:", err);
     process.exit(1);
