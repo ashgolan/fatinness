@@ -186,7 +186,7 @@ export default function Login() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Fateness Studio
+            Fatinness Studio
           </Typography>
           <Typography
             variant="body1"

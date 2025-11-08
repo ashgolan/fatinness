@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
+import { useBrand } from "../context/BrandContext";
 
 // Icons
 import PersonIcon from "@mui/icons-material/Person";
@@ -49,10 +50,10 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const BASE_URL = process.env.VITE_API_URL || "http://localhost:4000";
-  const logoUrl = `${BASE_URL}/uploads/logo.jpg`;
   const fallbackLogo = "https://via.placeholder.com/80x80.png?text=F";
-  const [imgSrc, setImgSrc] = React.useState(logoUrl);
+  const [imgSrc, setImgSrc] = useState(fallbackLogo);
+  const isDark = mode === "dark";
+  const { loading: loadingBrand } = useBrand(); // ✅ نأخذ الشعار وحالة التحميل
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -176,21 +177,23 @@ export default function Register() {
                 "&:hover": { transform: "scale(1.05) rotate(3deg)" },
               }}
             >
-              <img
-                src={imgSrc}
-                alt="Logo"
-                onError={() => setImgSrc(fallbackLogo)}
-                style={{
-                  width: 70,
-                  height: 70,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: `3px solid ${
-                    mode === "dark" ? BRAND.gold : BRAND.purple
-                  }`,
-                  boxShadow: `0 6px 20px rgba(160,24,96,0.25)`,
-                }}
-              />
+         <img
+              src={imgSrc}
+              alt="Logo"
+              onError={() => setImgSrc(fallbackLogo)}
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: "50%",
+                objectFit: "cover",
+                transition: "opacity 0.6s ease",
+                opacity: loadingBrand ? 0.5 : 1,
+                border: isDark ? "3px solid #222" : "3px solid #fff",
+                boxShadow: isDark
+                  ? "0 6px 20px rgba(251,192,45,0.3)"
+                  : "0 6px 20px rgba(160,24,96,0.25)",
+              }}
+            />
             </Box>
 
             <Typography
