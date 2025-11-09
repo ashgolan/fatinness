@@ -1,10 +1,15 @@
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 import { storage } from "./config";
 
 /**
  * 🔹 رفع صورة إلى Firebase واستبدال القديمة إذا وجدت
  * @param {File} file - ملف الصورة
- * @param {String} type - نوع الصورة ("logo" أو "card")
+ * @param {"logo" | "card"} type - نوع الصورة ("logo" أو "card")
  * @returns {Promise<string>} رابط الصورة الجديدة
  */
 export const uploadBrandImage = async (file, type = "logo") => {
@@ -14,17 +19,29 @@ export const uploadBrandImage = async (file, type = "logo") => {
   const fileRef = ref(storage, `${folder}/${type}.png`);
 
   try {
-    // حذف الصورة القديمة إن وجدت
+    // 🧹 حذف الصورة القديمة (إن وجدت)
     await deleteObject(fileRef).catch(() => {});
 
-    // رفع الصورة الجديدة
+    // ⏫ رفع الصورة الجديدة
     const snapshot = await uploadBytes(fileRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    // 🔗 الحصول على رابط التنزيل
+    let downloadURL = await getDownloadURL(snapshot.ref);
+
+    // ⚙️ إصلاح الرابط ليستخدم النطاق الصحيح دائمًا
+    if (downloadURL.includes("appspot.com")) {
+      downloadURL = downloadURL.replace(
+        "fateness-364c3.appspot.com",
+        "fateness-364c3.firebasestorage.app"
+      );
+    }
 
     console.log(`✅ ${type} uploaded successfully:`, downloadURL);
     return downloadURL;
-  } catch (err) {
-    console.error(`🔥 Error uploading ${type}:`, err);
-    throw err;
+  } catch (error) {
+    console.error(`🔥 Error uploading ${type}:`, error);
+    throw new Error(
+      "حدث خطأ أثناء رفع الصورة. تحقق من اتصال الإنترنت أو إعدادات CORS."
+    );
   }
 };
