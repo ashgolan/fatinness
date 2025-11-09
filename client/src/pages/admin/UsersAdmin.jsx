@@ -48,6 +48,7 @@ export default function UsersAdmin() {
     age: "",
     gender: "female",
   });
+  const [pendingRoleChange, setPendingRoleChange] = useState(false);
 
   // 🔹 جلب المشتركات
   const fetchUsers = async () => {
@@ -107,30 +108,29 @@ export default function UsersAdmin() {
 
   // 🚫 حظر / إلغاء حظر
   const toggleUserBlock = async (user) => {
-    if (user.role === "admin")
-      return toast.error("لا يمكن حظر مديرة النظام 👑");
+    if (user.role === "admin") {
+      toast.error("لا يمكن حظر مديرة النظام 👑");
+      return;
+    }
 
     const confirmMsg = user.isBlocked
       ? "هل ترغبين في إلغاء الحظر عن هذه المشتركة؟"
       : "هل أنتِ متأكدة من حظر هذه المشتركة؟";
+
     if (!window.confirm(confirmMsg)) return;
 
     try {
       const { data } = await Api.put(`/admin/users/${user._id}/block`);
-      toast.success(data.message);
 
-      const updatedUser = {
-        ...user,
-        isBlocked: !user.isBlocked,
-        ...(data.user || {}),
-      };
+      toast.success(
+        data?.message ||
+          (user.isBlocked
+            ? "تم إلغاء الحظر عن المشتركة بنجاح ✅"
+            : "تم حظر المشتركة بنجاح 🚫")
+      );
 
-      setUsers((prev) =>
-        prev.map((u) => (u._id === user._id ? { ...updatedUser } : u))
-      );
-      setFiltered((prev) =>
-        prev.map((u) => (u._id === user._id ? { ...updatedUser } : u))
-      );
+      // ✅ بعد التعديل نعيد تحميل القائمة كاملة من السيرفر
+      await fetchUsers();
     } catch (err) {
       console.error(err);
       toast.error("حدث خطأ أثناء تعديل حالة الحظر");
@@ -433,7 +433,13 @@ export default function UsersAdmin() {
                     sx={{ mb: 2 }}
                   />
                   {/* الأزرار */}
-                  <Box sx={{ display: "flex", gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1.5,
+                      mt: "auto", // ✅ يدفع الأزرار لأسفل
+                    }}
+                  >
                     <Button
                       fullWidth
                       variant="outlined"
@@ -442,8 +448,10 @@ export default function UsersAdmin() {
                         borderColor: "#1976d2",
                         color: "#1976d2",
                         fontWeight: 600,
+                        gap:0.6,
                         borderRadius: "8px",
                         textTransform: "none",
+                        whiteSpace: "nowrap", // ✅ يمنع الانتقال للسطر الثاني
                         "&:hover": {
                           backgroundColor: "rgba(25,118,210,0.04)",
                         },
@@ -452,15 +460,19 @@ export default function UsersAdmin() {
                       <EditIcon sx={{ fontSize: 18, mr: 0.5 }} />
                       تعديل
                     </Button>
+
                     <Button
                       fullWidth
                       variant="contained"
                       onClick={() => toggleUserBlock(user)}
                       sx={{
-                        backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
+                        whiteSpace: "nowrap",
                         fontWeight: 600,
                         borderRadius: "8px",
                         textTransform: "none",
+                        py: 1.2,
+                        gap:0.6,
+                        backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
                         "&:hover": {
                           backgroundColor: user.isBlocked
                             ? "#57a95b"
@@ -566,17 +578,77 @@ export default function UsersAdmin() {
               <MenuItem value="female">أنثى</MenuItem>
               <MenuItem value="male">ذكر</MenuItem>
             </TextField>
+            {/* 🧩 حقل الدور مع نافذة تأكيد */}
             <TextField
               select
               label="الدور"
               name="role"
               value={editData.role || "user"}
-              onChange={handleChange}
+              onChange={(e) => {
+                const newRole = e.target.value;
+                if (newRole === "admin" && editData.role !== "admin") {
+                  setPendingRoleChange(true); // ✅ فتح المودال
+                } else {
+                  setEditData((prev) => ({ ...prev, role: newRole }));
+                }
+              }}
               sx={textFieldStyle}
             >
               <MenuItem value="user">مشتركة</MenuItem>
               <MenuItem value="admin">مديرة</MenuItem>
             </TextField>
+
+            {/* ✅ مودال التأكيد عند التغيير إلى مديرة */}
+            <Dialog
+              open={pendingRoleChange}
+              onClose={() => setPendingRoleChange(false)}
+              PaperProps={{
+                sx: { borderRadius: 3, p: 1, textAlign: "center" },
+              }}
+            >
+              <DialogTitle sx={{ fontWeight: 700, color: "#d32f2f" }}>
+                ⚠️ تأكيد التغيير إلى مديرة
+              </DialogTitle>
+              <DialogContent>
+                <Typography sx={{ fontSize: "1rem", mb: 1 }}>
+                  هل أنتِ متأكدة أنكِ ترغبين بتحويل هذه المشتركة إلى مديرة؟ 👑
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  هذا التغيير يمنحها صلاحيات الإدارة داخل النظام.
+                </Typography>
+              </DialogContent>
+              <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setPendingRoleChange(false);
+                    setEditData((prev) => ({ ...prev, role: "user" })); // ❌ إلغاء
+                  }}
+                  sx={{ color: "#666", borderColor: "#ccc" }}
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    setPendingRoleChange(false);
+                    setEditData((prev) => ({ ...prev, role: "admin" })); // ✅ تأكيد
+                    toast.info("تم تحديد الدور كمديرة مؤقتًا (لم يُحفظ بعد)", {
+                      position: "top-center",
+                      autoClose: 3000,
+                    });
+                  }}
+                  sx={{
+                    fontWeight: 600,
+                    backgroundColor: "#1976d2",
+                    "&:hover": { backgroundColor: "#1565c0" },
+                  }}
+                >
+                  نعم، تأكيد التغيير
+                </Button>
+              </DialogActions>
+            </Dialog>
           </DialogContent>
           <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
             <Button

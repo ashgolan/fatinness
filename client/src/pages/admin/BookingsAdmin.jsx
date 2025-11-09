@@ -419,93 +419,95 @@ export default function BookingsAdmin() {
               overflow: "hidden",
             }}
           >
-            <Table>
-              <TableHead>
-                <TableRow
-                  sx={{ backgroundColor: isDark ? "#222831" : "#fdfdfd" }}
-                >
-                  {[
-                    "المشتركة",
-                    "النشطة",
-                    "الملغاة",
-                    "المنجزة",
-                    "الإجراءات",
-                  ].map((header) => (
-                    <TableCell
-                      key={header}
-                      align="center"
-                      sx={{
-                        color: isDark ? "#FFD700" : "#444",
-                        fontWeight: 600,
-                        fontSize: 14,
-                        py: 2,
-                        borderBottom: "1px solid rgba(255,215,0,0.2)",
-                      }}
-                    >
-                      {header}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {summary.map((row) => (
+            <Box sx={{ width: "100%", overflowX: "auto" }}>
+              <Table sx={{ minWidth: 600 }}>
+                <TableHead>
                   <TableRow
-                    key={row.userId}
-                    sx={{
-                      "&:hover": {
-                        backgroundColor: isDark
-                          ? "rgba(255,215,0,0.05)"
-                          : "rgba(160,24,96,0.05)",
-                      },
-                      transition: "0.3s",
-                    }}
+                    sx={{ backgroundColor: isDark ? "#222831" : "#fdfdfd" }}
                   >
-                    <TableCell
-                      align="center" // ✅ يوسّط الاسم أفقيًا داخل العمود
-                      sx={{
-                        color: isDark ? "#fff" : "#111",
-                        fontSize: 14,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {row.username}
-                    </TableCell>
-                    <TableCell align="center" sx={{ color: "#4caf50" }}>
-                      {row.active}
-                    </TableCell>
-                    <TableCell align="center" sx={{ color: "#c62828" }}>
-                      {row.cancelled}
-                    </TableCell>
-                    <TableCell align="center" sx={{ color: "#b8860b" }}>
-                      {row.completed}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        onClick={() => openDetails(row.userId, row.username)}
+                    {[
+                      "المشتركة",
+                      "النشطة",
+                      "الملغاة",
+                      "المنجزة",
+                      "الإجراءات",
+                    ].map((header) => (
+                      <TableCell
+                        key={header}
+                        align="center"
                         sx={{
-                          minWidth: 0,
-                          p: 1,
-                          borderRadius: "50%",
-                          backgroundColor: isDark
-                            ? "rgba(255,215,0,0.15)"
-                            : "rgba(160,24,96,0.1)",
-                          color: isDark ? "#FFD700" : "#A01860",
-                          "&:hover": {
-                            backgroundColor: isDark
-                              ? "rgba(255,215,0,0.25)"
-                              : "rgba(160,24,96,0.2)",
-                            transform: "scale(1.1)",
-                            transition: "all 0.2s ease",
-                          },
+                          color: isDark ? "#FFD700" : "#444",
+                          fontWeight: 600,
+                          fontSize: 14,
+                          py: 2,
+                          borderBottom: "1px solid rgba(255,215,0,0.2)",
                         }}
                       >
-                        <SearchIcon sx={{ fontSize: 22 }} />
-                      </Button>
-                    </TableCell>
+                        {header}
+                      </TableCell>
+                    ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {summary.map((row) => (
+                    <TableRow
+                      key={row.userId}
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: isDark
+                            ? "rgba(255,215,0,0.05)"
+                            : "rgba(160,24,96,0.05)",
+                        },
+                        transition: "0.3s",
+                      }}
+                    >
+                      <TableCell
+                        align="center" // ✅ يوسّط الاسم أفقيًا داخل العمود
+                        sx={{
+                          color: isDark ? "#fff" : "#111",
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {row.username}
+                      </TableCell>
+                      <TableCell align="center" sx={{ color: "#4caf50" }}>
+                        {row.active}
+                      </TableCell>
+                      <TableCell align="center" sx={{ color: "#c62828" }}>
+                        {row.cancelled}
+                      </TableCell>
+                      <TableCell align="center" sx={{ color: "#b8860b" }}>
+                        {row.completed}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          onClick={() => openDetails(row.userId, row.username)}
+                          sx={{
+                            minWidth: 0,
+                            p: 1,
+                            borderRadius: "50%",
+                            backgroundColor: isDark
+                              ? "rgba(255,215,0,0.15)"
+                              : "rgba(160,24,96,0.1)",
+                            color: isDark ? "#FFD700" : "#A01860",
+                            "&:hover": {
+                              backgroundColor: isDark
+                                ? "rgba(255,215,0,0.25)"
+                                : "rgba(160,24,96,0.2)",
+                              transform: "scale(1.1)",
+                              transition: "all 0.2s ease",
+                            },
+                          }}
+                        >
+                          <SearchIcon sx={{ fontSize: 22 }} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
           </Paper>
         ) : (
           <Typography
@@ -631,75 +633,85 @@ export default function BookingsAdmin() {
                   border: "1px solid rgba(255,215,0,0.2)",
                 }}
               >
-                <Table>
-                  <TableHead>
-                    <TableRow
-                      sx={{
-                        backgroundColor: isDark
-                          ? "rgba(255,215,0,0.05)"
-                          : "rgba(160,24,96,0.05)",
-                      }}
-                    >
-                      <TableCell align="center" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        التاريخ
-                      </TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 600, fontSize: 13 }}>
-                        الوقت
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        sx={{ fontWeight: 600, fontSize: 13 }}
-                      >
-                        الحالة
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredBookings.map((b) => (
+                <Box sx={{ width: "100%", overflowX: "auto" }}>
+                  <Table sx={{ minWidth: 500 }}>
+                    <TableHead>
                       <TableRow
-                        key={b._id}
                         sx={{
-                          "&:hover": {
-                            backgroundColor: isDark
-                              ? "rgba(255,215,0,0.03)"
-                              : "rgba(160,24,96,0.03)",
-                          },
+                          backgroundColor: isDark
+                            ? "rgba(255,215,0,0.05)"
+                            : "rgba(160,24,96,0.05)",
                         }}
                       >
-                        <TableCell align="center" sx={{ fontSize: 14 }}>
-                          {b.slot?.date
-                            ? new Date(b.slot.date).toLocaleDateString("ar-EG")
-                            : "—"}
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: 600, fontSize: 13 }}
+                        >
+                          التاريخ
                         </TableCell>
                         <TableCell
-                        align="center"
-                          sx={{
-                            fontSize: 14,
-                            color: isDark ? "#FFD700" : "#A01860",
-                            fontWeight: 600,
-                          }}
+                          align="center"
+                          sx={{ fontWeight: 600, fontSize: 13 }}
                         >
-                          {b.slot
-                            ? `${b.slot.startTime || "—"}${
-                                b.slot.endTime ? ` - ${b.slot.endTime}` : ""
-                              }`
-                            : "—"}
+                          الوقت
                         </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={getLabelByStatus(b)}
-                            size="small"
-                            sx={{
-                              ...getStatusChipStyle(b),
-                              fontSize: 12,
-                              height: 24,
-                            }}
-                          />
+                        <TableCell
+                          align="center"
+                          sx={{ fontWeight: 600, fontSize: 13 }}
+                        >
+                          الحالة
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHead>
+                    <TableBody>
+                      {filteredBookings.map((b) => (
+                        <TableRow
+                          key={b._id}
+                          sx={{
+                            "&:hover": {
+                              backgroundColor: isDark
+                                ? "rgba(255,215,0,0.03)"
+                                : "rgba(160,24,96,0.03)",
+                            },
+                          }}
+                        >
+                          <TableCell align="center" sx={{ fontSize: 14 }}>
+                            {b.slot?.date
+                              ? new Date(b.slot.date).toLocaleDateString(
+                                  "ar-EG"
+                                )
+                              : "—"}
+                          </TableCell>
+                          <TableCell
+                            align="center"
+                            sx={{
+                              fontSize: 14,
+                              color: isDark ? "#FFD700" : "#A01860",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {b.slot
+                              ? `${b.slot.startTime || "—"}${
+                                  b.slot.endTime ? ` - ${b.slot.endTime}` : ""
+                                }`
+                              : "—"}
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={getLabelByStatus(b)}
+                              size="small"
+                              sx={{
+                                ...getStatusChipStyle(b),
+                                fontSize: 12,
+                                height: 24,
+                              }}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Box>
               </Paper>
             </>
           ) : (

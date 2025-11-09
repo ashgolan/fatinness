@@ -234,26 +234,45 @@ export default function AdminNotifications() {
             </Select>
           </FormControl>
 
-          <Button
-            variant="contained"
-            onClick={handleSend}
-            disabled={loading}
-            sx={{
-              textTransform: "none",
-              fontWeight: 900,
-              px: 4,
-              py: 1.2,
-              borderRadius: 3,
-              background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
-              color: "#fff",
-              boxShadow: `0 6px 20px ${BRAND.purple}55`,
-              "&:hover": {
-                filter: "brightness(1.1)",
-              },
-            }}
-          >
-            {loading ? <CircularProgress size={24} /> : "📤 إرسال الإشعار"}
-          </Button>
+  <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+  <Button
+    variant="outlined"
+    onClick={handleSend}
+    disabled={loading}
+    sx={{
+      textTransform: "none",
+      fontWeight: 800,
+      px: 4,
+      py: 1.2,
+      borderRadius: 3,
+      border: `2px solid ${BRAND.purple}`,
+      color: BRAND.purple,
+      background: "transparent",
+      transition: "all 0.3s ease",
+      display: "flex",
+      alignItems: "center",
+      gap: 1,
+      "&:hover": {
+        background: `${BRAND.purple}10`, // خلفية شفافة خفيفة من البنفسجي
+        borderColor: BRAND.gold,
+        color: BRAND.gold,
+        boxShadow: `0 0 8px ${BRAND.gold}40`,
+      },
+      "&:disabled": {
+        opacity: 0.6,
+      },
+    }}
+  >
+    {loading ? (
+      <CircularProgress size={22} sx={{ color: BRAND.purple }} />
+    ) : (
+      <>
+        🔔 <Typography sx={{ fontWeight: 800 }}>إرسال الإشعار</Typography>
+      </>
+    )}
+  </Button>
+</Box>
+
         </Box>
 
         <Divider sx={{ my: 3 }} />

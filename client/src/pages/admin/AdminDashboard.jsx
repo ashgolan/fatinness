@@ -53,9 +53,13 @@ export default function AdminDashboard() {
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
   // ✅ عند توفر الشعار من السياق نحدّث الصورة
-  useEffect(() => {
-    if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
-  }, [logoUrl, loadingBrand]);
+// ✅ عند توفر الشعار من السياق نحدّث الصورة فورًا
+useEffect(() => {
+  if (!loadingBrand && logoUrl) {
+    setImgSrc(logoUrl);
+  }
+}, [logoUrl, loadingBrand]);
+
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -132,6 +136,7 @@ export default function AdminDashboard() {
     : null;
 
   const chartOptions = {
+    maintainAspectRatio: false, // ✅ السماح بالتحكم بالارتفاع بحرية
     responsive: true,
     plugins: {
       legend: {
@@ -173,9 +178,7 @@ export default function AdminDashboard() {
         sx={{
           p: 3,
           mb: 4,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          textAlign: "center", // ✅ محاذاة كل المحتوى للوسط
           background: isDark
             ? `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`
             : "linear-gradient(135deg, #f48fb1, #ce93d8, #fff176)",
@@ -186,30 +189,31 @@ export default function AdminDashboard() {
             : "0 4px 15px rgba(240,120,200,0.3)",
         }}
       >
-        <Box>
-          <Typography variant="h5" sx={{ fontWeight: 700 }}>
-            👋 مرحبًا {stats?.adminName || "آلاء"}!
-          </Typography>
-          <Typography variant="body1">
-            لديكِ اليوم {stats?.todaySessions || 0} جلسات نشطة و{" "}
-            {stats?.newUsersToday || 0} مشتركات جديدات 💪
-          </Typography>
+        <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+          👋 مرحبًا {stats?.adminName || "آلاء"}!
+        </Typography>
+        <Typography variant="body1" sx={{ fontSize: "1.05rem" }}>
+          لديكِ اليوم {stats?.todaySessions || 0} جلسات نشطة و{" "}
+          {stats?.newUsersToday || 0} مشتركات جديدات 💪
+        </Typography>
+
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
+          <img
+            src={imgSrc}
+            alt="Fateness Logo"
+            onError={() => setImgSrc(fallbackLogo)}
+            style={{
+              width: 72,
+              height: 72,
+              borderRadius: "50%",
+              objectFit: "cover",
+              backgroundColor: "#fff",
+              boxShadow: "0 0 10px rgba(255,255,255,0.5)",
+              opacity: loadingBrand ? 0.5 : 1,
+              transition: "opacity 0.6s ease",
+            }}
+          />
         </Box>
-        <img
-          src={imgSrc}
-          alt="Fateness Logo"
-          onError={() => setImgSrc(fallbackLogo)}
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: "50%",
-            objectFit: "cover",
-            backgroundColor: "#fff",
-            boxShadow: "0 0 10px rgba(255,255,255,0.5)",
-            opacity: loadingBrand ? 0.5 : 1,
-            transition: "opacity 0.6s ease",
-          }}
-        />
       </Paper>
 
       <Typography
@@ -295,22 +299,22 @@ export default function AdminDashboard() {
 
           {/* 📈 المخطط */}
           {chartData && (
-            <Box sx={{ mt: 6, position: "relative" }}>
+            <Box sx={{ mt: 6, position: "relative", pt: 4 }}>
               {/* 🖼️ شعار صغير في الزاوية العليا */}
               <Box
                 sx={{
                   position: "absolute",
-                  top: -25,
-                  right: 10,
+                  top: 25,
+                  right: 12,
+                  width: 44,
+                  height: 44,
+                  borderRadius: "50%", // ✅ دائرة مثالية
+                  background: isDark
+                    ? "rgba(30, 20, 40, 0.6)"
+                    : "rgba(255, 255, 255, 0.85)",
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                  background: isDark
-                    ? "rgba(30, 20, 40, 0.5)"
-                    : "rgba(255, 255, 255, 0.6)",
-                  borderRadius: "40px",
-                  px: 1.8,
-                  py: 0.8,
+                  justifyContent: "center",
                   boxShadow: isDark
                     ? "0 0 10px rgba(0,0,0,0.6)"
                     : "0 0 8px rgba(200,150,255,0.3)",
@@ -323,22 +327,13 @@ export default function AdminDashboard() {
                   alt="Brand Logo"
                   onError={() => setImgSrc(fallbackLogo)}
                   style={{
-                    width: 36,
-                    height: 36,
+                    width: "84%",
+                    height: "84%",
                     borderRadius: "50%",
                     objectFit: "cover",
                     backgroundColor: "#fff",
                   }}
                 />
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    fontWeight: 700,
-                    color: isDark ? BRAND.gold : "#7b1fa2",
-                  }}
-                >
-                  {stats?.clubName || "Fateness"}
-                </Typography>
               </Box>
 
               <Typography
@@ -360,10 +355,18 @@ export default function AdminDashboard() {
                   boxShadow: isDark
                     ? "0 4px 20px rgba(0,0,0,0.5)"
                     : "0 4px 15px rgba(200,150,255,0.15)",
+                  height: { xs: 280, sm: 350, md: 420 }, // ✅ ارتفاع ديناميكي حسب الجهاز
                 }}
               >
-                <Line data={chartData} options={chartOptions} height={90} />
-
+                <Line
+                  data={chartData}
+                  options={chartOptions}
+                  height={180} // ✅ بدل 90 إلى 180 لجعل المخطط أطول بمرتين
+                  style={{
+                    maxHeight: 400, // أقصى ارتفاع للمخطط
+                    marginTop: "10px",
+                  }}
+                />
                 {/* 🔸 شريط النسبة */}
                 <Box sx={{ mt: 4 }}>
                   <Typography

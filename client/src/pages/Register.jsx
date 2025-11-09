@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -53,11 +53,13 @@ export default function Register() {
   const fallbackLogo = "https://via.placeholder.com/80x80.png?text=F";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const isDark = mode === "dark";
-  const { loading: loadingBrand } = useBrand(); // ✅ نأخذ الشعار وحالة التحميل
+  const { logoUrl, loading: loadingBrand } = useBrand();
+  useEffect(() => {
+    if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
+  }, [logoUrl, loadingBrand]);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -177,23 +179,23 @@ export default function Register() {
                 "&:hover": { transform: "scale(1.05) rotate(3deg)" },
               }}
             >
-         <img
-              src={imgSrc}
-              alt="Logo"
-              onError={() => setImgSrc(fallbackLogo)}
-              style={{
-                width: 80,
-                height: 80,
-                borderRadius: "50%",
-                objectFit: "cover",
-                transition: "opacity 0.6s ease",
-                opacity: loadingBrand ? 0.5 : 1,
-                border: isDark ? "3px solid #222" : "3px solid #fff",
-                boxShadow: isDark
-                  ? "0 6px 20px rgba(251,192,45,0.3)"
-                  : "0 6px 20px rgba(160,24,96,0.25)",
-              }}
-            />
+              <img
+                src={imgSrc}
+                alt="Logo"
+                onError={() => setImgSrc(fallbackLogo)}
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  transition: "opacity 0.6s ease",
+                  opacity: loadingBrand ? 0.5 : 1,
+                  border: isDark ? "3px solid #222" : "3px solid #fff",
+                  boxShadow: isDark
+                    ? "0 6px 20px rgba(251,192,45,0.3)"
+                    : "0 6px 20px rgba(160,24,96,0.25)",
+                }}
+              />
             </Box>
 
             <Typography
@@ -225,14 +227,17 @@ export default function Register() {
           </Box>
 
           {/* النموذج */}
-          <Box component="form" onSubmit={onSubmit} sx={{ display: "grid", gap: 2.5 }}>
+          <Box
+            component="form"
+            onSubmit={onSubmit}
+            sx={{ display: "grid", gap: 2.5 }}
+          >
             {/* اسم المستخدم */}
             <TextField
               label="اسم المستخدم"
               name="username"
               value={form.username}
               onChange={handleChange}
-              
               required
               InputProps={{
                 startAdornment: (
@@ -283,7 +288,11 @@ export default function Register() {
                       edge="end"
                       sx={{ color: BRAND.purple }}
                     >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -352,7 +361,11 @@ export default function Register() {
             <Grid container spacing={2}>
               {[
                 { label: "الطول (سم)", name: "height", icon: <HeightIcon /> },
-                { label: "الوزن (كغ)", name: "weight", icon: <FitnessCenterIcon /> },
+                {
+                  label: "الوزن (كغ)",
+                  name: "weight",
+                  icon: <FitnessCenterIcon />,
+                },
                 { label: "العمر", name: "age", icon: <CakeIcon /> },
               ].map((field) => (
                 <Grid item xs={12} sm={4} key={field.name}>
@@ -391,10 +404,10 @@ export default function Register() {
                 fontWeight: 700,
                 borderRadius: "10px",
                 textTransform: "none",
-                          display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "10px", // ✅ هذه تضبط المسافة بين الأيقونة والكلمة
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px", // ✅ هذه تضبط المسافة بين الأيقونة والكلمة
                 background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
                 color: "#fff",
                 "&:hover": {

@@ -33,7 +33,9 @@ export default function AdminSettings() {
   const fetchSettings = async () => {
     try {
       const { data } = await Api.get("/admin/settings");
-      const settingsData = Array.isArray(data) ? data[0] : data.settings || data;
+      const settingsData = Array.isArray(data)
+        ? data[0]
+        : data.settings || data;
 
       const normalized = {
         ...settingsData,
@@ -66,17 +68,25 @@ export default function AdminSettings() {
   }, []);
 
   // 💾 حفظ الإعدادات النصية
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      await Api.put("/admin/settings", settings);
-      toast.success("تم حفظ التغييرات بنجاح ✅");
-    } catch {
-      toast.error("فشل حفظ الإعدادات ❌");
-    } finally {
-      setSaving(false);
-    }
-  };
+// 💾 حفظ الإعدادات النصية (مع تحقق قبل الحفظ)
+const handleSave = async () => {
+  // 🛑 التحقق من الحقول الأساسية
+  if (!settings.clubName?.trim() || !settings.contactNumber?.trim()) {
+    toast.error("يرجى ملء اسم النادي ورقم التواصل قبل الحفظ ⚠️");
+    return;
+  }
+
+  try {
+    setSaving(true);
+    await Api.put("/admin/settings", settings);
+    toast.success("تم حفظ التغييرات بنجاح ✅");
+  } catch {
+    toast.error("فشل حفظ الإعدادات ❌");
+  } finally {
+    setSaving(false);
+  }
+};
+
 
   // 🔹 رفع الصور (الشعار أو الكارت)
   const handleImageUpload = async (type) => {
@@ -124,9 +134,7 @@ export default function AdminSettings() {
         );
       } catch (error) {
         console.error(error);
-        toast.error(
-          `❌ فشل رفع ${type === "logo" ? "الشعار" : "صورة الكارت"}`
-        );
+        toast.error(`❌ فشل رفع ${type === "logo" ? "الشعار" : "صورة الكارت"}`);
       } finally {
         setUploading(false);
       }
@@ -358,23 +366,47 @@ export default function AdminSettings() {
 
         {/* 💾 زر الحفظ */}
         <Box sx={{ textAlign: "center", mt: 5 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSave}
-            disabled={saving}
-            sx={{
-              px: 4,
-              py: 1.2,
-              borderRadius: 3,
-              textTransform: "none",
-              fontWeight: 900,
-              background: "linear-gradient(135deg, #9B1D6F, #FFD93D)",
-              "&:hover": { filter: "brightness(1.08)" },
-            }}
-          >
-            {saving ? <CircularProgress size={24} /> : "💾 حفظ التغييرات"}
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+            <Button
+              variant="outlined"
+              onClick={handleSave}
+              disabled={saving}
+              sx={{
+                textTransform: "none",
+                fontWeight: 800,
+                px: 4,
+                py: 1.2,
+                borderRadius: 3,
+                border: "2px solid #9B1D6F", // بنفسجي الهوية
+                color: "#9B1D6F",
+                background: "transparent",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                "&:hover": {
+                  background: "#9B1D6F10", // شفافية خفيفة من البنفسجي
+                  borderColor: "#FFD93D",
+                  color: "#FFD93D",
+                  boxShadow: "0 0 8px #FFD93D40",
+                },
+                "&:disabled": {
+                  opacity: 0.6,
+                },
+              }}
+            >
+              {saving ? (
+                <CircularProgress size={22} sx={{ color: "#9B1D6F" }} />
+              ) : (
+                <>
+                  💾{" "}
+                  <Typography sx={{ fontWeight: 800 }}>
+                    حفظ التغييرات
+                  </Typography>
+                </>
+              )}
+            </Button>
+          </Box>
         </Box>
       </Paper>
     </Box>
