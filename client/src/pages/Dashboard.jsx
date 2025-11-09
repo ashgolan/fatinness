@@ -6,6 +6,7 @@ import {
   Grid,
   Button,
   Container,
+  CircularProgress,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -13,6 +14,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { useNavigate } from "react-router-dom";
 import { keyframes } from "@mui/system";
 import { useThemeMode } from "../context/ThemeContext";
+import { useBrand } from "../context/BrandContext"; // ✅ تمت إضافتها
 
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
@@ -28,6 +30,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
+  const { cardUrl, loading: loadingBrand } = useBrand(); // ✅ جلب صورة الكارت من السيرفر
+
+  // صورة بديلة في حال عدم وجود كارت
+  const fallbackCard = "/uploads/gym-cover.jpg";
+  const imgSrc = loadingBrand ? null : cardUrl || fallbackCard;
 
   const shortcuts = [
     {
@@ -96,7 +103,7 @@ export default function Dashboard() {
       />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        {/* صورة الغلاف */}
+        {/* ✅ صورة الغلاف من البراند */}
         <Box
           sx={{
             position: "relative",
@@ -110,58 +117,79 @@ export default function Dashboard() {
               : "0 12px 40px rgba(155,111,214,0.25)",
           }}
         >
-          <Box
-            component="img"
-            src="/uploads/gym-cover.jpg"
-            alt="صورة النادي"
-            sx={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              filter: "brightness(0.75)",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.2))",
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              bottom: { xs: 24, sm: 36, md: 48 },
-              left: "50%",
-              transform: "translateX(-50%)",
-              textAlign: "center",
-              color: "#fff",
-            }}
-          >
-            <Typography
-              variant="h3"
+          {loadingBrand ? (
+            <Box
               sx={{
-                fontWeight: 800,
-                mb: 1,
-                fontSize: { xs: "1.6rem", sm: "2.2rem", md: "2.6rem" },
-                textShadow: "0 3px 10px rgba(0,0,0,0.7)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "100%",
+                background: isDark
+                  ? "rgba(255,255,255,0.05)"
+                  : "rgba(0,0,0,0.05)",
               }}
             >
-              مرحبًا بكِ في Fateness 💜
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 500,
-                color: "#f5f5f5",
-                fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
-                textShadow: "0 2px 6px rgba(0,0,0,0.6)",
-              }}
-            >
-              ناديكِ الرياضي المفضل يبدأ من هنا ✨
-            </Typography>
-          </Box>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <>
+              <Box
+                component="img"
+                src={imgSrc}
+                alt="صورة النادي"
+                onError={(e) => (e.target.src = fallbackCard)}
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  filter: "brightness(0.75)",
+                  transition: "opacity 0.6s ease",
+                  opacity: loadingBrand ? 0.4 : 1,
+                }}
+              />
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.2))",
+                }}
+              />
+              <Box
+                sx={{
+                  position: "absolute",
+                  bottom: { xs: 24, sm: 36, md: 48 },
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  textAlign: "center",
+                  color: "#fff",
+                }}
+              >
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 800,
+                    mb: 1,
+                    fontSize: { xs: "1.6rem", sm: "2.2rem", md: "2.6rem" },
+                    textShadow: "0 3px 10px rgba(0,0,0,0.7)",
+                  }}
+                >
+                  مرحبًا بكِ في Fatinness 💜
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 500,
+                    color: "#f5f5f5",
+                    fontSize: { xs: "1rem", sm: "1.1rem", md: "1.2rem" },
+                    textShadow: "0 2px 6px rgba(0,0,0,0.6)",
+                  }}
+                >
+                  ناديكِ الرياضي المفضل يبدأ من هنا ✨
+                </Typography>
+              </Box>
+            </>
+          )}
         </Box>
 
         {/* بطاقات الاختصارات */}
@@ -185,8 +213,8 @@ export default function Dashboard() {
                 p: { xs: 4, md: 5 },
                 borderRadius: 4,
                 textAlign: "center",
-                width: { xs: "100%", sm: "400px" }, // 👈 عرض ثابت للبطاقات
-                minHeight: "420px", // 👈 ارتفاع موحد
+                width: { xs: "100%", sm: "400px" },
+                minHeight: "420px",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",

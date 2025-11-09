@@ -503,41 +503,35 @@ export const getSettings = async (req, res) => {
  */
 export const updateSettings = async (req, res) => {
   try {
-    const {
-      clubName,
-      contactNumber,
-      autoMessage,
-      allowExtraBookingsByDefault,
-      logoUrl,
-      cardUrl, // ✅ أضفناه هنا مباشرة بدل req.body.cardUrl
-    } = req.body;
+    const updateData = {};
+    const fields = [
+      "clubName",
+      "contactNumber",
+      "autoMessage",
+      "allowExtraBookingsByDefault",
+      "logoUrl",
+      "cardUrl",
+    ];
 
-    // ✅ جلب الإعدادات الحالية أو إنشاء جديدة إن لم توجد
-    let settings = await Setting.findOne();
-    if (!settings) settings = new Setting({});
+    // ✅ فقط الحقول المرسلة يتم تحديثها
+    for (const field of fields) {
+      if (req.body[field] !== undefined) updateData[field] = req.body[field];
+    }
 
-    // ✅ تحديث الحقول الأساسية فقط إن وُجدت قيم جديدة
-    if (clubName !== undefined) settings.clubName = clubName;
-    if (contactNumber !== undefined) settings.contactNumber = contactNumber;
-    if (autoMessage !== undefined) settings.autoMessage = autoMessage;
-    if (allowExtraBookingsByDefault !== undefined)
-      settings.allowExtraBookingsByDefault = allowExtraBookingsByDefault;
+    // ✅ تحديث السجل الوحيد أو إنشاؤه في حال لم يوجد (بأمان)
+    const settings = await Setting.findOneAndUpdate(
+      {}, // الشرط: أول سجل فقط
+      { $set: updateData },
+      { new: true, upsert: true } // ✅ أنشئه إن لم يكن موجودًا
+    );
 
-    // ✅ تحديث روابط الصور
-    if (logoUrl !== undefined) settings.logoUrl = logoUrl;
-    if (cardUrl !== undefined) settings.cardUrl = cardUrl;
-
-    // ✅ حفظ التغييرات
-    await settings.save();
-
-    // ✅ إعادة الإعدادات كاملة بعد التحديث
     res.json({
-      message: "تم تحديث الإعدادات بنجاح ✅",
+      message: "✅ تم تحديث الإعدادات بنجاح",
       settings,
     });
   } catch (error) {
     console.error("❌ خطأ أثناء تحديث الإعدادات:", error);
-    res.status(500).json({ message: "فشل تحديث الإعدادات" });
+    res.status(500).json({ message: "فشل تحديث الإعدادات", error });
   }
 };
 

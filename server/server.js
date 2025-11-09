@@ -14,7 +14,19 @@ import maintenanceRoutes from "./routes/maintenance.routes.js";
 const app = express();
 
 // ✅ تفعيل CORS
-app.use(cors());
+// ✅ تفعيل CORS للسماح للفرونت من Render بالوصول للسيرفر في Railway
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",          // أثناء التطوير
+      "https://fateness.onrender.com",  // الموقع المنشور في Render
+    ],
+    credentials: true,
+  })
+);
+// ✅ زيادة حجم body المسموح (حتى 10 MB للروابط الكبيرة أو الصور)
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // ✅ Stripe Webhook قبل JSON middleware
 app.post(
@@ -45,6 +57,13 @@ app.use("/uploads", express.static("uploads"));
 // ✅ جميع المسارات عبر index.js
 app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
+// ✅ منع توقف السيرفر عند أي خطأ غير متوقع
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("❌ Unhandled Rejection:", reason);
+});
 
 // 🟢 تشغيل السيرفر فقط (بدون React)
 const PORT = process.env.PORT || 4000;
