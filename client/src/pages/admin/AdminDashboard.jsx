@@ -299,7 +299,7 @@ useEffect(() => {
 
           {/* 📈 المخطط */}
           {chartData && (
-            <Box sx={{ mt: 6, position: "relative", pt: 4 }}>
+  <Box sx={{ mt: 6, position: "relative", pt: 4, mb: 10 }}>  {/* ⬅️ أضف mb:10 هنا */}
               {/* 🖼️ شعار صغير في الزاوية العليا */}
               <Box
                 sx={{

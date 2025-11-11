@@ -21,6 +21,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import LoginIcon from "@mui/icons-material/Login";
+import { registerFcmToken } from "../firebase/registerFcmToken";
 
 export default function Login() {
   const { mode, BRAND } = useThemeMode();
@@ -54,6 +55,8 @@ export default function Login() {
       const me = await Api.get("/users/me");
       setUser(me.data);
       toast.success("تم تسجيل الدخول بنجاح");
+      setToken(response.data.accessToken);
+      await registerFcmToken(); // ✅ تسجيل FCM token بعد الدخول
       navigate(me.data.role === "admin" ? "/admin/control" : from, {
         replace: true,
       });

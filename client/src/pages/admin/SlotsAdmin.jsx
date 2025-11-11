@@ -625,7 +625,7 @@ export default function SlotsAdmin() {
                   onChange={(e) => setSelectedWeek(e.target.value)}
                   MenuProps={{
                     PaperProps: {
-                      sx:{
+                      sx: {
                         borderRadius: 2,
                         mt: 1,
                         border: `1px solid ${BRAND.line}`,
@@ -657,33 +657,49 @@ export default function SlotsAdmin() {
                   exclusive
                   onChange={(e, val) => val && setFilter(val)}
                   sx={{
-                    backgroundColor:
-                      mode === "dark" ? "rgba(255,255,255,.04)" : BRAND.bgSoft,
-                    borderRadius: 2,
-                    p: "6px",
+                    borderRadius: 3,
+                    gap: 1,
                     flexWrap: "wrap",
+                    justifyContent: { xs: "center", md: "flex-end" },
                     "& .MuiToggleButton-root": {
                       textTransform: "none",
+                      fontWeight: 900,
                       fontSize: { xs: 14, sm: 13 },
-                      fontWeight: 800,
                       px: { xs: 3, sm: 2.5 },
-                      py: { xs: 1, sm: 0.8 },
+                      py: { xs: 1.2, sm: 0.9 },
+                      borderRadius: 2.5,
+                      border: `2px solid ${BRAND.line}`, // 🟡 outline سميك أنيق
                       color: BRAND.sub,
-                      border: "none !important",
-                      borderRadius: "12px !important",
-                      mr: 0.6,
-                      mb: { xs: 0.6, sm: 0 },
-                      "&.Mui-selected": {
-                        background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.fuchsia})`,
-                        color: "#fff",
-                        boxShadow: `0 6px 16px ${BRAND.fuchsia}55`,
-                        "&:hover": { filter: "brightness(.95)" },
-                      },
+                      backgroundColor:
+                        mode === "dark"
+                          ? "rgba(255,255,255,0.03)"
+                          : BRAND.bgSoft,
+                      transition: "all .25s ease-in-out",
                       "&:hover": {
+                        borderColor: BRAND.gold,
+                        color: BRAND.text,
                         backgroundColor:
                           mode === "dark"
                             ? "rgba(255,217,61,0.08)"
-                            : "rgba(155,29,111,0.08)",
+                            : "rgba(255,217,61,0.15)",
+                        transform: "translateY(-2px)",
+                      },
+                      "&.Mui-selected": {
+                        borderColor: BRAND.fuchsia,
+                        background:
+                          mode === "dark"
+                            ? "linear-gradient(145deg, rgba(194,24,91,0.25), rgba(255,217,61,0.08))"
+                            : "linear-gradient(145deg, rgba(194,24,91,0.15), rgba(255,217,61,0.08))",
+                        color: BRAND.fuchsia,
+                        boxShadow: `0 0 12px ${BRAND.fuchsia}44`,
+                        "&:hover": {
+                          borderColor: BRAND.gold,
+                          background:
+                            mode === "dark"
+                              ? "linear-gradient(145deg, rgba(255,217,61,0.25), rgba(194,24,91,0.15))"
+                              : "linear-gradient(145deg, rgba(255,217,61,0.25), rgba(194,24,91,0.15))",
+                          transform: "translateY(-2px)",
+                        },
                       },
                     },
                   }}
@@ -818,7 +834,13 @@ export default function SlotsAdmin() {
                             gap: 2,
                           }}
                         >
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1.5,
+                            }}
+                          >
                             <Box
                               sx={{
                                 width: 44,
@@ -878,8 +900,16 @@ export default function SlotsAdmin() {
                             flexWrap: "wrap",
                           }}
                         >
-                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                            <PeopleIcon sx={{ fontSize: 20, color: BRAND.sub }} />
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                            }}
+                          >
+                            <PeopleIcon
+                              sx={{ fontSize: 20, color: BRAND.sub }}
+                            />
                             <Typography sx={{ fontSize: 13, color: BRAND.sub }}>
                               السعة الكلية:
                             </Typography>
@@ -969,7 +999,7 @@ export default function SlotsAdmin() {
           fullWidth
           maxWidth="sm"
           PaperProps={{
-            sx:{
+            sx: {
               borderRadius: 3,
               border: `1px solid ${BRAND.line}`,
               background: BRAND.card,
@@ -992,7 +1022,7 @@ export default function SlotsAdmin() {
             تفاصيل الحصة
           </DialogTitle>
 
-          <DialogContent sx={{ p: 3,mt:2 }}>
+          <DialogContent sx={{ p: 3, mt: 2 }}>
             {selectedSlot && (
               <>
                 <Paper
@@ -1001,15 +1031,22 @@ export default function SlotsAdmin() {
                     p: 2.5,
                     mb: 3,
                     background:
-                      mode === "dark"
-                        ? "rgba(255,217,61,0.05)"
-                        : BRAND.bgSoft,
+                      mode === "dark" ? "rgba(255,217,61,0.05)" : BRAND.bgSoft,
                     borderRadius: 2,
                     border: `1px solid ${BRAND.line}`,
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 2 }}>
-                    <CalendarMonthIcon sx={{ fontSize: 22, color: BRAND.fuchsia }} />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      mb: 2,
+                    }}
+                  >
+                    <CalendarMonthIcon
+                      sx={{ fontSize: 22, color: BRAND.fuchsia }}
+                    />
                     <Typography
                       sx={{ fontSize: 14, color: BRAND.text, fontWeight: 900 }}
                     >
@@ -1139,7 +1176,9 @@ export default function SlotsAdmin() {
                       border: `1px dashed ${BRAND.line}`,
                     }}
                   >
-                    <PeopleIcon sx={{ fontSize: 50, color: BRAND.line, mb: 1 }} />
+                    <PeopleIcon
+                      sx={{ fontSize: 50, color: BRAND.line, mb: 1 }}
+                    />
                     <Typography sx={{ color: BRAND.sub, fontSize: 14 }}>
                       لا توجد مشتركات في هذه الحصة
                     </Typography>

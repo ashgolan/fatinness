@@ -10,7 +10,7 @@
 firebase/config.js
 # production
 /build
-
+/public/firebaseConfig
 # misc
 .DS_Store
 .env.local

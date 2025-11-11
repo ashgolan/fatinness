@@ -39,6 +39,7 @@ export default function BookingsAdmin() {
     cancelled: 0,
     blocked: 0,
   });
+  const [showAllCols, setShowAllCols] = useState(false);
 
   const getDisplayStatus = (b) => {
     if (!b.slot) return "unknown";
@@ -392,6 +393,39 @@ export default function BookingsAdmin() {
             </Box>
           </Paper>
         )}
+        {/* 🔘 زر عرض / إخفاء الأعمدة */}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => setShowAllCols(!showAllCols)}
+            startIcon={
+              showAllCols ? (
+                <span style={{ fontSize: 18 }}>👁️‍🗨️</span>
+              ) : (
+                <span style={{ fontSize: 18 }}>👁️</span>
+              )
+            }
+            sx={{
+              color: isDark ? "#FFD700" : "#A01860",
+              borderColor: isDark ? "#FFD700" : "#A01860",
+              borderRadius: "30px",
+              px: 2,
+              gap: 1.5, // 👈 هذا السطر يضيف المسافة
+              textTransform: "none",
+              fontWeight: 600,
+              transition: "all 0.3s ease",
+              "&:hover": {
+                backgroundColor: isDark
+                  ? "rgba(255,215,0,0.1)"
+                  : "rgba(160,24,96,0.08)",
+                transform: "scale(1.05)",
+              },
+            }}
+          >
+            {showAllCols ? "إخفاء التفاصيل" : "عرض التفاصيل"}
+          </Button>
+        </Box>
 
         {/* الجدول الرئيسي */}
         {loading ? (
@@ -419,33 +453,73 @@ export default function BookingsAdmin() {
               overflow: "hidden",
             }}
           >
-            <Box sx={{ width: "100%", overflowX: "auto" }}>
-              <Table sx={{ minWidth: 600 }}>
+            <Box
+              dir="rtl"
+              sx={{
+                width: "100%",
+                overflowX: showAllCols ? "auto" : "hidden", // ✅ تمرير فقط عند عرض التفاصيل
+              }}
+            >
+              <Table
+                sx={{
+                  width: "100%",
+                  tableLayout: "fixed", // ✅ يضغط الأعمدة بالتساوي
+                  minWidth: showAllCols ? 700 : "100%", // ✅ توسيع بسيط عند التفاصيل فقط
+                  "& th, & td": {
+                    padding: showAllCols ? "8px 6px" : "6px 3px", // ✅ تقليل الفراغات في الوضع العادي
+                    fontSize: showAllCols ? 14 : 13,
+                    whiteSpace: "nowrap",
+                  },
+                }}
+              >
+                {" "}
                 <TableHead>
                   <TableRow
                     sx={{ backgroundColor: isDark ? "#222831" : "#fdfdfd" }}
                   >
-                    {[
-                      "المشتركة",
-                      "النشطة",
-                      "الملغاة",
-                      "المنجزة",
-                      "الإجراءات",
-                    ].map((header) => (
-                      <TableCell
-                        key={header}
-                        align="center"
-                        sx={{
-                          color: isDark ? "#FFD700" : "#444",
-                          fontWeight: 600,
-                          fontSize: 14,
-                          py: 2,
-                          borderBottom: "1px solid rgba(255,215,0,0.2)",
-                        }}
-                      >
-                        {header}
-                      </TableCell>
-                    ))}
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: isDark ? "#FFD700" : "#444",
+                        fontWeight: 600,
+                      }}
+                    >
+                      المشتركة
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{ color: "#4caf50", fontWeight: 600 }}
+                    >
+                      النشطة
+                    </TableCell>
+
+                    {/* ✅ الأعمدة الإضافية تظهر فقط عند تفعيل الزر */}
+                    {showAllCols && (
+                      <>
+                        <TableCell
+                          align="center"
+                          sx={{ color: "#c62828", fontWeight: 600 }}
+                        >
+                          الملغاة
+                        </TableCell>
+                        <TableCell
+                          align="center"
+                          sx={{ color: "#b8860b", fontWeight: 600 }}
+                        >
+                          المنجزة
+                        </TableCell>
+                      </>
+                    )}
+
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: isDark ? "#FFD700" : "#A01860",
+                        fontWeight: 600,
+                      }}
+                    >
+                      الإجراءات
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -474,12 +548,17 @@ export default function BookingsAdmin() {
                       <TableCell align="center" sx={{ color: "#4caf50" }}>
                         {row.active}
                       </TableCell>
-                      <TableCell align="center" sx={{ color: "#c62828" }}>
-                        {row.cancelled}
-                      </TableCell>
-                      <TableCell align="center" sx={{ color: "#b8860b" }}>
-                        {row.completed}
-                      </TableCell>
+                      {showAllCols && (
+                        <>
+                          <TableCell align="center" sx={{ color: "#c62828" }}>
+                            {row.cancelled}
+                          </TableCell>
+                          <TableCell align="center" sx={{ color: "#b8860b" }}>
+                            {row.completed}
+                          </TableCell>
+                        </>
+                      )}
+
                       <TableCell align="center">
                         <Button
                           onClick={() => openDetails(row.userId, row.username)}
@@ -633,14 +712,31 @@ export default function BookingsAdmin() {
                   border: "1px solid rgba(255,215,0,0.2)",
                 }}
               >
-                <Box sx={{ width: "100%", overflowX: "auto" }}>
-                  <Table sx={{ minWidth: 500 }}>
+                {/* ✅ إصلاح الاتجاه واستخدام Box الصحيح */}
+                <Box
+                  dir="rtl"
+                  sx={{
+                    width: "100%",
+                    overflowX: "hidden", // ✅ لا تمرير أبدًا
+                  }}
+                >
+                  <Table
+                    sx={{
+                      width: "100%",
+                      tableLayout: "fixed", // ✅ يضغط الأعمدة بالتساوي
+                      "& th, & td": {
+                        textAlign: "center",
+                        direction: "rtl",
+                        padding: "6px 4px", // ✅ يقلل المسافات
+                        fontSize: 13,
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                  >
                     <TableHead>
                       <TableRow
                         sx={{
-                          backgroundColor: isDark
-                            ? "rgba(255,215,0,0.05)"
-                            : "rgba(160,24,96,0.05)",
+                          backgroundColor: isDark ? "#222831" : "#fdfdfd",
                         }}
                       >
                         <TableCell
