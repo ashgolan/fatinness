@@ -20,7 +20,7 @@ const messaging = firebase.messaging();
 // إشعار الخلفية
 messaging.onBackgroundMessage((payload) => {
   const { title, body } = payload.notification || {};
-  self.registration.showNotification(title || "إشعار", {
+  self.registration.showNotification("🔥 Fatinness Studio", {
     body: body || "",
     icon: "/logo192.png",
     // رابط يفتح عند النقر (اختياري لكنه مفيد)
