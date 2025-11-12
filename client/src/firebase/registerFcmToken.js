@@ -7,7 +7,7 @@ export async function registerFcmToken() {
   try {
     console.log("🚀 بدء عملية تسجيل FCM Token...");
 
-    // ✅ تحقق أن Firebase Messaging مدعوم
+    // ✅ تحقق من دعم المتصفح
     const supported = await isSupported();
     if (!supported) {
       console.warn("⚠️ المتصفح لا يدعم Firebase Messaging");
@@ -15,11 +15,20 @@ export async function registerFcmToken() {
       return null;
     }
 
+    // ✅ تأكد من وجود Service Worker
+    if (!("serviceWorker" in navigator)) {
+      console.warn("❌ المتصفح لا يدعم Service Workers");
+      return null;
+    }
+
+    console.log("📦 تسجيل Service Worker...");
+    const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    console.log("✅ تم تسجيل Service Worker:", registration);
+
     // ✅ تهيئة Messaging
     const messaging = getMessaging(app);
-    console.log("✅ تم تهيئة Firebase Messaging");
 
-    // ✅ طلب الإذن
+    // ✅ طلب الإذن من المستخدم
     const permission = await Notification.requestPermission();
     console.log("📜 حالة الإذن:", permission);
 
@@ -28,11 +37,11 @@ export async function registerFcmToken() {
       return null;
     }
 
-    // ✅ الحصول على التوكن
+    // ✅ الحصول على الـ Token
     console.log("🔄 جارٍ توليد FCM Token...");
     const fcmToken = await getToken(messaging, {
       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: await navigator.serviceWorker.ready, // ⚠️ هذا مهم جدًا للموبايل
+      serviceWorkerRegistration: registration,
     });
 
     if (!fcmToken) {
@@ -42,8 +51,7 @@ export async function registerFcmToken() {
 
     console.log("🎯 تم الحصول على FCM Token:", fcmToken);
 
-    // ✅ إرسال التوكن للسيرفر
-    console.log("📤 إرسال التوكن إلى السيرفر...");
+    // ✅ إرسال التوكن إلى السيرفر
     const { data } = await Api.post("/users/fcm", { fcmToken });
     console.log("✅ استجابة السيرفر:", data);
 
