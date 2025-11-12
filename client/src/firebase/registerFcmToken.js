@@ -40,7 +40,7 @@ export async function registerFcmToken() {
     // ✅ الحصول على الـ Token
     console.log("🔄 جارٍ توليد FCM Token...");
     const fcmToken = await getToken(messaging, {
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration: registration,
     });
 
