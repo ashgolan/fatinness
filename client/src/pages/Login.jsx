@@ -46,22 +46,53 @@ export default function Login() {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
   }, [logoUrl, loadingBrand]);
 
+  const getErrorMessage = (err) => {
+    if (err?.response?.data) {
+      return (
+        err.response.data.message ||
+        err.response.data.error ||
+        err.response.data.msg ||
+        `خطأ ${err.response.status || ""}`.trim()
+      );
+    }
+    if (err?.request)
+      return "تعذّر الاتصال بالخادم. تحققي من الإنترنت أو إعدادات CORS.";
+    return err?.message || "حدث خطأ غير متوقع.";
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // منع الضغط المزدوج أثناء التحميل
     setLoading(true);
+
     try {
+      // 🔹 إرسال بيانات الدخول
       const { data } = await Api.post("/auth/login", { email, password });
-      if (data?.token) setToken(data.token);
-      const me = await Api.get("/users/me");
-      setUser(me.data);
-      toast.success("تم تسجيل الدخول بنجاح");
-      setToken(response.data.accessToken);
-      await registerFcmToken(); // ✅ تسجيل FCM token بعد الدخول
-      navigate(me.data.role === "admin" ? "/admin/control" : from, {
-        replace: true,
-      });
+
+      if (data?.token) {
+        // ✅ حفظ التوكن
+        setToken(data.token);
+
+        // 🔹 جلب بيانات المستخدم
+        const me = await Api.get("/users/me");
+        setUser(me.data);
+
+        // 🔹 إشعار نجاح
+        toast.success("تم تسجيل الدخول بنجاح 🎉");
+
+        // 🔹 تسجيل FCM Token بعد الدخول
+        await registerFcmToken();
+
+        // 🔹 الانتقال حسب الدور
+        navigate(me.data.role === "admin" ? "/admin/control" : from, {
+          replace: true,
+        });
+      } else {
+        toast.error(data?.message || "فشل تسجيل الدخول");
+      }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "فشل تسجيل الدخول");
+      console.error("Login error:", err);
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
