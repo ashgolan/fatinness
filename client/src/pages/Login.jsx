@@ -81,7 +81,7 @@ export default function Login() {
         toast.success("تم تسجيل الدخول بنجاح 🎉");
 
         // 🔹 تسجيل FCM Token بعد الدخول
-        await registerFcmToken();
+        await registerFcmToken().catch(() => {});
 
         // 🔹 الانتقال حسب الدور
         navigate(me.data.role === "admin" ? "/admin/control" : from, {

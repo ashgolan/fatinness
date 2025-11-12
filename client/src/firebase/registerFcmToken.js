@@ -1,23 +1,35 @@
-// 📁 client/src/firebase/registerFcmToken.js
-import { getToken } from "firebase/messaging";
-import { messaging } from "./config";
+import { getMessaging, getToken } from "firebase/messaging";
+import { app } from "./config";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 
-export const registerFcmToken = async () => {
+export async function registerFcmToken() {
   try {
-    const token = await getToken(messaging, {
-      vapidKey: "YOUR_PUBLIC_VAPID_KEY", // 🔹 من إعدادات مشروعك في Firebase Cloud Messaging
+    const messaging = getMessaging(app);
+
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      console.warn("🔇 إشعارات FCM مرفوضة من المستخدم");
+      return null;
+    }
+
+    const fcmToken = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
     });
 
-    if (token) {
-      await Api.post("/users/fcm", { token });
-      console.log("✅ FCM Token Registered:", token);
-    } else {
-      console.warn("⚠️ لم يتم الحصول على رمز FCM");
+    if (!fcmToken) {
+      console.warn("⚠️ لم يتم الحصول على FCM token");
+      return null;
     }
+
+    // 🔹 أرسل التوكن إلى السيرفر لربطه بالمستخدم
+    await Api.post("/users/register-fcm", { token: fcmToken });
+    console.log("✅ تم تسجيل FCM Token بنجاح:", fcmToken);
+    return fcmToken;
   } catch (err) {
-    console.error("❌ خطأ في تسجيل FCM Token:", err);
-    toast.error("تعذر تفعيل الإشعارات على هذا الجهاز.");
+    console.error("❌ خطأ أثناء تسجيل FCM:", err.message);
+    // ⚠️ لا نرمي الخطأ للخارج حتى لا يُكسر الـ login flow
+    toast.info("⚠️ لم يتم تفعيل الإشعارات (اختياري)");
+    return null;
   }
-};
+}

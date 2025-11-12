@@ -7,6 +7,13 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { ThemeModeProvider } from "./context/ThemeContext";
 import { BrandProvider } from "./context/BrandContext";
+// ✅ تسجيل الـ Service Worker المسؤول عن الإشعارات (Firebase)
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker
+    .register("/firebase-messaging-sw.js")
+    .then((reg) => console.log("✅ Service Worker مسجل:", reg.scope))
+    .catch((err) => console.error("❌ فشل تسجيل Service Worker:", err));
+}
 
 const container = document.getElementById("root");
 const root = createRoot(container);
