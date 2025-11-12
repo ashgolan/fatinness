@@ -1,7 +1,7 @@
 import Agenda from "agenda";
 import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
-import { sendFcmToTokens } from "./fcm.js";
+import { sendSmartNotification } from "./notify.js";
 
 // 🔹 إنشاء مجدول Agenda
 export const agenda = new Agenda({
@@ -33,9 +33,12 @@ export const defineSchedulerJobs = () => {
     )} الساعة ${booking.slot.startTime || ""}`;
 
     try {
-      if (booking.user?.fcmTokens?.length) {
-        await sendFcmToTokens(booking.user.fcmTokens, { title, body });
-      }
+  await sendSmartNotification({
+  user: booking.user,
+  title,
+  body,
+});
+
       booking.reminderSent = true;
       await booking.save();
       console.log(`✅ Reminder sent for booking ${bookingId}`);
@@ -80,7 +83,11 @@ export const defineSchedulerJobs = () => {
           const body = `لقد أنجزتِ تدريبك بتاريخ ${slotDate.toLocaleDateString(
             "ar-EG"
           )}. استمري نحو هدفك 💪`;
-          await sendFcmToTokens(booking.user.fcmTokens, { title, body });
+await sendSmartNotification({
+  user: booking.user,
+  title,
+  body,
+});
           console.log(`🎊 Completion notification sent for booking ${bookingId}`);
         }
       } catch (err) {

@@ -2,7 +2,6 @@ import User from "../models/User.js";
 import Slot from "../models/Slot.js";
 import WeekTemplate from "../models/WeekTemplate.js";
 import Booking from "../models/Booking.js";
-import { sendFcmToTokens } from "../utils/fcm.js";
 import Notification from "../models/Notification.js";
 import { createObjectCsvStringifier } from "csv-writer";
 import Setting from "../models/Setting.js";
@@ -10,7 +9,8 @@ import multer from "multer";
 import path from "path";
 import { fmtLocal } from "../utils/date.js";
 import mongoose from "mongoose";
-
+import { sendSmartNotification } from "../utils/notify.js";
+import { sendFcmToTokens as sendFCMNotification } from "../utils/fcm.js";
 // 📸 إعداد مكان حفظ الصور
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -392,23 +392,21 @@ export const toggleUserBlock = async (req, res) => {
 /**
  * 🔹 إرسال إشعار مخصص وتسجيله في قاعدة البيانات
  */
+
 export const sendCustomNotification = async (req, res) => {
   try {
-    const { title, body, target } = req.body;
+    const { title, body, target, channel = "auto" } = req.body;
     const adminUser = req.user?._id;
 
-    if (!title || !body) {
+    if (!title || !body)
       return res
         .status(400)
         .json({ message: "الرجاء إدخال العنوان والمحتوى." });
-    }
 
+    // 📦 تحديد الفئة المستهدفة
     let users = [];
     if (target === "all") {
-      users = await User.find({
-        isBlocked: false,
-        fcmTokens: { $exists: true, $ne: [] },
-      });
+      users = await User.find({ isBlocked: false });
     } else {
       const user = await User.findById(target);
       if (!user)
@@ -419,30 +417,51 @@ export const sendCustomNotification = async (req, res) => {
     if (!users.length)
       return res.status(400).json({ message: "لا توجد مشتركات مستهدفات." });
 
-    const allTokens = users.flatMap((u) => u.fcmTokens || []);
-    if (!allTokens.length) {
-      return res
-        .status(400)
-        .json({ message: "لا توجد أجهزة مسجلة لاستقبال الإشعارات." });
+    // 📤 إرسال الإشعارات
+    let totalSuccess = 0;
+    let totalFail = 0;
+    let viaWhatsApp = 0;
+    let viaPush = 0;
+
+    for (const u of users) {
+      let result;
+
+      // ✅ تحديد نوع القناة
+      if (channel === "fcm") {
+        result = await sendFCMNotification(u.fcmTokens, title, body);
+        if (result.success) viaPush++;
+      } else {
+        result = await sendSmartNotification({ user: u, title, body });
+        if (result.via === "push") viaPush++;
+        if (result.via === "whatsapp") viaWhatsApp++;
+      }
+
+      totalSuccess += result.successCount || (result.success ? 1 : 0);
+      totalFail += result.failureCount || 0;
     }
 
-    const payload = { title, body };
-    const response = await sendFcmToTokens(allTokens, payload);
-
+    // 🧾 حفظ في السجل
     await Notification.create({
       title,
       body,
       targetType: target === "all" ? "all" : "user",
       targetUser: target === "all" ? null : target,
       sentBy: adminUser,
-      successCount: response?.successCount || 0,
-      failureCount: response?.failureCount || 0,
+      successCount: totalSuccess,
+      failureCount: totalFail,
+      channel: channel, // ✅ حفظ نوع القناة المستخدَمة
     });
 
+    // 📩 الرد إلى الواجهة
     res.json({
-      message: `تم إرسال الإشعار بنجاح إلى ${users.length} مشتركة.`,
-      successCount: response?.successCount,
-      failureCount: response?.failureCount,
+      message: `✅ تم إرسال الإشعار بنجاح إلى ${users.length} مشتركة.`,
+      successCount: totalSuccess,
+      failureCount: totalFail,
+      details: {
+        viaPush,
+        viaWhatsApp,
+        mode: channel,
+      },
     });
   } catch (error) {
     console.error("❌ خطأ أثناء إرسال الإشعار:", error);
@@ -497,7 +516,6 @@ export const getSettings = async (req, res) => {
   }
 };
 
-
 /**
  * 🔹 تحديث الإعدادات
  */
@@ -534,7 +552,6 @@ export const updateSettings = async (req, res) => {
     res.status(500).json({ message: "فشل تحديث الإعدادات", error });
   }
 };
-
 
 /**
  * 🔹 رفع شعار جديد للنادي

@@ -484,9 +484,30 @@ function AvailableView({
               }}
             >
               {/* 🔹 رقم اليوم */}
-              <strong style={{ fontSize: 18 }}>{d.getDate()}</strong>
+              {/* 🔹 اليوم أعلى المربع */}
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  color: mode === "dark" ? "#ccc" : "#333",
+                  marginBottom: 4,
+                }}
+              >
+                {dayNames[d.getDay()]} {/* يعرض مثل: الأحد */}
+              </div>
 
-              {/* 🟣 عدد الحصص (أسفل الرقم مباشرة) */}
+              {/* 🔹 التاريخ بصيغة رقم/شهر */}
+              <strong
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: isAvailable ? BRAND.purple : "#999",
+                }}
+              >
+                {`${d.getDate()}/${d.getMonth() + 1}`}
+              </strong>
+
+              {/* 🔹 عدد الحصص أسفل التاريخ */}
               {isAvailable && (
                 <span
                   style={{
@@ -497,7 +518,7 @@ function AvailableView({
                     fontWeight: 600,
                   }}
                 >
-                  {slotsCount}
+                  {slotsCount} حصة
                 </span>
               )}
 

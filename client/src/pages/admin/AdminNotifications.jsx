@@ -58,6 +58,8 @@ export default function AdminNotifications() {
   const [notificationToResend, setNotificationToResend] = useState(null);
   const [resending, setResending] = useState(false);
 
+  const [notificationType, setNotificationType] = useState("smart"); // "fcm" أو "smart"
+
   // 📥 جلب السجل والمشتركات
   const fetchHistory = async () => {
     try {
@@ -83,8 +85,18 @@ export default function AdminNotifications() {
 
     setLoading(true);
     try {
-      const { data } = await Api.post("/admin/notify", { title, body, target });
-      toast.success(data.message || "تم الإرسال بنجاح");
+      const { data } = await Api.post("/admin/notify", {
+        title,
+        body,
+        target,
+        mode: notificationType,
+      });
+      toast.success(
+        data.message ||
+          (notificationType === "smart"
+            ? "✅ تم الإرسال بالإشعار الذكي"
+            : "📱 تم الإرسال عبر التطبيق فقط")
+      );
       setTitle("");
       setBody("");
       fetchHistory();
@@ -233,46 +245,80 @@ export default function AdminNotifications() {
               )}
             </Select>
           </FormControl>
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel
+              shrink
+              sx={{
+                right: 14,
+                left: "auto",
+                background: mode === "dark" ? BRAND.card : "#fff",
+                px: 1,
+                fontWeight: 600,
+              }}
+            >
+              نوع الإشعار
+            </InputLabel>
+            <Select
+              value={notificationType}
+              onChange={(e) => setNotificationType(e.target.value)}
+              sx={{ textAlign: "right" }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    borderRadius: 2,
+                    mt: 1,
+                    border: `1px solid ${BRAND.line}`,
+                    backgroundColor: BRAND.card,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="smart">🤖 إشعار ذكي (FCM + WhatsApp)</MenuItem>
+              <MenuItem value="fcm">📱 عبر التطبيق فقط (FCM)</MenuItem>
+            </Select>
+          </FormControl>
 
-  <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-  <Button
-    variant="outlined"
-    onClick={handleSend}
-    disabled={loading}
-    sx={{
-      textTransform: "none",
-      fontWeight: 800,
-      px: 4,
-      py: 1.2,
-      borderRadius: 3,
-      border: `2px solid ${BRAND.purple}`,
-      color: BRAND.purple,
-      background: "transparent",
-      transition: "all 0.3s ease",
-      display: "flex",
-      alignItems: "center",
-      gap: 1,
-      "&:hover": {
-        background: `${BRAND.purple}10`, // خلفية شفافة خفيفة من البنفسجي
-        borderColor: BRAND.gold,
-        color: BRAND.gold,
-        boxShadow: `0 0 8px ${BRAND.gold}40`,
-      },
-      "&:disabled": {
-        opacity: 0.6,
-      },
-    }}
-  >
-    {loading ? (
-      <CircularProgress size={22} sx={{ color: BRAND.purple }} />
-    ) : (
-      <>
-        🔔 <Typography sx={{ fontWeight: 800 }}>إرسال الإشعار</Typography>
-      </>
-    )}
-  </Button>
-</Box>
-
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={handleSend}
+              disabled={loading}
+              sx={{
+                textTransform: "none",
+                fontWeight: 800,
+                px: 4,
+                py: 1.2,
+                borderRadius: 3,
+                border: `2px solid ${BRAND.purple}`,
+                color: BRAND.purple,
+                background: "transparent",
+                transition: "all 0.3s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                "&:hover": {
+                  background: `${BRAND.purple}10`, // خلفية شفافة خفيفة من البنفسجي
+                  borderColor: BRAND.gold,
+                  color: BRAND.gold,
+                  boxShadow: `0 0 8px ${BRAND.gold}40`,
+                },
+                "&:disabled": {
+                  opacity: 0.6,
+                },
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={22} sx={{ color: BRAND.purple }} />
+              ) : (
+                <>
+                  🔔{" "}
+                  <Typography sx={{ fontWeight: 800 }}>
+                    إرسال الإشعار
+                  </Typography>
+                </>
+              )}
+            </Button>
+          </Box>
         </Box>
 
         <Divider sx={{ my: 3 }} />

@@ -18,8 +18,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:3000",          // أثناء التطوير
-      "https://fateness.onrender.com",  // الموقع المنشور في Render
+      "http://localhost:3000", // أثناء التطوير
+      "https://fateness.onrender.com", // الموقع المنشور في Render
     ],
     credentials: true,
   })
@@ -70,11 +70,16 @@ const PORT = process.env.PORT || 4000;
 
 (async () => {
   try {
+    // 1️⃣ الاتصال بقاعدة البيانات
     await connectDB();
-    defineSchedulerJobs();
-    await agenda.start();
-    startScheduler();
 
+    // 2️⃣ تعريف وظائف المجدول (reminder + completed)
+    defineSchedulerJobs();
+
+    // 3️⃣ تشغيل المجدول (Agenda)
+    await startScheduler();
+
+    // 4️⃣ تشغيل السيرفر
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
