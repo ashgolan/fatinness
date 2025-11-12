@@ -1,3 +1,4 @@
+// src/firebase/registerFcmToken.js (CRA)
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 import { app } from "./config";
 import { Api } from "../api/Api";
@@ -5,61 +6,53 @@ import { toast } from "react-toastify";
 
 export async function registerFcmToken() {
   try {
-    console.log("🚀 بدء عملية تسجيل FCM Token...");
-
-    // ✅ تحقق من دعم المتصفح
     const supported = await isSupported();
-    if (!supported) {
-      console.warn("⚠️ المتصفح لا يدعم Firebase Messaging");
-      toast.info("جهازك لا يدعم الإشعارات.");
+    if (!supported || !("Notification" in window) || !navigator.serviceWorker) {
+      console.warn("Web Push not supported on this browser.");
+      toast.info("⚠️ جهازك/المتصفح لا يدعم الإشعارات.");
       return null;
     }
 
-    // ✅ تأكد من وجود Service Worker
-    if (!("serviceWorker" in navigator)) {
-      console.warn("❌ المتصفح لا يدعم Service Workers");
+    // 1) طلب الإذن
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") {
+      toast.info("⚠️ لم يتم تفعيل الإشعارات (اختياري).");
       return null;
     }
 
-    console.log("📦 تسجيل Service Worker...");
+    // 2) انتظر تسجيل الـ SW الجذري ثم مرّره لـ getToken
     const registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
-    console.log("✅ تم تسجيل Service Worker:", registration);
+    await navigator.serviceWorker.ready; // احتياط
 
-    // ✅ تهيئة Messaging
     const messaging = getMessaging(app);
+    const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
 
-    // ✅ طلب الإذن من المستخدم
-    const permission = await Notification.requestPermission();
-    console.log("📜 حالة الإذن:", permission);
-
-    if (permission !== "granted") {
-      toast.info("⚠️ لم يتم منح الإذن للإشعارات (اختياري)");
+    if (!vapidKey) {
+      console.error("Missing REACT_APP_FIREBASE_VAPID_KEY");
+      toast.error("مفتاح VAPID غير مضبوط في الواجهة.");
       return null;
     }
 
-    // ✅ الحصول على الـ Token
-    console.log("🔄 جارٍ توليد FCM Token...");
-    const fcmToken = await getToken(messaging, {
-      vapidKey: process.env.REACT_APP_FIREBASE_VAPID_KEY,
-      serviceWorkerRegistration: registration,
+    const token = await getToken(messaging, {
+      vapidKey,
+      serviceWorkerRegistration: registration, // ← أهم سطر
     });
 
-    if (!fcmToken) {
-      console.warn("⚠️ لم يتم توليد FCM Token");
+    if (!token) {
+      console.warn("No FCM token returned.");
       return null;
     }
 
-    console.log("🎯 تم الحصول على FCM Token:", fcmToken);
+    // 3) أرسل التوكن للسيرفر
+    await Api.post("/users/fcm", { fcmToken: token });
 
-    // ✅ إرسال التوكن إلى السيرفر
-    const { data } = await Api.post("/users/fcm", { fcmToken });
-    console.log("✅ استجابة السيرفر:", data);
-
+    console.log("FCM token saved:", token.slice(0, 12) + "…");
     toast.success("تم تفعيل الإشعارات بنجاح 🎉");
-    return fcmToken;
+    return token;
   } catch (err) {
-    console.error("❌ خطأ أثناء تسجيل FCM:", err);
-    toast.info("⚠️ لم يتم تفعيل الإشعارات (اختياري)");
+    console.error("FCM register error:", err);
+    // لو ظهر messaging/unsupported-browser هنا، السبب أحد البنود بالأعلى
+    toast.info("⚠️ لم يتم تفعيل الإشعارات (اختياري).");
     return null;
   }
 }
