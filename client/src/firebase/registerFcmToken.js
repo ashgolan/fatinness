@@ -23,7 +23,7 @@ export async function registerFcmToken() {
     }
 
     // 🔹 أرسل التوكن إلى السيرفر لربطه بالمستخدم
-    await Api.post("/users/register-fcm", { token: fcmToken });
+    await Api.post("/users/fcm", { fcmToken });
     console.log("✅ تم تسجيل FCM Token بنجاح:", fcmToken);
     return fcmToken;
   } catch (err) {
