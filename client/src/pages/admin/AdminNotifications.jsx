@@ -139,7 +139,17 @@ export default function AdminNotifications() {
       setNotificationToResend(null);
     }
   };
-
+  const handleDeleteNotification = async (id) => {
+    if (!window.confirm("هل أنت متأكد أنك تريد حذف هذا الإشعار نهائيًا؟"))
+      return;
+    try {
+      await Api.delete(`/admin/notifications/${id}`);
+      toast.success("🗑️ تم حذف الإشعار من السجل بنجاح");
+      setHistory((prev) => prev.filter((h) => h._id !== id));
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "فشل حذف الإشعار");
+    }
+  };
   return (
     <Box
       dir="rtl"
@@ -354,18 +364,35 @@ export default function AdminNotifications() {
                 key={n._id}
                 divider
                 secondaryAction={
-                  <Tooltip title="إعادة الإرسال مع تعديل">
-                    <IconButton
-                      edge="start"
-                      onClick={() => confirmResend(n)}
-                      sx={{
-                        color: BRAND.purple,
-                        "&:hover": { color: BRAND.fuchsia },
-                      }}
-                    >
-                      <Replay />
-                    </IconButton>
-                  </Tooltip>
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    {/* 🗑️ زر الحذف */}
+                    <Tooltip title="حذف من السجل نهائيًا">
+                      <IconButton
+                        edge="end"
+                        onClick={() => handleDeleteNotification(n._id)}
+                        sx={{
+                          color: "#e53935",
+                          "&:hover": { color: "#ff1744" },
+                        }}
+                      >
+                        🗑️
+                      </IconButton>
+                    </Tooltip>
+
+                    {/* 🔁 زر إعادة الإرسال */}
+                    <Tooltip title="إعادة الإرسال مع تعديل">
+                      <IconButton
+                        edge="end"
+                        onClick={() => confirmResend(n)}
+                        sx={{
+                          color: BRAND.purple,
+                          "&:hover": { color: BRAND.fuchsia },
+                        }}
+                      >
+                        <Replay />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 }
               >
                 <ListItemText

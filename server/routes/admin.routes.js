@@ -83,4 +83,14 @@ router.get("/scheduler/status", getSchedulerStatus);
 
 router.put("/users/:id", updateUserByAdmin);
 
+router.delete("/notifications/:id", authMiddleware, async (req, res) => {
+  try {
+    await Notification.findByIdAndDelete(req.params.id);
+    res.json({ message: "Notification deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "فشل حذف الإشعار" });
+  }
+});
+
 export default router;
