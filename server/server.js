@@ -1,11 +1,9 @@
 import "dotenv/config";
+process.env.TZ = process.env.TZ || "Asia/Jerusalem";
 import express from "express";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
 import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
-import { agenda } from "./config/agenda.js";
 import { defineSchedulerJobs, startScheduler } from "./utils/scheduler.js";
 import { handleWebhook } from "./controllers/payments.controller.js";
 import mainRoutes from "./routes/index.js";
