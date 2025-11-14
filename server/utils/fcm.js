@@ -2,25 +2,20 @@
 import admin from "firebase-admin";
 import fs from "fs";
 
-/**
- * ✅ تهيئة Firebase Admin باستخدام بيانات الخدمة من .env أو من ملف خارجي
- */
+// ======================================================
+// 🔥 تحميل بيانات Firebase Admin
+// ======================================================
 if (!admin.apps.length) {
   let serviceAccount = null;
 
   try {
-    // نحاول أولاً قراءة JSON من متغير البيئة
-const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
+    // من ENV مباشرة
+    const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
     if (raw && raw.trim() !== "{}") {
-      try {
-        serviceAccount = JSON.parse(raw);
-      } catch (err) {
-        console.error("❌ Failed to parse FIREBASE_SERVICE_ACCOUNT_JSON:", err.message);
-        process.exit(1);
-      }
+      serviceAccount = JSON.parse(raw);
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      // أو نقرأ من ملف خارجي إذا تم تحديد المسار
+      // من ملف خارجي
       const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
       if (fs.existsSync(path)) {
@@ -31,67 +26,76 @@ const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
         process.exit(1);
       }
     } else {
-      console.error("❌ Missing Firebase service account configuration in .env");
-      console.error("Add either FIREBASE_SERVICE_ACCOUNT_JSON or FIREBASE_SERVICE_ACCOUNT_PATH");
+      console.error("❌ Missing Firebase service account configuration");
       process.exit(1);
     }
 
-    // ✅ التهيئة الفعلية
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
 
-    console.log("✅ Firebase Admin initialized successfully");
-  } catch (error) {
-    console.error("❌ Failed to initialize Firebase Admin:", error.message);
+    console.log("✅ Firebase Admin initialized");
+  } catch (err) {
+    console.error("❌ Firebase init error:", err.message);
     process.exit(1);
   }
 }
 
-/**
- * 🔹 إرسال إشعار إلى جهاز واحد
- * @param {string} token - رمز FCM الخاص بالمستخدم
- * @param {string} title - عنوان الإشعار
- * @param {string} body - نص الإشعار
- * @param {object} data - بيانات إضافية (اختيارية)
- */
+// ======================================================
+// 🔥 إرسال إشعار إلى عدة أجهزة (مع إرجاع عدد النجاح/الفشل)
+// ======================================================
+export async function sendFcmToTokens(tokens = [], message = {}) {
+  if (!tokens.length) {
+    return { successCount: 0, failureCount: 1 };
+  }
+
+  try {
+    const response = await admin.messaging().sendEachForMulticast({
+      tokens,
+      notification: {
+        title: message.title || "Fatinness Studio",
+        body: message.body || "",
+      },
+      data: message.data || {},
+      android: { priority: "high" },
+      apns: { payload: { aps: { sound: "default" } } },
+    });
+
+    console.log(
+      `📢 FCM: success=${response.successCount}, failed=${response.failureCount}`
+    );
+
+    return {
+      successCount: response.successCount,
+      failureCount: response.failureCount,
+      success: response.successCount > 0,
+    };
+  } catch (error) {
+    console.error("❌ FCM send error:", error.message);
+    return { successCount: 0, failureCount: tokens.length };
+  }
+}
+
+// ======================================================
+// 🔥 إرسال إشعار لجهاز واحد
+// ======================================================
 export async function sendPushNotification(token, title, body, data = {}) {
   try {
     const message = {
       token,
-      notification: { title, body },
+      notification: {
+        title: title || "Fatinness Studio",
+        body: body || "",
+      },
       data,
       android: { priority: "high" },
       apns: { payload: { aps: { sound: "default" } } },
     };
 
-    const response = await admin.messaging().send(message);
-    console.log("✅ Notification sent:", response);
-    return response;
-  } catch (error) {
-    console.error("❌ Error sending notification:", error.message);
-  }
-}
-
-/**
- * 🔹 إرسال إشعار إلى عدة أجهزة دفعة واحدة
- * @param {string[]} tokens - مجموعة الرموز (FCM Tokens)
- * @param {object} message - يحتوي على title, body, data
- */
-export async function sendFcmToTokens(tokens = [], message = {}) {
-  if (!tokens.length) return;
-  try {
-    const response = await admin.messaging().sendEachForMulticast({
-      tokens,
-      notification: {
-        title: message.title,
-        body: message.body,
-      },
-      data: message.data || {},
-    });
-    console.log(`✅ FCM sent to ${response.successCount} devices`);
-  } catch (error) {
-    console.error("❌ Error in sendFcmToTokens:", error);
+    const res = await admin.messaging().send(message);
+    return res;
+  } catch (err) {
+    console.error("❌ Single push error:", err.message);
   }
 }
 

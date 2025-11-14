@@ -81,8 +81,11 @@ export default function Login() {
         toast.success("تم تسجيل الدخول بنجاح 🎉");
 
         // 🔹 تسجيل FCM Token بعد الدخول
-        await registerFcmToken().catch(() => {});
-
+        if (me.data.role !== "admin") {
+          await registerFcmToken().catch(() => {
+            toast.info("لم يتم تفعيل الإشعارات (اختياري).");
+          });
+        }
         // 🔹 الانتقال حسب الدور
         navigate(me.data.role === "admin" ? "/admin/control" : from, {
           replace: true,

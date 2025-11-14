@@ -64,8 +64,6 @@ export default function AdminNotifications() {
   const [notificationToResend, setNotificationToResend] = useState(null);
   const [resending, setResending] = useState(false);
 
-  const [notificationType, setNotificationType] = useState("smart");
-
   // 📥 جلب السجل والمشتركات
   const fetchHistory = async () => {
     try {
@@ -95,7 +93,6 @@ export default function AdminNotifications() {
         title,
         body,
         target,
-        channel: notificationType,
       });
 
       toast.success(data.message);
@@ -257,30 +254,6 @@ export default function AdminNotifications() {
             </Select>
           </FormControl>
 
-          {/* نوع الإشعار */}
-          <FormControl fullWidth sx={{ mb: 3 }}>
-            <InputLabel
-              shrink
-              sx={{
-                right: 14,
-                background: BRAND.card,
-                px: 1,
-                fontWeight: 600,
-              }}
-            >
-              نوع الإشعار
-            </InputLabel>
-
-            <Select
-              value={notificationType}
-              onChange={(e) => setNotificationType(e.target.value)}
-              sx={{ textAlign: "right" }}
-            >
-              <MenuItem value="smart">🤖 ذكي (FCM + WhatsApp)</MenuItem>
-              <MenuItem value="fcm">📱 فقط التطبيق (FCM)</MenuItem>
-            </Select>
-          </FormControl>
-
           {/* زر إرسال */}
           <Box sx={{ textAlign: "center" }}>
             <Button
@@ -322,10 +295,7 @@ export default function AdminNotifications() {
             alignItems: "center",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 900, color: BRAND.text }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 900, color: BRAND.text }}>
             🕘 سجل آخر الإشعارات
           </Typography>
 
@@ -335,7 +305,7 @@ export default function AdminNotifications() {
               color="error"
               onClick={handleClearAll}
               startIcon={<DeleteForeverIcon />}
-              sx={{ fontWeight: 800,gap :1 }}
+              sx={{ fontWeight: 800, gap: 1 }}
             >
               مسح الكل
             </Button>
@@ -367,8 +337,11 @@ export default function AdminNotifications() {
               >
                 {/* النص */}
                 <ListItemText
-                  primary={`${n.title} (${n.targetType === "all" ? "جميع المشتركات" : n.targetUser?.username
-                    })`}
+                  primary={`${n.title} (${
+                    n.targetType === "all"
+                      ? "جميع المشتركات"
+                      : n.targetUser?.username
+                  })`}
                   secondary={
                     <>
                       <Typography sx={{ color: BRAND.sub }}>
