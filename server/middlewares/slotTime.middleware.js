@@ -1,4 +1,5 @@
 import Slot from "../models/Slot.js";
+import { toLocal } from "../utils/date.js"; // مهم جداً لمنع مشاكل UTC
 
 export const checkSlotTimeValidity = async (req, res, next) => {
   try {
@@ -12,18 +13,25 @@ export const checkSlotTimeValidity = async (req, res, next) => {
       return res.status(404).json({ message: "Slot not found." });
     }
 
-    const now = new Date();
-    const slotDate = new Date(slot.date);
+    // 🟣 تحويل تاريخ Mongo إلى Local Date
+    const date = toLocal(slot.date);
 
-    // 🔹 إذا كان الوقت الحالي بعد وقت الحصة فلا يُسمح بالحجز
-    if (slotDate.getTime() <= now.getTime()) {
-      return res
-        .status(400)
-        .json({ message: "This slot has already passed or is in progress." });
+    // 🕒 دمج الوقت مع التاريخ (startTime)
+    const [h, m] = slot.startTime.split(":").map(Number);
+    date.setHours(h, m, 0, 0);
+
+    const now = new Date();
+
+    // 🔥 المقارنة الحقيقية للوقت
+    if (date.getTime() <= now.getTime()) {
+      return res.status(400).json({
+        message: "This slot has already passed or is in progress.",
+      });
     }
 
-    // مرر بيانات الجلسة لو احتجناها لاحقًا
+    // مرر البيانات لإعادة استعمالها
     req.slot = slot;
+
     next();
   } catch (error) {
     console.error("Slot time check error:", error);

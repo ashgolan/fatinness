@@ -30,13 +30,21 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ message: "Slot not available" });
 
     // ✅ لا يمكن الحجز في مواعيد منتهية
+    // ✅ لا يمكن الحجز في مواعيد منتهية (نأخذ التاريخ + وقت بداية الحصة)
     const now = new Date();
-    const slotDateTime = new Date(slot.date);
-    if (slotDateTime < now) {
-      return res
-        .status(400)
-        .json({ message: "لا يمكن حجز فترات انتهى موعدها." });
+
+    const sessionStart = toLocal(slot.date); // نحول تاريخ Mongo إلى Local
+    if (slot.startTime) {
+      const [sh, sm] = slot.startTime.split(":").map(Number);
+      sessionStart.setHours(sh, sm, 0, 0);  // نضع ساعة بداية الحصة
     }
+
+    if (sessionStart <= now) {
+      return res.status(400).json({
+        message: "This slot has already passed or is in progress.",
+      });
+    }
+
 
     // ✅ حساب بداية ونهاية الأسبوع
     const startOfWeek = new Date(slot.date);
