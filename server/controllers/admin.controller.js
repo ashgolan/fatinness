@@ -50,6 +50,8 @@ export const createWeekTemplate = async (req, res) => {
 /**
  * 🔹 تطبيق قالب أسبوعي على تواريخ محددة
  */
+import { parseLocalDate } from "../utils/date.js";
+
 export const applyTemplate = async (req, res) => {
   try {
     const { templateId, startDate } = req.body;
@@ -57,7 +59,9 @@ export const applyTemplate = async (req, res) => {
     if (!template)
       return res.status(404).json({ message: "Template not found" });
 
-    const start = new Date(startDate);
+    // ✅ استخدم تاريخ محلي بدلاً من new Date
+    const start = parseLocalDate(startDate); // مثال: "2025-11-14"
+
     const createdSlots = [];
 
     for (const slot of template.slots) {
@@ -87,7 +91,6 @@ export const applyTemplate = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    // لا نكرر الرد مرتين
     res
       .status(500)
       .json({ message: "Error applying template", error: error.message });
