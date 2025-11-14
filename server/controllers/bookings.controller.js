@@ -1,10 +1,12 @@
 import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
+
 import { scheduleReminder } from "../utils/scheduler.js";
 import {
   createGoogleEvent,
   deleteGoogleEvent,
 } from "../utils/googleCalendar.js";
+import { toLocal } from "../utils/date.js";
 
 /**
  * 🔹 إنشاء حجز جديد (مع تحقق من الاشتراك الشهري)
