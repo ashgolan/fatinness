@@ -4,10 +4,10 @@ import express from "express";
 import cors from "cors";
 import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
-import { defineSchedulerJobs, startScheduler } from "./utils/scheduler.js";
 import { handleWebhook } from "./controllers/payments.controller.js";
 import mainRoutes from "./routes/index.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
+import { startScheduler } from "./utils/scheduler.js";
 
 const app = express();
 
@@ -72,7 +72,6 @@ const PORT = process.env.PORT || 4000;
     await connectDB();
 
     // 2️⃣ تعريف وظائف المجدول (reminder + completed)
-    defineSchedulerJobs();
 
     // 3️⃣ تشغيل المجدول (Agenda)
     await startScheduler();
