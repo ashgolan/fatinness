@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ الشعار من السياق
   const isDark = mode === "dark";
 
-  const fallbackLogo = "/uploads/logo-placeholder.png";
+  const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
   // ✅ عند توفر الشعار من السياق نحدّث الصورة

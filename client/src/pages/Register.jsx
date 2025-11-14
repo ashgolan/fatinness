@@ -50,7 +50,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const fallbackLogo = "https://via.placeholder.com/80x80.png?text=F";
+  const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const isDark = mode === "dark";
   const { logoUrl, loading: loadingBrand } = useBrand();

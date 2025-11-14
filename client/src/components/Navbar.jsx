@@ -42,7 +42,7 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   // ✅ شعار افتراضي ثابت أثناء التحميل أو عند عدم وجود شعار
-  const fallbackLogo = "/uploads/logo-placeholder.png"; // ضع صورة افتراضية محلية جميلة داخل public/uploads
+  const fallbackLogo = "/uploads/fatiness_logo.png"; // ضع صورة افتراضية محلية جميلة داخل public/uploads
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 const location = useLocation();
 

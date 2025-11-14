@@ -38,7 +38,7 @@ export default function Login() {
   const from = location.state?.from?.pathname || "/dashboard";
 
   // ✅ شعار افتراضي فوري
-  const fallbackLogo = "/uploads/logo-placeholder.png";
+  const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
   // ✅ عند تحديث الشعار من BrandContext، نحدّث الصورة فوراً
