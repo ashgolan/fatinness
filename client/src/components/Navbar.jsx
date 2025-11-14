@@ -29,22 +29,24 @@ import { UserContext } from "../context/UserContext";
 import { clearToken } from "../utils/tokensStorage";
 import { Api } from "../api/Api";
 import { useThemeMode } from "../context/ThemeContext";
-import { useBrand } from "../context/BrandContext"; // ✅ الشعار من هنا
+import { useBrand } from "../context/BrandContext";
+import { useTranslation } from "react-i18next"; // 🟣 الترجمة
 
 export default function Navbar() {
+  const { t } = useTranslation(); // 🟣
+
   const { user, setUser, loadingUser } = useContext(UserContext);
   const { mode, toggleMode, BRAND } = useThemeMode();
-  const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ جلب الشعار وحالة التحميل
+  const { logoUrl, loading: loadingBrand } = useBrand();
 
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ شعار افتراضي ثابت أثناء التحميل أو عند عدم وجود شعار
-  const fallbackLogo = "/uploads/fatiness_logo.png"; // ضع صورة افتراضية محلية جميلة داخل public/uploads
+  const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
-const location = useLocation();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
@@ -79,31 +81,30 @@ const location = useLocation();
   const navLinks = useMemo(() => {
     if (loadingUser) return [];
 
-if (!user) {
-  // 🔹 لا نظهر أي زر في صفحات login أو register
-  const currentPath = location.pathname;
-  const isAuthPage =
-    currentPath === "/login" || currentPath === "/register";
+    if (!user) {
+      const currentPath = location.pathname;
+      const isAuthPage =
+        currentPath === "/login" || currentPath === "/register";
 
-  return isAuthPage
-    ? [] // لا شيء في شريط التنقل
-    : [{ label: "تسجيل الدخول", to: "/login", icon: <LogoutIcon /> }];
-}
-
+      return isAuthPage
+        ? []
+        : [{ label: t("navbar.login"), to: "/login", icon: <LogoutIcon /> }];
+    }
 
     if (user.role === "admin") {
       return [
-        { label: "لوحة الإدارة", to: "/admin/control", icon: <DashboardIcon /> },
-        { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
+        { label: t("navbar.admin_panel"), to: "/admin/control", icon: <DashboardIcon /> },
+        { label: t("navbar.logout"), action: logout, icon: <LogoutIcon /> },
       ];
     }
 
     return [
-      { label: "الرئيسية", to: "/dashboard", icon: <HomeIcon /> },
-      { label: "مركز الحجوزات", to: "/bookings-hub", icon: <CalendarMonthIcon /> },
-      { label: "تسجيل الخروج", action: logout, icon: <LogoutIcon /> },
+      { label: t("navbar.home"), to: "/dashboard", icon: <HomeIcon /> },
+      { label: t("navbar.bookings_hub"), to: "/bookings-hub", icon: <CalendarMonthIcon /> },
+      { label: t("navbar.logout"), action: logout, icon: <LogoutIcon /> },
     ];
-  }, [user, loadingUser]);
+  }, [user, loadingUser, t]);
+  
 
   if (loadingUser) {
     return (
@@ -142,12 +143,12 @@ if (!user) {
           }}
         >
           {status?.active
-            ? "🔔 نظام التذكيرات يعمل الآن"
-            : "⚠️ نظام التذكيرات غير فعّال حالياً"}
+            ? t("navbar.reminder_system_on")
+            : t("navbar.reminder_system_off")}
         </Box>
       )}
 
-      {/* الـ Navbar */}
+      {/* THE NAVBAR */}
       <AppBar
         position="sticky"
         elevation={0}
@@ -167,7 +168,7 @@ if (!user) {
             minHeight: { xs: 56, sm: 64 },
           }}
         >
-          {/* ✅ الشعار من BrandContext */}
+          {/* Logo */}
           <Box
             component={Link}
             to="/"
@@ -213,7 +214,7 @@ if (!user) {
             </Typography>
           </Box>
 
-          {/* مفتاح الوضع */}
+          {/* Theme Switch */}
           <Box
             sx={{
               display: "flex",
@@ -256,7 +257,7 @@ if (!user) {
             />
           </Box>
 
-          {/* روابط سطح المكتب */}
+          {/* Desktop Links */}
           <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1.5 }}>
             {navLinks.map((link, index) =>
               link.to ? (
@@ -318,7 +319,7 @@ if (!user) {
             )}
           </Box>
 
-          {/* زر القائمة للموبايل */}
+          {/* Mobile Menu */}
           <IconButton
             onClick={() => setDrawerOpen(true)}
             sx={{
@@ -331,7 +332,7 @@ if (!user) {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer الموبايل */}
+      {/* Drawer mobile */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -345,7 +346,7 @@ if (!user) {
         }}
       >
         <Box sx={{ p: 2 }}>
-          {/* رأس القائمة */}
+          {/* Drawer HEADER */}
           <Box
             sx={{
               display: "flex",
@@ -379,7 +380,9 @@ if (!user) {
             </Typography>
 
             <IconButton onClick={() => setDrawerOpen(false)}>
-              <CloseIcon sx={{ color: mode === "dark" ? BRAND.textDark : "#333" }} />
+              <CloseIcon
+                sx={{ color: mode === "dark" ? BRAND.textDark : "#333" }}
+              />
             </IconButton>
           </Box>
 

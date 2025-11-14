@@ -15,6 +15,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { useTranslation } from "react-i18next"; // ✅ الترجمة
 
 ChartJS.register(
   CategoryScale,
@@ -52,14 +53,15 @@ export default function AdminDashboard() {
   const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
-  // ✅ عند توفر الشعار من السياق نحدّث الصورة
-// ✅ عند توفر الشعار من السياق نحدّث الصورة فورًا
-useEffect(() => {
-  if (!loadingBrand && logoUrl) {
-    setImgSrc(logoUrl);
-  }
-}, [logoUrl, loadingBrand]);
+  const { t, i18n } = useTranslation(); // ✅ الترجمة
 
+  // ✅ عند توفر الشعار من السياق نحدّث الصورة
+  // ✅ عند توفر الشعار من السياق نحدّث الصورة فورًا
+  useEffect(() => {
+    if (!loadingBrand && logoUrl) {
+      setImgSrc(logoUrl);
+    }
+  }, [logoUrl, loadingBrand]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -68,13 +70,13 @@ useEffect(() => {
         const { data } = await Api.get("/admin/dashboard");
         setStats(data);
       } catch {
-        toast.error("فشل تحميل الإحصاءات");
+        toast.error(t("adminDashboard.errors.fetchStats"));
       } finally {
         setLoading(false);
       }
     };
     fetchStats();
-  }, []);
+  }, [t]);
 
   // 🌀 التحريك
   useEffect(() => {
@@ -104,15 +106,25 @@ useEffect(() => {
     }
   }, [stats]);
 
+  // ⚙️ تحديد الـ locale حسب اللغة المختارة
+  const chartLocale =
+    i18n.language === "he"
+      ? "he-IL"
+      : i18n.language === "en"
+      ? "en-US"
+      : "ar-EG";
+
   // 🎨 الرسم البياني
   const chartData = stats?.dailyBookings
     ? {
         labels: stats.dailyBookings.map((d) =>
-          new Date(d.date).toLocaleDateString("ar-EG", { weekday: "short" })
+          new Date(d.date).toLocaleDateString(chartLocale, {
+            weekday: "short",
+          })
         ),
         datasets: [
           {
-            label: "الحجوزات النشطة",
+            label: t("adminDashboard.chart.activeBookingsLabel"),
             data: stats.dailyBookings.map((d) => d.active),
             borderColor: isDark ? "#ab47bc" : "#ab47bc",
             backgroundColor: isDark
@@ -122,7 +134,7 @@ useEffect(() => {
             fill: true,
           },
           {
-            label: "الحجوزات الملغاة",
+            label: t("adminDashboard.chart.cancelledBookingsLabel"),
             data: stats.dailyBookings.map((d) => d.cancelled),
             borderColor: isDark ? "#ffb74d" : "#ffb74d",
             backgroundColor: isDark
@@ -136,7 +148,7 @@ useEffect(() => {
     : null;
 
   const chartOptions = {
-    maintainAspectRatio: false, // ✅ السماح بالتحكم بالارتفاع بحرية
+    maintainAspectRatio: false,
     responsive: true,
     plugins: {
       legend: {
@@ -178,7 +190,7 @@ useEffect(() => {
         sx={{
           p: 3,
           mb: 4,
-          textAlign: "center", // ✅ محاذاة كل المحتوى للوسط
+          textAlign: "center",
           background: isDark
             ? `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`
             : "linear-gradient(135deg, #f48fb1, #ce93d8, #fff176)",
@@ -190,11 +202,17 @@ useEffect(() => {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-          👋 مرحبًا {stats?.adminName || "آلاء"}!
+          {/* 👋 مرحبًا {stats?.adminName || "آلاء"}! */}
+          {t("adminDashboard.welcomeTitle", {
+            name: stats?.adminName || "آلاء",
+          })}
         </Typography>
         <Typography variant="body1" sx={{ fontSize: "1.05rem" }}>
-          لديكِ اليوم {stats?.todaySessions || 0} جلسات نشطة و{" "}
-          {stats?.newUsersToday || 0} مشتركات جديدات 💪
+          {/* لديكِ اليوم X جلسات نشطة و Y مشتركات جديدات 💪 */}
+          {t("adminDashboard.welcomeMessage", {
+            sessions: stats?.todaySessions || 0,
+            newUsers: stats?.newUsersToday || 0,
+          })}
         </Typography>
 
         <Box sx={{ mt: 2, display: "flex", justifyContent: "center" }}>
@@ -225,7 +243,7 @@ useEffect(() => {
           textAlign: "center",
         }}
       >
-        📊 لوحة الإحصاءات العامة
+        {t("adminDashboard.mainTitle")}
       </Typography>
 
       {loading ? (
@@ -281,7 +299,7 @@ useEffect(() => {
                     color: isDark ? BRAND.gold : "#9c27b0",
                   }}
                 >
-                  {card.label}
+                  {t(`adminDashboard.cards.${card.key}`)}
                 </Typography>
                 <Typography
                   variant="h4"
@@ -299,7 +317,7 @@ useEffect(() => {
 
           {/* 📈 المخطط */}
           {chartData && (
-  <Box sx={{ mt: 6, position: "relative", pt: 4, mb: 10 }}>  {/* ⬅️ أضف mb:10 هنا */}
+            <Box sx={{ mt: 6, position: "relative", pt: 4, mb: 10 }}>
               {/* 🖼️ شعار صغير في الزاوية العليا */}
               <Box
                 sx={{
@@ -308,7 +326,7 @@ useEffect(() => {
                   right: 12,
                   width: 44,
                   height: 44,
-                  borderRadius: "50%", // ✅ دائرة مثالية
+                  borderRadius: "50%",
                   background: isDark
                     ? "rgba(30, 20, 40, 0.6)"
                     : "rgba(255, 255, 255, 0.85)",
@@ -344,7 +362,7 @@ useEffect(() => {
                   mb: 2,
                 }}
               >
-                📈 عدد الحجوزات خلال آخر 7 أيام
+                {t("adminDashboard.chart.title")}
               </Typography>
 
               <Paper
@@ -355,15 +373,15 @@ useEffect(() => {
                   boxShadow: isDark
                     ? "0 4px 20px rgba(0,0,0,0.5)"
                     : "0 4px 15px rgba(200,150,255,0.15)",
-                  height: { xs: 280, sm: 350, md: 420 }, // ✅ ارتفاع ديناميكي حسب الجهاز
+                  height: { xs: 280, sm: 350, md: 420 },
                 }}
               >
                 <Line
                   data={chartData}
                   options={chartOptions}
-                  height={180} // ✅ بدل 90 إلى 180 لجعل المخطط أطول بمرتين
+                  height={180}
                   style={{
-                    maxHeight: 400, // أقصى ارتفاع للمخطط
+                    maxHeight: 400,
                     marginTop: "10px",
                   }}
                 />
@@ -373,7 +391,7 @@ useEffect(() => {
                     variant="subtitle1"
                     sx={{ mb: 1, color: isDark ? BRAND.gold : "#7b1fa2" }}
                   >
-                    🔸 نسبة الحجوزات خلال الأسبوع الأخير:
+                    {t("adminDashboard.chart.weekRatioTitle")}
                   </Typography>
 
                   <Box
@@ -417,10 +435,14 @@ useEffect(() => {
                     }}
                   >
                     <Typography variant="body2">
-                      ✅ نشطة: {Number(activePercentAnim).toFixed(1)}%
+                      {t("adminDashboard.chart.activePercentLabel", {
+                        value: Number(activePercentAnim).toFixed(1),
+                      })}
                     </Typography>
                     <Typography variant="body2">
-                      ❌ ملغاة: {Number(cancelledPercentAnim).toFixed(1)}%
+                      {t("adminDashboard.chart.cancelledPercentLabel", {
+                        value: Number(cancelledPercentAnim).toFixed(1),
+                      })}
                     </Typography>
                   </Box>
                 </Box>
@@ -429,7 +451,9 @@ useEffect(() => {
           )}
         </>
       ) : (
-        <Typography sx={{ mt: 3 }}>لا توجد بيانات متاحة حالياً.</Typography>
+        <Typography sx={{ mt: 3 }}>
+          {t("adminDashboard.noData")}
+        </Typography>
       )}
     </Box>
   );

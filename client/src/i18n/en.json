@@ -1,0 +1,516 @@
+{
+  "footer": {
+    "subtitle": "Women's Fitness Studio"
+  },
+  "navbar": {
+    "admin_panel": "Admin Panel",
+    "logout": "Logout",
+    "home": "Home",
+    "bookings_hub": "Bookings Hub",
+    "login": "Login",
+    "reminder_system_on": "🔔 Reminder system is running",
+    "reminder_system_off": "⚠️ Reminder system is currently inactive"
+  },
+  "adminDashboard": {
+    "welcomeTitle": "👋 Welcome, {{name}}!",
+    "welcomeMessage": "You have {{sessions}} active sessions today and {{newUsers}} new members 💪",
+    "mainTitle": "📊 Global Statistics Dashboard",
+    "noData": "No data available at the moment.",
+    "errors": {
+      "fetchStats": "Failed to load statistics"
+    },
+    "cards": {
+      "totalUsers": "Total Members",
+      "activeUsers": "Active Members",
+      "blockedUsers": "Blocked Members",
+      "totalBookings": "Total Bookings",
+      "activeBookings": "Active Bookings",
+      "completedBookings": "Completed Bookings",
+      "cancelled": "Cancelled Bookings",
+      "totalSlots": "Total Sessions",
+      "todaySessions": "Today's Sessions",
+      "upcomingWeekSessions": "Next Week Sessions"
+    },
+    "chart": {
+      "title": "📈 Bookings in the last 7 days",
+      "activeBookingsLabel": "Active bookings",
+      "cancelledBookingsLabel": "Cancelled bookings",
+      "weekRatioTitle": "🔸 Bookings ratio over the last week:",
+      "activePercentLabel": "✅ Active: {{value}}%",
+      "cancelledPercentLabel": "❌ Cancelled: {{value}}%"
+    }
+  },
+  "adminNotifications": {
+    "title": "🔔 Send Custom Notification",
+    "notificationTitle": "Notification Title",
+    "notificationBody": "Notification Body",
+    "target": "Target Audience",
+    "allUsers": "All Users",
+    "send": "🔔 Send Notification",
+    "fetchError": "Failed to load data",
+    "emptyFields": "Please enter a title and message before sending.",
+    "sendFailed": "Failed to send notification",
+    "resendFailed": "Failed to resend notification",
+    "history": "🕘 Recent Notifications History",
+    "clearAll": "Clear All",
+    "confirmDeleteAll": "Are you sure you want to clear the entire log?",
+    "confirmDeleteOne": "Do you want to permanently delete this notification?",
+    "deletedOne": "🗑️ Notification deleted",
+    "deleteFailed": "Failed to delete notification",
+    "noNotifications": "No notifications yet.",
+    "resend": "Resend",
+    "delete": "Delete",
+    "resendWindowTitle": "🔁 Resend Notification",
+    "cancel": "Cancel",
+    "confirmSend": "📤 Confirm Send"
+  },
+  "adminReports": {
+    "title": "📤 Export Booking Reports",
+    "description": "Select the date range for exporting booking reports, or leave fields empty to export all data:",
+    "from": "From",
+    "to": "To",
+    "download": "📥 Download Report",
+    "success": "Report downloaded successfully ✅",
+    "fail": "Failed to download report ❌"
+  },
+  "adminSchedule": {
+    "title": "Schedule",
+    "subtitle": "Manage current and next week sessions",
+    "currentWeek": "Current Week",
+    "nextWeek": "Next Week",
+    "current": "Current",
+    "next": "Next",
+    "capacity": "Capacity",
+    "addSlot": "Add Slot",
+    "saveAll": "Save Changes",
+    "saveNextWeek": "Generate Next Week",
+    "blocked": "Blocked",
+    "expand": "Expand",
+
+    "confirm": {
+      "deleteSlot": "Are you sure you want to delete this slot?"
+    },
+
+    "success": {
+      "deleted": "Slot deleted",
+      "saved": "Changes saved",
+      "createdNext": "{{count}} sessions created"
+    },
+
+    "errors": {
+      "fetchCurrent": "Failed to load current week data",
+      "saveFailed": "Failed to save changes",
+      "deleteFailed": "Failed to delete slot",
+      "createNextFailed": "Failed to create next week"
+    },
+
+    "info": {
+      "noValidChanges": "No valid changes to save",
+      "addValid": "Add valid sessions first"
+    },
+
+    "noDeletePast": "Cannot delete a past slot"
+  },
+
+  "days": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+  "adminSettings": {
+    "title": "⚙️ Club General Settings",
+    "cardImage": "🪪 Membership Card Image",
+    "noImage": "No image available",
+    "changeCard": "🪪 Change Card Image",
+    "changeLogo": "📸 Change Logo",
+
+    "clubName": "🏷️ Club Name",
+    "contactNumber": "📞 Contact Number",
+    "autoMessage": "💬 Automatic Message",
+
+    "allowExtraBookings": "Allow Extra Bookings by Default",
+
+    "systemStatus": "Current System Status:",
+    "status": {
+      "maintenance": "🚧 Under Maintenance",
+      "active": "✅ Running Normally"
+    },
+
+    "enableMaintenance": "🚧 Enable Maintenance Mode",
+    "disableMaintenance": "🔓 Disable Maintenance Mode",
+
+    "saveChanges": "💾 Save Changes",
+
+    "uploading": {
+      "logo": "Uploading logo...",
+      "card": "Uploading card image..."
+    },
+
+    "success": {
+      "saved": "Changes saved successfully! 🎉",
+      "logoUploaded": "Logo uploaded successfully 🎉",
+      "cardUploaded": "Card image uploaded successfully 🎉"
+    },
+
+    "errors": {
+      "required": "Please fill the club name and contact number ⚠️",
+      "loadFail": "Failed to load settings ❌",
+      "saveFail": "Failed to save settings ❌",
+      "logoFail": "Failed to upload logo ❌",
+      "cardFail": "Failed to upload card image ❌",
+      "maintenanceFail": "Failed to load system status ❌",
+      "maintenanceToggleFail": "Failed to toggle maintenance mode ❌"
+    },
+
+    "confirm": {
+      "disableMaintenance": "Do you want to disable maintenance mode and activate the system?",
+      "enableMaintenance": "Are you sure you want to enable maintenance mode? All members will be temporarily blocked."
+    }
+  },
+  "bookingsAdmin": {
+    "title": "Bookings Management",
+
+    "stats": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "blocked": "Blocked",
+      "all": "All"
+    },
+
+    "table": {
+      "user": "User",
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "actions": "Actions"
+    },
+
+    "details": {
+      "title": "Bookings for {{name}}",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "noBookings": "No bookings for this user"
+    },
+
+    "buttons": {
+      "showDetails": "Show Details",
+      "hideDetails": "Hide Details"
+    },
+
+    "errors": {
+      "loadSummary": "Failed to load bookings",
+      "loadDetails": "Failed to load booking details"
+    }
+  },
+  "bookingsAdmin": {
+    "title": "Bookings Management",
+
+    "ratesTitle": "Overall Booking Rates",
+
+    "labels": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+
+    "columns": {
+      "user": "User",
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "actions": "Actions"
+    },
+
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+
+    "status": {
+      "booked": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "blocked": "Blocked",
+      "unknown": "Unknown"
+    },
+
+    "showDetails": "Show Details",
+    "hideDetails": "Hide Details",
+
+    "errors": {
+      "summaryLoad": "Failed to load data",
+      "detailsLoad": "Failed to load booking details"
+    },
+
+    "details": {
+      "title": "Bookings for {{name}}",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "noBookings": "No bookings for this user"
+    },
+
+    "stats": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "blocked": "Blocked",
+      "all": "All"
+    },
+
+    "buttons": {
+      "showDetails": "Show Details",
+      "hideDetails": "Hide Details"
+    }
+  },
+  "controlCenter": {
+    "title": "🎛️ Admin Control Center",
+    "subtitle": "Choose the section you want to manage from the list below 👇",
+
+    "sections": {
+      "newUser": "Add New Member",
+      "dashboard": "General Dashboard",
+      "users": "Members List",
+      "bookings": "Bookings",
+      "weeklySlots": "Weekly Schedule",
+      "templates": "Weekly Templates",
+      "notifications": "Notifications",
+      "settings": "General Settings"
+    },
+
+    "footerTitle": "A Complete Dashboard to Manage Fateness Studio",
+    "footerText": "You can always return to this page to manage all system features from one place."
+  },
+  "slotsAdmin": {
+    "header": {
+      "title": "Weekly Schedule Management",
+      "subtitle": "View and monitor all training sessions throughout the week"
+    },
+    "stats": {
+      "title": "Weekly Sessions Statistics",
+      "active": "Active",
+      "ended": "Ended",
+      "blocked": "Blocked",
+      "total": "Total"
+    },
+    "filters": {
+      "selectWeek": "Select Week",
+      "active": "Active",
+      "ended": "Ended",
+      "blocked": "Blocked",
+      "all": "All"
+    },
+
+    "day": {
+      "sessionsCount": "{{count}} sessions"
+    },
+
+    "card": {
+      "capacityLabel": "Capacity:",
+      "availableLabel": "Available:"
+    },
+
+    "empty": {
+      "title": "No sessions available this week",
+      "range": "From {{start}} to {{end}}"
+    },
+
+    "dialog": {
+      "title": "Session Details",
+      "membersTitle": "Registered Members ({{count}})",
+      "status": {
+        "booked": "Booked",
+        "cancelled": "Cancelled"
+      },
+      "noMembers": "No members registered for this session",
+      "close": "Close",
+      "activate": "Activate Session",
+      "deactivate": "Block Session"
+    },
+
+    "common": {
+      "unknownUser": "Unknown User",
+      "noPhone": "No phone number"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "running": "In Progress",
+      "ended": "Ended",
+      "endedAgo": "Ended {{time}} ago",
+      "blocked": "Blocked",
+      "active": "Active",
+      "unknown": "Unknown",
+      "after": "after"
+    }
+  },
+  "usersAdmin": {
+    "title": "Members Management",
+    "subtitle": "Manage members data and bookings in the studio",
+
+    "search": {
+      "placeholder": "Search by name, email, or phone..."
+    },
+
+    "card": {
+      "email": "Email",
+      "phone": "Phone",
+      "bookingsCount": "Bookings Count",
+      "active": "Active",
+      "blocked": "Blocked"
+    },
+
+    "extraBooking": {
+      "label": "Allow Extra Booking",
+      "updated": "Extra booking status updated"
+    },
+
+    "block": {
+      "cannotBlockAdmin": "You cannot block the system admin 👑",
+      "confirmBlock": "Are you sure you want to block this member?",
+      "confirmUnblock": "Are you sure you want to unblock this member?",
+      "blockedSuccess": "Member blocked successfully 🚫",
+      "unblockedSuccess": "Member unblocked successfully ✅",
+      "error": "An error occurred while updating block status"
+    },
+
+    "editDialog": {
+      "title": "Edit Member Information",
+
+      "fields": {
+        "username": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "age": "Age",
+        "gender": "Gender",
+        "genderFemale": "Female",
+        "genderMale": "Male",
+        "role": "Role",
+        "roleUser": "Member",
+        "roleAdmin": "Admin"
+      },
+
+      "roleConfirm": {
+        "title": "⚠️ Confirm Admin Role",
+        "text": "Are you sure you want to promote this member to admin? 👑",
+        "subtext": "This change grants full administrative privileges.",
+        "cancel": "Cancel",
+        "confirm": "Yes, confirm"
+      }
+    },
+
+    "buttons": {
+      "edit": "Edit",
+      "block": "Block",
+      "unblock": "Unblock",
+      "save": "Save Changes",
+      "cancel": "Cancel"
+    },
+
+    "messages": {
+      "loadError": "Failed to fetch members",
+      "notFound": "No matching members found",
+      "updateSuccess": "Member updated successfully",
+      "updateError": "Failed to update member information"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+
+  "usersAdmin": {
+    "title": "Users Management",
+    "subtitle": "Manage users’ data and bookings in the studio",
+    "searchPlaceholder": "Search by name, email or phone...",
+
+    "totalBookings": "Total Bookings",
+    "allowExtra": "Allow Extra Booking",
+
+    "edit": "Edit",
+    "block": "Block",
+    "unblock": "Unblock",
+
+    "status": {
+      "active": "Active",
+      "blocked": "Blocked"
+    },
+
+    "messages": {
+      "updated": "User data updated successfully",
+      "blocked": "User blocked successfully",
+      "unblocked": "User unblocked successfully",
+      "extraUpdated": "Extra booking status updated",
+      "tempAdmin": "User set as admin temporarily (not saved yet)"
+    },
+
+    "errors": {
+      "load": "Failed to load users",
+      "extraBooking": "Failed to update extra booking status",
+      "cannotBlockAdmin": "You cannot block the system admin",
+      "blockFailed": "Failed to change block status",
+      "updateFailed": "Failed to update user data"
+    },
+
+    "confirm": {
+      "block": "Are you sure you want to block this user?",
+      "unblock": "Do you want to unblock this user?"
+    },
+
+    "confirmRole": {
+      "title": "⚠️ Confirm Admin Promotion",
+      "text": "Are you sure you want to promote this user to admin? 👑",
+      "note": "This will grant her full system management permissions.",
+      "confirm": "Yes, confirm"
+    },
+
+    "editUser": "Edit User Data",
+
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age",
+      "gender": "Gender",
+      "role": "Role"
+    },
+
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+
+    "roles": {
+      "user": "User",
+      "admin": "Admin"
+    },
+
+    "noResults": "No matching users found"
+  },
+  "login": {
+    "title": "Fatinness Studio",
+    "welcome": "Welcome back 💪",
+    "email": "Email Address",
+    "password": "Password",
+    "button": "Login",
+    "buttonLoading": "Logging in...",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create a new account",
+    "contactAdmin": "Please contact the administration to create a new account 🙏",
+
+    "success": {
+      "login": "Logged in successfully 🎉",
+      "fcmOptional": "Notifications were not activated (optional)."
+    },
+
+    "errors": {
+      "status": "Error {{status}}",
+      "network": "Could not connect to the server. Check your internet or CORS settings.",
+      "unexpected": "An unexpected error occurred.",
+      "loginFailed": "Login failed"
+    }
+  }
+}

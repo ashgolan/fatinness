@@ -24,15 +24,18 @@ import {
 } from "@mui/material";
 
 import ReplayIcon from "@mui/icons-material/Replay";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever"; // ← لحذف الكل
-import DeleteSweepIcon from "@mui/icons-material/DeleteSweep"; // ← لحذف واحد
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
+import { fixDigits } from "../../utils/fixDigits";
 
 export default function AdminNotifications() {
   const theme = useTheme();
   const mode = theme.palette.mode;
+  const { t } = useTranslation();
 
   // 🎨 ألوان الهوية
   const BRAND = {
@@ -74,7 +77,7 @@ export default function AdminNotifications() {
       setHistory(historyData);
       setUsers(usersData);
     } catch {
-      toast.error("فشل جلب البيانات");
+      toast.error(t("adminNotifications.fetchError"));
     }
   };
 
@@ -85,7 +88,7 @@ export default function AdminNotifications() {
   // 🚀 إرسال إشعار جديد
   const handleSend = async () => {
     if (!title.trim() || !body.trim())
-      return toast.error("أدخل عنوانًا ومحتوى قبل الإرسال.");
+      return toast.error(t("adminNotifications.emptyFields"));
 
     setLoading(true);
     try {
@@ -100,7 +103,9 @@ export default function AdminNotifications() {
       setBody("");
       fetchHistory();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "فشل الإرسال");
+      toast.error(
+        err?.response?.data?.message || t("adminNotifications.sendFailed")
+      );
     } finally {
       setLoading(false);
     }
@@ -118,7 +123,7 @@ export default function AdminNotifications() {
     if (!notificationToResend) return;
 
     if (!editTitle.trim() || !editBody.trim())
-      return toast.error("يجب إدخال عنوان ومحتوى.");
+      return toast.error(t("adminNotifications.emptyFields"));
 
     setResending(true);
     try {
@@ -134,7 +139,7 @@ export default function AdminNotifications() {
       toast.success(data.message);
       fetchHistory();
     } catch (err) {
-      toast.error("فشل إعادة الإرسال");
+      toast.error(t("adminNotifications.resendFailed"));
     } finally {
       setResending(false);
       setConfirmOpen(false);
@@ -144,27 +149,27 @@ export default function AdminNotifications() {
 
   // 🗑️ حذف واحد
   const handleDeleteNotification = async (id) => {
-    if (!window.confirm("هل تريد حذف الإشعار نهائيًا؟")) return;
+    if (!window.confirm(t("adminNotifications.confirmDeleteOne"))) return;
 
     try {
       await Api.delete(`/admin/notifications/${id}`);
-      toast.success("🗑️ تم حذف الإشعار");
+      toast.success(t("adminNotifications.deletedOne"));
       setHistory((prev) => prev.filter((h) => h._id !== id));
     } catch {
-      toast.error("فشل حذف الإشعار");
+      toast.error(t("adminNotifications.deleteFailed"));
     }
   };
 
   // 🧹 مسح السجل بالكامل
   const handleClearAll = async () => {
-    if (!window.confirm("هل أنت متأكد أنك تريد مسح كامل السجل؟")) return;
+    if (!window.confirm(t("adminNotifications.confirmDeleteAll"))) return;
 
     try {
       await Api.delete("/admin/notifications");
-      toast.success("🧹 تم مسح السجل بالكامل");
+      toast.success(t("adminNotifications.allDeleted"));
       setHistory([]);
     } catch {
-      toast.error("فشل مسح السجل");
+      toast.error(t("adminNotifications.deleteFailed"));
     }
   };
 
@@ -201,14 +206,14 @@ export default function AdminNotifications() {
           variant="h5"
           sx={{ fontWeight: 900, color: BRAND.text, mb: 3 }}
         >
-          🔔 إرسال إشعار مخصص
+          {t("adminNotifications.title")}
         </Typography>
 
         {/* إنشاء إشعار */}
         <Box sx={{ mb: 4 }}>
           <TextField
             fullWidth
-            label="عنوان الإشعار"
+            label={t("adminNotifications.notificationTitle")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             sx={{ mb: 2 }}
@@ -219,7 +224,7 @@ export default function AdminNotifications() {
             fullWidth
             multiline
             minRows={3}
-            label="محتوى الإشعار"
+            label={t("adminNotifications.notificationBody")}
             value={body}
             onChange={(e) => setBody(e.target.value)}
             sx={{ mb: 2 }}
@@ -236,7 +241,7 @@ export default function AdminNotifications() {
                 fontWeight: 600,
               }}
             >
-              الفئة المستهدفة
+              {t("adminNotifications.target")}
             </InputLabel>
 
             <Select
@@ -244,8 +249,12 @@ export default function AdminNotifications() {
               onChange={(e) => setTarget(e.target.value)}
               sx={{ textAlign: "right" }}
             >
-              <MenuItem value="all">📢 جميع المشتركات</MenuItem>
+              <MenuItem value="all">
+                📢 {t("adminNotifications.allUsers")}
+              </MenuItem>
+
               <Divider />
+
               {users.map((u) => (
                 <MenuItem key={u._id} value={u._id}>
                   👩 {u.username}
@@ -278,7 +287,7 @@ export default function AdminNotifications() {
               {loading ? (
                 <CircularProgress size={22} sx={{ color: BRAND.purple }} />
               ) : (
-                "🔔 إرسال الإشعار"
+                t("adminNotifications.send")
               )}
             </Button>
           </Box>
@@ -295,8 +304,11 @@ export default function AdminNotifications() {
             alignItems: "center",
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 900, color: BRAND.text }}>
-            🕘 سجل آخر الإشعارات
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 900, color: BRAND.text }}
+          >
+            {t("adminNotifications.history")}
           </Typography>
 
           {history.length > 0 && (
@@ -307,7 +319,7 @@ export default function AdminNotifications() {
               startIcon={<DeleteForeverIcon />}
               sx={{ fontWeight: 800, gap: 1 }}
             >
-              مسح الكل
+              {t("adminNotifications.clearAll")}
             </Button>
           )}
         </Box>
@@ -339,7 +351,7 @@ export default function AdminNotifications() {
                 <ListItemText
                   primary={`${n.title} (${
                     n.targetType === "all"
-                      ? "جميع المشتركات"
+                      ? t("adminNotifications.allUsers")
                       : n.targetUser?.username
                   })`}
                   secondary={
@@ -347,8 +359,15 @@ export default function AdminNotifications() {
                       <Typography sx={{ color: BRAND.sub }}>
                         {n.body}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: BRAND.sub }}>
-                        📅 {new Date(n.createdAt).toLocaleString("ar-EG")}
+
+                      <Typography
+                        variant="caption"
+                        sx={{ color: BRAND.sub }}
+                      >
+                        📅{" "}
+                        {fixDigits(
+                          new Date(n.createdAt).toLocaleString("ar-EG")
+                        )}
                         {" — "}
                         👑 {n.sentBy?.username}
                       </Typography>
@@ -376,7 +395,7 @@ export default function AdminNotifications() {
                   }}
                 >
                   {/* إعادة إرسال */}
-                  <Tooltip title="إعادة الإرسال">
+                  <Tooltip title={t("adminNotifications.resend")}>
                     <IconButton
                       onClick={() => confirmResend(n)}
                       sx={{ color: BRAND.purple }}
@@ -386,7 +405,7 @@ export default function AdminNotifications() {
                   </Tooltip>
 
                   {/* حذف */}
-                  <Tooltip title="حذف نهائي">
+                  <Tooltip title={t("adminNotifications.delete")}>
                     <IconButton
                       onClick={() => handleDeleteNotification(n._id)}
                       sx={{ color: "#e53935" }}
@@ -407,7 +426,7 @@ export default function AdminNotifications() {
                   fontWeight: 700,
                 }}
               >
-                لا يوجد إشعارات بعد.
+                {t("adminNotifications.noNotifications")}
               </Typography>
             )}
           </List>
@@ -429,13 +448,13 @@ export default function AdminNotifications() {
         }}
       >
         <DialogTitle sx={{ textAlign: "right", fontWeight: 900 }}>
-          🔁 إعادة إرسال الإشعار
+          {t("adminNotifications.resendWindowTitle")}
         </DialogTitle>
 
         <DialogContent sx={{ textAlign: "right" }}>
           <TextField
             fullWidth
-            label="عنوان الإشعار"
+            label={t("adminNotifications.notificationTitle")}
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             sx={{ mb: 2 }}
@@ -446,7 +465,7 @@ export default function AdminNotifications() {
             fullWidth
             multiline
             minRows={3}
-            label="محتوى الإشعار"
+            label={t("adminNotifications.notificationBody")}
             value={editBody}
             onChange={(e) => setEditBody(e.target.value)}
             inputProps={{ style: { textAlign: "right" } }}
@@ -464,7 +483,7 @@ export default function AdminNotifications() {
               px: 3,
             }}
           >
-            إلغاء
+            {t("adminNotifications.cancel")}
           </Button>
 
           <Button
@@ -480,7 +499,7 @@ export default function AdminNotifications() {
               px: 3,
             }}
           >
-            {resending ? <CircularProgress size={22} /> : "📤 تأكيد الإرسال"}
+            {resending ? <CircularProgress size={22} /> : t("adminNotifications.confirmSend")}
           </Button>
         </DialogActions>
       </Dialog>

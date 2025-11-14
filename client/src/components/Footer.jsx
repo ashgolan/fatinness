@@ -1,10 +1,13 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import { useThemeMode } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next"; // 🟣 إضافة الترجمة
 
 export default function Footer() {
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
+
+  const { t } = useTranslation(); // 🟣 تفعيل i18n
 
   return (
     <Box component="footer" sx={{ textAlign: "center", py: 2, color: "#666" }}>
@@ -23,7 +26,7 @@ export default function Footer() {
         <b style={{ color: isDark ? BRAND.gold : BRAND.purple }}>
           Fateness Studio
         </b>{" "}
-        - استوديو اللياقة النسائي
+        - {t("footer.subtitle")}
       </Typography>
     </Box>
   );

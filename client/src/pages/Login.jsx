@@ -1,3 +1,4 @@
+// client/src/pages/Login.jsx
 import React, { useContext, useState, useEffect } from "react";
 import {
   Box,
@@ -22,11 +23,13 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import LoginIcon from "@mui/icons-material/Login";
 import { registerFcmToken } from "../firebase/registerFcmToken";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
   const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ نأخذ الشعار وحالة التحميل
+  const { t } = useTranslation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,12 +55,13 @@ export default function Login() {
         err.response.data.message ||
         err.response.data.error ||
         err.response.data.msg ||
-        `خطأ ${err.response.status || ""}`.trim()
+        t("login.errors.status", {
+          status: err.response.status || "",
+        }).trim()
       );
     }
-    if (err?.request)
-      return "تعذّر الاتصال بالخادم. تحققي من الإنترنت أو إعدادات CORS.";
-    return err?.message || "حدث خطأ غير متوقع.";
+    if (err?.request) return t("login.errors.network");
+    return err?.message || t("login.errors.unexpected");
   };
 
   const onSubmit = async (e) => {
@@ -78,12 +82,12 @@ export default function Login() {
         setUser(me.data);
 
         // 🔹 إشعار نجاح
-        toast.success("تم تسجيل الدخول بنجاح 🎉");
+        toast.success(t("login.success.login"));
 
         // 🔹 تسجيل FCM Token بعد الدخول
         if (me.data.role !== "admin") {
           await registerFcmToken().catch(() => {
-            toast.info("لم يتم تفعيل الإشعارات (اختياري).");
+            toast.info(t("login.success.fcmOptional"));
           });
         }
         // 🔹 الانتقال حسب الدور
@@ -91,7 +95,7 @@ export default function Login() {
           replace: true,
         });
       } else {
-        toast.error(data?.message || "فشل تسجيل الدخول");
+        toast.error(data?.message || t("login.errors.loginFailed"));
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -223,7 +227,7 @@ export default function Login() {
               WebkitTextFillColor: "transparent",
             }}
           >
-            Fatinness Studio
+            {t("login.title")}
           </Typography>
           <Typography
             variant="body1"
@@ -233,7 +237,7 @@ export default function Login() {
               fontWeight: 500,
             }}
           >
-            مرحباً بعودتك 💪
+            {t("login.welcome")}
           </Typography>
         </Box>
 
@@ -245,7 +249,7 @@ export default function Login() {
         >
           <TextField
             fullWidth
-            label="البريد الإلكتروني"
+            label={t("login.email")}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -285,7 +289,7 @@ export default function Login() {
 
           <TextField
             fullWidth
-            label="كلمة المرور"
+            label={t("login.password")}
             type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -359,7 +363,7 @@ export default function Login() {
               },
             }}
           >
-            {loading ? "جارٍ تسجيل الدخول..." : "تسجيل الدخول"}
+            {loading ? t("login.buttonLoading") : t("login.button")}
           </Button>
 
           <Typography
@@ -370,12 +374,12 @@ export default function Login() {
               color: isDark ? BRAND.subDark : "#666",
             }}
           >
-            ليس لديكِ حساب؟{" "}
+            {t("login.noAccount")}{" "}
             <Link
               to="#"
               onClick={(e) => {
                 e.preventDefault();
-                toast.info("يرجى التواصل مع الإدارة لإنشاء حساب جديد 🙏", {
+                toast.info(t("login.contactAdmin"), {
                   position: "top-center",
                   autoClose: 4000,
                   style: {
@@ -400,7 +404,7 @@ export default function Login() {
               }
               onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
             >
-              أنشئي حسابًا جديدًا
+              {t("login.createAccount")}
             </Link>
           </Typography>
         </Box>

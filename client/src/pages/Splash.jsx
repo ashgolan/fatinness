@@ -1,45 +1,102 @@
 // client/src/pages/Splash.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box } from "@mui/material";
+import { Box, Button, Stack } from "@mui/material";
+import i18n from "../i18n/i18n";
 
 export default function Splash() {
   const navigate = useNavigate();
+  const [showButtons, setShowButtons] = useState(false);
 
-  // ⏱️ الانتقال بعد 3 ثوانٍ
+  // ⏱️ بعد 5 ثوانٍ: أظهر أزرار اختيار اللغة
   useEffect(() => {
-    const timer = setTimeout(() => navigate("/login"), 5000);
+    const timer = setTimeout(() => setShowButtons(true), 5000);
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, []);
+
+  const chooseLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("appLanguage", lang);
+    navigate("/login");
+  };
 
   return (
     <Box
       sx={{
-        position: "fixed",     // يغطي الشاشة كاملة
+        position: "fixed",
         top: 0,
         left: 0,
         width: "100vw",
         height: "100vh",
-        zIndex: 9999,          // فوق كل شيء
         overflow: "hidden",
+        background: "#F7D34B",
+        zIndex: 9999,
       }}
     >
-      {/* 🎥 فيديو الخلفية فقط */}
-      <video
-        src="/videos/splash1.mp4"
-        autoPlay
-        muted
-        playsInline
-        loop
-        style={{
+      {/* الفيديو داخل إطار */}
+      <Box
+        sx={{
           position: "absolute",
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",  // يملأ الشاشة بالكامل
-          top: 0,
-          left: 0,
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "90%",
+          height: "90%",
+          overflow: "hidden",
+          borderRadius: "20px",
         }}
-      />
+      >
+        <video
+          src="/videos/splash1.mp4"
+          autoPlay
+          muted
+          playsInline
+          loop
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      </Box>
+
+      {/* ازرار اختيار اللغة */}
+      {showButtons && (
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            position: "absolute",
+            bottom: "50px",
+            left: "50%",
+            transform: "translateX(-50%)",
+          }}
+        >
+          <Button
+            variant="contained"
+            sx={{ background: "#9C1C6B" }}
+            onClick={() => chooseLanguage("ar")}
+          >
+            العربية
+          </Button>
+
+          <Button
+            variant="contained"
+            sx={{ background: "#9C1C6B" }}
+            onClick={() => chooseLanguage("he")}
+          >
+            עברית
+          </Button>
+
+          <Button
+            variant="contained"
+            sx={{ background: "#9C1C6B" }}
+            onClick={() => chooseLanguage("en")}
+          >
+            English
+          </Button>
+        </Stack>
+      )}
     </Box>
   );
 }

@@ -20,11 +20,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-
-import { Api } from "../../api/Api";
-import { toast } from "react-toastify";
-import { useThemeMode } from "../../context/ThemeContext";
-
 // Icons
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -36,6 +31,10 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
 import CloseIcon from "@mui/icons-material/Close";
+import { Api } from "../../api/Api";
+import { toast } from "react-toastify";
+import { useThemeMode } from "../../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 // ===================== أدوات التاريخ =====================
 function startOfWeek(date = new Date()) {
@@ -72,24 +71,24 @@ function isToday(date) {
   );
 }
 
-const dayNames = [
-  "الأحد",
-  "الاثنين",
-  "الثلاثاء",
-  "الأربعاء",
-  "الخميس",
-  "الجمعة",
-  "السبت",
-];
-
 export default function AdminSchedule() {
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
+  const { t } = useTranslation();
 
-  // 🎨 ألوان هادئة ومريحة
+  const dayNames = [
+    t("days.0"),
+    t("days.1"),
+    t("days.2"),
+    t("days.3"),
+    t("days.4"),
+    t("days.5"),
+    t("days.6"),
+  ];
+
+  // 🎨 ألوان التصميم
   const COLORS = {
     primary: isDark ? "#B794F6" : "#9B6FD6",
     secondary: isDark ? "#F6C86E" : "#E8B54D",
@@ -100,12 +99,10 @@ export default function AdminSchedule() {
     borderAccent: isDark ? "rgba(183,148,246,0.25)" : "rgba(155,111,214,0.25)",
     text: isDark ? "#E5E5E5" : "#2D2D2D",
     textSoft: isDark ? "#A0A0A0" : "#666666",
-    success: isDark ? "#6EAF87" : "#4CAF50",
-    warning: isDark ? "#D4A76A" : "#FFB74D",
     error: isDark ? "#D57373" : "#E57373",
   };
 
-  // ===================== الحالة العامة =====================
+  // ===================== الحالة =====================
   const [tab, setTab] = useState(0);
   const weekStart = useMemo(() => startOfWeek(new Date()), []);
   const [weekData, setWeekData] = useState(null);
@@ -124,7 +121,7 @@ export default function AdminSchedule() {
       });
       setWeekData(data);
     } catch {
-      toast.error("تعذّر جلب حصص الأسبوع الحالي");
+      toast.error(t("adminSchedule.errors.fetchCurrent"));
     } finally {
       setLoading(false);
     }
@@ -138,19 +135,20 @@ export default function AdminSchedule() {
       });
       setNextWeekData(data);
     } catch (e) {
-      console.error("❌ Error fetching next week slots:", e);
+      console.error(e);
     }
   };
 
   useEffect(() => {
     fetchCurrentWeek();
     fetchNextWeek();
-    const arr = Array.from({ length: 7 }, (_, i) => ({
-      dayOffset: i,
-      items: [],
-    }));
-    setNextWeek(arr);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    setNextWeek(
+      Array.from({ length: 7 }, (_, i) => ({
+        dayOffset: i,
+        items: [],
+      }))
+    );
   }, []);
 
   // ===================== إدارة الأسبوع الحالي =====================
@@ -158,10 +156,7 @@ export default function AdminSchedule() {
     const key = fmt(addDays(weekStart, dayIndex));
     setCurrentEdits((prev) => ({
       ...prev,
-      [key]: [
-        ...(prev[key] || []),
-        { startTime: "", endTime: "", capacity: "20" },
-      ],
+      [key]: [...(prev[key] || []), { startTime: "", endTime: "", capacity: "20" }],
     }));
   };
 
@@ -187,18 +182,20 @@ export default function AdminSchedule() {
   };
 
   const deleteSlot = async (id) => {
-    if (!window.confirm("هل تريدين حذف هذه الحصة؟")) return;
+    if (!window.confirm(t("adminSchedule.confirm.deleteSlot"))) return;
+
     try {
       await Api.delete(`/admin/slots/${id}`);
-      toast.success("تم الحذف بنجاح");
+      toast.success(t("adminSchedule.success.deleted"));
       fetchCurrentWeek();
     } catch {
-      toast.error("فشل الحذف");
+      toast.error(t("adminSchedule.errors.deleteFailed"));
     }
   };
 
   const saveChanges = async () => {
     const changes = [];
+
     Object.keys(currentEdits).forEach((key) => {
       currentEdits[key].forEach((s) => {
         if (s.startTime && s.endTime) {
@@ -211,14 +208,16 @@ export default function AdminSchedule() {
         }
       });
     });
-    if (!changes.length) return toast.info("لا توجد تغييرات صالحة للحفظ");
+
+    if (!changes.length) return toast.info(t("adminSchedule.info.noValidChanges"));
+
     try {
       await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
-      toast.success("✅ تم حفظ التغييرات بنجاح");
+      toast.success(t("adminSchedule.success.saved"));
       setCurrentEdits({});
       fetchCurrentWeek();
     } catch {
-      toast.error("❌ فشل الحفظ");
+      toast.error(t("adminSchedule.errors.saveFailed"));
     }
   };
 
@@ -252,17 +251,20 @@ export default function AdminSchedule() {
           capacity: Number(s.capacity) || 20,
         }))
     );
-    if (!items.length) return toast.warn("أضيفي حصصاً صالحة قبل الحفظ");
+
+    if (!items.length) return toast.warn(t("adminSchedule.info.addValid"));
+
     try {
       const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
-      toast.success(`✅ تم إنشاء ${data.created} حصة للأسبوع القادم`);
-      await fetchNextWeek();
+      toast.success(t("adminSchedule.success.createdNext", { count: data.created }));
+      fetchNextWeek();
+
       setNextWeek(
         Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] }))
       );
       setTab(1);
     } catch {
-      toast.error("❌ فشل إنشاء الأسبوع القادم");
+      toast.error(t("adminSchedule.errors.createNextFailed"));
     }
   };
 
@@ -278,100 +280,77 @@ export default function AdminSchedule() {
     const isTodayFlag = isToday(new Date(dayKey));
 
     const cardContent = (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 2 } }}>
-        {/* الحصص الموجودة */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        {/* حصص قديمة */}
         {!!existing.length && (
-          <Stack spacing={{ xs: 1, sm: 1.5 }}>
+          <Stack spacing={1.5}>
             {existing.map((s) => (
               <Paper
                 key={s._id}
                 elevation={0}
                 sx={{
-                  p: { xs: 1.5, sm: 2 },
+                  p: 2,
                   display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  alignItems: { xs: "flex-start", sm: "center" },
                   justifyContent: "space-between",
-                  gap: { xs: 1, sm: 0 },
-                  borderRadius: { xs: 1.5, sm: 2 },
+                  alignItems: "center",
+                  borderRadius: 2,
                   background: COLORS.bgSoft,
                   border: `1px solid ${COLORS.border}`,
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    borderColor: COLORS.borderAccent,
-                  },
                 }}
               >
-                <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 1.5 }, flexWrap: "wrap" }}>
-                  <AccessTimeIcon
-                    sx={{ fontSize: { xs: 16, sm: 18 }, color: COLORS.primary }}
-                  />
-                  <Typography
-                    sx={{ 
-                      fontWeight: 600, 
-                      fontSize: { xs: 12, sm: 14 }, 
-                      color: COLORS.text 
-                    }}
-                  >
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                  <AccessTimeIcon sx={{ color: COLORS.primary }} />
+
+                  <Typography sx={{ fontWeight: 600, color: COLORS.text }}>
                     {s.startTime} - {s.endTime}
                   </Typography>
+
                   <Chip
                     size="small"
-                    label={`سعة ${s.capacity}`}
+                    label={`${t("adminSchedule.capacity")} ${s.capacity}`}
                     sx={{
-                      height: { xs: 20, sm: 22 },
-                      fontSize: { xs: 10, sm: 11 },
                       background: isDark
                         ? "rgba(183,148,246,0.15)"
                         : "rgba(155,111,214,0.1)",
                       color: COLORS.primary,
                       fontWeight: 600,
-                      border: "none",
                     }}
                   />
+
                   {s.isBlocked && (
                     <Chip
                       size="small"
-                      label="معطلة"
+                      label={t("adminSchedule.blocked")}
                       sx={{
-                        height: { xs: 20, sm: 22 },
-                        fontSize: { xs: 10, sm: 11 },
                         background: isDark
                           ? "rgba(213,115,115,0.15)"
                           : "rgba(229,115,115,0.1)",
                         color: COLORS.error,
                         fontWeight: 600,
-                        border: "none",
                       }}
                     />
                   )}
                 </Box>
 
+                {/* زر حذف */}
                 {!isNextWeek && (
                   <Tooltip
-                    title={isPast ? "لا يمكن حذف حصة منتهية" : "حذف الحصة"}
+                    title={
+                      isPast
+                        ? t("adminSchedule.noDeletePast")
+                        : t("adminSchedule.deleteSlot")
+                    }
                   >
                     <span>
                       <IconButton
-                        onClick={() => !isPast && deleteSlot(s._id)}
-                        size="small"
                         disabled={isPast}
+                        onClick={() => !isPast && deleteSlot(s._id)}
                         sx={{
+                          background: isPast ? COLORS.textSoft : COLORS.error,
                           color: "#fff",
-                          backgroundColor: isPast
-                            ? COLORS.textSoft
-                            : COLORS.error,
-                          width: { xs: 32, sm: 36 },
-                          height: { xs: 32, sm: 36 },
-                          "&:hover": {
-                            backgroundColor: isPast
-                              ? COLORS.textSoft
-                              : "#C62828",
-                          },
-                          opacity: isPast ? 0.5 : 1,
                         }}
                       >
-                        <DeleteIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
+                        <DeleteIcon />
                       </IconButton>
                     </span>
                   </Tooltip>
@@ -381,23 +360,22 @@ export default function AdminSchedule() {
           </Stack>
         )}
 
-        {/* الحصص الجديدة */}
+        {/* حصص جديدة */}
         {!!pending.length && (
-          <Stack spacing={{ xs: 1, sm: 1.5 }}>
+          <Stack spacing={1.5}>
             {pending.map((s, idx) => (
               <Paper
                 key={idx}
-                elevation={0}
                 sx={{
-                  p: { xs: 1.5, sm: 2 },
-                  borderRadius: { xs: 1.5, sm: 2 },
+                  p: 2,
+                  borderRadius: 2,
                   background: isDark
                     ? "rgba(183,148,246,0.08)"
                     : "rgba(155,111,214,0.05)",
                   border: `1px dashed ${COLORS.borderAccent}`,
                 }}
               >
-                <Grid container spacing={{ xs: 1, sm: 1.5 }} alignItems="center">
+                <Grid container spacing={1.5}>
                   <Grid item xs={12} sm={4}>
                     <TextField
                       type="time"
@@ -406,29 +384,12 @@ export default function AdminSchedule() {
                       value={s.startTime}
                       onChange={(e) =>
                         isNextWeek
-                          ? updateNextSlot(
-                              dayIndex,
-                              idx,
-                              "startTime",
-                              e.target.value
-                            )
+                          ? updateNextSlot(dayIndex, idx, "startTime", e.target.value)
                           : updateSlot(dayKey, idx, "startTime", e.target.value)
                       }
-                      InputProps={{
-                        sx: { fontSize: { xs: 12, sm: 14 } }
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 1.5,
-                          backgroundColor: COLORS.bgCard,
-                          "& fieldset": { borderColor: COLORS.border },
-                          "&:hover fieldset": {
-                            borderColor: COLORS.borderAccent,
-                          },
-                        },
-                      }}
                     />
                   </Grid>
+
                   <Grid item xs={12} sm={4}>
                     <TextField
                       type="time"
@@ -437,78 +398,40 @@ export default function AdminSchedule() {
                       value={s.endTime}
                       onChange={(e) =>
                         isNextWeek
-                          ? updateNextSlot(
-                              dayIndex,
-                              idx,
-                              "endTime",
-                              e.target.value
-                            )
+                          ? updateNextSlot(dayIndex, idx, "endTime", e.target.value)
                           : updateSlot(dayKey, idx, "endTime", e.target.value)
                       }
-                      InputProps={{
-                        sx: { fontSize: { xs: 12, sm: 14 } }
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 1.5,
-                          backgroundColor: COLORS.bgCard,
-                          "& fieldset": { borderColor: COLORS.border },
-                          "&:hover fieldset": {
-                            borderColor: COLORS.borderAccent,
-                          },
-                        },
-                      }}
                     />
                   </Grid>
+
                   <Grid item xs={8} sm={3}>
                     <TextField
                       type="number"
                       size="small"
                       fullWidth
-                      placeholder="السعة"
+                      placeholder={t("adminSchedule.capacity")}
                       value={s.capacity}
                       onChange={(e) =>
                         isNextWeek
-                          ? updateNextSlot(
-                              dayIndex,
-                              idx,
-                              "capacity",
-                              e.target.value
-                            )
+                          ? updateNextSlot(dayIndex, idx, "capacity", e.target.value)
                           : updateSlot(dayKey, idx, "capacity", e.target.value)
                       }
-                      InputProps={{
-                        sx: { fontSize: { xs: 12, sm: 14 } }
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          borderRadius: 1.5,
-                          backgroundColor: COLORS.bgCard,
-                          "& fieldset": { borderColor: COLORS.border },
-                          "&:hover fieldset": {
-                            borderColor: COLORS.borderAccent,
-                          },
-                        },
-                      }}
                     />
                   </Grid>
-                  <Grid item xs={4} sm={1} sx={{ display: "flex", justifyContent: "center" }}>
+
+                  <Grid item xs={4} sm={1}>
                     <IconButton
                       onClick={() =>
                         isNextWeek
                           ? removeNextSlot(dayIndex, idx)
                           : removeSlot(dayKey, idx)
                       }
-                      size="small"
                       sx={{
+                        background: COLORS.error,
                         color: "#fff",
-                        backgroundColor: COLORS.error,
-                        width: { xs: 32, sm: 36 },
-                        height: { xs: 32, sm: 36 },
-                        "&:hover": { backgroundColor: "#C62828" },
                       }}
                     >
-                      <DeleteIcon sx={{ fontSize: { xs: 14, sm: 16 } }} />
+                      <DeleteIcon />
                     </IconButton>
                   </Grid>
                 </Grid>
@@ -517,361 +440,136 @@ export default function AdminSchedule() {
           </Stack>
         )}
 
-        {/* زر الإضافة */}
+        {/* زر إضافة */}
         <Button
           variant="outlined"
           fullWidth
+          disabled={isPast}
           onClick={() =>
             isNextWeek ? addNextSlot(dayIndex) : addSlot(dayIndex)
           }
-          disabled={isPast}
-          startIcon={<AddCircleIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
-          sx={{
-            mt: 0.5,
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: { xs: 12, sm: 14 },
-            borderRadius: { xs: 1.5, sm: 2 },
-            py: { xs: 1, sm: 1.2 },
-            gap: { xs: 0.5, sm: 1 },
-            borderColor: COLORS.borderAccent,
-            color: COLORS.primary,
-            "&:hover": {
-              borderColor: COLORS.primary,
-              background: isDark
-                ? "rgba(183,148,246,0.08)"
-                : "rgba(155,111,214,0.05)",
-            },
-            "&:disabled": { opacity: 0.4 },
-          }}
+          startIcon={<AddCircleIcon />}
         >
-          إضافة حصة جديدة
+          {t("adminSchedule.addSlot")}
         </Button>
       </Box>
     );
 
     return (
       <>
+        {/* بطاقة اليوم */}
         <Paper
-          elevation={0}
           sx={{
-            borderRadius: { xs: 2, sm: 3 },
-            height: "100%",
-            minHeight: { xs: 250, sm: 300, md: 350 },
+            borderRadius: 2,
+            minHeight: 260,
+            background: COLORS.bgCard,
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            background: COLORS.bgCard,
-            border: isTodayFlag
-              ? "2px solid transparent"
-              : `1.3px solid ${isDark ? COLORS.border : "rgba(0,0,0,0.15)"}`,
-            backgroundImage: isTodayFlag
-              ? isDark
-                ? `linear-gradient(${COLORS.bgCard}, ${COLORS.bgCard}), linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`
-                : `linear-gradient(${COLORS.bgCard}, ${COLORS.bgCard}), linear-gradient(90deg, #9B6FD6, #E8B54D)`
-              : "none",
-            backgroundOrigin: "border-box",
-            backgroundClip: isTodayFlag
-              ? "content-box, border-box"
-              : "border-box",
-            boxShadow: isTodayFlag
-              ? `0 0 ${isMobile ? '10px' : '14px'} ${COLORS.primary}50`
-              : isDark
-              ? `0 2px ${isMobile ? '6px' : '8px'} rgba(0,0,0,0.3)`
-              : `0 2px ${isMobile ? '6px' : '8px'} rgba(0,0,0,0.05)`,
-            transition: "all 0.35s ease",
-            "&:hover": {
-              transform: isMobile ? "none" : "translateY(-3px)",
-              boxShadow: isTodayFlag
-                ? `0 0 ${isMobile ? '14px' : '18px'} ${COLORS.primary}70`
-                : isDark
-                ? `0 ${isMobile ? '4px' : '6px'} ${isMobile ? '12px' : '16px'} rgba(0,0,0,0.35)`
-                : `0 ${isMobile ? '4px' : '6px'} ${isMobile ? '12px' : '16px'} rgba(0,0,0,0.08)`,
-            },
-            opacity: isPast ? 0.6 : 1,
           }}
         >
-          {/* شريط علوي لليوم الحالي */}
           {isTodayFlag && (
             <Box
               sx={{
-                height: { xs: 3, sm: 4 },
+                height: 4,
                 background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`,
               }}
             />
           )}
 
-          {/* رأس اليوم */}
           <Box
             sx={{
-              p: { xs: 1.5, sm: 2 },
+              p: 2,
               borderBottom: `1px solid ${COLORS.border}`,
               display: "flex",
-              alignItems: "center",
               justifyContent: "space-between",
-              background: isTodayFlag
-                ? isDark
-                  ? "rgba(183,148,246,0.06)"
-                  : "rgba(155,111,214,0.04)"
-                : "transparent",
             }}
           >
             <Box>
-              <Typography
-                sx={{ 
-                  fontWeight: 700, 
-                  fontSize: { xs: 13, sm: 15 }, 
-                  color: COLORS.text 
-                }}
-              >
+              <Typography sx={{ fontWeight: 700 }}>
                 {dayNames[dayIndex]}
               </Typography>
-              <Typography
-                sx={{ 
-                  fontSize: { xs: 10, sm: 11 }, 
-                  color: COLORS.textSoft, 
-                  mt: 0.3 
-                }}
-              >
-                {new Date(dayKey).toLocaleDateString("ar-EG", {
+              <Typography sx={{ color: COLORS.textSoft, fontSize: 12 }}>
+                {new Date(dayKey).toLocaleDateString("en-GB", {
                   day: "numeric",
                   month: "short",
                 })}
               </Typography>
             </Box>
 
-            {!isMobile && (
-              <Tooltip title="عرض موسّع">
-                <IconButton
-                  onClick={() =>
-                    setExpandedDay({
-                      dayIndex,
-                      dayKey,
-                      existing,
-                      pending,
-                      isPast,
-                      isNextWeek,
-                    })
-                  }
-                  size="small"
-                  sx={{
-                    color: COLORS.primary,
-                    "&:hover": {
-                      background: isDark
-                        ? "rgba(183,148,246,0.1)"
-                        : "rgba(155,111,214,0.08)",
-                    },
-                  }}
-                >
-                  <ZoomInIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
+            <Tooltip title={t("adminSchedule.expand")}>
+              <IconButton
+                onClick={() =>
+                  setExpandedDay({
+                    dayIndex,
+                    dayKey,
+                    existing,
+                    pending,
+                    isPast,
+                    isNextWeek,
+                  })
+                }
+                sx={{ color: COLORS.primary }}
+              >
+                <ZoomInIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
 
-          {/* المحتوى */}
-          <Box 
-            sx={{ 
-              p: { xs: 1.5, sm: 2 }, 
-              flex: 1, 
-              overflowY: "auto",
-              overflowX: "hidden",
-              "&::-webkit-scrollbar": {
-                width: "4px",
-              },
-              "&::-webkit-scrollbar-track": {
-                background: "transparent",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                background: COLORS.border,
-                borderRadius: "4px",
-              },
-            }}
-          >
+          <Box sx={{ p: 2, flex: 1, overflowY: "auto" }}>
             {cardContent}
           </Box>
         </Paper>
-
-        {/* نافذة التكبير */}
-        <Dialog
-          open={expandedDay?.dayKey === dayKey}
-          onClose={() => setExpandedDay(null)}
-          fullScreen={isMobile}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{ 
-            sx: { 
-              borderRadius: isMobile ? 0 : 3, 
-              background: COLORS.bgCard,
-              m: isMobile ? 0 : 2,
-            } 
-          }}
-        >
-          <DialogTitle
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              borderBottom: `1px solid ${COLORS.border}`,
-              p: { xs: 2, sm: 3 },
-            }}
-          >
-            <Box>
-              <Typography
-                sx={{ 
-                  fontWeight: 800, 
-                  fontSize: { xs: 16, sm: 18 }, 
-                  color: COLORS.text 
-                }}
-              >
-                {dayNames[dayIndex]}
-              </Typography>
-              <Typography 
-                sx={{ 
-                  fontSize: { xs: 11, sm: 12 }, 
-                  color: COLORS.textSoft 
-                }}
-              >
-                {new Date(dayKey).toLocaleDateString("ar-EG", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </Typography>
-            </Box>
-            <IconButton
-              onClick={() => setExpandedDay(null)}
-              sx={{ color: COLORS.textSoft }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent 
-            sx={{ 
-              p: { xs: 2, sm: 3 },
-              overflowX: "hidden",
-            }}
-          >
-            {cardContent}
-          </DialogContent>
-        </Dialog>
       </>
     );
   };
 
-  // ===================== الواجهة =====================
+  // ===================== واجهة الصفحة الأساسية =====================
   return (
     <Box
       dir="rtl"
       sx={{
         minHeight: "100vh",
-        py: { xs: 1.5, sm: 3, md: 4 },
-        px: { xs: 1, sm: 2, md: 3, lg: 4 },
+        py: 3,
+        px: 2,
         background: COLORS.bgMain,
       }}
     >
       <Box sx={{ maxWidth: 1600, mx: "auto" }}>
         {/* العنوان + Tabs */}
         <Paper
-          elevation={0}
           sx={{
-            p: { xs: 2, sm: 2.5, md: 3 },
-            mb: { xs: 2, sm: 3, md: 4 },
-            borderRadius: { xs: 2, sm: 2.5 },
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
             background: COLORS.bgCard,
             border: `1px solid ${COLORS.border}`,
           }}
         >
-          {/* العنوان */}
-          <Box 
-            sx={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: { xs: 1.5, sm: 2 }, 
-              mb: { xs: 2, sm: 3 },
-              flexWrap: isMobile ? "wrap" : "nowrap",
-            }}
-          >
-            <Box
-              sx={{
-                width: { xs: 40, sm: 48 },
-                height: { xs: 40, sm: 48 },
-                borderRadius: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: isDark
-                  ? "rgba(183,148,246,0.15)"
-                  : "rgba(155,111,214,0.1)",
-              }}
-            >
-              <CalendarTodayIcon 
-                sx={{ 
-                  color: COLORS.primary, 
-                  fontSize: { xs: 20, sm: 24 } 
-                }} 
-              />
-            </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography
-                variant="h5"
-                sx={{ 
-                  fontWeight: 800, 
-                  mb: 0.5, 
-                  color: COLORS.text,
-                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                }}
-              >
-                الرزنامة الأسبوعية
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <CalendarTodayIcon sx={{ color: COLORS.primary, fontSize: 30 }} />
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                {t("adminSchedule.title")}
               </Typography>
-              <Typography 
-                sx={{ 
-                  color: COLORS.textSoft, 
-                  fontSize: { xs: 11, sm: 13 },
-                }}
-              >
-                إدارة وتنظيم جدول الحصص الرياضية
+              <Typography sx={{ color: COLORS.textSoft }}>
+                {t("adminSchedule.subtitle")}
               </Typography>
             </Box>
           </Box>
 
-          {/* Tabs */}
           <Tabs
             value={tab}
             onChange={(_, v) => setTab(v)}
-            variant={isMobile ? "fullWidth" : "standard"}
             TabIndicatorProps={{
               style: {
                 height: 3,
-                borderRadius: 3,
                 background: COLORS.primary,
               },
             }}
-            sx={{
-              "& .MuiTab-root": {
-                textTransform: "none",
-                fontWeight: 600,
-                fontSize: { xs: 12, sm: 14 },
-                minHeight: { xs: 42, sm: 44 },
-                mr: isMobile ? 0 : 2,
-                color: COLORS.textSoft,
-                px: { xs: 1, sm: 2 },
-              },
-              "& .Mui-selected": {
-                color: COLORS.primary,
-              },
-            }}
           >
-            <Tab
-              icon={<EventAvailableIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-              iconPosition="start"
-              label="الأسبوع الحالي"
-            />
-            <Tab
-              icon={<NavigateNextIcon sx={{ fontSize: { xs: 16, sm: 18 } }} />}
-              iconPosition="start"
-              label="الأسبوع القادم"
-            />
+            <Tab label={t("adminSchedule.currentWeek")} />
+            <Tab label={t("adminSchedule.nextWeek")} />
           </Tabs>
         </Paper>
 
@@ -879,14 +577,7 @@ export default function AdminSchedule() {
         {tab === 0 && (
           <>
             {loading ? (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  minHeight: { xs: 300, sm: 400 },
-                }}
-              >
+              <Box sx={{ textAlign: "center", py: 5 }}>
                 <CircularProgress sx={{ color: COLORS.primary }} />
               </Box>
             ) : (
@@ -897,81 +588,58 @@ export default function AdminSchedule() {
                     display: "flex",
                     alignItems: "center",
                     gap: 1,
-                    mb: { xs: 2, sm: 3 },
+                    mb: 2,
                     color: COLORS.textSoft,
-                    fontSize: { xs: 11, sm: 13 },
                     fontWeight: 600,
-                    flexWrap: "wrap",
-                    px: { xs: 1, sm: 0 },
                   }}
                 >
-                  <NavigateBeforeIcon fontSize="small" />
-                  <Typography sx={{ fontSize: { xs: 11, sm: 13 } }}>
+                  <NavigateBeforeIcon />
+                  <Typography>
                     {weekData?.weekStart} → {weekData?.weekEnd}
                   </Typography>
                   <Chip
-                    label="الحالي"
-                    size="small"
+                    label={t("adminSchedule.current")}
                     sx={{
-                      ml: "auto",
                       background: COLORS.primary,
                       color: "#fff",
-                      fontWeight: 600,
-                      border: "none",
-                      fontSize: { xs: 10, sm: 11 },
-                      height: { xs: 22, sm: 24 },
+                      ml: "auto",
                     }}
                   />
                 </Box>
 
-                {/* البطاقات */}
-                <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>
+                <Grid container spacing={2}>
                   {Array.from({ length: 7 }, (_, i) => {
                     const d = addDays(weekStart, i);
                     const key = fmt(d);
-                    const existing = weekData?.days?.[key] || [];
-                    const pending = currentEdits[key] || [];
-                    const past = isPastDay(d);
+
                     return (
-                      <Grid item xs={12} sm={6} md={4} lg={3} key={key}>
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
                         <DayCard
                           dayIndex={i}
                           dayKey={key}
-                          existing={existing}
-                          pending={pending}
-                          isPast={past}
+                          existing={weekData?.days?.[key] || []}
+                          pending={currentEdits[key] || []}
+                          isPast={isPastDay(d)}
                         />
                       </Grid>
                     );
                   })}
                 </Grid>
 
-                {/* زر الحفظ */}
-                <Box sx={{ textAlign: "center", px: { xs: 1, sm: 0 } }}>
+                <Box sx={{ textAlign: "center", mt: 3 }}>
                   <Button
                     variant="contained"
-                    size={isMobile ? "medium" : "large"}
-                    fullWidth={isMobile}
+                    startIcon={<SaveIcon />}
                     onClick={saveChanges}
-                    startIcon={<SaveIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />}
                     sx={{
-                      textTransform: "none",
-                      fontWeight: 700,
-                      px: { xs: 4, sm: 5 },
-                      py: { xs: 1.2, sm: 1.5 },
-                      gap: 1,
-                      fontSize: { xs: 13, sm: 15 },
-                      borderRadius: { xs: 1.5, sm: 2 },
                       background: COLORS.primary,
                       color: "#fff",
-                      boxShadow: "none",
-                      "&:hover": {
-                        background: isDark ? "#9F7BD9" : "#8058C2",
-                        boxShadow: "none",
-                      },
+                      px: 4,
+                      py: 1.5,
+                      fontWeight: 700,
                     }}
                   >
-                    حفظ جميع التغييرات
+                    {t("adminSchedule.saveAll")}
                   </Button>
                 </Box>
               </>
@@ -982,50 +650,42 @@ export default function AdminSchedule() {
         {/* الأسبوع القادم */}
         {tab === 1 && (
           <>
-            {/* نطاق الأسبوع */}
+            {/* نطاق الأسبوع القادم */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                mb: { xs: 2, sm: 3 },
+                mb: 2,
                 color: COLORS.textSoft,
-                fontSize: { xs: 11, sm: 13 },
                 fontWeight: 600,
-                flexWrap: "wrap",
-                px: { xs: 1, sm: 0 },
               }}
             >
-              <NavigateNextIcon fontSize="small" />
-              <Typography sx={{ fontSize: { xs: 11, sm: 13 } }}>
+              <NavigateNextIcon />
+              <Typography>
                 {nextWeekData?.weekStart} → {nextWeekData?.weekEnd}
               </Typography>
+
               <Chip
-                label="القادم"
-                size="small"
+                label={t("adminSchedule.next")}
                 sx={{
-                  ml: "auto",
                   background: COLORS.secondary,
                   color: isDark ? "#2D2D2D" : "#fff",
-                  fontWeight: 600,
-                  border: "none",
-                  fontSize: { xs: 10, sm: 11 },
-                  height: { xs: 22, sm: 24 },
+                  ml: "auto",
                 }}
               />
             </Box>
 
-            {/* البطاقات */}
-            <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5 }} sx={{ mb: { xs: 2, sm: 3 } }}>
+            <Grid container spacing={2}>
               {Array.from({ length: 7 }, (_, i) => {
                 const date = fmt(addDays(addDays(weekStart, 7), i));
-                const slots = nextWeekData?.days?.[date] || [];
+
                 return (
                   <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
                     <DayCard
                       dayIndex={i}
                       dayKey={date}
-                      existing={slots}
+                      existing={nextWeekData?.days?.[date] || []}
                       pending={nextWeek[i]?.items || []}
                       isPast={false}
                       isNextWeek={true}
@@ -1035,35 +695,80 @@ export default function AdminSchedule() {
               })}
             </Grid>
 
-            {/* زر الحفظ */}
-            <Box sx={{ textAlign: "center", px: { xs: 1, sm: 0 } }}>
+            <Box sx={{ textAlign: "center", mt: 3 }}>
               <Button
                 variant="contained"
-                size={isMobile ? "medium" : "large"}
-                fullWidth={isMobile}
+                startIcon={<SaveIcon />}
                 onClick={saveNextWeek}
-                startIcon={<SaveIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />}
                 sx={{
-                  textTransform: "none",
-                  fontWeight: 700,
-                  px: { xs: 4, sm: 5 },
-                  py: { xs: 1.2, sm: 1.5 },
-                  fontSize: { xs: 13, sm: 15 },
-                  borderRadius: { xs: 1.5, sm: 2 },
                   background: COLORS.secondary,
                   color: isDark ? "#2D2D2D" : "#fff",
-                  boxShadow: "none",
-                  "&:hover": {
-                    background: isDark ? "#DEB05A" : "#D4A043",
-                    boxShadow: "none",
-                  },
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 700,
                 }}
               >
-                حفظ الأسبوع القادم
+                {t("adminSchedule.saveNextWeek")}
               </Button>
             </Box>
           </>
         )}
+
+        {/* نافذة تكبير اليوم */}
+        <Dialog
+          open={!!expandedDay}
+          onClose={() => setExpandedDay(null)}
+          fullWidth
+          maxWidth="md"
+          fullScreen={isMobile}
+          PaperProps={{
+            sx: {
+              background: COLORS.bgCard,
+              borderRadius: isMobile ? 0 : 2,
+            },
+          }}
+        >
+          {expandedDay && (
+            <>
+              <DialogTitle
+                sx={{
+                  borderBottom: `1px solid ${COLORS.border}`,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Box>
+                  <Typography sx={{ fontWeight: 800 }}>
+                    {dayNames[expandedDay.dayIndex]}
+                  </Typography>
+
+                  <Typography sx={{ fontSize: 13, color: COLORS.textSoft }}>
+                    {new Date(expandedDay.dayKey).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </Typography>
+                </Box>
+
+                <IconButton onClick={() => setExpandedDay(null)}>
+                  <CloseIcon />
+                </IconButton>
+              </DialogTitle>
+
+              <DialogContent sx={{ p: 3 }}>
+                <DayCard
+                  dayIndex={expandedDay.dayIndex}
+                  dayKey={expandedDay.dayKey}
+                  existing={expandedDay.existing}
+                  pending={expandedDay.pending}
+                  isPast={expandedDay.isPast}
+                  isNextWeek={expandedDay.isNextWeek}
+                />
+              </DialogContent>
+            </>
+          )}
+        </Dialog>
       </Box>
     </Box>
   );

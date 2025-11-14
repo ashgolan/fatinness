@@ -21,12 +21,12 @@ import {
   Tooltip,
   useTheme,
 } from "@mui/material";
+
+import { useTranslation } from "react-i18next";
+
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import PeopleIcon from "@mui/icons-material/People";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import BlockIcon from "@mui/icons-material/Block";
-import CancelIcon from "@mui/icons-material/Cancel";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
@@ -34,8 +34,11 @@ import { toast } from "react-toastify";
 export default function SlotsAdmin() {
   const theme = useTheme();
   const mode = theme.palette.mode;
+  const { t, i18n } = useTranslation();
 
-  // 🎨 ألوان مستوحاة من شعار النادي (ذهبي + بنفسجي + فوشي)
+  const dir = i18n.dir(); // RTL / LTR
+
+  // 🎨 Colors
   const BRAND = {
     gold: "#FFD93D",
     goldDark: "#FFC300",
@@ -48,15 +51,13 @@ export default function SlotsAdmin() {
     card: mode === "dark" ? "rgba(18,20,28,.95)" : "rgba(255,255,255,.95)",
     text: mode === "dark" ? "#FFFFFF" : "#1a1a1a",
     sub: mode === "dark" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.6)",
-
-    // ألوان الحالات
     green: "#4CAF50",
     red: "#E2445C",
     amber: "#FFB300",
     blue: "#AB47BC",
   };
 
-  // 🧠 حالـة الصفحة
+  // 🧠 State
   const [slots, setSlots] = useState([]);
   const [weeks, setWeeks] = useState([]);
   const [selectedWeek, setSelectedWeek] = useState("");
@@ -68,13 +69,13 @@ export default function SlotsAdmin() {
   const [weekRange, setWeekRange] = useState({ start: "", end: "" });
   const [filter, setFilter] = useState("active");
 
-  // ⏱️ تحديث الوقت لتقييم حالة الحصص
+  // ⏱️ Update time
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // 🗓️ توليد أسابيع ±2 حول الأسبوع الحالي (يبدأ الاثنين)
+  // 🗓️ Generate weeks
   const generateWeeks = () => {
     const today = new Date();
 
@@ -93,6 +94,7 @@ export default function SlotsAdmin() {
     sunday.setDate(sunday.getDate() - dow);
 
     const list = [];
+
     for (let i = -2; i <= 2; i++) {
       const weekStart = new Date(sunday);
       weekStart.setDate(sunday.getDate() + i * 7);
@@ -112,15 +114,15 @@ export default function SlotsAdmin() {
     const current = list.find(
       (w) => new Date(w.start) <= today && today <= new Date(w.end)
     );
+
     setSelectedWeek(current ? current.start : list[2].start);
   };
 
   useEffect(() => {
     generateWeeks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 📥 جلب حصص الأسبوع المختار
+  // 📥 Fetch Slots
   const fetchSlots = async () => {
     if (!selectedWeek) return;
     setLoading(true);
@@ -132,7 +134,7 @@ export default function SlotsAdmin() {
       setSlots(allSlots);
       setWeekRange({ start: data.weekStart || "", end: data.weekEnd || "" });
     } catch {
-      toast.error("حدث خطأ أثناء تحميل الحصص");
+      toast.error(t("slotsAdmin.toast.loadError"));
     } finally {
       setLoading(false);
     }
@@ -140,53 +142,86 @@ export default function SlotsAdmin() {
 
   useEffect(() => {
     fetchSlots();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedWeek]);
 
-  // 🧩 أدوات حالة الحصة
+  // 🧩 Slot Status
   const getSlotStatus = (slot) => {
     if (!slot)
-      return { label: "غير معروفة", color: BRAND.sub, type: "unknown" };
+      return {
+        label: t("slotsAdmin.status.unknown"),
+        color: BRAND.sub,
+        type: "unknown",
+      };
+
     if (slot.isBlocked)
-      return { label: "معطّلة", color: BRAND.amber, type: "blocked" };
+      return {
+        label: t("slotsAdmin.status.blocked"),
+        color: BRAND.amber,
+        type: "blocked",
+      };
+
     const start = new Date(slot.date);
     const [sh, sm] = slot.startTime.split(":");
     start.setHours(Number(sh), Number(sm), 0, 0);
+
     const end = new Date(slot.date);
     const [eh, em] = slot.endTime
       ? slot.endTime.split(":")
       : [Number(sh) + 1, Number(sm)];
     end.setHours(Number(eh), Number(em), 0, 0);
-    if (now > end) return { label: "منتهية", color: BRAND.red, type: "ended" };
+
+    if (now > end)
+      return {
+        label: t("slotsAdmin.status.ended"),
+        color: BRAND.red,
+        type: "ended",
+      };
+
     if (now >= start && now <= end)
       return {
-        label: "جارية",
+        label: t("slotsAdmin.status.running"),
         color: BRAND.fuchsia,
         type: "running",
       };
-    return { label: "قادمة", color: BRAND.green, type: "upcoming" };
+
+    return {
+      label: t("slotsAdmin.status.upcoming"),
+      color: BRAND.green,
+      type: "upcoming",
+    };
   };
 
+  // ⏱️ Time Diff
   const getTimeDiff = (slot) => {
     const start = new Date(slot.date);
     const [sh, sm] = slot.startTime.split(":");
     start.setHours(sh, sm, 0, 0);
+
     const diffMs = start - now;
     const diffMin = Math.floor(diffMs / 60000);
+
     if (diffMin > 0) {
       const h = Math.floor(diffMin / 60);
       const m = diffMin % 60;
-      return `بعد ${h ? `${h} ساعة و` : ""}${m} دقيقة`;
+      return t("slotsAdmin.status.after", {
+        hours: h,
+        minutes: m,
+      });
     } else if (diffMin > -60) {
-      return `بدأت منذ ${Math.abs(diffMin)} دقيقة`;
+      return t("slotsAdmin.status.startedAgo", {
+        minutes: Math.abs(diffMin),
+      });
     } else {
       const h = Math.floor(Math.abs(diffMin) / 60);
       const m = Math.abs(diffMin) % 60;
-      return `انتهت منذ ${h ? `${h} ساعة و` : ""}${m} دقيقة`;
+      return t("slotsAdmin.status.endedAgo", {
+        hours: h,
+        minutes: m,
+      });
     }
   };
 
-  // 📊 حسابات سريعة
+  // 📊 Quick Stats
   const total = slots.length || 1;
   const activeCount = slots.filter(
     (s) =>
@@ -194,16 +229,18 @@ export default function SlotsAdmin() {
       (getSlotStatus(s).type === "upcoming" ||
         getSlotStatus(s).type === "running")
   ).length;
+
   const endedCount = slots.filter(
     (s) => !s.isBlocked && getSlotStatus(s).type === "ended"
   ).length;
+
   const blockedCount = slots.filter((s) => s.isBlocked).length;
 
   const activePercent = Math.round((activeCount / total) * 100);
   const endedPercent = Math.round((endedCount / total) * 100);
   const blockedPercent = Math.round((blockedCount / total) * 100);
 
-  // 🧹 فلترة وعرض
+  // 🧹 Filtered Slots
   const filteredSlots = useMemo(() => {
     return slots.filter((slot) => {
       const status = getSlotStatus(slot);
@@ -213,23 +250,24 @@ export default function SlotsAdmin() {
       if (filter === "blocked") return status.type === "blocked";
       return true;
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slots, filter, now, mode]);
 
+  // Group by day
   const groupedByDay = useMemo(() => {
     return filteredSlots.reduce((acc, slot) => {
-      const dayKey = new Date(slot.date).toLocaleDateString("ar-EG", {
+      const dayKey = new Date(slot.date).toLocaleDateString(i18n.language, {
         weekday: "long",
         month: "short",
         day: "numeric",
       });
+
       if (!acc[dayKey]) acc[dayKey] = [];
       acc[dayKey].push(slot);
       return acc;
     }, {});
-  }, [filteredSlots]);
+  }, [filteredSlots, i18n.language]);
 
-  // 🪟 حوار التفاصيل
+  // Dialog open handler
   const handleSlotClick = async (slot) => {
     setSelectedSlot(slot);
     try {
@@ -241,30 +279,35 @@ export default function SlotsAdmin() {
     setOpen(true);
   };
 
+  // Toggle block
   const handleToggleBlock = async () => {
     if (!selectedSlot) return;
+
     const slotDateTime = new Date(selectedSlot.date);
     const [hour, minute] = selectedSlot.startTime.split(":");
     slotDateTime.setHours(hour, minute, 0, 0);
+
     if (slotDateTime < now) {
-      toast.warn("لا يمكن تعطيل أو تفعيل حصة انتهى موعدها");
+      toast.warn(t("slotsAdmin.toast.blockEndedSlot"));
       return;
     }
+
     const confirmMsg = selectedSlot.isBlocked
-      ? "هل تريدين تفعيل هذه الحصة من جديد؟"
-      : "هل تريدين تعطيل هذه الحصة؟";
+      ? t("slotsAdmin.dialog.confirmActivate")
+      : t("slotsAdmin.dialog.confirmDeactivate");
+
     if (!window.confirm(confirmMsg)) return;
+
     try {
       const { data } = await Api.put(`/admin/slots/${selectedSlot._id}/block`);
       toast.success(data.message);
       setOpen(false);
       fetchSlots();
     } catch {
-      toast.error("حدث خطأ أثناء تحديث حالة الحصة");
+      toast.error(t("slotsAdmin.toast.updateError"));
     }
   };
-
-  // 🌌 خلفية ديناميكية
+  // 🌌 Dynamic background
   const pageBackground =
     mode === "dark"
       ? `
@@ -280,7 +323,7 @@ export default function SlotsAdmin() {
 
   return (
     <Box
-      dir="rtl"
+      dir={dir}
       sx={{
         minHeight: "100vh",
         py: 4,
@@ -347,10 +390,10 @@ export default function SlotsAdmin() {
                   variant="h5"
                   sx={{ fontWeight: 800, color: BRAND.text, mb: 0.5 }}
                 >
-                  إدارة الجدول الأسبوعي
+                  {t("slotsAdmin.header.title")}
                 </Typography>
                 <Typography sx={{ fontSize: 14, color: BRAND.sub }}>
-                  عرض وإدارة جميع الحصص والجلسات
+                  {t("slotsAdmin.header.subtitle")}
                 </Typography>
               </Box>
             </Box>
@@ -360,7 +403,7 @@ export default function SlotsAdmin() {
           </Box>
         </Paper>
 
-        {/* الإحصائيات */}
+        {/* Stats */}
         {!loading && slots.length > 0 && (
           <Paper
             elevation={0}
@@ -385,10 +428,10 @@ export default function SlotsAdmin() {
                 textAlign: "center",
               }}
             >
-              📊 توزيع الحصص الأسبوعي
+              {t("slotsAdmin.stats.title")}
             </Typography>
 
-            {/* النشطة */}
+            {/* Active */}
             <Box sx={{ mb: 2 }}>
               <Box
                 sx={{
@@ -408,7 +451,7 @@ export default function SlotsAdmin() {
                     }}
                   />
                   <Typography sx={{ fontWeight: 700, color: BRAND.text }}>
-                    نشطة
+                    {t("slotsAdmin.stats.active")}
                   </Typography>
                 </Box>
                 <Typography sx={{ color: BRAND.sub }}>
@@ -434,7 +477,7 @@ export default function SlotsAdmin() {
               </Box>
             </Box>
 
-            {/* المنتهية */}
+            {/* Ended */}
             <Box sx={{ mb: 2 }}>
               <Box
                 sx={{
@@ -454,7 +497,7 @@ export default function SlotsAdmin() {
                     }}
                   />
                   <Typography sx={{ fontWeight: 700, color: BRAND.text }}>
-                    منتهية
+                    {t("slotsAdmin.stats.ended")}
                   </Typography>
                 </Box>
                 <Typography sx={{ color: BRAND.sub }}>
@@ -480,7 +523,7 @@ export default function SlotsAdmin() {
               </Box>
             </Box>
 
-            {/* المعطلة */}
+            {/* Blocked */}
             <Box sx={{ mb: 2 }}>
               <Box
                 sx={{
@@ -500,7 +543,7 @@ export default function SlotsAdmin() {
                     }}
                   />
                   <Typography sx={{ fontWeight: 700, color: BRAND.text }}>
-                    معطلة
+                    {t("slotsAdmin.stats.blocked")}
                   </Typography>
                 </Box>
                 <Typography sx={{ color: BRAND.sub }}>
@@ -526,7 +569,7 @@ export default function SlotsAdmin() {
               </Box>
             </Box>
 
-            {/* الإجمالي */}
+            {/* Total */}
             <Box>
               <Box
                 sx={{
@@ -546,7 +589,7 @@ export default function SlotsAdmin() {
                     }}
                   />
                   <Typography sx={{ fontWeight: 700, color: BRAND.text }}>
-                    إجمالي
+                    {t("slotsAdmin.stats.total")}
                   </Typography>
                 </Box>
                 <Typography sx={{ color: BRAND.sub }}>
@@ -573,7 +616,7 @@ export default function SlotsAdmin() {
           </Paper>
         )}
 
-        {/* فلاتر وأسبوع العرض */}
+        {/* Filters + Week */}
         <Paper
           elevation={0}
           sx={{
@@ -597,7 +640,7 @@ export default function SlotsAdmin() {
             alignItems="center"
             justifyContent="center"
           >
-            {/* اختيار الأسبوع */}
+            {/* Week Selector */}
             <Grid item xs={12} md={6}>
               <FormControl
                 fullWidth
@@ -618,10 +661,10 @@ export default function SlotsAdmin() {
                   },
                 }}
               >
-                <InputLabel>اختاري أسبوع العرض</InputLabel>
+                <InputLabel>{t("slotsAdmin.filters.selectWeek")}</InputLabel>
                 <Select
                   value={selectedWeek}
-                  label="اختاري أسبوع العرض"
+                  label={t("slotsAdmin.filters.selectWeek")}
                   onChange={(e) => setSelectedWeek(e.target.value)}
                   MenuProps={{
                     PaperProps: {
@@ -643,7 +686,7 @@ export default function SlotsAdmin() {
               </FormControl>
             </Grid>
 
-            {/* فلاتر الحصص */}
+            {/* Filters */}
             <Grid item xs={12} md={6}>
               <Box
                 sx={{
@@ -668,7 +711,7 @@ export default function SlotsAdmin() {
                       px: { xs: 3, sm: 2.5 },
                       py: { xs: 1.2, sm: 0.9 },
                       borderRadius: 2.5,
-                      border: `2px solid ${BRAND.line}`, // 🟡 outline سميك أنيق
+                      border: `2px solid ${BRAND.line}`,
                       color: BRAND.sub,
                       backgroundColor:
                         mode === "dark"
@@ -704,17 +747,25 @@ export default function SlotsAdmin() {
                     },
                   }}
                 >
-                  <ToggleButton value="active">النشطة</ToggleButton>
-                  <ToggleButton value="ended">المنتهية</ToggleButton>
-                  <ToggleButton value="blocked">المعطلة</ToggleButton>
-                  <ToggleButton value="all">الكل</ToggleButton>
+                  <ToggleButton value="active">
+                    {t("slotsAdmin.filters.active")}
+                  </ToggleButton>
+                  <ToggleButton value="ended">
+                    {t("slotsAdmin.filters.ended")}
+                  </ToggleButton>
+                  <ToggleButton value="blocked">
+                    {t("slotsAdmin.filters.blocked")}
+                  </ToggleButton>
+                  <ToggleButton value="all">
+                    {t("slotsAdmin.filters.all")}
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
             </Grid>
           </Grid>
         </Paper>
 
-        {/* عرض الحصص */}
+        {/* Slots Display */}
         {loading ? (
           <Box
             sx={{
@@ -763,7 +814,9 @@ export default function SlotsAdmin() {
                   />
                   {day}
                   <Chip
-                    label={`${groupedByDay[day].length} حصة`}
+                    label={t("slotsAdmin.day.sessionsCount", {
+                      count: groupedByDay[day].length,
+                    })}
                     size="small"
                     sx={{
                       backgroundColor: `${BRAND.purple}15`,
@@ -816,7 +869,8 @@ export default function SlotsAdmin() {
                           "&:after": {
                             content: '""',
                             position: "absolute",
-                            right: 0,
+                            right: dir === "rtl" ? 0 : "auto",
+                            left: dir === "ltr" ? 0 : "auto",
                             top: 0,
                             bottom: 0,
                             width: "5px",
@@ -827,137 +881,148 @@ export default function SlotsAdmin() {
                       >
                         <Box
                           sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "flex-start",
-                            mb: 2.5,
-                            gap: 2,
+                            position: "relative",
+                            zIndex: 1,
                           }}
                         >
                           <Box
                             sx={{
                               display: "flex",
-                              alignItems: "center",
-                              gap: 1.5,
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              mb: 2.5,
+                              gap: 2,
                             }}
                           >
                             <Box
                               sx={{
-                                width: 44,
-                                height: 44,
-                                borderRadius: 1.5,
-                                backgroundColor: `${status.color}22`,
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "center",
+                                gap: 1.5,
                               }}
                             >
-                              <AccessTimeIcon
-                                sx={{ fontSize: 24, color: status.color }}
-                              />
-                            </Box>
-                            <Box>
-                              <Typography
+                              <Box
                                 sx={{
-                                  fontSize: 16,
-                                  fontWeight: 900,
-                                  color: BRAND.text,
-                                  mb: 0.3,
+                                  width: 44,
+                                  height: 44,
+                                  borderRadius: 1.5,
+                                  backgroundColor: `${status.color}22`,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
                                 }}
                               >
-                                {slot.startTime} - {slot.endTime}
+                                <AccessTimeIcon
+                                  sx={{ fontSize: 24, color: status.color }}
+                                />
+                              </Box>
+                              <Box>
+                                <Typography
+                                  sx={{
+                                    fontSize: 16,
+                                    fontWeight: 900,
+                                    color: BRAND.text,
+                                    mb: 0.3,
+                                  }}
+                                >
+                                  {slot.startTime} - {slot.endTime}
+                                </Typography>
+                                <Typography
+                                  sx={{ fontSize: 12, color: BRAND.sub }}
+                                >
+                                  {getTimeDiff(slot)}
+                                </Typography>
+                              </Box>
+                            </Box>
+
+                            <Chip
+                              label={status.label}
+                              size="small"
+                              sx={{
+                                backgroundColor: `${status.color}15`,
+                                color: status.color,
+                                border: `1px solid ${status.color}55`,
+                                fontSize: 12,
+                                fontWeight: 900,
+                                height: 28,
+                              }}
+                            />
+                          </Box>
+
+                          <Divider sx={{ my: 2 }} />
+
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              gap: 2,
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <PeopleIcon
+                                sx={{ fontSize: 20, color: BRAND.sub }}
+                              />
+                              <Typography
+                                sx={{ fontSize: 13, color: BRAND.sub }}
+                              >
+                                {t("slotsAdmin.card.capacityLabel")}
                               </Typography>
                               <Typography
-                                sx={{ fontSize: 12, color: BRAND.sub }}
+                                sx={{
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                  color: BRAND.text,
+                                }}
                               >
-                                {getTimeDiff(slot)}
+                                {slot.capacity}
                               </Typography>
                             </Box>
-                          </Box>
 
-                          <Chip
-                            label={status.label}
-                            size="small"
-                            sx={{
-                              backgroundColor: `${status.color}15`,
-                              color: status.color,
-                              border: `1px solid ${status.color}55`,
-                              fontSize: 12,
-                              fontWeight: 900,
-                              height: 28,
-                            }}
-                          />
-                        </Box>
-
-                        <Divider sx={{ my: 2 }} />
-
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                            gap: 2,
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <PeopleIcon
-                              sx={{ fontSize: 20, color: BRAND.sub }}
-                            />
-                            <Typography sx={{ fontSize: 13, color: BRAND.sub }}>
-                              السعة الكلية:
-                            </Typography>
-                            <Typography
+                            <Box
                               sx={{
-                                fontSize: 15,
-                                fontWeight: 900,
-                                color: BRAND.text,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                px: 1.6,
+                                py: 0.6,
+                                borderRadius: "10px",
+                                border: `1px solid ${BRAND.line}`,
+                                backgroundColor:
+                                  slot.available > 0
+                                    ? `${BRAND.green}1A`
+                                    : `${BRAND.red}1A`,
                               }}
                             >
-                              {slot.capacity}
-                            </Typography>
-                          </Box>
-
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                              px: 1.6,
-                              py: 0.6,
-                              borderRadius: "10px",
-                              border: `1px solid ${BRAND.line}`,
-                              backgroundColor:
-                                slot.available > 0
-                                  ? `${BRAND.green}1A`
-                                  : `${BRAND.red}1A`,
-                            }}
-                          >
-                            <Typography
-                              sx={{
-                                fontSize: 12,
-                                fontWeight: 800,
-                                color: BRAND.sub,
-                              }}
-                            >
-                              المتاحة
-                            </Typography>
-                            <Typography
-                              sx={{
-                                fontSize: 15,
-                                fontWeight: 900,
-                                color:
-                                  slot.available > 0 ? BRAND.green : BRAND.red,
-                              }}
-                            >
-                              {slot.available}
-                            </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: 12,
+                                  fontWeight: 800,
+                                  color: BRAND.sub,
+                                }}
+                              >
+                                {t("slotsAdmin.card.availableLabel")}
+                              </Typography>
+                              <Typography
+                                sx={{
+                                  fontSize: 15,
+                                  fontWeight: 900,
+                                  color:
+                                    slot.available > 0
+                                      ? BRAND.green
+                                      : BRAND.red,
+                                }}
+                              >
+                                {slot.available}
+                              </Typography>
+                            </Box>
                           </Box>
                         </Box>
                       </Paper>
@@ -984,15 +1049,18 @@ export default function SlotsAdmin() {
             <Typography
               sx={{ fontSize: 16, color: BRAND.sub, fontWeight: 900 }}
             >
-              لا توجد حصص في هذا الأسبوع
+              {t("slotsAdmin.empty.title")}
             </Typography>
             <Typography sx={{ fontSize: 13, color: BRAND.sub, mt: 1 }}>
-              ({weekRange.start} → {weekRange.end})
+              {t("slotsAdmin.empty.range", {
+                start: weekRange.start,
+                end: weekRange.end,
+              })}
             </Typography>
           </Paper>
         )}
 
-        {/* Dialog التفاصيل */}
+        {/* Details Dialog */}
         <Dialog
           open={open}
           onClose={() => setOpen(false)}
@@ -1019,7 +1087,7 @@ export default function SlotsAdmin() {
               p: 3,
             }}
           >
-            تفاصيل الحصة
+            {t("slotsAdmin.dialog.title")}
           </DialogTitle>
 
           <DialogContent sx={{ p: 3, mt: 2 }}>
@@ -1048,20 +1116,31 @@ export default function SlotsAdmin() {
                       sx={{ fontSize: 22, color: BRAND.fuchsia }}
                     />
                     <Typography
-                      sx={{ fontSize: 14, color: BRAND.text, fontWeight: 900 }}
+                      sx={{
+                        fontSize: 14,
+                        color: BRAND.text,
+                        fontWeight: 900,
+                      }}
                     >
-                      {new Date(selectedSlot.date).toLocaleDateString("ar-EG", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
+                      {new Date(selectedSlot.date).toLocaleDateString(
+                        i18n.language,
+                        {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )}
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <AccessTimeIcon sx={{ fontSize: 22, color: BRAND.gold }} />
                     <Typography
-                      sx={{ fontSize: 14, color: BRAND.text, fontWeight: 900 }}
+                      sx={{
+                        fontSize: 14,
+                        color: BRAND.text,
+                        fontWeight: 900,
+                      }}
                     >
                       {selectedSlot.startTime} - {selectedSlot.endTime}
                     </Typography>
@@ -1080,7 +1159,9 @@ export default function SlotsAdmin() {
                   }}
                 >
                   <PeopleIcon sx={{ fontSize: 20, color: BRAND.purple }} />
-                  المشتركات ({bookings.length})
+                  {t("slotsAdmin.dialog.membersTitle", {
+                    count: bookings.length,
+                  })}
                 </Typography>
 
                 {bookings.length ? (
@@ -1122,7 +1203,9 @@ export default function SlotsAdmin() {
                             mb: 0.5,
                           }}
                         >
-                          {b.user?.name || b.user?.username || "غير معروف"}
+                          {b.user?.name ||
+                            b.user?.username ||
+                            t("slotsAdmin.common.unknownUser")}
                         </Typography>
                         <Box
                           sx={{
@@ -1133,7 +1216,7 @@ export default function SlotsAdmin() {
                           }}
                         >
                           <Typography sx={{ fontSize: 12, color: BRAND.sub }}>
-                            {b.user?.phone || "لا يوجد"}
+                            {b.user?.phone || t("slotsAdmin.common.noPhone")}
                           </Typography>
                           <Box
                             sx={{
@@ -1144,7 +1227,11 @@ export default function SlotsAdmin() {
                             }}
                           />
                           <Chip
-                            label={b.status === "booked" ? "محجوزة" : "ملغاة"}
+                            label={
+                              b.status === "booked"
+                                ? t("slotsAdmin.dialog.status.booked")
+                                : t("slotsAdmin.dialog.status.cancelled")
+                            }
                             size="small"
                             sx={{
                               backgroundColor:
@@ -1180,7 +1267,7 @@ export default function SlotsAdmin() {
                       sx={{ fontSize: 50, color: BRAND.line, mb: 1 }}
                     />
                     <Typography sx={{ color: BRAND.sub, fontSize: 14 }}>
-                      لا توجد مشتركات في هذه الحصة
+                      {t("slotsAdmin.dialog.noMembers")}
                     </Typography>
                   </Paper>
                 )}
@@ -1195,6 +1282,7 @@ export default function SlotsAdmin() {
               background: BRAND.bgSoft,
               borderTop: `1px solid ${BRAND.line}`,
               gap: 1.2,
+              flexDirection: dir === "rtl" ? "row-reverse" : "row",
             }}
           >
             <Button
@@ -1210,7 +1298,7 @@ export default function SlotsAdmin() {
                 "&:hover": { backgroundColor: BRAND.card },
               }}
             >
-              إغلاق
+              {t("slotsAdmin.dialog.close")}
             </Button>
             {selectedSlot && !isNaN(new Date(selectedSlot.date)) && (
               <Button
@@ -1231,7 +1319,9 @@ export default function SlotsAdmin() {
                   "&:hover": { filter: "brightness(.95)" },
                 }}
               >
-                {selectedSlot.isBlocked ? "تفعيل الحصة" : "تعطيل الحصة"}
+                {selectedSlot.isBlocked
+                  ? t("slotsAdmin.dialog.activate")
+                  : t("slotsAdmin.dialog.deactivate")}
               </Button>
             )}
           </DialogActions>

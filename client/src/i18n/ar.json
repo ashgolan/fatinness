@@ -1,0 +1,523 @@
+{
+  "footer": {
+    "subtitle": "استوديو اللياقة النسائي"
+  },
+  "navbar": {
+    "admin_panel": "لوحة الإدارة",
+    "logout": "تسجيل الخروج",
+    "home": "الرئيسية",
+    "bookings_hub": "مركز الحجوزات",
+    "login": "تسجيل الدخول",
+    "reminder_system_on": "🔔 نظام التذكيرات يعمل الآن",
+    "reminder_system_off": "⚠️ نظام التذكيرات غير فعّال حالياً"
+  },
+  "adminDashboard": {
+    "welcomeTitle": "👋 مرحبًا {{name}}!",
+    "welcomeMessage": "لديكِ اليوم {{sessions}} جلسات نشطة و {{newUsers}} مشتركات جديدات 💪",
+    "mainTitle": "📊 لوحة الإحصاءات العامة",
+    "noData": "لا توجد بيانات متاحة حالياً.",
+    "errors": {
+      "fetchStats": "فشل تحميل الإحصاءات"
+    },
+    "cards": {
+      "totalUsers": "إجمالي المشتركات",
+      "activeUsers": "المشتركات النشِطات",
+      "blockedUsers": "المشتركات المحظورات",
+      "totalBookings": "إجمالي الحجوزات",
+      "activeBookings": "الحجوزات النشطة",
+      "completedBookings": "الحجوزات المنجزة",
+      "cancelled": "الحجوزات الملغاة",
+      "totalSlots": "عدد الجلسات",
+      "todaySessions": "جلسات اليوم",
+      "upcomingWeekSessions": "جلسات الأسبوع القادم"
+    },
+    "chart": {
+      "title": "📈 عدد الحجوزات خلال آخر 7 أيام",
+      "activeBookingsLabel": "الحجوزات النشطة",
+      "cancelledBookingsLabel": "الحجوزات الملغاة",
+      "weekRatioTitle": "🔸 نسبة الحجوزات خلال الأسبوع الأخير:",
+      "activePercentLabel": "✅ نشطة: {{value}}٪",
+      "cancelledPercentLabel": "❌ ملغاة: {{value}}٪"
+    }
+  },
+  "adminNotifications": {
+    "title": "🔔 إرسال إشعار مخصص",
+    "notificationTitle": "عنوان الإشعار",
+    "notificationBody": "محتوى الإشعار",
+    "target": "الفئة المستهدفة",
+    "allUsers": "جميع المشتركات",
+    "send": "🔔 إرسال الإشعار",
+    "fetchError": "فشل جلب البيانات",
+    "emptyFields": "أدخل عنوانًا ومحتوى قبل الإرسال.",
+    "sendFailed": "فشل الإرسال",
+    "resendFailed": "فشل إعادة الإرسال",
+    "history": "🕘 سجل آخر الإشعارات",
+    "clearAll": "مسح الكل",
+    "confirmDeleteAll": "هل أنت متأكد أنك تريد مسح كامل السجل؟",
+    "confirmDeleteOne": "هل تريد حذف الإشعار نهائيًا؟",
+    "deletedOne": "🗑️ تم حذف الإشعار",
+    "deleteFailed": "فشل حذف الإشعار",
+    "noNotifications": "لا يوجد إشعارات بعد.",
+    "resend": "إعادة إرسال",
+    "delete": "حذف نهائي",
+    "resendWindowTitle": "🔁 إعادة إرسال الإشعار",
+    "cancel": "إلغاء",
+    "confirmSend": "📤 تأكيد الإرسال"
+  },
+  "adminReports": {
+    "title": "📤 تصدير تقارير الحجوزات",
+    "description": "حددي الفترة الزمنية لتصدير تقرير الحجوزات، أو اتركي الحقول فارغة لتصدير كل البيانات:",
+    "from": "من",
+    "to": "إلى",
+    "download": "📥 تنزيل التقرير",
+    "success": "تم تنزيل التقرير بنجاح ✅",
+    "fail": "فشل تنزيل التقرير ❌"
+  },
+  "adminSchedule": {
+    "title": "جدول الحصص",
+    "subtitle": "إدارة حصص الأسبوع الحالي والقادم",
+    "currentWeek": "الأسبوع الحالي",
+    "nextWeek": "الأسبوع القادم",
+    "current": "حالي",
+    "next": "قادم",
+    "capacity": "السعة",
+    "addSlot": "إضافة حصة",
+    "saveAll": "حفظ التغييرات",
+    "saveNextWeek": "إنشاء جدول الأسبوع القادم",
+    "blocked": "معطلة",
+    "expand": "عرض موسّع",
+
+    "confirm": {
+      "deleteSlot": "هل تريد حذف هذه الحصة؟"
+    },
+
+    "success": {
+      "deleted": "تم حذف الحصة",
+      "saved": "تم حفظ التغييرات",
+      "createdNext": "تم إنشاء {{count}} حصة للأسبوع القادم"
+    },
+
+    "errors": {
+      "fetchCurrent": "فشل جلب بيانات الأسبوع الحالي",
+      "saveFailed": "فشل حفظ التغييرات",
+      "deleteFailed": "فشل حذف الحصة",
+      "createNextFailed": "فشل إنشاء الأسبوع القادم"
+    },
+
+    "info": {
+      "noValidChanges": "لا يوجد تغييرات صالحة للحفظ",
+      "addValid": "أضف حصصًا صالحة أولًا"
+    },
+
+    "noDeletePast": "لا يمكن حذف حصة في يوم سابق"
+  },
+
+  "days": [
+    "الأحد",
+    "الاثنين",
+    "الثلاثاء",
+    "الأربعاء",
+    "الخميس",
+    "الجمعة",
+    "السبت"
+  ],
+  "adminSettings": {
+    "title": "⚙️ الإعدادات العامة للنادي",
+    "cardImage": "🪪 صورة الكارت",
+    "noImage": "لا توجد صورة حالية",
+    "changeCard": "🪪 تغيير صورة الكارت",
+    "changeLogo": "📸 تغيير الشعار",
+
+    "clubName": "🏷️ اسم النادي",
+    "contactNumber": "📞 رقم التواصل",
+    "autoMessage": "💬 الرسالة التلقائية",
+
+    "allowExtraBookings": "السماح بالحجوزات الإضافية افتراضيًا",
+
+    "systemStatus": "حالة النظام الحالية:",
+    "status": {
+      "maintenance": "🚧 تحت الصيانة",
+      "active": "✅ يعمل بشكل طبيعي"
+    },
+
+    "enableMaintenance": "🚧 تفعيل وضع الصيانة",
+    "disableMaintenance": "🔓 إيقاف وضع الصيانة",
+
+    "saveChanges": "💾 حفظ التغييرات",
+
+    "uploading": {
+      "logo": "جارٍ رفع الشعار...",
+      "card": "جارٍ رفع صورة الكارت..."
+    },
+
+    "success": {
+      "saved": "تم حفظ التغييرات بنجاح ✅",
+      "logoUploaded": "تم رفع الشعار بنجاح 🎉",
+      "cardUploaded": "تم رفع صورة الكارت بنجاح 🎉"
+    },
+
+    "errors": {
+      "required": "يرجى ملء اسم النادي ورقم التواصل قبل الحفظ ⚠️",
+      "loadFail": "فشل تحميل الإعدادات ❌",
+      "saveFail": "فشل حفظ الإعدادات ❌",
+      "logoFail": "فشل رفع الشعار ❌",
+      "cardFail": "فشل رفع صورة الكارت ❌",
+      "maintenanceFail": "فشل تحميل حالة النظام ❌",
+      "maintenanceToggleFail": "فشل تبديل وضع الصيانة ❌"
+    },
+
+    "confirm": {
+      "disableMaintenance": "هل ترغبين في إيقاف وضع الصيانة وتشغيل النظام؟",
+      "enableMaintenance": "هل ترغبين في تفعيل وضع الصيانة؟ سيتم حظر جميع المشتركات مؤقتًا."
+    }
+  },
+  "bookingsAdmin": {
+    "title": "إدارة الحجوزات",
+
+    "stats": {
+      "active": "نشطة",
+      "completed": "منجزة",
+      "cancelled": "ملغاة",
+      "blocked": "معطلة",
+      "all": "الكل"
+    },
+
+    "table": {
+      "user": "المشتركة",
+      "active": "النشطة",
+      "cancelled": "الملغاة",
+      "completed": "المنجزة",
+      "actions": "الإجراءات"
+    },
+
+    "details": {
+      "title": "تفاصيل حجوزات {{name}}",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "status": "الحالة",
+      "noBookings": "لا توجد حجوزات لهذه المشتركة"
+    },
+
+    "buttons": {
+      "showDetails": "عرض التفاصيل",
+      "hideDetails": "إخفاء التفاصيل"
+    },
+
+    "errors": {
+      "loadSummary": "حدث خطأ أثناء تحميل البيانات",
+      "loadDetails": "حدث خطأ أثناء جلب التفاصيل"
+    }
+  },
+  "bookingsAdmin": {
+    "title": "إدارة الحجوزات",
+
+    "ratesTitle": "معدلات الحجوزات العامة",
+
+    "labels": {
+      "active": "نشط",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    },
+
+    "columns": {
+      "user": "المشتركة",
+      "active": "نشط",
+      "cancelled": "ملغي",
+      "completed": "مكتمل",
+      "actions": "إجراءات"
+    },
+
+    "filters": {
+      "all": "الكل",
+      "active": "نشط",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    },
+
+    "status": {
+      "booked": "نشط",
+      "completed": "مكتمل",
+      "cancelled": "ملغي",
+      "blocked": "محظور",
+      "unknown": "غير معروف"
+    },
+
+    "showDetails": "عرض التفاصيل",
+    "hideDetails": "إخفاء التفاصيل",
+
+    "errors": {
+      "summaryLoad": "فشل تحميل البيانات",
+      "detailsLoad": "فشل تحميل تفاصيل الحجوزات"
+    },
+
+    "details": {
+      "title": "الحجوزات الخاصة بـ {{name}}",
+      "date": "التاريخ",
+      "time": "الوقت",
+      "status": "الحالة",
+      "noBookings": "لا توجد حجوزات لهذه المشتركة"
+    },
+
+    "stats": {
+      "active": "نشط",
+      "completed": "مكتمل",
+      "cancelled": "ملغي",
+      "blocked": "محظور",
+      "all": "الكل"
+    },
+
+    "buttons": {
+      "showDetails": "عرض التفاصيل",
+      "hideDetails": "إخفاء التفاصيل"
+    }
+  },
+  "controlCenter": {
+    "title": "🎛️ مركز التحكم الإداري",
+    "subtitle": "اختاري القسم الذي ترغبين بإدارته من القائمة أدناه 👇",
+
+    "sections": {
+      "newUser": "إضافة مشتركة جديدة",
+      "dashboard": "لوحة الإحصاءات العامة",
+      "users": "قائمة المشتركات",
+      "bookings": "الحجوزات",
+      "weeklySlots": "الجدول الأسبوعي",
+      "templates": "القوالب الأسبوعية",
+      "notifications": "الإشعارات",
+      "settings": "الإعدادات العامة"
+    },
+
+    "footerTitle": "لوحة تحكم متكاملة لإدارة Fateness Studio",
+    "footerText": "يمكنك العودة إلى هذه الصفحة في أي وقت لإدارة جميع جوانب النظام من مكان واحد."
+  },
+  "slotsAdmin": {
+    "header": {
+      "title": "إدارة الجدول الأسبوعي",
+      "subtitle": "عرض وتتبع جميع الجلسات خلال أيام الأسبوع"
+    },
+
+    "stats": {
+      "title": "إحصائيات الجلسات الأسبوعية",
+      "active": "نشطة",
+      "ended": "منتهية",
+      "blocked": "معطلة",
+      "total": "الإجمالي"
+    },
+    "filters": {
+      "selectWeek": "اختاري أسبوع العرض",
+      "active": "النشطة",
+      "ended": "المنتهية",
+      "blocked": "المعطلة",
+      "all": "الكل"
+    },
+
+    "day": {
+      "sessionsCount": "{{count}} جلسات"
+    },
+
+    "card": {
+      "capacityLabel": "السعة:",
+      "availableLabel": "المتاحة:"
+    },
+
+    "empty": {
+      "title": "لا توجد حصص في هذا الأسبوع",
+      "range": "من {{start}} إلى {{end}}"
+    },
+
+    "dialog": {
+      "title": "تفاصيل الحصة",
+      "membersTitle": "المشتركات المسجلات ({{count}})",
+      "status": {
+        "booked": "محجوزة",
+        "cancelled": "ملغاة"
+      },
+      "noMembers": "لا توجد مشتركات في هذه الحصة",
+      "close": "إغلاق",
+      "activate": "تفعيل الحصة",
+      "deactivate": "تعطيل الحصة"
+    },
+
+    "common": {
+      "unknownUser": "غير معروف",
+      "noPhone": "لا يوجد رقم"
+    },
+    "status": {
+      "upcoming": "قادمة",
+      "running": "جارية",
+      "ended": "منتهية",
+      "endedAgo": "انتهت منذ {{time}}",
+      "blocked": "معطلة",
+      "active": "نشطة",
+      "unknown": "غير معروفة",
+      "after": "بعد"
+    }
+  },
+  "usersAdmin": {
+    "title": "إدارة المشتركات",
+    "subtitle": "إدارة بيانات وحجوزات المشتركات في الاستوديو",
+
+    "search": {
+      "placeholder": "ابحثي بالاسم أو البريد الإلكتروني أو رقم الهاتف..."
+    },
+
+    "card": {
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "bookingsCount": "عدد الحجوزات",
+      "active": "نشطة",
+      "blocked": "محظورة"
+    },
+
+    "extraBooking": {
+      "label": "السماح بالحجز الإضافي",
+      "updated": "تم تحديث حالة الحجز الإضافي"
+    },
+
+    "block": {
+      "cannotBlockAdmin": "لا يمكن حظر مديرة النظام 👑",
+      "confirmBlock": "هل أنتِ متأكدة من حظر هذه المشتركة؟",
+      "confirmUnblock": "هل ترغبين في إلغاء الحظر عن هذه المشتركة؟",
+      "blockedSuccess": "تم حظر المشتركة بنجاح 🚫",
+      "unblockedSuccess": "تم إلغاء الحظر عن المشتركة بنجاح ✅",
+      "error": "حدث خطأ أثناء تعديل حالة الحظر"
+    },
+
+    "editDialog": {
+      "title": "تعديل بيانات المشتركة",
+
+      "fields": {
+        "username": "الاسم",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "height": "الطول (سم)",
+        "weight": "الوزن (كغ)",
+        "age": "العمر",
+        "gender": "الجنس",
+        "genderFemale": "أنثى",
+        "genderMale": "ذكر",
+        "role": "الدور",
+        "roleUser": "مشتركة",
+        "roleAdmin": "مديرة"
+      },
+
+      "roleConfirm": {
+        "title": "⚠️ تأكيد التغيير إلى مديرة",
+        "text": "هل أنتِ متأكدة أنكِ ترغبين بتحويل هذه المشتركة إلى مديرة؟ 👑",
+        "subtext": "هذا التغيير يمنحها صلاحيات الإدارة داخل النظام.",
+        "cancel": "إلغاء",
+        "confirm": "نعم، تأكيد التغيير"
+      }
+    },
+
+    "buttons": {
+      "edit": "تعديل",
+      "block": "حظر",
+      "unblock": "إلغاء الحظر",
+      "save": "حفظ التغييرات",
+      "cancel": "إلغاء"
+    },
+
+    "messages": {
+      "loadError": "حدث خطأ أثناء جلب المشتركات",
+      "notFound": "لا توجد مشتركات مطابقة للبحث",
+      "updateSuccess": "تم تحديث بيانات المشتركة بنجاح ✅",
+      "updateError": "فشل تحديث بيانات المشتركة"
+    }
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "save": "حفظ"
+  },
+
+  "usersAdmin": {
+    "title": "إدارة المشتركات",
+    "subtitle": "إدارة بيانات وحجوزات المشتركات في الاستوديو",
+    "searchPlaceholder": "ابحثي بالاسم أو البريد الإلكتروني أو رقم الهاتف...",
+
+    "totalBookings": "عدد الحجوزات",
+    "allowExtra": "السماح بالحجز الإضافي",
+
+    "edit": "تعديل",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
+
+    "status": {
+      "active": "نشطة",
+      "blocked": "محظورة"
+    },
+
+    "messages": {
+      "updated": "تم تحديث بيانات المشتركة بنجاح",
+      "blocked": "تم حظر المشتركة بنجاح",
+      "unblocked": "تم إلغاء الحظر بنجاح",
+      "extraUpdated": "تم تحديث حالة الحجز الإضافي",
+      "tempAdmin": "تم تعيين المشتركة كمديرة بشكل مؤقت (لم يُحفظ بعد)"
+    },
+
+    "errors": {
+      "load": "حدث خطأ أثناء جلب المشتركات",
+      "extraBooking": "حدث خطأ أثناء تعديل حالة الحجز الإضافي",
+      "cannotBlockAdmin": "لا يمكن حظر مديرة النظام",
+      "blockFailed": "حدث خطأ أثناء تعديل حالة الحظر",
+      "updateFailed": "فشل تحديث بيانات المشتركة"
+    },
+
+    "confirm": {
+      "block": "هل أنتِ متأكدة من حظر هذه المشتركة؟",
+      "unblock": "هل ترغبين في إلغاء الحظر عن هذه المشتركة؟"
+    },
+
+    "confirmRole": {
+      "title": "⚠️ تأكيد التغيير إلى مديرة",
+      "text": "هل أنتِ متأكدة أنكِ ترغبين بتحويل هذه المشتركة إلى مديرة؟ 👑",
+      "note": "هذا التغيير يمنحها صلاحيات الإدارة داخل النظام.",
+      "confirm": "نعم، تأكيد التغيير"
+    },
+
+    "editUser": "تعديل بيانات المشتركة",
+
+    "fields": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "height": "الطول (سم)",
+      "weight": "الوزن (كغ)",
+      "age": "العمر",
+      "gender": "الجنس",
+      "role": "الدور"
+    },
+
+    "gender": {
+      "female": "أنثى",
+      "male": "ذكر"
+    },
+
+    "roles": {
+      "user": "مشتركة",
+      "admin": "مديرة"
+    },
+
+    "noResults": "لا توجد مشتركات مطابقة للبحث"
+  },
+  "login": {
+    "title": "Fatinness Studio",
+    "welcome": "مرحباً بعودتك 💪",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "button": "تسجيل الدخول",
+    "buttonLoading": "جارٍ تسجيل الدخول...",
+    "noAccount": "ليس لديكِ حساب؟",
+    "createAccount": "أنشئي حسابًا جديدًا",
+    "contactAdmin": "يرجى التواصل مع الإدارة لإنشاء حساب جديد 🙏",
+    "success": {
+      "login": "تم تسجيل الدخول بنجاح 🎉",
+      "fcmOptional": "لم يتم تفعيل الإشعارات (اختياري)."
+    },
+    "errors": {
+      "status": "خطأ {{status}}",
+      "network": "تعذّر الاتصال بالخادم. تحققي من الإنترنت أو إعدادات CORS.",
+      "unexpected": "حدث خطأ غير متوقع.",
+      "loginFailed": "فشل تسجيل الدخول"
+    }
+  }
+}

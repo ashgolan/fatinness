@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+
 import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
@@ -29,8 +30,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 
+import { useTranslation } from "react-i18next";
+
 export default function UsersAdmin() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -48,9 +52,12 @@ export default function UsersAdmin() {
     age: "",
     gender: "female",
   });
+
   const [pendingRoleChange, setPendingRoleChange] = useState(false);
 
+  // ---------------------------
   // 🔹 جلب المشتركات
+  // ---------------------------
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -58,7 +65,7 @@ export default function UsersAdmin() {
       setUsers(data);
       setFiltered(data);
     } catch {
-      toast.error("حدث خطأ أثناء جلب المشتركات");
+      toast.error(t("usersAdmin.errors.load"));
     } finally {
       setLoading(false);
     }
@@ -68,7 +75,9 @@ export default function UsersAdmin() {
     fetchUsers();
   }, []);
 
+  // ---------------------------
   // 🔍 البحث
+  // ---------------------------
   useEffect(() => {
     if (!search.trim()) {
       setFiltered(users);
@@ -85,7 +94,9 @@ export default function UsersAdmin() {
     );
   }, [search, users]);
 
+  // ---------------------------
   // 🟢 السماح بالحجز الإضافي
+  // ---------------------------
   const toggleExtraBooking = async (user) => {
     try {
       const { data } = await Api.put("/admin/users/extra-booking", {
@@ -93,7 +104,8 @@ export default function UsersAdmin() {
         allow: !user.allowExtraBookings,
       });
 
-      toast.success(data.message || "تم تحديث حالة الحجز الإضافي");
+      toast.success(data.message || t("usersAdmin.messages.extraUpdated"));
+
       setUsers((prev) =>
         prev.map((u) =>
           u._id === user._id
@@ -102,20 +114,22 @@ export default function UsersAdmin() {
         )
       );
     } catch {
-      toast.error("حدث خطأ أثناء تعديل حالة المشتركة");
+      toast.error(t("usersAdmin.errors.extraBooking"));
     }
   };
 
+  // ---------------------------
   // 🚫 حظر / إلغاء حظر
+  // ---------------------------
   const toggleUserBlock = async (user) => {
     if (user.role === "admin") {
-      toast.error("لا يمكن حظر مديرة النظام 👑");
+      toast.error(t("usersAdmin.errors.cannotBlockAdmin"));
       return;
     }
 
     const confirmMsg = user.isBlocked
-      ? "هل ترغبين في إلغاء الحظر عن هذه المشتركة؟"
-      : "هل أنتِ متأكدة من حظر هذه المشتركة؟";
+      ? t("usersAdmin.confirm.unblock")
+      : t("usersAdmin.confirm.block");
 
     if (!window.confirm(confirmMsg)) return;
 
@@ -125,19 +139,18 @@ export default function UsersAdmin() {
       toast.success(
         data?.message ||
           (user.isBlocked
-            ? "تم إلغاء الحظر عن المشتركة بنجاح ✅"
-            : "تم حظر المشتركة بنجاح 🚫")
+            ? t("usersAdmin.messages.unblocked")
+            : t("usersAdmin.messages.blocked"))
       );
 
-      // ✅ بعد التعديل نعيد تحميل القائمة كاملة من السيرفر
       await fetchUsers();
-    } catch (err) {
-      console.error(err);
-      toast.error("حدث خطأ أثناء تعديل حالة الحظر");
+    } catch {
+      toast.error(t("usersAdmin.errors.blockFailed"));
     }
   };
-
+  // ---------------------------
   // ✏️ تعديل بيانات
+  // ---------------------------
   const handleEdit = (user) => {
     setEditUser(user);
     setEditData({
@@ -148,7 +161,7 @@ export default function UsersAdmin() {
       weight: user.weight || "",
       age: user.age || "",
       gender: user.gender || "female",
-      role: user.role || "user", // 👈 تمت الإضافة هنا
+      role: user.role || "user",
     });
     setEditOpen(true);
   };
@@ -161,21 +174,23 @@ export default function UsersAdmin() {
   const handleSave = async () => {
     try {
       const { data } = await Api.put(`/admin/users/${editUser._id}`, editData);
-      toast.success("تم تحديث بيانات المشتركة بنجاح ✅");
+      toast.success(t("usersAdmin.messages.updated"));
       setEditOpen(false);
+
       setUsers((prev) =>
         prev.map((u) => (u._id === editUser._id ? data.user : u))
       );
       setFiltered((prev) =>
         prev.map((u) => (u._id === editUser._id ? data.user : u))
       );
-    } catch (err) {
-      console.error(err);
-      toast.error("فشل تحديث بيانات المشتركة");
+    } catch {
+      toast.error(t("usersAdmin.errors.updateFailed"));
     }
   };
 
+  // ---------------------------
   // 🎨 أنماط الحقول
+  // ---------------------------
   const textFieldStyle = {
     backgroundColor: theme.palette.background.paper,
     borderRadius: "10px",
@@ -200,11 +215,12 @@ export default function UsersAdmin() {
         color: theme.palette.text.primary,
         py: 4,
         px: { xs: 2, sm: 3 },
-        transition: "background-color 0.3s ease, color 0.3s ease",
       }}
     >
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-        {/* رأس الصفحة */}
+        {/* ---------------------------------- */}
+        {/* 🔵 رأس الصفحة */}
+        {/* ---------------------------------- */}
         <Paper
           sx={{
             p: 3,
@@ -213,7 +229,6 @@ export default function UsersAdmin() {
             background: "linear-gradient(90deg,#1976d2,#42a5f5)",
             color: "#fff",
             boxShadow: 3,
-            transition: "0.3s",
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -222,16 +237,18 @@ export default function UsersAdmin() {
             </Avatar>
             <Box>
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                إدارة المشتركات
+                {t("usersAdmin.title")}
               </Typography>
               <Typography variant="body2">
-                إدارة بيانات وحجوزات المشتركات في الاستوديو
+                {t("usersAdmin.subtitle")}
               </Typography>
             </Box>
           </Box>
         </Paper>
 
-        {/* شريط البحث */}
+        {/* ---------------------------------- */}
+        {/* 🔍 شريط البحث */}
+        {/* ---------------------------------- */}
         <Paper
           sx={{
             p: 2.5,
@@ -240,12 +257,11 @@ export default function UsersAdmin() {
             backgroundColor: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
             boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-            transition: "0.3s",
           }}
         >
           <TextField
             fullWidth
-            placeholder="ابحثي بالاسم أو البريد الإلكتروني أو رقم الهاتف..."
+            placeholder={t("usersAdmin.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{
@@ -259,7 +275,9 @@ export default function UsersAdmin() {
           />
         </Paper>
 
-        {/* قائمة المشتركات */}
+        {/* ---------------------------------- */}
+        {/* 🟣 قائمة المشتركات */}
+        {/* ---------------------------------- */}
         {loading ? (
           <Box
             sx={{
@@ -272,29 +290,25 @@ export default function UsersAdmin() {
             <CircularProgress sx={{ color: "#1976d2" }} size={50} />
           </Box>
         ) : filtered.length ? (
-          <Grid
-            container
-            spacing={2.5}
-            justifyContent="center"
-            alignItems="stretch"
-          >
+          <Grid container spacing={2.5} justifyContent="center">
             {filtered.map((user) => (
               <Grid item xs={12} sm={6} lg={4} key={user._id}>
                 <Paper
                   sx={{
                     p: 2.5,
-                    position: "relative", // ✅ أضف هذا
+                    position: "relative",
                     borderRadius: "14px",
                     backgroundColor: theme.palette.background.paper,
-                    border: "1.5px solid rgba(255, 215, 0, 0.4)", // ذهبي خفيف جدًا
-                    boxShadow: "0 2px 10px rgba(255, 215, 0, 0.08)", // ظل ناعم جدًا
+                    border: "1.5px solid rgba(255, 215, 0, 0.4)",
+                    boxShadow: "0 2px 10px rgba(255, 215, 0, 0.08)",
                     transition: "all 0.3s ease",
                     "&:hover": {
-                      boxShadow: "0 3px 14px rgba(255, 215, 0, 0.2)", // توهج خفيف عند المرور
+                      boxShadow: "0 3px 14px rgba(255, 215, 0, 0.2)",
                       transform: "translateY(-2px)",
                     },
                   }}
                 >
+                  {/* 👑 تاج المديرة */}
                   {user.role === "admin" && (
                     <Box
                       sx={{
@@ -313,7 +327,9 @@ export default function UsersAdmin() {
                       👑
                     </Box>
                   )}
-                  {/* رأس البطاقة */}
+                  {/* --------------------------- */}
+                  {/* 👤 رأس البطاقة */}
+                  {/* --------------------------- */}
                   <Box
                     sx={{
                       display: "flex",
@@ -322,7 +338,6 @@ export default function UsersAdmin() {
                       mb: 2,
                     }}
                   >
-                    {/* 👤 اسم المشتركة */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <Typography
                         variant="h6"
@@ -334,26 +349,29 @@ export default function UsersAdmin() {
                         {user.username}
                       </Typography>
 
-                      {/* 🔹 رمز الحالة */}
                       {user.isBlocked ? (
                         <Typography
-                          title="محظورة"
-                          sx={{ fontSize: 22, lineHeight: 1, opacity: 0.9 }}
+                          title={t("usersAdmin.status.blocked")}
+                          sx={{ fontSize: 22, lineHeight: 1 }}
                         >
                           👩‍🦰❌
                         </Typography>
                       ) : (
                         <Typography
-                          title="نشطة"
-                          sx={{ fontSize: 22, lineHeight: 1, opacity: 0.9 }}
+                          title={t("usersAdmin.status.active")}
+                          sx={{ fontSize: 22, lineHeight: 1 }}
                         >
                           👩‍🦰✅
                         </Typography>
                       )}
                     </Box>
                   </Box>
+
                   <Divider sx={{ mb: 2 }} />
-                  {/* معلومات المشتركة */}
+
+                  {/* --------------------------- */}
+                  {/* 📌 معلومات المشتركة */}
+                  {/* --------------------------- */}
                   <Box sx={{ mb: 2.5, display: "grid", gap: 1.2 }}>
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
@@ -366,6 +384,7 @@ export default function UsersAdmin() {
                         {user.email || "—"}
                       </Typography>
                     </Box>
+
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                     >
@@ -377,6 +396,7 @@ export default function UsersAdmin() {
                         {user.phone || "—"}
                       </Typography>
                     </Box>
+
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                     >
@@ -390,12 +410,17 @@ export default function UsersAdmin() {
                           fontWeight: 600,
                         }}
                       >
-                        عدد الحجوزات: {user.totalBookings || 0}
+                        {t("usersAdmin.totalBookings")}:{" "}
+                        {user.totalBookings || 0}
                       </Typography>
                     </Box>
                   </Box>
+
                   <Divider sx={{ mb: 2 }} />
-                  {/* السماح بالحجز الإضافي */}
+
+                  {/* --------------------------- */}
+                  {/* ⚡ السماح بالحجز الإضافي */}
+                  {/* --------------------------- */}
                   <FormControlLabel
                     control={
                       <Switch
@@ -404,18 +429,14 @@ export default function UsersAdmin() {
                         disabled={user.isBlocked}
                         sx={{
                           "& .MuiSwitch-switchBase.Mui-checked": {
-                            color: "#FFD700", // ذهبي رئيسي
+                            color: "#FFD700",
                             filter:
                               "drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))",
                           },
                           "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
                             {
-                              backgroundColor: "#ffeb3b", // ذهبي فاتح للمسار
-                              boxShadow: "0 0 8px rgba(255, 215, 0, 0.5)",
+                              backgroundColor: "#ffeb3b",
                             },
-                          "& .MuiSwitch-track": {
-                            backgroundColor: "#e0e0e0",
-                          },
                         }}
                       />
                     }
@@ -427,19 +448,16 @@ export default function UsersAdmin() {
                           color: theme.palette.text.secondary,
                         }}
                       >
-                        السماح بالحجز الإضافي
+                        {t("usersAdmin.allowExtra")}
                       </Typography>
                     }
                     sx={{ mb: 2 }}
                   />
-                  {/* الأزرار */}
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 1.5,
-                      mt: "auto", // ✅ يدفع الأزرار لأسفل
-                    }}
-                  >
+
+                  {/* --------------------------- */}
+                  {/* 🔘 أزرار التحكم */}
+                  {/* --------------------------- */}
+                  <Box sx={{ display: "flex", gap: 1.5 }}>
                     <Button
                       fullWidth
                       variant="outlined"
@@ -448,17 +466,13 @@ export default function UsersAdmin() {
                         borderColor: "#1976d2",
                         color: "#1976d2",
                         fontWeight: 600,
-                        gap:0.6,
                         borderRadius: "8px",
                         textTransform: "none",
-                        whiteSpace: "nowrap", // ✅ يمنع الانتقال للسطر الثاني
-                        "&:hover": {
-                          backgroundColor: "rgba(25,118,210,0.04)",
-                        },
+                        gap: 0.6,
                       }}
                     >
-                      <EditIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                      تعديل
+                      <EditIcon sx={{ fontSize: 18 }} />
+                      {t("usersAdmin.edit")}
                     </Button>
 
                     <Button
@@ -466,22 +480,21 @@ export default function UsersAdmin() {
                       variant="contained"
                       onClick={() => toggleUserBlock(user)}
                       sx={{
-                        whiteSpace: "nowrap",
                         fontWeight: 600,
                         borderRadius: "8px",
                         textTransform: "none",
-                        py: 1.2,
-                        gap:0.6,
                         backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
                         "&:hover": {
                           backgroundColor: user.isBlocked
                             ? "#57a95b"
-                            : "#e53935",
+                            : "#d32f2f",
                         },
                       }}
                     >
-                      <BlockIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                      {user.isBlocked ? "إلغاء الحظر" : "حظر"}
+                      <BlockIcon sx={{ fontSize: 18 }} />
+                      {user.isBlocked
+                        ? t("usersAdmin.unblock")
+                        : t("usersAdmin.block")}
                     </Button>
                   </Box>
                 </Paper>
@@ -503,102 +516,114 @@ export default function UsersAdmin() {
               variant="h6"
               sx={{ color: theme.palette.text.secondary }}
             >
-              لا توجد مشتركات مطابقة للبحث
+              {t("usersAdmin.noResults")}
             </Typography>
           </Paper>
         )}
 
-        {/* نافذة تعديل بيانات المشتركة */}
+        {/* --------------------------- */}
+        {/* 🟣 نافذة تعديل بيانات المشتركة */}
+        {/* --------------------------- */}
         <Dialog
           open={editOpen}
           onClose={() => setEditOpen(false)}
           fullWidth
           maxWidth="sm"
-          PaperProps={{
-            sx: { borderRadius: "12px", p: 1 },
-          }}
+          PaperProps={{ sx: { borderRadius: "12px", p: 1 } }}
         >
           <DialogTitle sx={{ fontWeight: 700, color: "#1976d2" }}>
-            تعديل بيانات المشتركة
+            {t("usersAdmin.editUser")}
           </DialogTitle>
+
           <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
             <TextField
-              label="الاسم"
+              label={t("usersAdmin.fields.name")}
               name="username"
               value={editData.username}
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             <TextField
-              label="البريد الإلكتروني"
+              label={t("usersAdmin.fields.email")}
               name="email"
               value={editData.email}
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             <TextField
-              label="رقم الهاتف"
+              label={t("usersAdmin.fields.phone")}
               name="phone"
               value={editData.phone}
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             <TextField
-              label="الطول (سم)"
+              label={t("usersAdmin.fields.height")}
               name="height"
               type="number"
               value={editData.height}
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             <TextField
-              label="الوزن (كغ)"
+              label={t("usersAdmin.fields.weight")}
               name="weight"
               type="number"
               value={editData.weight}
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             <TextField
-              label="العمر"
+              label={t("usersAdmin.fields.age")}
               name="age"
               type="number"
               value={editData.age}
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             <TextField
               select
-              label="الجنس"
+              label={t("usersAdmin.fields.gender")}
               name="gender"
               value={editData.gender}
               onChange={handleChange}
               sx={textFieldStyle}
             >
-              <MenuItem value="female">أنثى</MenuItem>
-              <MenuItem value="male">ذكر</MenuItem>
+              <MenuItem value="female">
+                {t("usersAdmin.gender.female")}
+              </MenuItem>
+              <MenuItem value="male">{t("usersAdmin.gender.male")}</MenuItem>
             </TextField>
-            {/* 🧩 حقل الدور مع نافذة تأكيد */}
+
+            {/* --------------------------- */}
+            {/* 🟣 حقل الدور + نافذة تأكيد */}
+            {/* --------------------------- */}
             <TextField
               select
-              label="الدور"
+              label={t("usersAdmin.fields.role")}
               name="role"
               value={editData.role || "user"}
               onChange={(e) => {
                 const newRole = e.target.value;
                 if (newRole === "admin" && editData.role !== "admin") {
-                  setPendingRoleChange(true); // ✅ فتح المودال
+                  setPendingRoleChange(true);
                 } else {
                   setEditData((prev) => ({ ...prev, role: newRole }));
                 }
               }}
               sx={textFieldStyle}
             >
-              <MenuItem value="user">مشتركة</MenuItem>
-              <MenuItem value="admin">مديرة</MenuItem>
+              <MenuItem value="user">{t("usersAdmin.roles.user")}</MenuItem>
+              <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
             </TextField>
 
-            {/* ✅ مودال التأكيد عند التغيير إلى مديرة */}
+            {/* نافذة تأكيد ترقية المديرة */}
             <Dialog
               open={pendingRoleChange}
               onClose={() => setPendingRoleChange(false)}
@@ -607,37 +632,37 @@ export default function UsersAdmin() {
               }}
             >
               <DialogTitle sx={{ fontWeight: 700, color: "#d32f2f" }}>
-                ⚠️ تأكيد التغيير إلى مديرة
+                {t("usersAdmin.confirmRole.title")}
               </DialogTitle>
+
               <DialogContent>
                 <Typography sx={{ fontSize: "1rem", mb: 1 }}>
-                  هل أنتِ متأكدة أنكِ ترغبين بتحويل هذه المشتركة إلى مديرة؟ 👑
+                  {t("usersAdmin.confirmRole.text")}
                 </Typography>
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  هذا التغيير يمنحها صلاحيات الإدارة داخل النظام.
+                  {t("usersAdmin.confirmRole.note")}
                 </Typography>
               </DialogContent>
+
               <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
                 <Button
                   variant="outlined"
                   onClick={() => {
                     setPendingRoleChange(false);
-                    setEditData((prev) => ({ ...prev, role: "user" })); // ❌ إلغاء
+                    setEditData((prev) => ({ ...prev, role: "user" }));
                   }}
                   sx={{ color: "#666", borderColor: "#ccc" }}
                 >
-                  إلغاء
+                  {t("common.cancel")}
                 </Button>
+
                 <Button
                   variant="contained"
                   color="primary"
                   onClick={() => {
                     setPendingRoleChange(false);
-                    setEditData((prev) => ({ ...prev, role: "admin" })); // ✅ تأكيد
-                    toast.info("تم تحديد الدور كمديرة مؤقتًا (لم يُحفظ بعد)", {
-                      position: "top-center",
-                      autoClose: 3000,
-                    });
+                    setEditData((prev) => ({ ...prev, role: "admin" }));
+                    toast.info(t("usersAdmin.messages.tempAdmin"));
                   }}
                   sx={{
                     fontWeight: 600,
@@ -645,18 +670,20 @@ export default function UsersAdmin() {
                     "&:hover": { backgroundColor: "#1565c0" },
                   }}
                 >
-                  نعم، تأكيد التغيير
+                  {t("usersAdmin.confirmRole.confirm")}
                 </Button>
               </DialogActions>
             </Dialog>
           </DialogContent>
+
           <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
             <Button
               onClick={() => setEditOpen(false)}
               sx={{ color: "#777", fontWeight: 600 }}
             >
-              إلغاء
+              {t("common.cancel")}
             </Button>
+
             <Button
               variant="contained"
               onClick={handleSave}
@@ -666,7 +693,7 @@ export default function UsersAdmin() {
                 fontWeight: 600,
               }}
             >
-              حفظ التغييرات
+              {t("common.save")}
             </Button>
           </DialogActions>
         </Dialog>

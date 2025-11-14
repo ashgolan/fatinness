@@ -1,0 +1,484 @@
+{
+  "footer": {
+    "subtitle": "סטודיו הכושר לנשים"
+  },
+  "navbar": {
+    "admin_panel": "לוח ניהול",
+    "logout": "התנתקות",
+    "home": "דף הבית",
+    "bookings_hub": "מרכז הזמנות",
+    "login": "התחברות",
+    "reminder_system_on": "🔔 מערכת התזכורות פועלת כעת",
+    "reminder_system_off": "⚠️ מערכת התזכורות אינה פעילה כרגע"
+  },
+  "adminDashboard": {
+    "welcomeTitle": "👋 שלום {{name}}!",
+    "welcomeMessage": "יש לך היום {{sessions}} אימונים פעילים ו- {{newUsers}} נרשמות חדשות 💪",
+    "mainTitle": "📊 לוח סטטיסטיקות כללי",
+    "noData": "אין נתונים זמינים כרגע.",
+    "errors": {
+      "fetchStats": "טעינת הסטטיסטיקה נכשלה"
+    },
+    "cards": {
+      "totalUsers": "סך כל המנויות",
+      "activeUsers": "מנויות פעילות",
+      "blockedUsers": "מנויות חסומות",
+      "totalBookings": "סך כל ההזמנות",
+      "activeBookings": "הזמנות פעילות",
+      "completedBookings": "הזמנות שהושלמו",
+      "cancelled": "הזמנות שבוטלו",
+      "totalSlots": "מספר מפגשים",
+      "todaySessions": "אימוני היום",
+      "upcomingWeekSessions": "אימוני השבוע הבא"
+    },
+    "chart": {
+      "title": "📈 מספר ההזמנות ב-7 הימים האחרונים",
+      "activeBookingsLabel": "הזמנות פעילות",
+      "cancelledBookingsLabel": "הזמנות שבוטלו",
+      "weekRatioTitle": "🔸 שיעור ההזמנות בשבוע האחרון:",
+      "activePercentLabel": "✅ פעילות: {{value}}%",
+      "cancelledPercentLabel": "❌ בוטלו: {{value}}%"
+    }
+  },
+  "adminNotifications": {
+    "title": "🔔 שליחת התראה מותאמת",
+    "notificationTitle": "כותרת ההתראה",
+    "notificationBody": "תוכן ההתראה",
+    "target": "קהל יעד",
+    "allUsers": "כל המשתמשות",
+    "send": "🔔 שליחת התראה",
+    "fetchError": "נכשל בקבלת הנתונים",
+    "emptyFields": "יש להזין כותרת ותוכן לפני השליחה.",
+    "sendFailed": "שליחה נכשלה",
+    "resendFailed": "שליחה מחדש נכשלה",
+    "history": "🕘 היסטוריית ההתראות האחרונות",
+    "clearAll": "מחיקת הכל",
+    "confirmDeleteAll": "האם את בטוחה שברצונך למחוק את כל ההיסטוריה?",
+    "confirmDeleteOne": "למחוק את ההתראה לצמיתות?",
+    "deletedOne": "🗑️ ההתראה נמחקה",
+    "deleteFailed": "מחיקה נכשלה",
+    "noNotifications": "אין התראות כרגע.",
+    "resend": "שליחה מחדש",
+    "delete": "מחיקה",
+    "resendWindowTitle": "🔁 שליחת ההתראה מחדש",
+    "cancel": "ביטול",
+    "confirmSend": "📤 אישור שליחה"
+  },
+  "adminReports": {
+    "title": "📤 ייצוא דוחות הזמנות",
+    "description": "בחרי את טווח התאריכים לייצוא הדוח, או השאירי את השדות ריקים לייצוא כל הנתונים:",
+    "from": "מ־",
+    "to": "עד",
+    "download": "📥 הורדת הדוח",
+    "success": "הדוח הורד בהצלחה ✅",
+    "fail": "הורדת הדוח נכשלה ❌"
+  },
+  "adminSchedule": {
+    "title": "לוח אימונים",
+    "subtitle": "ניהול שיעורי השבוע הנוכחי והבא",
+    "currentWeek": "שבוע נוכחי",
+    "nextWeek": "שבוע הבא",
+    "current": "נוכחי",
+    "next": "הבא",
+    "capacity": "קיבולת",
+    "addSlot": "הוספת שיעור",
+    "saveAll": "שמירת שינויים",
+    "saveNextWeek": "יצירת לוח לשבוע הבא",
+    "blocked": "חסום",
+    "expand": "תצוגה מורחבת",
+
+    "confirm": {
+      "deleteSlot": "האם ברצונך למחוק את השיעור?"
+    },
+
+    "success": {
+      "deleted": "השיעור נמחק",
+      "saved": "השינויים נשמרו",
+      "createdNext": "{{count}} שיעורים נוצרו לשבוע הבא"
+    },
+
+    "errors": {
+      "fetchCurrent": "טעינת נתוני השבוע נכשלה",
+      "saveFailed": "שמירת השינויים נכשלה",
+      "deleteFailed": "מחיקת השיעור נכשלה",
+      "createNextFailed": "יצירת השבוע הבא נכשלה"
+    },
+
+    "info": {
+      "noValidChanges": "אין שינויים לשמירה",
+      "addValid": "יש להוסיף שיעורים תקינים תחילה"
+    },
+
+    "noDeletePast": "לא ניתן למחוק שיעור שעבר"
+  },
+
+  "days": ["יום א׳", "יום ב׳", "יום ג׳", "יום ד׳", "יום ה׳", "יום ו׳", "שבת"],
+  "adminSettings": {
+    "title": "⚙️ הגדרות כלליות של הסטודיו",
+    "cardImage": "🪪 תמונת כרטיס מנוי",
+    "noImage": "אין תמונה זמינה",
+    "changeCard": "🪪 החלפת תמונת הכרטיס",
+    "changeLogo": "📸 החלפת הלוגו",
+
+    "clubName": "🏷️ שם הסטודיו",
+    "contactNumber": "📞 מספר ליצירת קשר",
+    "autoMessage": "💬 הודעה אוטומטית",
+
+    "allowExtraBookings": "לאפשר הזמנות נוספות כברירת מחדל",
+
+    "systemStatus": "מצב המערכת הנוכחי:",
+    "status": {
+      "maintenance": "🚧 במצב תחזוקה",
+      "active": "✅ פעיל כרגיל"
+    },
+
+    "enableMaintenance": "🚧 הפעלת מצב תחזוקה",
+    "disableMaintenance": "🔓 ביטול מצב תחזוקה",
+
+    "saveChanges": "💾 שמירת שינויים",
+
+    "uploading": {
+      "logo": "מעלה לוגו...",
+      "card": "מעלה תמונת כרטיס..."
+    },
+
+    "success": {
+      "saved": "השינויים נשמרו בהצלחה! 🎉",
+      "logoUploaded": "הלוגו הועלה בהצלחה 🎉",
+      "cardUploaded": "תמונת הכרטיס הועלתה בהצלחה 🎉"
+    },
+
+    "errors": {
+      "required": "אנא מלאי את שם הסטודיו ומספר הקשר ⚠️",
+      "loadFail": "שגיאה בטעינת ההגדרות ❌",
+      "saveFail": "שגיאה בשמירת ההגדרות ❌",
+      "logoFail": "שגיאה בהעלאת הלוגו ❌",
+      "cardFail": "שגיאה בהעלאת תמונת הכרטיס ❌",
+      "maintenanceFail": "שגיאה בטעינת מצב המערכת ❌",
+      "maintenanceToggleFail": "שגיאה בשינוי מצב התחזוקה ❌"
+    },
+
+    "confirm": {
+      "disableMaintenance": "האם לבטל את מצב התחזוקה ולהפעיל את המערכת?",
+      "enableMaintenance": "האם להפעיל מצב תחזוקה? כל המנויות ייחסמו זמנית."
+    }
+  },
+  "bookingsAdmin": {
+    "title": "ניהול הזמנות",
+
+    "ratesTitle": "שיעורי ההזמנות הכלליים",
+
+    "labels": {
+      "active": "פעיל",
+      "completed": "הושלם",
+      "cancelled": "בוטל"
+    },
+
+    "columns": {
+      "user": "משתמשת",
+      "active": "פעיל",
+      "cancelled": "בוטל",
+      "completed": "הושלם",
+      "actions": "פעולות"
+    },
+
+    "filters": {
+      "all": "הכל",
+      "active": "פעיל",
+      "completed": "הושלם",
+      "cancelled": "בוטל"
+    },
+
+    "status": {
+      "booked": "פעיל",
+      "completed": "הושלם",
+      "cancelled": "בוטל",
+      "blocked": "חסום",
+      "unknown": "לא ידוע"
+    },
+
+    "showDetails": "הצג פרטים",
+    "hideDetails": "הסתר פרטים",
+
+    "errors": {
+      "summaryLoad": "שגיאה בטעינת הנתונים",
+      "detailsLoad": "שגיאה בטעינת פרטי ההזמנות"
+    },
+
+    "details": {
+      "title": "הזמנות עבור {{name}}",
+      "date": "תאריך",
+      "time": "שעה",
+      "status": "סטטוס",
+      "noBookings": "אין הזמנות למשתמשת זו"
+    },
+
+    "stats": {
+      "active": "פעיל",
+      "completed": "הושלם",
+      "cancelled": "בוטל",
+      "blocked": "חסום",
+      "all": "הכל"
+    },
+
+    "buttons": {
+      "showDetails": "הצג פרטים",
+      "hideDetails": "הסתר פרטים"
+    }
+  },
+  "controlCenter": {
+    "title": "🎛️ מרכז הניהול",
+    "subtitle": "בחרי את החלק שברצונך לנהל מהרשימה למטה 👇",
+
+    "sections": {
+      "newUser": "הוספת משתמשת חדשה",
+      "dashboard": "לוח סטטיסטיקות",
+      "users": "רשימת המשתמשות",
+      "bookings": "הזמנות",
+      "weeklySlots": "לוח שבועי",
+      "templates": "תבניות שבועיות",
+      "notifications": "התראות",
+      "settings": "הגדרות כלליות"
+    },
+
+    "footerTitle": "מערכת שליטה מלאה לניהול Fateness Studio",
+    "footerText": "ניתן לחזור לעמוד זה בכל רגע כדי לנהל את כל חלקי המערכת ממקום אחד."
+  },
+  "slotsAdmin": {
+    "header": {
+      "title": "ניהול לוח שבועי",
+      "subtitle": "תצוגה ומעקב אחר כל האימונים במהלך השבוע"
+    },
+
+    "stats": {
+      "title": "סטטיסטיקת אימונים שבועית",
+      "active": "פעיל",
+      "ended": "הסתיים",
+      "blocked": "חסום",
+      "total": "סך הכל"
+    },
+
+    "filters": {
+      "selectWeek": "בחירת שבוע",
+      "active": "פעיל",
+      "ended": "הסתיים",
+      "blocked": "חסום",
+      "all": "הכול"
+    },
+
+    "day": {
+      "sessionsCount": "{{count}} אימונים"
+    },
+
+    "card": {
+      "capacityLabel": "קיבולת:",
+      "availableLabel": "פנוי:"
+    },
+
+    "empty": {
+      "title": "אין אימונים זמינים בשבוע זה",
+      "range": "מה־{{start}} עד {{end}}"
+    },
+
+    "dialog": {
+      "title": "פרטי האימון",
+      "membersTitle": "משתתפות רשומות ({{count}})",
+      "status": {
+        "booked": "שמורה",
+        "cancelled": "בוטלה"
+      },
+      "noMembers": "אין משתתפות רשומות לאימון זה",
+      "close": "סגירה",
+      "activate": "הפעלת אימון",
+      "deactivate": "חסימת אימון"
+    },
+
+    "common": {
+      "unknownUser": "משתמשת לא ידועה",
+      "noPhone": "ללא מספר טלפון"
+    },
+    "status": {
+      "upcoming": "קרובה",
+      "running": "מתבצעת",
+      "ended": "הסתיים",
+      "endedAgo": "הסתיים לפני {{time}}",
+      "blocked": "חסום",
+      "active": "פעיל",
+      "unknown": "לא ידוע",
+      "after": "אחרי"
+    }
+  },
+  "usersAdmin": {
+    "title": "ניהול משתמשות",
+    "subtitle": "ניהול נתונים והזמנות של המשתמשות בסטודיו",
+
+    "search": {
+      "placeholder": "חיפוש לפי שם, אימייל או טלפון..."
+    },
+
+    "card": {
+      "email": "אימייל",
+      "phone": "טלפון",
+      "bookingsCount": "מספר הזמנות",
+      "active": "פעילה",
+      "blocked": "חסומה"
+    },
+
+    "extraBooking": {
+      "label": "לאפשר הזמנה נוספת",
+      "updated": "סטטוס ההזמנה הנוספת עודכן"
+    },
+
+    "block": {
+      "cannotBlockAdmin": "לא ניתן לחסום מנהלת מערכת 👑",
+      "confirmBlock": "האם את בטוחה שברצונך לחסום משתמשת זו?",
+      "confirmUnblock": "האם את בטוחה שברצונך לבטל את החסימה?",
+      "blockedSuccess": "המשתמשת נחסמה בהצלחה 🚫",
+      "unblockedSuccess": "החסימה בוטלה בהצלחה ✅",
+      "error": "שגיאה בעת עדכון סטטוס החסימה"
+    },
+
+    "editDialog": {
+      "title": "עריכת פרטי משתמשת",
+
+      "fields": {
+        "username": "שם",
+        "email": "אימייל",
+        "phone": "טלפון",
+        "height": "גובה (ס\"מ)",
+        "weight": "משקל (ק\"ג)",
+        "age": "גיל",
+        "gender": "מין",
+        "genderFemale": "נקבה",
+        "genderMale": "זכר",
+        "role": "תפקיד",
+        "roleUser": "משתמשת",
+        "roleAdmin": "מנהלת"
+      },
+
+      "roleConfirm": {
+        "title": "⚠️ אישור שינוי לתפקיד מנהלת",
+        "text": "האם את בטוחה שברצונך להפוך משתמשת זו למנהלת? 👑",
+        "subtext": "שינוי זה מעניק הרשאות ניהול מלאות.",
+        "cancel": "ביטול",
+        "confirm": "כן, לאשר"
+      }
+    },
+
+    "buttons": {
+      "edit": "עריכה",
+      "block": "חסימה",
+      "unblock": "ביטול חסימה",
+      "save": "שמירת שינויים",
+      "cancel": "ביטול"
+    },
+
+    "messages": {
+      "loadError": "שגיאה בעת טעינת המשתמשות",
+      "notFound": "לא נמצאו משתמשות תואמות לחיפוש",
+      "updateSuccess": "פרטי המשתמשת עודכנו בהצלחה",
+      "updateError": "נכשלה עדכון פרטי המשתמשת"
+    }
+  },
+  "common": {
+    "cancel": "ביטול",
+    "save": "שמור"
+  },
+
+  "usersAdmin": {
+    "title": "ניהול משתמשות",
+    "subtitle": "ניהול נתוני המשתמשות וההזמנות בסטודיו",
+    "searchPlaceholder": "חיפוש לפי שם, אימייל או מספר טלפון...",
+
+    "totalBookings": "מספר ההזמנות",
+    "allowExtra": "לאפשר הזמנה נוספת",
+
+    "edit": "עריכה",
+    "block": "חסימה",
+    "unblock": "ביטול חסימה",
+
+    "status": {
+      "active": "פעילה",
+      "blocked": "חסומה"
+    },
+
+    "messages": {
+      "updated": "נתוני המשתמשת עודכנו בהצלחה",
+      "blocked": "המשתמשת נחסמה בהצלחה",
+      "unblocked": "המשתמשת שוחררה מחסימה",
+      "extraUpdated": "סטטוס ההזמנה הנוספת עודכן",
+      "tempAdmin": "המשתמשת הוגדרה כ־Admin זמני (לא נשמר עדיין)"
+    },
+
+    "errors": {
+      "load": "שגיאה בטעינת המשתמשות",
+      "extraBooking": "שגיאה בעדכון סטטוס ההזמנה הנוספת",
+      "cannotBlockAdmin": "לא ניתן לחסום מנהלת מערכת",
+      "blockFailed": "שגיאה בעדכון סטטוס החסימה",
+      "updateFailed": "שגיאה בעדכון נתוני המשתמשת"
+    },
+
+    "confirm": {
+      "block": "האם לחסום משתמשת זו?",
+      "unblock": "האם לבטל את חסימתה?"
+    },
+
+    "confirmRole": {
+      "title": "⚠️ אישור שינוי לתפקיד מנהלת",
+      "text": "האם את בטוחה שברצונך להפוך משתמשת זו למנהלת? 👑",
+      "note": "הפעולה תעניק לה הרשאות ניהול מלאות.",
+      "confirm": "כן, אשרי"
+    },
+
+    "editUser": "עריכת פרטי משתמשת",
+
+    "fields": {
+      "name": "שם",
+      "email": "אימייל",
+      "phone": "טלפון",
+      "height": "גובה (ס״מ)",
+      "weight": "משקל (ק״ג)",
+      "age": "גיל",
+      "gender": "מין",
+      "role": "תפקיד"
+    },
+
+    "gender": {
+      "female": "נקבה",
+      "male": "זכר"
+    },
+
+    "roles": {
+      "user": "משתמשת",
+      "admin": "מנהלת"
+    },
+
+    "noResults": "לא נמצאו משתמשות מתאימות"
+  },
+  "login": {
+    "title": "Fatinness Studio",
+    "welcome": "ברוכה השבה 💪",
+
+    "email": "אימייל",
+    "password": "סיסמה",
+
+    "button": "התחברות",
+    "buttonLoading": "מתחברת...",
+
+    "noAccount": "אין לך חשבון?",
+    "createAccount": "צרי חשבון חדש",
+    "contactAdmin": "אנא פני להנהלה ליצירת חשבון חדש 🙏",
+
+    "success": {
+      "login": "התחברת בהצלחה 🎉",
+      "fcmOptional": "התראות לא הופעלו (לא חובה)."
+    },
+
+    "errors": {
+      "network": "לא ניתן להתחבר לשרת. בדקי אינטרנט או הגדרות CORS.",
+      "unexpected": "אירעה שגיאה בלתי צפויה.",
+      "loginFailed": "ההתחברות נכשלה",
+      "status": "שגיאה {{status}}"
+    }
+  }
+}

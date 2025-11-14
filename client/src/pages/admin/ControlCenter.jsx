@@ -1,8 +1,10 @@
 import React from "react";
 import { Box, Grid, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useThemeMode } from "../../context/ThemeContext"; // ✅ استدعاء الثيم العام
+import { useThemeMode } from "../../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
+// Icons
 import GroupIcon from "@mui/icons-material/Group";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import ScheduleIcon from "@mui/icons-material/Schedule";
@@ -15,92 +17,81 @@ import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 
 export default function ControlCenter() {
   const navigate = useNavigate();
-  const { mode, BRAND } = useThemeMode(); // ✅ استخدام الوضع العام
+  const { mode, BRAND } = useThemeMode();
+  const { t } = useTranslation();
 
   const isDark = mode === "dark";
 
   const sections = [
     {
-      title: "إضافة مشتركة جديدة",
+      title: t("controlCenter.sections.newUser"),
       icon: <PersonAddAltIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/register",
       gradient: "linear-gradient(135deg, #A01860 0%, #FBC02D 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(160,24,96,0.15), rgba(251,192,45,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(160,24,96,0.15), rgba(251,192,45,0.15))",
       iconColor: "#A01860",
     },
     {
-      title: "لوحة الإحصاءات العامة",
+      title: t("controlCenter.sections.dashboard"),
       icon: <AssessmentIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/dashboard",
       gradient: "linear-gradient(135deg, #764ba2 0%, #667eea 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(118,75,162,0.15), rgba(102,126,234,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(118,75,162,0.15), rgba(102,126,234,0.15))",
       iconColor: "#764ba2",
     },
     {
-      title: "قائمة المشتركات",
+      title: t("controlCenter.sections.users"),
       icon: <GroupIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/users",
       gradient: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(76,175,80,0.15), rgba(46,125,50,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(76,175,80,0.15), rgba(46,125,50,0.15))",
       iconColor: "#4caf50",
     },
     {
-      title: "الحجوزات",
+      title: t("controlCenter.sections.bookings"),
       icon: <EventNoteIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/bookings",
       gradient: "linear-gradient(135deg, #0288d1 0%, #26c6da 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(2,136,209,0.15), rgba(38,198,218,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(2,136,209,0.15), rgba(38,198,218,0.15))",
       iconColor: "#0288d1",
     },
     {
-      title: "الجدول الأسبوعي",
+      title: t("controlCenter.sections.weeklySlots"),
       icon: <ScheduleIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/slots",
       gradient: "linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(171,71,188,0.15), rgba(142,36,170,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(171,71,188,0.15), rgba(142,36,170,0.15))",
       iconColor: "#ab47bc",
     },
     {
-      title: "القوالب الأسبوعية",
+      title: t("controlCenter.sections.templates"),
       icon: <LayersIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/schedule",
       gradient: "linear-gradient(135deg, #00acc1 0%, #26c6da 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(0,172,193,0.15), rgba(38,198,218,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(0,172,193,0.15), rgba(38,198,218,0.15))",
       iconColor: "#00acc1",
     },
     {
-      title: "الإشعارات",
-      icon: (
-        <NotificationsActiveIcon
-          sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }}
-        />
-      ),
+      title: t("controlCenter.sections.notifications"),
+      icon: <NotificationsActiveIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/notifications",
       gradient: "linear-gradient(135deg, #f4511e 0%, #ff7043 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(244,81,30,0.15), rgba(255,112,67,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(244,81,30,0.15), rgba(255,112,67,0.15))",
       iconColor: "#f4511e",
     },
     {
-      title: "الإعدادات العامة",
+      title: t("controlCenter.sections.settings"),
       icon: <SettingsIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/settings",
       gradient: "linear-gradient(135deg, #546e7a 0%, #78909c 100%)",
-      iconBg:
-        "linear-gradient(135deg, rgba(84,110,122,0.15), rgba(120,144,156,0.15))",
+      iconBg: "linear-gradient(135deg, rgba(84,110,122,0.15), rgba(120,144,156,0.15))",
       iconColor: "#546e7a",
     },
   ];
 
   return (
     <Box
-      dir="rtl"
+      dir={t("dir")}
       sx={{
         minHeight: "100vh",
         background: isDark
@@ -112,7 +103,7 @@ export default function ControlCenter() {
       }}
     >
       <Box sx={{ maxWidth: 1400, mx: "auto" }}>
-        {/* 🟣 العنوان */}
+        {/* Title */}
         <Box sx={{ textAlign: "center", mb: { xs: 4, sm: 6, md: 8 }, px: 2 }}>
           <Typography
             variant="h3"
@@ -128,8 +119,9 @@ export default function ControlCenter() {
               mb: 1.5,
             }}
           >
-            🎛️ مركز التحكم الإداري
+            {t("controlCenter.title")}
           </Typography>
+
           <Typography
             variant="h6"
             sx={{
@@ -139,23 +131,22 @@ export default function ControlCenter() {
               mx: "auto",
             }}
           >
-            اختاري القسم الذي ترغبين بإدارته من القائمة أدناه 👇
+            {t("controlCenter.subtitle")}
           </Typography>
         </Box>
 
-        {/* 🧱 البطاقات */}
+        {/* Cards */}
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: {
-              xs: "repeat(2, 1fr)", // ✅ على الموبايل: بطاقتان في كل سطر
+              xs: "repeat(2, 1fr)",
               sm: "repeat(2, 1fr)",
               md: "repeat(3, 1fr)",
               lg: "repeat(4, 1fr)",
             },
             gap: { xs: 1.5, sm: 2.5, md: 3.5 },
             justifyItems: "center",
-            alignItems: "stretch",
           }}
         >
           {sections.map((section, index) => (
@@ -165,16 +156,14 @@ export default function ControlCenter() {
                 width: "100%",
                 maxWidth: 320,
                 minHeight: 200,
-                borderRadius: 3, // 🔹 انحناء بسيط وجميل
+                borderRadius: 3,
                 overflow: "hidden",
-                position: "relative",
                 p: "2px",
                 background: section.gradient,
-                transition: "all 0.3s ease",
                 cursor: "pointer",
+                transition: "0.3s",
                 "&:hover": {
                   transform: "translateY(-6px) scale(1.02)",
-                  boxShadow: "0 15px 30px rgba(0,0,0,0.15)",
                 },
               }}
               onClick={() => navigate(section.path)}
@@ -183,16 +172,10 @@ export default function ControlCenter() {
                 elevation={0}
                 sx={{
                   p: { xs: 2.5, sm: 3 },
-                  borderRadius: 3, // 🔹 أيضاً نفس الانحناء
+                  borderRadius: 3,
                   background: isDark ? BRAND.paperDark : "#fff",
                   textAlign: "center",
                   height: "100%",
-                  color: "text.primary",
-                  transition: "all 0.3s ease",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
                 }}
               >
                 <Box
@@ -205,20 +188,12 @@ export default function ControlCenter() {
                     alignItems: "center",
                     justifyContent: "center",
                     mb: 2,
-                    boxShadow: `0 4px 10px ${section.iconColor}33`,
                   }}
                 >
                   <Box sx={{ color: section.iconColor }}>{section.icon}</Box>
                 </Box>
 
-                <Typography
-                  variant="subtitle1"
-                  sx={{
-                    fontWeight: 700,
-                    color: isDark ? BRAND.textDark : "#222",
-                    fontSize: "1rem",
-                  }}
-                >
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   {section.title}
                 </Typography>
               </Paper>
@@ -226,21 +201,8 @@ export default function ControlCenter() {
           ))}
         </Box>
 
-        {/* 🧩 أسفل الصفحة */}
-        <Box
-          sx={{
-            mt: 8,
-            p: "3px",
-            borderRadius: 5,
-            background: `linear-gradient(135deg, ${
-              isDark ? BRAND.gold : BRAND.purple
-            }, ${isDark ? BRAND.purple : BRAND.gold})`,
-            boxShadow: isDark
-              ? "0 10px 30px rgba(251,192,45,0.25)"
-              : "0 10px 30px rgba(160,24,96,0.25)",
-            transition: "all 0.3s ease",
-          }}
-        >
+        {/* Footer */}
+        <Box sx={{ mt: 8, p: "3px", borderRadius: 5 }}>
           <Paper
             elevation={0}
             sx={{
@@ -248,7 +210,6 @@ export default function ControlCenter() {
               borderRadius: 5,
               background: isDark ? BRAND.paperDark : "#fff",
               textAlign: "center",
-              color: "text.primary",
             }}
           >
             <DashboardCustomizeIcon
@@ -258,27 +219,12 @@ export default function ControlCenter() {
                 mb: 2,
               }}
             />
-            <Typography
-              variant="h5"
-              sx={{
-                fontWeight: 700,
-                mb: 1,
-                color: isDark ? BRAND.textDark : "#222",
-              }}
-            >
-              لوحة تحكم متكاملة لإدارة Fateness Studio
+            <Typography variant="h5" sx={{ fontWeight: 700 }}>
+              {t("controlCenter.footerTitle")}
             </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                color: isDark ? BRAND.subDark : "#555",
-                maxWidth: 800,
-                mx: "auto",
-                lineHeight: 1.7,
-              }}
-            >
-              يمكنك العودة إلى هذه الصفحة في أي وقت لإدارة جميع جوانب النظام من
-              مكان واحد.
+
+            <Typography variant="body1" sx={{ mt: 1 }}>
+              {t("controlCenter.footerText")}
             </Typography>
           </Paper>
         </Box>

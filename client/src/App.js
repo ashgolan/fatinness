@@ -1,11 +1,13 @@
+// App.jsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import "./i18n/i18n";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 // 🔹 مكونات التصميم
 import { CssBaseline, GlobalStyles } from "@mui/material";
 
 // 🔹 مزود الوضع العام
-import { ThemeModeProvider } from "./context/ThemeContext"; // 🟣 هذا هو المزود الذي أنشأناه
+import { ThemeModeProvider } from "./context/ThemeContext";
 
 // 🔹 المكونات العامة
 import Navbar from "./components/Navbar";
@@ -33,12 +35,19 @@ import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ControlCenter from "./pages/admin/ControlCenter";
 import AdminSchedule from "./pages/admin/AdminSchedule";
+
 import BookingsHub from "./pages/BookingsHub";
 import Splash from "./pages/Splash";
+import i18n from "./i18n/i18n";
 
 export default function App() {
+  const location = useLocation();
+
+  // 🔥 إخفاء Navbar & Footer & Padding في صفحة Splash فقط
+  const isSplash = location.pathname === "/";
+const savedLang = localStorage.getItem("appLanguage") || "ar";
+i18n.changeLanguage(savedLang);
   return (
-    // 🟣 لفّ التطبيق بالكامل داخل ThemeModeProvider بدلاً من ThemeProvider المحلي
     <ThemeModeProvider>
       <GlobalStyles
         styles={{
@@ -59,13 +68,15 @@ export default function App() {
           flexDirection: "column",
         }}
       >
-        <Navbar />
+        {/* ❌ إخفاء الـ Navbar في صفحة Splash */}
+        {!isSplash && <Navbar />}
 
-        <div style={{ flex: 1, padding: "16px" }}>
+        <div style={{ flex: 1, padding: isSplash ? "0" : "16px" }}>
           <Routes>
+            {/* 🌟 صفحة السبلاش */}
             <Route path="/" element={<Splash />} />
 
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            {/* صفحة تسجيل الدخول */}
             <Route path="/login" element={<Login />} />
 
             {/* 🔹 مسارات المستخدم */}
@@ -100,7 +111,8 @@ export default function App() {
           </Routes>
         </div>
 
-        <Footer />
+        {/* ❌ إخفاء Footer في صفحة Splash */}
+        {!isSplash && <Footer />}
       </div>
     </ThemeModeProvider>
   );

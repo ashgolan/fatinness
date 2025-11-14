@@ -9,8 +9,10 @@ import {
 } from "@mui/material";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 export default function AdminReports() {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,9 +38,9 @@ export default function AdminReports() {
       link.click();
       link.remove();
 
-      toast.success("تم تنزيل التقرير بنجاح ✅");
+      toast.success(t("adminReports.success"));
     } catch (error) {
-      toast.error("فشل تنزيل التقرير ❌");
+      toast.error(t("adminReports.fail"));
     } finally {
       setLoading(false);
     }
@@ -47,25 +49,26 @@ export default function AdminReports() {
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", mt: 4 }}>
       <Typography variant="h5" gutterBottom>
-        📤 تصدير تقارير الحجوزات
+        {t("adminReports.title")}
       </Typography>
 
       <Paper sx={{ p: 3, mt: 2 }}>
         <Typography sx={{ mb: 2 }}>
-          حددي الفترة الزمنية لتصدير تقرير الحجوزات، أو اتركي الحقول فارغة لتصدير كل البيانات:
+          {t("adminReports.description")}
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
           <TextField
             type="date"
-            label="من"
+            label={t("adminReports.from")}
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
+
           <TextField
             type="date"
-            label="إلى"
+            label={t("adminReports.to")}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
@@ -79,7 +82,11 @@ export default function AdminReports() {
           onClick={handleExport}
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} /> : "📥 تنزيل التقرير"}
+          {loading ? (
+            <CircularProgress size={24} />
+          ) : (
+            t("adminReports.download")
+          )}
         </Button>
       </Paper>
     </Box>

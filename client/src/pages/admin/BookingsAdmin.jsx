@@ -18,13 +18,16 @@ import {
   Chip,
   useTheme,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search"; // 👈 أضف هذا الاستيراد بالأعلى
+
+import SearchIcon from "@mui/icons-material/Search";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 export default function BookingsAdmin() {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const { t } = useTranslation();
 
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,17 +42,21 @@ export default function BookingsAdmin() {
     cancelled: 0,
     blocked: 0,
   });
+
   const [showAllCols, setShowAllCols] = useState(false);
 
   const getDisplayStatus = (b) => {
     if (!b.slot) return "unknown";
     if (b.slot.isBlocked) return "blocked";
+
     const now = new Date();
     const end = new Date(b.slot.date);
+
     if (b.slot.endTime) {
       const [h, m] = b.slot.endTime.split(":");
       end.setHours(Number(h), Number(m), 0, 0);
     }
+
     if (b.status === "booked" && now > end) return "completed";
     return b.status;
   };
@@ -67,7 +74,7 @@ export default function BookingsAdmin() {
       });
       setSummary(sorted);
     } catch {
-      toast.error("حدث خطأ أثناء تحميل بيانات الحجوزات");
+      toast.error(t("bookingsAdmin.errors.summaryLoad"));
     } finally {
       setLoading(false);
     }
@@ -78,13 +85,20 @@ export default function BookingsAdmin() {
     setLoadingDetails(true);
     try {
       const { data } = await Api.get(`/admin/bookings/user/${userId}`);
+
       const sorted = [...data].sort((a, b) => {
-        const order = { booked: 1, completed: 2, cancelled: 3, blocked: 4 };
+        const order = {
+          booked: 1,
+          completed: 2,
+          cancelled: 3,
+          blocked: 4,
+        };
         return order[getDisplayStatus(a)] - order[getDisplayStatus(b)];
       });
+
       setBookings(sorted);
     } catch {
-      toast.error("حدث خطأ أثناء جلب تفاصيل الحجوزات");
+      toast.error(t("bookingsAdmin.errors.detailsLoad"));
     } finally {
       setLoadingDetails(false);
     }
@@ -118,32 +132,6 @@ export default function BookingsAdmin() {
     blocked: bookings.filter((b) => getDisplayStatus(b) === "blocked").length,
   };
 
-  const getLabelByStatus = (b) => {
-    const s = getDisplayStatus(b);
-    if (s === "blocked") return "معطلة";
-    if (s === "booked") return "نشطة";
-    if (s === "completed") return "منجزة";
-    if (s === "cancelled") return "ملغاة";
-    return "غير معروفة";
-  };
-
-  const getStatusChipStyle = (b) => {
-    const s = getDisplayStatus(b);
-    const base = {
-      fontWeight: 600,
-      border: "1px solid transparent",
-    };
-    if (s === "blocked")
-      return { ...base, backgroundColor: "#fff3e0", color: "#e65100" };
-    if (s === "booked")
-      return { ...base, backgroundColor: "#e8f5e9", color: "#2e7d32" };
-    if (s === "completed")
-      return { ...base, backgroundColor: "#fff9c4", color: "#b8860b" };
-    if (s === "cancelled")
-      return { ...base, backgroundColor: "#ffebee", color: "#c62828" };
-    return { ...base, backgroundColor: "#f5f5f5", color: "#757575" };
-  };
-
   const totalAll = summary.reduce(
     (acc, s) => acc + s.active + s.cancelled + s.completed,
     0
@@ -161,6 +149,7 @@ export default function BookingsAdmin() {
   useEffect(() => {
     let frame = 0;
     const duration = 25;
+
     const animate = setInterval(() => {
       frame++;
       setAnimated({
@@ -169,14 +158,39 @@ export default function BookingsAdmin() {
         cancelled: (cancelledPercent / duration) * frame,
         blocked: (blockedPercent / duration) * frame,
       });
+
       if (frame >= duration) clearInterval(animate);
     }, 20);
+
     return () => clearInterval(animate);
   }, [activePercent, completedPercent, cancelledPercent, blockedPercent]);
+  // ➕ للحصول على ألوان Chip حسب حالة الحجز
+  const getStatusChipStyle = (b) => {
+    const s = getDisplayStatus(b);
+
+    const base = {
+      fontWeight: 600,
+      border: "1px solid transparent",
+    };
+
+    if (s === "blocked")
+      return { ...base, backgroundColor: "#fff3e0", color: "#e65100" };
+
+    if (s === "booked")
+      return { ...base, backgroundColor: "#e8f5e9", color: "#2e7d32" };
+
+    if (s === "completed")
+      return { ...base, backgroundColor: "#fff9c4", color: "#b8860b" };
+
+    if (s === "cancelled")
+      return { ...base, backgroundColor: "#ffebee", color: "#c62828" };
+
+    return { ...base, backgroundColor: "#f5f5f5", color: "#757575" };
+  };
 
   return (
     <Box
-      dir="rtl"
+      dir={t("dir")}
       sx={{
         minHeight: "100vh",
         background: isDark
@@ -188,7 +202,6 @@ export default function BookingsAdmin() {
       }}
     >
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-        {/* العنوان */}
         <Typography
           variant="h5"
           sx={{
@@ -200,10 +213,9 @@ export default function BookingsAdmin() {
               : "0 0 6px rgba(160,24,96,0.2)",
           }}
         >
-          📋 إدارة الحجوزات
+          {t("bookingsAdmin.title")}
         </Typography>
 
-        {/* 🌈 شريط نسب الحجوزات المتطور */}
         {!loading && summary.length > 0 && (
           <Paper
             sx={{
@@ -229,10 +241,9 @@ export default function BookingsAdmin() {
                 textAlign: "center",
               }}
             >
-              🔸 نسب الحجوزات الإجمالية:
+              {t("bookingsAdmin.ratesTitle")}
             </Typography>
-
-            {/* 🟩 الشريط المتدرج */}
+            {/* الشريط المتدرج للنسب */}
             <Box
               sx={{
                 position: "relative",
@@ -280,7 +291,7 @@ export default function BookingsAdmin() {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: isDark ? "#333" : "#333",
+                  color: "#333",
                   fontWeight: 700,
                   fontSize: 13,
                   transition: "width 0.4s ease",
@@ -314,7 +325,7 @@ export default function BookingsAdmin() {
               </Box>
             </Box>
 
-            {/* 🔹 دلالات الألوان والنسب */}
+            {/* دلالات النسب */}
             <Box
               sx={{
                 display: "flex",
@@ -343,7 +354,8 @@ export default function BookingsAdmin() {
                     fontWeight: 600,
                   }}
                 >
-                  ✅ نشطة ({animated.active.toFixed(1)}%)
+                  {t("bookingsAdmin.labels.active")}(
+                  {animated.active.toFixed(1)}%)
                 </Typography>
               </Box>
 
@@ -365,7 +377,8 @@ export default function BookingsAdmin() {
                     fontWeight: 600,
                   }}
                 >
-                  🏆 منجزة ({animated.completed.toFixed(1)}%)
+                  {t("bookingsAdmin.labels.completed")}(
+                  {animated.completed.toFixed(1)}%)
                 </Typography>
               </Box>
 
@@ -387,13 +400,15 @@ export default function BookingsAdmin() {
                     fontWeight: 600,
                   }}
                 >
-                  ❌ ملغاة ({animated.cancelled.toFixed(1)}%)
+                  {t("bookingsAdmin.labels.cancelled")}(
+                  {animated.cancelled.toFixed(1)}%)
                 </Typography>
               </Box>
             </Box>
           </Paper>
         )}
-        {/* 🔘 زر عرض / إخفاء الأعمدة */}
+
+        {/* زر عرض/إخفاء الأعمدة */}
         <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
           <Button
             variant="outlined"
@@ -411,7 +426,7 @@ export default function BookingsAdmin() {
               borderColor: isDark ? "#FFD700" : "#A01860",
               borderRadius: "30px",
               px: 2,
-              gap: 1.5, // 👈 هذا السطر يضيف المسافة
+              gap: 1.5,
               textTransform: "none",
               fontWeight: 600,
               transition: "all 0.3s ease",
@@ -423,7 +438,9 @@ export default function BookingsAdmin() {
               },
             }}
           >
-            {showAllCols ? "إخفاء التفاصيل" : "عرض التفاصيل"}
+            {showAllCols
+              ? t("bookingsAdmin.hideDetails")
+              : t("bookingsAdmin.showDetails")}
           </Button>
         </Box>
 
@@ -454,28 +471,29 @@ export default function BookingsAdmin() {
             }}
           >
             <Box
-              dir="rtl"
+              dir={t("dir")}
               sx={{
                 width: "100%",
-                overflowX: showAllCols ? "auto" : "hidden", // ✅ تمرير فقط عند عرض التفاصيل
+                overflowX: showAllCols ? "auto" : "hidden",
               }}
             >
               <Table
                 sx={{
                   width: "100%",
-                  tableLayout: "fixed", // ✅ يضغط الأعمدة بالتساوي
-                  minWidth: showAllCols ? 700 : "100%", // ✅ توسيع بسيط عند التفاصيل فقط
+                  tableLayout: "fixed",
+                  minWidth: showAllCols ? 700 : "100%",
                   "& th, & td": {
-                    padding: showAllCols ? "8px 6px" : "6px 3px", // ✅ تقليل الفراغات في الوضع العادي
+                    padding: showAllCols ? "8px 6px" : "6px 3px",
                     fontSize: showAllCols ? 14 : 13,
                     whiteSpace: "nowrap",
                   },
                 }}
               >
-                {" "}
                 <TableHead>
                   <TableRow
-                    sx={{ backgroundColor: isDark ? "#222831" : "#fdfdfd" }}
+                    sx={{
+                      backgroundColor: isDark ? "#222831" : "#fdfdfd",
+                    }}
                   >
                     <TableCell
                       align="center"
@@ -484,29 +502,29 @@ export default function BookingsAdmin() {
                         fontWeight: 600,
                       }}
                     >
-                      المشتركة
+                      {t("bookingsAdmin.columns.user")}
                     </TableCell>
+
                     <TableCell
                       align="center"
                       sx={{ color: "#4caf50", fontWeight: 600 }}
                     >
-                      النشطة
+                      {t("bookingsAdmin.columns.active")}
                     </TableCell>
 
-                    {/* ✅ الأعمدة الإضافية تظهر فقط عند تفعيل الزر */}
                     {showAllCols && (
                       <>
                         <TableCell
                           align="center"
                           sx={{ color: "#c62828", fontWeight: 600 }}
                         >
-                          الملغاة
+                          {t("bookingsAdmin.columns.cancelled")}
                         </TableCell>
                         <TableCell
                           align="center"
                           sx={{ color: "#b8860b", fontWeight: 600 }}
                         >
-                          المنجزة
+                          {t("bookingsAdmin.columns.completed")}
                         </TableCell>
                       </>
                     )}
@@ -518,10 +536,11 @@ export default function BookingsAdmin() {
                         fontWeight: 600,
                       }}
                     >
-                      الإجراءات
+                      {t("bookingsAdmin.columns.actions")}
                     </TableCell>
                   </TableRow>
                 </TableHead>
+
                 <TableBody>
                   {summary.map((row) => (
                     <TableRow
@@ -536,7 +555,7 @@ export default function BookingsAdmin() {
                       }}
                     >
                       <TableCell
-                        align="center" // ✅ يوسّط الاسم أفقيًا داخل العمود
+                        align="center"
                         sx={{
                           color: isDark ? "#fff" : "#111",
                           fontSize: 14,
@@ -545,14 +564,17 @@ export default function BookingsAdmin() {
                       >
                         {row.username}
                       </TableCell>
+
                       <TableCell align="center" sx={{ color: "#4caf50" }}>
                         {row.active}
                       </TableCell>
+
                       {showAllCols && (
                         <>
                           <TableCell align="center" sx={{ color: "#c62828" }}>
                             {row.cancelled}
                           </TableCell>
+
                           <TableCell align="center" sx={{ color: "#b8860b" }}>
                             {row.completed}
                           </TableCell>
@@ -596,7 +618,7 @@ export default function BookingsAdmin() {
               color: isDark ? "#999" : "#777",
             }}
           >
-            لا توجد بيانات حاليًا
+            {t("bookingsAdmin.noData")}
           </Typography>
         )}
       </Box>
@@ -627,8 +649,9 @@ export default function BookingsAdmin() {
             borderBottom: "1px solid rgba(255,215,0,0.2)",
           }}
         >
-          تفاصيل حجوزات {selectedUser?.name}
+          {t("bookingsAdmin.details.title")} {selectedUser?.name}
         </DialogTitle>
+
         <DialogContent sx={{ mt: 3, pb: 3 }}>
           {loadingDetails ? (
             <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
@@ -650,14 +673,34 @@ export default function BookingsAdmin() {
                 }}
               >
                 {[
-                  { label: "نشطة", value: stats.booked, color: "#4caf50" },
-                  { label: "منجزة", value: stats.completed, color: "#b8860b" },
-                  { label: "ملغاة", value: stats.cancelled, color: "#c62828" },
-                  { label: "معطلة", value: stats.blocked, color: "#e65100" },
+                  {
+                    label: t("bookingsAdmin.stats.active"),
+                    value: stats.booked,
+                    color: "#4caf50",
+                  },
+                  {
+                    label: t("bookingsAdmin.stats.completed"),
+                    value: stats.completed,
+                    color: "#b8860b",
+                  },
+                  {
+                    label: t("bookingsAdmin.stats.cancelled"),
+                    value: stats.cancelled,
+                    color: "#c62828",
+                  },
+                  {
+                    label: t("bookingsAdmin.stats.blocked"),
+                    value: stats.blocked,
+                    color: "#e65100",
+                  },
                 ].map((s) => (
                   <Box key={s.label} sx={{ textAlign: "center" }}>
                     <Typography
-                      sx={{ fontSize: "22px", fontWeight: 700, color: s.color }}
+                      sx={{
+                        fontSize: "22px",
+                        fontWeight: 700,
+                        color: s.color,
+                      }}
                     >
                       {s.value}
                     </Typography>
@@ -694,10 +737,18 @@ export default function BookingsAdmin() {
                     },
                   }}
                 >
-                  <ToggleButton value="all">الكل</ToggleButton>
-                  <ToggleButton value="booked">نشطة</ToggleButton>
-                  <ToggleButton value="completed">منجزة</ToggleButton>
-                  <ToggleButton value="cancelled">ملغاة</ToggleButton>
+                  <ToggleButton value="all">
+                    {t("bookingsAdmin.filters.all")}
+                  </ToggleButton>
+                  <ToggleButton value="booked">
+                    {t("bookingsAdmin.filters.active")}
+                  </ToggleButton>
+                  <ToggleButton value="completed">
+                    {t("bookingsAdmin.filters.completed")}
+                  </ToggleButton>
+                  <ToggleButton value="cancelled">
+                    {t("bookingsAdmin.filters.cancelled")}
+                  </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
 
@@ -712,22 +763,21 @@ export default function BookingsAdmin() {
                   border: "1px solid rgba(255,215,0,0.2)",
                 }}
               >
-                {/* ✅ إصلاح الاتجاه واستخدام Box الصحيح */}
                 <Box
-                  dir="rtl"
+                  dir={t("dir")}
                   sx={{
                     width: "100%",
-                    overflowX: "hidden", // ✅ لا تمرير أبدًا
+                    overflowX: "hidden",
                   }}
                 >
                   <Table
                     sx={{
                       width: "100%",
-                      tableLayout: "fixed", // ✅ يضغط الأعمدة بالتساوي
+                      tableLayout: "fixed",
                       "& th, & td": {
                         textAlign: "center",
-                        direction: "rtl",
-                        padding: "6px 4px", // ✅ يقلل المسافات
+                        direction: t("dir"),
+                        padding: "6px 4px",
                         fontSize: 13,
                         whiteSpace: "nowrap",
                       },
@@ -739,26 +789,18 @@ export default function BookingsAdmin() {
                           backgroundColor: isDark ? "#222831" : "#fdfdfd",
                         }}
                       >
-                        <TableCell
-                          align="center"
-                          sx={{ fontWeight: 600, fontSize: 13 }}
-                        >
-                          التاريخ
+                        <TableCell sx={{ fontWeight: 600, fontSize: 13 }}>
+                          {t("bookingsAdmin.details.date")}
                         </TableCell>
-                        <TableCell
-                          align="center"
-                          sx={{ fontWeight: 600, fontSize: 13 }}
-                        >
-                          الوقت
+                        <TableCell sx={{ fontWeight: 600, fontSize: 13 }}>
+                          {t("bookingsAdmin.details.time")}
                         </TableCell>
-                        <TableCell
-                          align="center"
-                          sx={{ fontWeight: 600, fontSize: 13 }}
-                        >
-                          الحالة
+                        <TableCell sx={{ fontWeight: 600, fontSize: 13 }}>
+                          {t("bookingsAdmin.details.status")}
                         </TableCell>
                       </TableRow>
                     </TableHead>
+
                     <TableBody>
                       {filteredBookings.map((b) => (
                         <TableRow
@@ -771,15 +813,15 @@ export default function BookingsAdmin() {
                             },
                           }}
                         >
-                          <TableCell align="center" sx={{ fontSize: 14 }}>
+                          <TableCell sx={{ fontSize: 14 }}>
                             {b.slot?.date
                               ? new Date(b.slot.date).toLocaleDateString(
-                                  "ar-EG"
+                                  t("locale")
                                 )
                               : "—"}
                           </TableCell>
+
                           <TableCell
-                            align="center"
                             sx={{
                               fontSize: 14,
                               color: isDark ? "#FFD700" : "#A01860",
@@ -792,9 +834,12 @@ export default function BookingsAdmin() {
                                 }`
                               : "—"}
                           </TableCell>
-                          <TableCell align="center">
+
+                          <TableCell>
                             <Chip
-                              label={getLabelByStatus(b)}
+                              label={t(
+                                `bookingsAdmin.status.${getDisplayStatus(b)}`
+                              )}
                               size="small"
                               sx={{
                                 ...getStatusChipStyle(b),
@@ -812,7 +857,7 @@ export default function BookingsAdmin() {
             </>
           ) : (
             <Typography sx={{ textAlign: "center", py: 4, color: "#999" }}>
-              لا توجد حجوزات لهذه المشتركة
+              {t("bookingsAdmin.details.noBookings")}
             </Typography>
           )}
         </DialogContent>
