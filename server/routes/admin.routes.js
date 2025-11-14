@@ -19,6 +19,8 @@ import {
   updateUserByAdmin,
   getBookingsSummary,
   getUserBookings,
+  deleteNotificationById,
+  clearAllNotifications,
 } from "../controllers/admin.controller.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -83,14 +85,9 @@ router.get("/scheduler/status", getSchedulerStatus);
 
 router.put("/users/:id", updateUserByAdmin);
 
-router.delete("/notifications/:id", authMiddleware, async (req, res) => {
-  try {
-    await Notification.findByIdAndDelete(req.params.id);
-    res.json({ message: "Notification deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "فشل حذف الإشعار" });
-  }
-});
+// 🗑️ حذف إشعار واحد
+router.delete("/notifications/:id", deleteNotificationById);
 
+// 🧹 مسح جميع الإشعارات
+router.delete("/notifications", clearAllNotifications);
 export default router;

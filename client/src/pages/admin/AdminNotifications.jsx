@@ -22,7 +22,11 @@ import {
   DialogTitle,
   useTheme,
 } from "@mui/material";
-import { Replay } from "@mui/icons-material";
+
+import ReplayIcon from "@mui/icons-material/Replay";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever"; // ← لحذف الكل
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep"; // ← لحذف واحد
+
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 
@@ -30,7 +34,7 @@ export default function AdminNotifications() {
   const theme = useTheme();
   const mode = theme.palette.mode;
 
-  // 🎨 ألوان الهوية البصرية (Fatiness)
+  // 🎨 ألوان الهوية
   const BRAND = {
     gold: "#FFD93D",
     goldDark: "#FFC300",
@@ -49,16 +53,18 @@ export default function AdminNotifications() {
   const [body, setBody] = useState("");
   const [target, setTarget] = useState("all");
   const [loading, setLoading] = useState(false);
+
   const [history, setHistory] = useState([]);
   const [users, setUsers] = useState([]);
 
+  // لإعادة الإرسال
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [editBody, setEditBody] = useState("");
   const [notificationToResend, setNotificationToResend] = useState(null);
   const [resending, setResending] = useState(false);
 
-  const [notificationType, setNotificationType] = useState("smart"); // "fcm" أو "smart"
+  const [notificationType, setNotificationType] = useState("smart");
 
   // 📥 جلب السجل والمشتركات
   const fetchHistory = async () => {
@@ -89,14 +95,10 @@ export default function AdminNotifications() {
         title,
         body,
         target,
-        mode: notificationType,
+        channel: notificationType,
       });
-      toast.success(
-        data.message ||
-          (notificationType === "smart"
-            ? "✅ تم الإرسال بالإشعار الذكي"
-            : "📱 تم الإرسال عبر التطبيق فقط")
-      );
+
+      toast.success(data.message);
       setTitle("");
       setBody("");
       fetchHistory();
@@ -107,6 +109,7 @@ export default function AdminNotifications() {
     }
   };
 
+  // ♻️ إعادة إرسال
   const confirmResend = (n) => {
     setNotificationToResend(n);
     setEditTitle(n.title);
@@ -116,8 +119,9 @@ export default function AdminNotifications() {
 
   const handleConfirmResend = async () => {
     if (!notificationToResend) return;
+
     if (!editTitle.trim() || !editBody.trim())
-      return toast.error("يجب إدخال عنوان ومحتوى قبل الإرسال.");
+      return toast.error("يجب إدخال عنوان ومحتوى.");
 
     setResending(true);
     try {
@@ -129,27 +133,44 @@ export default function AdminNotifications() {
             ? "all"
             : notificationToResend.targetUser?._id,
       });
-      toast.success(data.message || "تمت إعادة الإرسال بنجاح");
+
+      toast.success(data.message);
       fetchHistory();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "فشل إعادة الإرسال");
+      toast.error("فشل إعادة الإرسال");
     } finally {
       setResending(false);
       setConfirmOpen(false);
       setNotificationToResend(null);
     }
   };
+
+  // 🗑️ حذف واحد
   const handleDeleteNotification = async (id) => {
-    if (!window.confirm("هل أنت متأكد أنك تريد حذف هذا الإشعار نهائيًا؟"))
-      return;
+    if (!window.confirm("هل تريد حذف الإشعار نهائيًا؟")) return;
+
     try {
       await Api.delete(`/admin/notifications/${id}`);
-      toast.success("🗑️ تم حذف الإشعار من السجل بنجاح");
+      toast.success("🗑️ تم حذف الإشعار");
       setHistory((prev) => prev.filter((h) => h._id !== id));
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "فشل حذف الإشعار");
+    } catch {
+      toast.error("فشل حذف الإشعار");
     }
   };
+
+  // 🧹 مسح السجل بالكامل
+  const handleClearAll = async () => {
+    if (!window.confirm("هل أنت متأكد أنك تريد مسح كامل السجل؟")) return;
+
+    try {
+      await Api.delete("/admin/notifications");
+      toast.success("🧹 تم مسح السجل بالكامل");
+      setHistory([]);
+    } catch {
+      toast.error("فشل مسح السجل");
+    }
+  };
+
   return (
     <Box
       dir="rtl"
@@ -179,23 +200,14 @@ export default function AdminNotifications() {
         }}
       >
         {/* العنوان */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 3,
-          }}
+        <Typography
+          variant="h5"
+          sx={{ fontWeight: 900, color: BRAND.text, mb: 3 }}
         >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 900, color: BRAND.text, display: "flex", gap: 1 }}
-          >
-            🔔 إرسال إشعار مخصص
-          </Typography>
-        </Box>
+          🔔 إرسال إشعار مخصص
+        </Typography>
 
-        {/* 📤 إنشاء إشعار */}
+        {/* إنشاء إشعار */}
         <Box sx={{ mb: 4 }}>
           <TextField
             fullWidth
@@ -205,6 +217,7 @@ export default function AdminNotifications() {
             sx={{ mb: 2 }}
             inputProps={{ style: { textAlign: "right" } }}
           />
+
           <TextField
             fullWidth
             multiline
@@ -214,81 +227,62 @@ export default function AdminNotifications() {
             onChange={(e) => setBody(e.target.value)}
             sx={{ mb: 2 }}
           />
+
+          {/* الفئة */}
           <FormControl fullWidth sx={{ mb: 3 }}>
             <InputLabel
               shrink
               sx={{
                 right: 14,
-                left: "auto",
-                background: mode === "dark" ? BRAND.card : "#fff",
+                background: BRAND.card,
                 px: 1,
                 fontWeight: 600,
               }}
             >
               الفئة المستهدفة
             </InputLabel>
+
             <Select
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               sx={{ textAlign: "right" }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    borderRadius: 2,
-                    mt: 1,
-                    border: `1px solid ${BRAND.line}`,
-                    backgroundColor: BRAND.card,
-                  },
-                },
-              }}
             >
               <MenuItem value="all">📢 جميع المشتركات</MenuItem>
-              <Divider sx={{ my: 1 }} />
-              {users.length > 0 ? (
-                users.map((u) => (
-                  <MenuItem key={u._id} value={u._id}>
-                    👩 {u.username}
-                  </MenuItem>
-                ))
-              ) : (
-                <MenuItem disabled>لا يوجد مشتركات</MenuItem>
-              )}
+              <Divider />
+              {users.map((u) => (
+                <MenuItem key={u._id} value={u._id}>
+                  👩 {u.username}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
+
+          {/* نوع الإشعار */}
           <FormControl fullWidth sx={{ mb: 3 }}>
             <InputLabel
               shrink
               sx={{
                 right: 14,
-                left: "auto",
-                background: mode === "dark" ? BRAND.card : "#fff",
+                background: BRAND.card,
                 px: 1,
                 fontWeight: 600,
               }}
             >
               نوع الإشعار
             </InputLabel>
+
             <Select
               value={notificationType}
               onChange={(e) => setNotificationType(e.target.value)}
               sx={{ textAlign: "right" }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    borderRadius: 2,
-                    mt: 1,
-                    border: `1px solid ${BRAND.line}`,
-                    backgroundColor: BRAND.card,
-                  },
-                },
-              }}
             >
-              <MenuItem value="smart">🤖 إشعار ذكي (FCM + WhatsApp)</MenuItem>
-              <MenuItem value="fcm">📱 عبر التطبيق فقط (FCM)</MenuItem>
+              <MenuItem value="smart">🤖 ذكي (FCM + WhatsApp)</MenuItem>
+              <MenuItem value="fcm">📱 فقط التطبيق (FCM)</MenuItem>
             </Select>
           </FormControl>
 
-          <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+          {/* زر إرسال */}
+          <Box sx={{ textAlign: "center" }}>
             <Button
               variant="outlined"
               onClick={handleSend}
@@ -301,31 +295,17 @@ export default function AdminNotifications() {
                 borderRadius: 3,
                 border: `2px solid ${BRAND.purple}`,
                 color: BRAND.purple,
-                background: "transparent",
-                transition: "all 0.3s ease",
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
                 "&:hover": {
-                  background: `${BRAND.purple}10`, // خلفية شفافة خفيفة من البنفسجي
+                  background: `${BRAND.purple}10`,
                   borderColor: BRAND.gold,
                   color: BRAND.gold,
-                  boxShadow: `0 0 8px ${BRAND.gold}40`,
-                },
-                "&:disabled": {
-                  opacity: 0.6,
                 },
               }}
             >
               {loading ? (
                 <CircularProgress size={22} sx={{ color: BRAND.purple }} />
               ) : (
-                <>
-                  🔔{" "}
-                  <Typography sx={{ fontWeight: 800 }}>
-                    إرسال الإشعار
-                  </Typography>
-                </>
+                "🔔 إرسال الإشعار"
               )}
             </Button>
           </Box>
@@ -333,21 +313,36 @@ export default function AdminNotifications() {
 
         <Divider sx={{ my: 3 }} />
 
-        {/* 🕘 سجل الإشعارات */}
-        <Typography
-          variant="h6"
+        {/* سجل الإشعارات + زر مسح الكل */}
+        <Box
           sx={{
-            fontWeight: 900,
-            color: BRAND.text,
             mb: 2,
             display: "flex",
+            justifyContent: "space-between",
             alignItems: "center",
-            gap: 1,
           }}
         >
-          🕘 سجل آخر الإشعارات
-        </Typography>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 900, color: BRAND.text }}
+          >
+            🕘 سجل آخر الإشعارات
+          </Typography>
 
+          {history.length > 0 && (
+            <Button
+              variant="text"
+              color="error"
+              onClick={handleClearAll}
+              startIcon={<DeleteForeverIcon />}
+              sx={{ fontWeight: 800,gap :1 }}
+            >
+              مسح الكل
+            </Button>
+          )}
+        </Box>
+
+        {/* قائمة السجل */}
         <Paper
           elevation={0}
           sx={{
@@ -363,39 +358,29 @@ export default function AdminNotifications() {
               <ListItem
                 key={n._id}
                 divider
-                secondaryAction={
-                  <Box sx={{ display: "flex", gap: 1 }}>
-                    {/* 🗑️ زر الحذف */}
-                    <Tooltip title="حذف من السجل نهائيًا">
-                      <IconButton
-                        edge="end"
-                        onClick={() => handleDeleteNotification(n._id)}
-                        sx={{
-                          color: "#e53935",
-                          "&:hover": { color: "#ff1744" },
-                        }}
-                      >
-                        🗑️
-                      </IconButton>
-                    </Tooltip>
-
-                    {/* 🔁 زر إعادة الإرسال */}
-                    <Tooltip title="إعادة الإرسال مع تعديل">
-                      <IconButton
-                        edge="end"
-                        onClick={() => confirmResend(n)}
-                        sx={{
-                          color: BRAND.purple,
-                          "&:hover": { color: BRAND.fuchsia },
-                        }}
-                      >
-                        <Replay />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                }
+                sx={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: 2,
+                }}
               >
+                {/* النص */}
                 <ListItemText
+                  primary={`${n.title} (${n.targetType === "all" ? "جميع المشتركات" : n.targetUser?.username
+                    })`}
+                  secondary={
+                    <>
+                      <Typography sx={{ color: BRAND.sub }}>
+                        {n.body}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: BRAND.sub }}>
+                        📅 {new Date(n.createdAt).toLocaleString("ar-EG")}
+                        {" — "}
+                        👑 {n.sentBy?.username}
+                      </Typography>
+                    </>
+                  }
                   primaryTypographyProps={{
                     sx: {
                       textAlign: "right",
@@ -404,34 +389,43 @@ export default function AdminNotifications() {
                     },
                   }}
                   secondaryTypographyProps={{
-                    sx: { textAlign: "right", color: BRAND.sub },
+                    sx: { textAlign: "right" },
                   }}
-                  primary={`${n.title} (${
-                    n.targetType === "all"
-                      ? "جميع المشتركات"
-                      : n.targetUser?.username
-                  })`}
-                  secondary={
-                    <>
-                      <Typography
-                        variant="body2"
-                        sx={{ textAlign: "right", color: BRAND.sub }}
-                      >
-                        {n.body}
-                      </Typography>
-                      <Typography
-                        variant="caption"
-                        sx={{ display: "block", mt: 0.5, textAlign: "right" }}
-                      >
-                        📅 {new Date(n.createdAt).toLocaleString("ar-EG")} — 👑{" "}
-                        {n.sentBy?.username}
-                      </Typography>
-                    </>
-                  }
                 />
+
+                {/* الأزرار */}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
+                    alignItems: "center",
+                  }}
+                >
+                  {/* إعادة إرسال */}
+                  <Tooltip title="إعادة الإرسال">
+                    <IconButton
+                      onClick={() => confirmResend(n)}
+                      sx={{ color: BRAND.purple }}
+                    >
+                      <ReplayIcon />
+                    </IconButton>
+                  </Tooltip>
+
+                  {/* حذف */}
+                  <Tooltip title="حذف نهائي">
+                    <IconButton
+                      onClick={() => handleDeleteNotification(n._id)}
+                      sx={{ color: "#e53935" }}
+                    >
+                      <DeleteSweepIcon />
+                    </IconButton>
+                  </Tooltip>
+                </Box>
               </ListItem>
             ))}
-            {!history.length && (
+
+            {history.length === 0 && (
               <Typography
                 sx={{
                   p: 2,
@@ -447,7 +441,7 @@ export default function AdminNotifications() {
         </Paper>
       </Paper>
 
-      {/* 🧩 نافذة التأكيد مع التحرير */}
+      {/* نافذة إعادة الإرسال */}
       <Dialog
         open={confirmOpen}
         onClose={() => setConfirmOpen(false)}
@@ -461,15 +455,11 @@ export default function AdminNotifications() {
           },
         }}
       >
-        <DialogTitle
-          sx={{ textAlign: "right", fontWeight: 900, color: BRAND.text }}
-        >
+        <DialogTitle sx={{ textAlign: "right", fontWeight: 900 }}>
           🔁 إعادة إرسال الإشعار
         </DialogTitle>
+
         <DialogContent sx={{ textAlign: "right" }}>
-          <Typography sx={{ mb: 2, color: BRAND.sub }}>
-            يمكنك تعديل العنوان أو المحتوى قبل إعادة الإرسال:
-          </Typography>
           <TextField
             fullWidth
             label="عنوان الإشعار"
@@ -478,6 +468,7 @@ export default function AdminNotifications() {
             sx={{ mb: 2 }}
             inputProps={{ style: { textAlign: "right" } }}
           />
+
           <TextField
             fullWidth
             multiline
@@ -488,10 +479,10 @@ export default function AdminNotifications() {
             inputProps={{ style: { textAlign: "right" } }}
           />
         </DialogContent>
+
         <DialogActions sx={{ p: 2, justifyContent: "flex-start" }}>
           <Button
             onClick={() => setConfirmOpen(false)}
-            disabled={resending}
             sx={{
               textTransform: "none",
               color: BRAND.sub,
@@ -502,6 +493,7 @@ export default function AdminNotifications() {
           >
             إلغاء
           </Button>
+
           <Button
             variant="contained"
             onClick={handleConfirmResend}
@@ -513,7 +505,6 @@ export default function AdminNotifications() {
               color: "#fff",
               borderRadius: 2,
               px: 3,
-              "&:hover": { filter: "brightness(1.1)" },
             }}
           >
             {resending ? <CircularProgress size={22} /> : "📤 تأكيد الإرسال"}

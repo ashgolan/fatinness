@@ -715,3 +715,28 @@ export const adminGetSlotBookings = async (req, res) => {
     res.status(500).json({ message: "خطأ في تحميل حجوزات الحصة" });
   }
 };
+
+export const deleteNotificationById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await Notification.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ message: "الإشعار غير موجود" });
+    }
+
+    return res.json({ message: "🗑️ تم حذف الإشعار بنجاح" });
+  } catch (err) {
+    console.error("❌ deleteNotificationById error:", err);
+    return res.status(500).json({ message: "فشل حذف الإشعار" });
+  }
+};
+export const clearAllNotifications = async (req, res) => {
+  try {
+    await Notification.deleteMany({});
+    return res.json({ message: "🧹 تم مسح سجل الإشعارات بالكامل" });
+  } catch (err) {
+    console.error("❌ clearAllNotifications error:", err);
+    return res.status(500).json({ message: "فشل مسح سجل الإشعارات" });
+  }
+};

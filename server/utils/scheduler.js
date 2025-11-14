@@ -1,9 +1,11 @@
 import Agenda from "agenda";
 import Booking from "../models/Booking.js";
-import Slot from "../models/Slot.js";
 import { sendSmartNotification } from "./notify.js";
+import { toLocal } from "./date.js"; // ← الصحيح
 
+// ======================================================
 // 🔹 إنشاء مجدول Agenda
+// ======================================================
 export const agenda = new Agenda({
   db: { address: process.env.MONGO_URI, collection: "agendaJobs" },
 });
@@ -12,89 +14,72 @@ export const agenda = new Agenda({
 // 🔹 تعريف الوظائف التي ينفذها المجدول
 // ======================================================
 export const defineSchedulerJobs = () => {
-  // 🕓 وظيفة إرسال التذكير
+  // ======================================================
+  // 🕓 وظيفة إرسال التذكير قبل ساعتين
+  // ======================================================
   agenda.define("send-reminder", async (job) => {
     const { bookingId } = job.attrs.data;
-    const booking = await Booking.findById(bookingId).populate("user slot");
 
-    if (!booking) {
-      console.warn(`⚠️ Reminder skipped: booking not found (${bookingId})`);
-      return;
-    }
-    if (!booking.slot || !booking.slot.date) {
-      console.warn(`⚠️ Reminder skipped: slot not found for booking ${bookingId}`);
-      return;
-    }
+    const booking = await Booking.findById(bookingId).populate("user slot");
+    if (!booking || !booking.slot) return;
+
     if (booking.status !== "booked" || booking.reminderSent) return;
 
+    // تحويل التاريخ إلى Local
+    const slotDate = toLocal(booking.slot.date);
+
     const title = "تذكير: تدريبك بعد ساعتين 💪";
-    const body = `لديك تدريب اليوم ${booking.slot.date.toLocaleDateString(
+    const body = `لديك تدريب اليوم ${slotDate.toLocaleDateString(
       "ar-EG"
-    )} الساعة ${booking.slot.startTime || ""}`;
+    )} الساعة ${booking.slot.startTime}`;
 
     try {
-  await sendSmartNotification({
-  user: booking.user,
-  title,
-  body,
-});
+      await sendSmartNotification({ user: booking.user, title, body });
 
       booking.reminderSent = true;
       await booking.save();
+
       console.log(`✅ Reminder sent for booking ${bookingId}`);
     } catch (err) {
-      console.error(`❌ Failed to send reminder for ${bookingId}:`, err.message);
+      console.error(`❌ Reminder failed for ${bookingId}:`, err.message);
     }
   });
 
   // ======================================================
-  // 🕕 وظيفة جديدة: تحديد الحجز كـ "منجز" بعد انتهاء الحصة + إشعار تهنئة
+  // 🕕 وظيفة تحديد الحجز كـ "منجز" بعد نهاية الحصة
   // ======================================================
   agenda.define("mark-completed", async (job) => {
     const { bookingId } = job.attrs.data;
+
     const booking = await Booking.findById(bookingId).populate("user slot");
+    if (!booking || !booking.slot) return;
 
-    if (!booking) {
-      console.warn(`⚠️ mark-completed skipped: booking not found (${bookingId})`);
-      return;
-    }
+    if (booking.status !== "booked") return;
 
-    if (booking.status !== "booked") {
-      console.log(`ℹ️ Booking ${bookingId} already ${booking.status}`);
-      return;
-    }
+    const slotDate = toLocal(booking.slot.date);
 
-    const slotDate = booking.slot?.date;
-    if (!slotDate) {
-      console.warn(`⚠️ mark-completed skipped: missing slotDate for ${bookingId}`);
-      return;
-    }
+    // حساب وقت النهاية
+    const [eh, em] = booking.slot.endTime.split(":").map(Number);
+    const end = toLocal(slotDate);
+    end.setHours(eh, em, 0, 0);
 
     const now = new Date();
-    if (now >= slotDate) {
+    if (now >= end) {
       booking.status = "completed";
       await booking.save();
-      console.log(`✅ Booking ${bookingId} marked as completed automatically`);
 
-      // 🎉 إرسال إشعار تهنئة
       try {
-        if (booking.user?.fcmTokens?.length) {
-          const title = "🎉 أحسنتِ!";
-          const body = `لقد أنجزتِ تدريبك بتاريخ ${slotDate.toLocaleDateString(
-            "ar-EG"
-          )}. استمري نحو هدفك 💪`;
-await sendSmartNotification({
-  user: booking.user,
-  title,
-  body,
-});
-          console.log(`🎊 Completion notification sent for booking ${bookingId}`);
-        }
+        const title = "🎉 أحسنتِ!";
+        const body = `لقد أنجزتِ تدريبك بتاريخ ${slotDate.toLocaleDateString(
+          "ar-EG"
+        )}. استمري نحو هدفك 💪`;
+
+        await sendSmartNotification({ user: booking.user, title, body });
+
+        console.log(`🏁 Completed booking ${bookingId}`);
       } catch (err) {
-        console.error(`❌ Failed to send completion notification:`, err.message);
+        console.error("⚠️ Completion notification failed:", err.message);
       }
-    } else {
-      console.log(`⏳ Booking ${bookingId} not finished yet`);
     }
   });
 };
@@ -112,35 +97,51 @@ export const startScheduler = async () => {
 };
 
 // ======================================================
-// 🔹 وظيفة مساعد لتحديد وقت التذكير + التحديث التلقائي بعد الحصة
+// 🔹 وظيفة جدولة التذكير + إنهاء الجلسة آليًا
 // ======================================================
-export const scheduleReminder = async (bookingId, slotDate) => {
+export const scheduleReminder = async (bookingId, slotDate, startTime, endTime) => {
   try {
-    if (!slotDate || !(slotDate instanceof Date)) {
-      console.warn(`⚠️ Reminder skipped: invalid slotDate for booking ${bookingId}`);
-      return;
-    }
+    if (!slotDate || !startTime || !endTime) return;
 
-    // 🕓 برمجة التذكير قبل ساعتين
-    const reminderTime = new Date(slotDate.getTime() - 2 * 60 * 60 * 1000);
+    console.log("=======================================");
+    console.log("🟦 New booking — Scheduling reminder");
+    console.log("🕒 RAW slot.date from Mongo:", slotDate, " | ISO:", slotDate.toISOString());
+
+    // 1) تحويل إلى Local
+    const localDate = toLocal(slotDate);
+    console.log("🟪 Local slot date (after toLocal):", localDate.toLocaleString("ar-EG"));
+
+    // 2) ضبط وقت بداية الجلسة
+    const [sh, sm] = startTime.split(":").map(Number);
+    localDate.setHours(sh, sm, 0, 0);
+    console.log("🟧 Slot start datetime (real session start):", localDate.toLocaleString("ar-EG"));
+
+    // 3) حساب التذكير قبل ساعتين
+    const reminderTime = new Date(localDate.getTime() - 2 * 60 * 60 * 1000);
+    console.log("⏰ Reminder should be sent at:", reminderTime.toLocaleString("ar-EG"));
+
     if (reminderTime > new Date()) {
       await agenda.schedule(reminderTime, "send-reminder", { bookingId });
-      console.log(
-        `⏰ Reminder scheduled for booking ${bookingId} at ${reminderTime.toLocaleString(
-          "ar-EG"
-        )}`
-      );
+      console.log("⏳ Reminder scheduled successfully!");
+    } else {
+      console.log("⚠️ Reminder time already passed — Not scheduling.");
     }
 
-    // 🕕 برمجة تحديث الحالة بعد نهاية الحصة + إشعار تهنئة
-    const completeTime = new Date(slotDate.getTime() + 1 * 60 * 1000); // بعد دقيقة من نهاية الحصة
+    // 4) حساب نهاية الجلسة
+    const [eh, em] = endTime.split(":").map(Number);
+    const end = toLocal(slotDate);
+    end.setHours(eh, em, 0, 0);
+
+    console.log("🟩 Session end time:", end.toLocaleString("ar-EG"));
+
+    const completeTime = new Date(end.getTime() + 60 * 1000);
+    console.log("🏁 Completion scheduled at:", completeTime.toLocaleString("ar-EG"));
+
     await agenda.schedule(completeTime, "mark-completed", { bookingId });
-    console.log(
-      `🏁 Completion scheduled for booking ${bookingId} at ${completeTime.toLocaleString(
-        "ar-EG"
-      )}`
-    );
+
+    console.log("=======================================");
+
   } catch (err) {
-    console.error(`❌ Failed to schedule reminder for ${bookingId}:`, err.message);
+    console.error("❌ Scheduler error:", err.message);
   }
 };

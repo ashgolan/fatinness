@@ -54,7 +54,9 @@ export const createBooking = async (req, res) => {
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
     if (userBookingsThisWeek >= allowed)
-      return res.status(403).json({ message: "لقد وصلت إلى الحد الأقصى للحجوزات الأسبوعية." });
+      return res
+        .status(403)
+        .json({ message: "لقد وصلت إلى الحد الأقصى للحجوزات الأسبوعية." });
 
     // ✅ التحقق من سعة الحصة
     const slotBookingsCount = await Booking.countDocuments({
@@ -84,13 +86,24 @@ export const createBooking = async (req, res) => {
     if (slot?.date) {
       try {
         const slotDate = new Date(slot.date);
-        await scheduleReminder(booking._id, slotDate);
-        console.log(`⏰ Reminder scheduled for booking ${booking._id} (${slotDate.toISOString()})`);
+        await scheduleReminder(
+          booking._id,
+          slot.date,
+          slot.startTime,
+          slot.endTime
+        );
+        console.log(
+          `⏰ Reminder scheduled for booking ${
+            booking._id
+          } (${slotDate.toISOString()})`
+        );
       } catch (err) {
         console.warn("⚠️ Reminder scheduling failed:", err.message);
       }
     } else {
-      console.warn(`⚠️ Skipped reminder: slot.date missing for booking ${booking._id}`);
+      console.warn(
+        `⚠️ Skipped reminder: slot.date missing for booking ${booking._id}`
+      );
     }
 
     // ✅ الرد النهائي للواجهة
