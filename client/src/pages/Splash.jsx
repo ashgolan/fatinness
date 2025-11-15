@@ -8,7 +8,7 @@ export default function Splash() {
   const navigate = useNavigate();
   const [showButtons, setShowButtons] = useState(false);
 
-  // ⏱️ بعد 5 ثوانٍ: أظهر أزرار اختيار اللغة
+  // ⏱️ بعد 5 ثواني يظهر اختيار اللغة
   useEffect(() => {
     const timer = setTimeout(() => setShowButtons(true), 5000);
     return () => clearTimeout(timer);
@@ -29,7 +29,7 @@ export default function Splash() {
         width: "100vw",
         height: "100vh",
         overflow: "hidden",
-        background: "#F7D34B",
+        backgroundColor: "#fbd555", // ← اللون الصحيح المطابق للوغو
         zIndex: 9999,
       }}
     >
@@ -40,8 +40,8 @@ export default function Splash() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "60%",
-          height: "60%",
+          width: "70%",
+          height: "70%",
           overflow: "hidden",
           borderRadius: "20px",
         }}
@@ -51,7 +51,6 @@ export default function Splash() {
           autoPlay
           muted
           playsInline
-          
           style={{
             width: "100%",
             height: "100%",
@@ -60,7 +59,7 @@ export default function Splash() {
         />
       </Box>
 
-      {/* ازرار اختيار اللغة */}
+      {/* أزرار اختيار اللغة */}
       {showButtons && (
         <Stack
           direction="row"
@@ -72,60 +71,62 @@ export default function Splash() {
             transform: "translateX(-50%)",
           }}
         >
-        <Button
-  variant="outlined"
-  sx={{
-    backgroundColor: "white",
-    color: "#9C1C6B",
-    borderColor: "#9C1C6B",
-    fontWeight: "bold",
-    "&:hover": {
-      backgroundColor: "#ffffff",
-      borderColor: "#7a1554",
-      boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
-    },
-  }}
-  onClick={() => chooseLanguage("ar")}
->
-  العربية
-</Button>
+          {/* زر العربية */}
+          <Button
+            variant="outlined"
+            sx={{
+              backgroundColor: "white",
+              color: "#9C1C6B",
+              borderColor: "#9C1C6B",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "#ffffff",
+                borderColor: "#7a1554",
+                boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
+              },
+            }}
+            onClick={() => chooseLanguage("ar")}
+          >
+            العربية
+          </Button>
 
-<Button
-  variant="outlined"
-  sx={{
-    backgroundColor: "white",
-    color: "#9C1C6B",
-    borderColor: "#9C1C6B",
-    fontWeight: "bold",
-    "&:hover": {
-      backgroundColor: "#ffffff",
-      borderColor: "#7a1554",
-      boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
-    },
-  }}
-  onClick={() => chooseLanguage("he")}
->
-  עברית
-</Button>
+          {/* زر العبرية */}
+          <Button
+            variant="outlined"
+            sx={{
+              backgroundColor: "white",
+              color: "#9C1C6B",
+              borderColor: "#9C1C6B",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "#ffffff",
+                borderColor: "#7a1554",
+                boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
+              },
+            }}
+            onClick={() => chooseLanguage("he")}
+          >
+            עברית
+          </Button>
 
-<Button
-  variant="outlined"
-  sx={{
-    backgroundColor: "white",
-    color: "#9C1C6B",
-    borderColor: "#9C1C6B",
-    fontWeight: "bold",
-    "&:hover": {
-      backgroundColor: "#ffffff",
-      borderColor: "#7a1554",
-      boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
-    },
-  }}
-  onClick={() => chooseLanguage("en")}
->
-  English
-</Button>
-
+          {/* زر الإنجليزية */}
+          <Button
+            variant="outlined"
+            sx={{
+              backgroundColor: "white",
+              color: "#9C1C6B",
+              borderColor: "#9C1C6B",
+              fontWeight: "bold",
+              "&:hover": {
+                backgroundColor: "#ffffff",
+                borderColor: "#7a1554",
+                boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
+              },
+            }}
+            onClick={() => chooseLanguage("en")}
+          >
+            English
+          </Button>
         </Stack>
       )}
     </Box>
