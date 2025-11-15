@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next";
+
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CancelIcon from "@mui/icons-material/Cancel";
 
 export default function MyBookings() {
+  const { t } = useTranslation();
   const { mode, BRAND } = useThemeMode();
+
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -21,7 +25,7 @@ export default function MyBookings() {
       const { data } = await Api.get("/bookings/me");
       setBookings(data);
     } catch {
-      toast.error("حدث خطأ أثناء جلب الحجوزات");
+      toast.error(t("myBookings.fetchError"));
     } finally {
       setLoading(false);
     }
@@ -33,14 +37,14 @@ export default function MyBookings() {
 
   // 🔹 إلغاء الحجز
   const handleCancel = async (id) => {
-    if (!window.confirm("هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟")) return;
+    if (!window.confirm(t("myBookings.cancelConfirm"))) return;
     setRefreshing(true);
     try {
       await Api.delete(`/bookings/${id}`);
-      toast.success("تم إلغاء الحجز بنجاح ✅");
+      toast.success(t("myBookings.cancelSuccess"));
       fetchBookings();
     } catch (err) {
-      toast.error(err?.response?.data?.message || "تعذر إلغاء الحجز");
+      toast.error(err?.response?.data?.message || t("myBookings.cancelFail"));
     } finally {
       setRefreshing(false);
     }
@@ -86,17 +90,18 @@ export default function MyBookings() {
           style={{
             fontSize: "clamp(22px, 5vw, 30px)",
             fontWeight: "bold",
-            background: mode === "dark"
-              ? `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.purple})`
-              : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`,
+            background:
+              mode === "dark"
+                ? `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.purple})`
+                : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
           }}
         >
-          📅 حجوزاتي
+          {t("myBookings.title")}
         </h1>
         <p style={{ color: mode === "dark" ? "#aaa" : "#555", fontSize: "0.95rem" }}>
-          استعرضي حجوزاتك القادمة، السابقة، أو الملغاة
+          {t("myBookings.subtitle")}
         </p>
       </div>
 
@@ -111,9 +116,9 @@ export default function MyBookings() {
         }}
       >
         {[
-          { value: "upcoming", label: "📆 القادمة" },
-          { value: "past", label: "✅ السابقة" },
-          { value: "cancelled", label: "❌ الملغاة" },
+          { value: "upcoming", label: t("myBookings.filters.upcoming") },
+          { value: "past", label: t("myBookings.filters.past") },
+          { value: "cancelled", label: t("myBookings.filters.cancelled") },
         ].map((btn) => (
           <button
             key={btn.value}
@@ -162,7 +167,7 @@ export default function MyBookings() {
         </div>
       ) : filteredBookings.length === 0 ? (
         <p style={{ textAlign: "center", opacity: 0.7, marginTop: 40 }}>
-          لا توجد حجوزات في هذا القسم.
+          {t("myBookings.noBookings")}
         </p>
       ) : (
         <div
@@ -175,12 +180,14 @@ export default function MyBookings() {
         >
           {filteredBookings.map((b) => {
             const slotDate = new Date(b.slot.date);
+
             const date = slotDate.toLocaleDateString("ar-EG", {
               weekday: "long",
               day: "2-digit",
               month: "2-digit",
               year: "numeric",
             });
+
             const time = b.slot.startTime;
             const isCancelled = b.status === "cancelled" || b.slot.isBlocked;
             const isPast = new Date(b.slot.date) < now && !isCancelled;
@@ -239,7 +246,9 @@ export default function MyBookings() {
                     }}
                   >
                     <AccessTimeIcon sx={{ color: BRAND.purple }} />
-                    <span>الساعة: {time}</span>
+                    <span>
+                      {t("myBookings.time")}: {time}
+                    </span>
                   </div>
 
                   <div
@@ -255,17 +264,23 @@ export default function MyBookings() {
                     {isCancelled ? (
                       <>
                         <CancelIcon sx={{ color: "#f44336" }} />
-                        <span style={{ color: "#f44336" }}>ملغاة</span>
+                        <span style={{ color: "#f44336" }}>
+                          {t("myBookings.status.cancelled")}
+                        </span>
                       </>
                     ) : isPast ? (
                       <>
                         <DoneAllIcon sx={{ color: "#10b981" }} />
-                        <span style={{ color: "#10b981" }}>منتهية</span>
+                        <span style={{ color: "#10b981" }}>
+                          {t("myBookings.status.completed")}
+                        </span>
                       </>
                     ) : (
                       <>
                         <DoneAllIcon sx={{ color: BRAND.purple }} />
-                        <span style={{ color: BRAND.purple }}>محجوزة ✅</span>
+                        <span style={{ color: BRAND.purple }}>
+                          {t("myBookings.status.booked")}
+                        </span>
                       </>
                     )}
                   </div>
@@ -288,7 +303,7 @@ export default function MyBookings() {
                       transition: "all 0.25s ease",
                     }}
                   >
-                    {refreshing ? "..." : "إلغاء الحجز"}
+                    {refreshing ? t("myBookings.cancelling") : t("myBookings.cancelButton")}
                   </button>
                 )}
               </div>

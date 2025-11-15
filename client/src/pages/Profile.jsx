@@ -14,10 +14,12 @@ import {
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler);
 
 export default function Profile() {
+  const { t, i18n } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newWeight, setNewWeight] = useState("");
@@ -32,7 +34,7 @@ export default function Profile() {
       const { data } = await Api.get("/users/me");
       setUser(data);
     } catch {
-      toast.error("حدث خطأ أثناء تحميل الملف الشخصي");
+      toast.error(t("profile.errors.fetchFail"));
     } finally {
       setLoading(false);
     }
@@ -43,19 +45,20 @@ export default function Profile() {
   }, []);
 
   const handleAddWeight = async () => {
-    if (!newWeight) return toast.warning("الرجاء إدخال الوزن الجديد");
+    if (!newWeight) return toast.warning(t("profile.errors.weightRequired"));
+
     setSaving(true);
     try {
       await Api.post("/users/me/weight", {
         weight: parseFloat(newWeight),
         note,
       });
-      toast.success("تم حفظ الوزن بنجاح ✅");
+      toast.success(t("profile.messages.weightSaved"));
       setNewWeight("");
       setNote("");
       fetchProfile();
     } catch {
-      toast.error("فشل حفظ الوزن");
+      toast.error(t("profile.errors.saveFail"));
     } finally {
       setSaving(false);
     }
@@ -89,16 +92,21 @@ export default function Profile() {
     );
   }
 
-  const isSubscriptionActive = user?.role === "admin" || user?.subscription?.active !== false;
+  const isSubscriptionActive =
+    user?.role === "admin" || user?.subscription?.active !== false;
+
   const weightHistory = user?.weightHistory || [];
 
   const chartData = {
     labels: weightHistory.map((w) =>
-      new Date(w.date).toLocaleDateString("ar-EG", { month: "short", day: "numeric" })
+      new Date(w.date).toLocaleDateString(
+        i18n.language === "ar" ? "ar-EG" : i18n.language === "he" ? "he-IL" : "en-US",
+        { month: "short", day: "numeric" }
+      )
     ),
     datasets: [
       {
-        label: "الوزن (كغ)",
+        label: t("profile.chart.label"),
         data: weightHistory.map((w) => w.weight),
         fill: true,
         backgroundColor: (context) => {
@@ -134,33 +142,11 @@ export default function Profile() {
         },
       },
       tooltip: {
-        backgroundColor: isDark ? "rgba(40,40,60,0.95)" : "rgba(255,255,255,0.95)",
-        titleColor: isDark ? "#fff" : "#111827",
-        bodyColor: isDark ? "#C084FC" : "#6366f1",
-        borderColor: isDark ? "#444" : "#e5e7eb",
-        borderWidth: 1,
-        padding: 12,
-        displayColors: false,
         callbacks: {
-          label: (context) => `${context.parsed.y} كجم`,
+          label: (context) => `${context.parsed.y} ${t("profile.units.kg")}`,
         },
       },
     },
-    scales: {
-      y: {
-        grid: { color: isDark ? "#333" : "#f3f4f6" },
-        ticks: { color: isDark ? "#BBB" : "#6b7280" },
-      },
-      x: {
-        grid: { color: isDark ? "#333" : "#f3f4f6" },
-        ticks: { color: isDark ? "#BBB" : "#6b7280" },
-      },
-    },
-  };
-
-  const getInitials = (name) => {
-    if (!name) return "U";
-    return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
   };
 
   const cardBg = isDark ? "#2B2B3D" : "#FFFFFF";
@@ -177,14 +163,12 @@ export default function Profile() {
         background: isDark
           ? "linear-gradient(135deg, #1E1E2F 0%, #2B1D3A 50%, #201C29 100%)"
           : "linear-gradient(135deg, #e0e7ff 0%, #ffffff 50%, #fae8ff 100%)",
-        fontFamily: "Tajawal, Cairo, sans-serif",
-        color: textMain,
-        transition: "background 0.5s ease, color 0.3s ease",
+        dir: i18n.language === "ar" ? "rtl" : "ltr",
       }}
-      dir="rtl"
     >
       <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 16px" }}>
-        {/* رأس الصفحة */}
+
+        {/* Header */}
         <div
           style={{
             borderRadius: "24px",
@@ -192,68 +176,53 @@ export default function Profile() {
             background: isDark
               ? "linear-gradient(135deg, #312E81 0%, #5B21B6 50%, #831843 100%)"
               : "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)",
-            marginBottom: "32px",
             padding: "48px",
-            position: "relative",
-            overflow: "hidden",
+            textAlign: "center",
           }}
         >
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              opacity: 0.08,
-              backgroundImage:
-                "radial-gradient(circle at 2px 2px, white 1px, transparent 0)",
-              backgroundSize: "40px 40px",
-            }}
-          />
-          <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
-            <h1
-              style={{
-                fontSize: "36px",
-                fontWeight: "bold",
-                color: "#fff",
-                marginBottom: "8px",
-              }}
-            >
-              {user?.username || "مستخدم"}
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.9)" }}>
-              👤 {user?.role === "admin" ? "مدير" : "عضو"} • {user?.email}
-            </p>
-          </div>
+          <h1 style={{ fontSize: "36px", color: "#fff" }}>
+            {user?.username || t("profile.labels.user")}
+          </h1>
+          <p style={{ color: "rgba(255,255,255,0.9)" }}>
+            👤{" "}
+            {user?.role === "admin"
+              ? t("profile.roles.admin")
+              : t("profile.roles.member")}{" "}
+            • {user?.email}
+          </p>
         </div>
 
-        {/* الإحصائيات */}
+        {/* Stats */}
         <div
           style={{
             display: "grid",
             gridTemplateColumns: window.innerWidth < 768 ? "repeat(2,1fr)" : "repeat(4,1fr)",
             gap: "24px",
-            marginBottom: "32px",
+            marginTop: "32px",
           }}
         >
-          {[
+          {[ 
             {
               icon: "⚖️",
-              label: "الوزن الحالي",
-              value: user?.weight ? `${user.weight} كجم` : "-",
+              label: t("profile.stats.currentWeight"),
+              value: user?.weight ? `${user.weight} ${t("profile.units.kg")}` : "-",
             },
             {
               icon: "📏",
-              label: "الطول",
-              value: user?.height ? `${user.height} سم` : "-",
+              label: t("profile.stats.height"),
+              value: user?.height ? `${user.height} ${t("profile.units.cm")}` : "-",
             },
             {
               icon: "🏋️",
-              label: "الحصص المنجزة",
+              label: t("profile.stats.completed"),
               value: user?.stats?.completedBookings || 0,
             },
             {
               icon: isSubscriptionActive ? "✅" : "❌",
-              label: "الاشتراك",
-              value: isSubscriptionActive ? "نشط" : "منتهي",
+              label: t("profile.stats.subscription"),
+              value: isSubscriptionActive
+                ? t("profile.status.active")
+                : t("profile.status.expired"),
             },
           ].map((stat) => (
             <div
@@ -261,53 +230,51 @@ export default function Profile() {
               style={{
                 background: cardBg,
                 borderRadius: "16px",
-                boxShadow: cardShadow,
                 padding: "24px",
                 textAlign: "center",
-                transition: "transform 0.3s, box-shadow 0.3s",
+                boxShadow: cardShadow,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-4px)")}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
             >
-              <div style={{ fontSize: "28px", marginBottom: "12px" }}>{stat.icon}</div>
-              <p style={{ fontSize: "13px", color: textSub }}>{stat.label}</p>
+              <div style={{ fontSize: "28px" }}>{stat.icon}</div>
+              <p style={{ color: textSub }}>{stat.label}</p>
               <p style={{ fontSize: "22px", fontWeight: "bold" }}>{stat.value}</p>
             </div>
           ))}
         </div>
 
-        {/* الرسم البياني */}
+        {/* Chart */}
         <div
           style={{
             background: cardBg,
             borderRadius: "24px",
-            boxShadow: cardShadow,
             padding: "24px",
-            marginBottom: "32px",
+            marginTop: "32px",
           }}
         >
-          <h2 style={{ fontSize: "20px", marginBottom: "8px" }}>📊 تطور الوزن</h2>
+          <h2>{t("profile.sections.weightProgress")}</h2>
+
           {weightHistory.length > 0 ? (
             <div style={{ height: "400px" }}>
               <Line data={chartData} options={chartOptions} />
             </div>
           ) : (
             <p style={{ textAlign: "center", color: textSub, padding: "64px 0" }}>
-              لا توجد بيانات وزن بعد
+              {t("profile.messages.noWeightData")}
             </p>
           )}
         </div>
 
-        {/* إضافة وزن جديد */}
+        {/* Add Weight */}
         <div
           style={{
             background: cardBg,
             borderRadius: "24px",
-            boxShadow: cardShadow,
             padding: "24px",
+            marginTop: "32px",
           }}
         >
-          <h2 style={{ fontSize: "20px", marginBottom: "16px" }}>⚖️ إضافة قياس جديد</h2>
+          <h2>{t("profile.sections.addWeight")}</h2>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -317,39 +284,28 @@ export default function Profile() {
             <input
               type="number"
               step="0.1"
+              placeholder={t("profile.fields.weightPlaceholder")}
               value={newWeight}
               onChange={(e) => setNewWeight(e.target.value)}
-              placeholder="مثال: 75.5"
               style={{
                 width: "100%",
                 height: "48px",
-                fontSize: "18px",
-                border: "1px solid",
-                borderColor: isDark ? "#444" : "#e5e7eb",
-                borderRadius: "8px",
                 padding: "0 16px",
-                background: isDark ? "#1E1E2E" : "#fff",
-                color: textMain,
                 marginBottom: "16px",
-                outline: "none",
               }}
             />
+
             <textarea
+              placeholder={t("profile.fields.notePlaceholder")}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="ملاحظة (اختياري)"
               style={{
                 width: "100%",
                 height: "48px",
-                borderRadius: "8px",
-                border: "1px solid",
-                borderColor: isDark ? "#444" : "#e5e7eb",
                 padding: "12px 16px",
-                background: isDark ? "#1E1E2E" : "#fff",
-                color: textMain,
-                resize: "none",
               }}
             />
+
             <button
               type="submit"
               disabled={saving || !newWeight}
@@ -359,15 +315,12 @@ export default function Profile() {
                 marginTop: "16px",
                 background: "linear-gradient(135deg, #a855f7 0%, #6366f1 100%)",
                 color: "#fff",
-                fontWeight: "600",
-                border: "none",
                 borderRadius: "8px",
-                cursor: saving || !newWeight ? "not-allowed" : "pointer",
-                opacity: saving || !newWeight ? 0.5 : 1,
-                transition: "all 0.3s",
+                fontWeight: "600",
+                opacity: saving || !newWeight ? 0.6 : 1,
               }}
             >
-              {saving ? "⏳ جاري الحفظ..." : "➕ حفظ القياس"}
+              {saving ? t("profile.buttons.saving") : t("profile.buttons.save")}
             </button>
           </form>
         </div>

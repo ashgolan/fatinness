@@ -16,6 +16,7 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
+import { useTranslation } from "react-i18next";
 
 // Icons
 import PersonIcon from "@mui/icons-material/Person";
@@ -29,9 +30,10 @@ import CakeIcon from "@mui/icons-material/Cake";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // 👑 رمز الدور
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // 👑
 
 export default function Register() {
+  const { t } = useTranslation();
   const { mode, BRAND } = useThemeMode();
 
   const [form, setForm] = useState({
@@ -43,7 +45,7 @@ export default function Register() {
     height: "",
     weight: "",
     age: "",
-    role: "user", // 👈 الدور الافتراضي
+    role: "user",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -54,21 +56,23 @@ export default function Register() {
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const isDark = mode === "dark";
   const { logoUrl, loading: loadingBrand } = useBrand();
+
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
   }, [logoUrl, loadingBrand]);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       await Api.post("/auth/register", form);
-      toast.success("✅ تم إنشاء الحساب بنجاح");
-      navigate("/admin/users"); // ⬅️ بعد الإنشاء يعود لقائمة المشتركات
+      toast.success(t("register.success"));
+      navigate("/admin/users");
     } catch (err) {
-      toast.error(err?.response?.data?.message || "فشل إنشاء الحساب");
+      toast.error(err?.response?.data?.message || t("register.fail"));
     } finally {
       setLoading(false);
     }
@@ -120,7 +124,6 @@ export default function Register() {
           transition: "all 0.4s ease",
         }}
       >
-        {/* إزالة تلوين autofill */}
         <style>{`
           input:-webkit-autofill,
           input:-webkit-autofill:hover,
@@ -134,7 +137,6 @@ export default function Register() {
           }
         `}</style>
 
-        {/* البطاقة */}
         <Paper
           elevation={12}
           sx={{
@@ -153,7 +155,6 @@ export default function Register() {
             transition: "all 0.3s ease",
           }}
         >
-          {/* 🔶 الشريط العلوي */}
           <Box
             sx={{
               height: 4,
@@ -167,7 +168,6 @@ export default function Register() {
             }}
           />
 
-          {/* 🪞 الشعار والعنوان */}
           <Box sx={{ textAlign: "center", mb: 3 }}>
             <Box
               sx={{
@@ -211,8 +211,9 @@ export default function Register() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              إنشاء حساب جديد
+              {t("register.title")}
             </Typography>
+
             <Typography
               variant="body1"
               sx={{
@@ -222,19 +223,18 @@ export default function Register() {
                 fontSize: "0.95rem",
               }}
             >
-              المدير فقط يمكنه إضافة مشتركات أو مديرات جديدة 👑
+              {t("register.subtitle")}
             </Typography>
           </Box>
 
-          {/* النموذج */}
+          {/* FORM */}
           <Box
             component="form"
             onSubmit={onSubmit}
             sx={{ display: "grid", gap: 2.5 }}
           >
-            {/* اسم المستخدم */}
             <TextField
-              label="اسم المستخدم"
+              label={t("register.fields.username")}
               name="username"
               value={form.username}
               onChange={handleChange}
@@ -249,9 +249,8 @@ export default function Register() {
               sx={textFieldStyle}
             />
 
-            {/* البريد */}
             <TextField
-              label="البريد الإلكتروني"
+              label={t("register.fields.email")}
               type="email"
               name="email"
               value={form.email}
@@ -267,9 +266,8 @@ export default function Register() {
               sx={textFieldStyle}
             />
 
-            {/* كلمة المرور */}
             <TextField
-              label="كلمة المرور"
+              label={t("register.fields.password")}
               type={showPassword ? "text" : "password"}
               name="password"
               value={form.password}
@@ -288,11 +286,7 @@ export default function Register() {
                       edge="end"
                       sx={{ color: BRAND.purple }}
                     >
-                      {showPassword ? (
-                        <VisibilityOffIcon />
-                      ) : (
-                        <VisibilityIcon />
-                      )}
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -300,9 +294,8 @@ export default function Register() {
               sx={textFieldStyle}
             />
 
-            {/* الهاتف */}
             <TextField
-              label="رقم الهاتف"
+              label={t("register.fields.phone")}
               name="phone"
               value={form.phone}
               onChange={handleChange}
@@ -316,10 +309,9 @@ export default function Register() {
               sx={textFieldStyle}
             />
 
-            {/* الجنس */}
             <TextField
               select
-              label="الجنس"
+              label={t("register.fields.gender")}
               name="gender"
               value={form.gender}
               onChange={handleChange}
@@ -332,14 +324,13 @@ export default function Register() {
               }}
               sx={textFieldStyle}
             >
-              <MenuItem value="female">أنثى</MenuItem>
-              <MenuItem value="male">ذكر</MenuItem>
+              <MenuItem value="female">{t("register.fields.female")}</MenuItem>
+              <MenuItem value="male">{t("register.fields.male")}</MenuItem>
             </TextField>
 
-            {/* الدور 👑 */}
             <TextField
               select
-              label="نوع الحساب"
+              label={t("register.fields.role")}
               name="role"
               value={form.role}
               onChange={handleChange}
@@ -350,23 +341,32 @@ export default function Register() {
                   </InputAdornment>
                 ),
               }}
+              helperText={t("register.fields.roleHelper")}
               sx={textFieldStyle}
-              helperText="اختاري ما إذا كانت مشتركة أو مديرة"
             >
-              <MenuItem value="user">مشتركة</MenuItem>
-              <MenuItem value="admin">مديرة</MenuItem>
+              <MenuItem value="user">{t("register.fields.roleUser")}</MenuItem>
+              <MenuItem value="admin">
+                {t("register.fields.roleAdmin")}
+              </MenuItem>
             </TextField>
 
-            {/* الطول والوزن والعمر */}
             <Grid container spacing={2}>
               {[
-                { label: "الطول (سم)", name: "height", icon: <HeightIcon /> },
                 {
-                  label: "الوزن (كغ)",
+                  label: t("register.fields.height"),
+                  name: "height",
+                  icon: <HeightIcon />,
+                },
+                {
+                  label: t("register.fields.weight"),
                   name: "weight",
                   icon: <FitnessCenterIcon />,
                 },
-                { label: "العمر", name: "age", icon: <CakeIcon /> },
+                {
+                  label: t("register.fields.age"),
+                  name: "age",
+                  icon: <CakeIcon />,
+                },
               ].map((field) => (
                 <Grid item xs={12} sm={4} key={field.name}>
                   <TextField
@@ -391,7 +391,6 @@ export default function Register() {
               ))}
             </Grid>
 
-            {/* زر الإرسال */}
             <Button
               type="submit"
               fullWidth
@@ -407,7 +406,7 @@ export default function Register() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "10px", // ✅ هذه تضبط المسافة بين الأيقونة والكلمة
+                gap: "10px",
                 background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
                 color: "#fff",
                 "&:hover": {
@@ -415,7 +414,7 @@ export default function Register() {
                 },
               }}
             >
-              {loading ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
+              {loading ? t("register.submitting") : t("register.submit")}
             </Button>
           </Box>
         </Paper>

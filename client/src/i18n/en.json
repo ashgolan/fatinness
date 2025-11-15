@@ -512,5 +512,197 @@
       "unexpected": "An unexpected error occurred.",
       "loginFailed": "Login failed"
     }
+  },
+  "register": {
+    "title": "Create New Account",
+    "subtitle": "Only admins can add new users or administrators 👑",
+    "submit": "Create Account",
+    "submitting": "Creating account...",
+    "success": "Account created successfully",
+    "fail": "Failed to create account",
+
+    "fields": {
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "phone": "Phone Number",
+      "gender": "Gender",
+      "female": "Female",
+      "male": "Male",
+      "role": "Account Type",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "roleHelper": "Choose if this is a user or an admin",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age"
+    }
+  },
+  "profile": {
+    "labels": {
+      "user": "User"
+    },
+    "roles": {
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "stats": {
+      "currentWeight": "Current Weight",
+      "height": "Height",
+      "completed": "Completed Sessions",
+      "subscription": "Subscription"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired"
+    },
+    "sections": {
+      "weightProgress": "📊 Weight Progress",
+      "addWeight": "⚖️ Add New Measurement"
+    },
+    "fields": {
+      "weightPlaceholder": "Example: 75.5",
+      "notePlaceholder": "Note (optional)"
+    },
+    "buttons": {
+      "save": "➕ Save Measurement",
+      "saving": "⏳ Saving..."
+    },
+    "messages": {
+      "noWeightData": "No weight data yet",
+      "weightSaved": "Weight saved successfully"
+    },
+    "errors": {
+      "weightRequired": "Please enter the new weight",
+      "fetchFail": "Failed to load profile",
+      "saveFail": "Failed to save weight"
+    },
+    "chart": {
+      "label": "Weight (kg)"
+    },
+    "units": {
+      "kg": "kg",
+      "cm": "cm"
+    }
+  },
+  "myBookings": {
+    "title": "📅 My Bookings",
+    "subtitle": "View your upcoming, past, or cancelled bookings",
+
+    "filters": {
+      "upcoming": "📆 Upcoming",
+      "past": "✅ Past",
+      "cancelled": "❌ Cancelled"
+    },
+
+    "fetchError": "Failed to fetch bookings",
+    "noBookings": "No bookings in this section.",
+
+    "time": "Time",
+
+    "status": {
+      "booked": "Booked",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+
+    "cancelConfirm": "Are you sure you want to cancel this booking?",
+    "cancelSuccess": "Booking cancelled successfully",
+    "cancelFail": "Unable to cancel booking",
+
+    "cancelButton": "Cancel Booking",
+    "cancelling": "Cancelling..."
+  },
+  "weekdays": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+
+  "bookingsHub": {
+    "loading": "Loading bookings...",
+
+    "errors": {
+      "fetch": "Failed to load data",
+      "notFoundToCancel": "Booking not found to cancel"
+    },
+
+    "confirmCancel": "Are you sure you want to cancel this booking?",
+
+    "stats": {
+      "upcoming": "Upcoming",
+      "past": "Completed",
+      "cancelled": "Cancelled"
+    },
+
+    "tabs": {
+      "available": "Available slots",
+      "myBookings": "My bookings"
+    },
+
+    "views": {
+      "week": "Week view",
+      "month": "Full month view"
+    },
+
+    "slotsLabel": "slot(s)",
+    "capacityLabel": "Seats",
+
+    "filters": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "cancelled": "Cancelled"
+    },
+
+    "buttons": {
+      "processing": "Processing...",
+      "booked": "Booked – tap to cancel",
+      "full": "Full",
+      "bookNow": "Book now",
+      "cancelBooking": "Cancel booking",
+      "rebook": "Rebook"
+    },
+
+    "emptySection": "No bookings in this section.",
+
+    "toasts": {
+      "bookSuccess": "Booking created successfully ✅",
+      "bookFail": "Booking failed",
+      "cancelSuccess": "Booking cancelled successfully ❌",
+      "cancelFail": "Could not cancel booking",
+      "rebookSuccess": "Rebooked successfully 🔁",
+      "rebookFail": "Rebook failed"
+    }
+  },
+   "subscription": {
+    "title": "💳 Your Monthly Subscription",
+    "status": "Status",
+    "active": "Active ✅",
+    "inactive": "Expired ❌",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+
+    "buttons": {
+      "renew": "Renew Subscription"
+    },
+
+    "notes": {
+      "production": "🔒 You will be redirected to a secure payment page",
+      "development": "🧪 Development mode: Renewal happens locally without payment"
+    },
+
+    "errors": {
+      "load": "Failed to load subscription data",
+      "paymentSession": "Failed to create payment session",
+      "renewFail": "Subscription renewal failed"
+    },
+
+    "toasts": {
+      "renewSuccess": "Subscription renewed successfully! Redirecting..."
+    }
   }
 }

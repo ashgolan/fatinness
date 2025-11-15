@@ -519,5 +519,197 @@
       "unexpected": "حدث خطأ غير متوقع.",
       "loginFailed": "فشل تسجيل الدخول"
     }
+  },
+  "register": {
+    "title": "إنشاء حساب جديد",
+    "subtitle": "المدير فقط يمكنه إضافة مشتركات أو مديرات جديدة 👑",
+    "submit": "إنشاء الحساب",
+    "submitting": "جارٍ إنشاء الحساب...",
+    "success": "تم إنشاء الحساب بنجاح",
+    "fail": "فشل إنشاء الحساب",
+
+    "fields": {
+      "username": "اسم المستخدم",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "phone": "رقم الهاتف",
+      "gender": "الجنس",
+      "female": "أنثى",
+      "male": "ذكر",
+      "role": "نوع الحساب",
+      "roleUser": "مشتركة",
+      "roleAdmin": "مديرة",
+      "roleHelper": "اختاري ما إذا كانت مشتركة أو مديرة",
+      "height": "الطول (سم)",
+      "weight": "الوزن (كغ)",
+      "age": "العمر"
+    }
+  },
+  "profile": {
+    "labels": {
+      "user": "مستخدم"
+    },
+    "roles": {
+      "admin": "مدير",
+      "member": "مشتركة"
+    },
+    "stats": {
+      "currentWeight": "الوزن الحالي",
+      "height": "الطول",
+      "completed": "الحصص المنجزة",
+      "subscription": "الاشتراك"
+    },
+    "status": {
+      "active": "نشط",
+      "expired": "منتهي"
+    },
+    "sections": {
+      "weightProgress": "📊 تطور الوزن",
+      "addWeight": "⚖️ إضافة قياس جديد"
+    },
+    "fields": {
+      "weightPlaceholder": "مثال: 75.5",
+      "notePlaceholder": "ملاحظة (اختياري)"
+    },
+    "buttons": {
+      "save": "➕ حفظ القياس",
+      "saving": "⏳ جاري الحفظ..."
+    },
+    "messages": {
+      "noWeightData": "لا توجد بيانات وزن بعد",
+      "weightSaved": "تم حفظ الوزن بنجاح ✅"
+    },
+    "errors": {
+      "weightRequired": "الرجاء إدخال الوزن الجديد",
+      "fetchFail": "حدث خطأ أثناء تحميل الملف الشخصي",
+      "saveFail": "فشل حفظ الوزن"
+    },
+    "chart": {
+      "label": "الوزن (كغ)"
+    },
+    "units": {
+      "kg": "كجم",
+      "cm": "سم"
+    }
+  },
+  "myBookings": {
+    "title": "📅 حجوزاتي",
+    "subtitle": "استعرضي حجوزاتك القادمة، السابقة، أو الملغاة",
+
+    "filters": {
+      "upcoming": "📆 القادمة",
+      "past": "✅ السابقة",
+      "cancelled": "❌ الملغاة"
+    },
+
+    "fetchError": "حدث خطأ أثناء جلب الحجوزات",
+    "noBookings": "لا توجد حجوزات في هذا القسم.",
+
+    "time": "الساعة",
+
+    "status": {
+      "booked": "محجوزة ✅",
+      "completed": "منتهية",
+      "cancelled": "ملغاة"
+    },
+
+    "cancelConfirm": "هل أنت متأكد من رغبتك في إلغاء هذا الحجز؟",
+    "cancelSuccess": "تم إلغاء الحجز بنجاح ✅",
+    "cancelFail": "تعذر إلغاء الحجز",
+
+    "cancelButton": "إلغاء الحجز",
+    "cancelling": "جاري الإلغاء..."
+  },
+  "weekdays": {
+    "sunday": "الأحد",
+    "monday": "الاثنين",
+    "tuesday": "الثلاثاء",
+    "wednesday": "الأربعاء",
+    "thursday": "الخميس",
+    "friday": "الجمعة",
+    "saturday": "السبت"
+  },
+
+  "bookingsHub": {
+    "loading": "جاري تحميل البيانات...",
+
+    "errors": {
+      "fetch": "فشل تحميل البيانات",
+      "notFoundToCancel": "لم يتم العثور على الحجز لإلغائه"
+    },
+
+    "confirmCancel": "هل أنتِ متأكدة من إلغاء هذا الحجز؟",
+
+    "stats": {
+      "upcoming": "القادمة",
+      "past": "المنتهية",
+      "cancelled": "الملغاة"
+    },
+
+    "tabs": {
+      "available": "الحجوزات المتاحة",
+      "myBookings": "حجوزاتي"
+    },
+
+    "views": {
+      "week": "عرض الأسبوع",
+      "month": "عرض الشهر الكامل"
+    },
+
+    "slotsLabel": "حصة",
+    "capacityLabel": "المقاعد",
+
+    "filters": {
+      "upcoming": "الحجوزات القادمة",
+      "past": "الحجوزات السابقة",
+      "cancelled": "الحجوزات الملغاة"
+    },
+
+    "buttons": {
+      "processing": "⏳ جاري التنفيذ...",
+      "booked": "✅ محجوز - اضغطي للإلغاء",
+      "full": "🔒 ممتلئة",
+      "bookNow": "🎯 احجزي الآن",
+      "cancelBooking": "🗑️ إلغاء الحجز",
+      "rebook": "🔁 إعادة الحجز"
+    },
+
+    "emptySection": "لا توجد حجوزات في هذا القسم.",
+
+    "toasts": {
+      "bookSuccess": "تم الحجز بنجاح ✅",
+      "bookFail": "فشل الحجز",
+      "cancelSuccess": "تم إلغاء الحجز بنجاح ❌",
+      "cancelFail": "تعذر إلغاء الحجز",
+      "rebookSuccess": "تمت إعادة الحجز بنجاح 🔁",
+      "rebookFail": "فشل إعادة الحجز"
+    }
+  },
+   "subscription": {
+    "title": "💳 اشتراكك الشهري",
+    "status": "الحالة",
+    "active": "نشط ✅",
+    "inactive": "منتهي ❌",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+
+    "buttons": {
+      "renew": "تجديد الاشتراك"
+    },
+
+    "notes": {
+      "production": "🔒 سيتم نقلك إلى صفحة الدفع الآمنة",
+      "development": "🧪 وضع التطوير: التجديد يتم محليًا دون دفع"
+    },
+
+    "errors": {
+      "load": "حدث خطأ أثناء تحميل بيانات الاشتراك",
+      "paymentSession": "تعذر إنشاء جلسة الدفع",
+      "renewFail": "فشل تجديد الاشتراك"
+    },
+
+    "toasts": {
+      "renewSuccess": "تم تجديد الاشتراك بنجاح ✅ سيتم تحويلك إلى صفحة الحجز..."
+    }
   }
 }

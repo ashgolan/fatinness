@@ -480,5 +480,197 @@
       "loginFailed": "ההתחברות נכשלה",
       "status": "שגיאה {{status}}"
     }
+  },
+  "register": {
+    "title": "יצירת חשבון חדש",
+    "subtitle": "רק המנהלת יכולה להוסיף משתמשות או מנהלות חדשות 👑",
+    "submit": "יצירת חשבון",
+    "submitting": "יוצרת חשבון...",
+    "success": "החשבון נוצר בהצלחה",
+    "fail": "יצירת החשבון נכשלה",
+
+    "fields": {
+      "username": "שם משתמש",
+      "email": "אימייל",
+      "password": "סיסמה",
+      "phone": "מספר טלפון",
+      "gender": "מגדר",
+      "female": "נקבה",
+      "male": "זכר",
+      "role": "סוג חשבון",
+      "roleUser": "משתמשת",
+      "roleAdmin": "מנהלת",
+      "roleHelper": "בחרי אם המשתמשת רגילה או מנהלת",
+      "height": "גובה (ס״מ)",
+      "weight": "משקל (ק״ג)",
+      "age": "גיל"
+    }
+  },
+  "profile": {
+    "labels": {
+      "user": "משתמש"
+    },
+    "roles": {
+      "admin": "מנהלת",
+      "member": "משתמשת"
+    },
+    "stats": {
+      "currentWeight": "משקל נוכחי",
+      "height": "גובה",
+      "completed": "אימונים שהושלמו",
+      "subscription": "מנוי"
+    },
+    "status": {
+      "active": "פעיל",
+      "expired": "פג תוקף"
+    },
+    "sections": {
+      "weightProgress": "📊 התקדמות המשקל",
+      "addWeight": "⚖️ הוספת מדידה חדשה"
+    },
+    "fields": {
+      "weightPlaceholder": "לדוגמה: 75.5",
+      "notePlaceholder": "הערה (לא חובה)"
+    },
+    "buttons": {
+      "save": "➕ שמירת מדידה",
+      "saving": "⏳ שומר..."
+    },
+    "messages": {
+      "noWeightData": "אין נתוני משקל",
+      "weightSaved": "המשקל נשמר בהצלחה"
+    },
+    "errors": {
+      "weightRequired": "אנא הזיני משקל חדש",
+      "fetchFail": "שגיאה בטעינת הפרופיל",
+      "saveFail": "שגיאה בשמירת המשקל"
+    },
+    "chart": {
+      "label": "משקל (ק״ג)"
+    },
+    "units": {
+      "kg": "ק\"ג",
+      "cm": "ס\"מ"
+    }
+  },
+  "myBookings": {
+    "title": "📅 ההזמנות שלי",
+    "subtitle": "צפי בהזמנות הקרובות, הקודמות או המבוטלות שלך",
+
+    "filters": {
+      "upcoming": "📆 קרובות",
+      "past": "✅ קודמות",
+      "cancelled": "❌ מבוטלות"
+    },
+
+    "fetchError": "שגיאה בקבלת ההזמנות",
+    "noBookings": "אין הזמנות בקטגוריה זו.",
+
+    "time": "שעה",
+
+    "status": {
+      "booked": "הוזמן",
+      "completed": "הושלם",
+      "cancelled": "בוטל"
+    },
+
+    "cancelConfirm": "האם את בטוחה שברצונך לבטל הזמנה זו?",
+    "cancelSuccess": "ההזמנה בוטלה בהצלחה",
+    "cancelFail": "לא ניתן לבטל את ההזמנה",
+
+    "cancelButton": "בטלי הזמנה",
+    "cancelling": "מבטלת..."
+  },
+  "weekdays": {
+    "sunday": "ראשון",
+    "monday": "שני",
+    "tuesday": "שלישי",
+    "wednesday": "רביעי",
+    "thursday": "חמישי",
+    "friday": "שישי",
+    "saturday": "שבת"
+  },
+
+  "bookingsHub": {
+    "loading": "טוען נתונים...",
+
+    "errors": {
+      "fetch": "טעינה נכשלה",
+      "notFoundToCancel": "לא נמצא המועד לביטול"
+    },
+
+    "confirmCancel": "האם את בטוחה שברצונך לבטל את ההזמנה?",
+
+    "stats": {
+      "upcoming": "קרובות",
+      "past": "שהסתיימו",
+      "cancelled": "מבוטלות"
+    },
+
+    "tabs": {
+      "available": "מועדים פנויים",
+      "myBookings": "ההזמנות שלי"
+    },
+
+    "views": {
+      "week": "תצוגת שבוע",
+      "month": "תצוגת חודש מלא"
+    },
+
+    "slotsLabel": "שיעור",
+    "capacityLabel": "מקומות",
+
+    "filters": {
+      "upcoming": "הזמנות קרובות",
+      "past": "הזמנות קודמות",
+      "cancelled": "הזמנות מבוטלות"
+    },
+
+    "buttons": {
+      "processing": "מעבד...",
+      "booked": "שמור – לחצי לביטול",
+      "full": "מלא",
+      "bookNow": "להזמין עכשיו",
+      "cancelBooking": "ביטול הזמנה",
+      "rebook": "להזמין שוב"
+    },
+
+    "emptySection": "אין הזמנות בקטגוריה זו.",
+
+    "toasts": {
+      "bookSuccess": "ההזמנה נשמרה בהצלחה ✅",
+      "bookFail": "ההזמנה נכשלה",
+      "cancelSuccess": "ההזמנה בוטלה בהצלחה ❌",
+      "cancelFail": "לא ניתן היה לבטל את ההזמנה",
+      "rebookSuccess": "ההזמנה נפתחה מחדש 🔁",
+      "rebookFail": "פתיחה מחדש נכשלה"
+    }
+  },
+    "subscription": {
+    "title": "💳 המנוי החודשי שלך",
+    "status": "סטטוס",
+    "active": "פעיל ✅",
+    "inactive": "לא פעיל ❌",
+    "startDate": "תאריך התחלה",
+    "endDate": "תאריך סיום",
+
+    "buttons": {
+      "renew": "חדש מנוי"
+    },
+
+    "notes": {
+      "production": "🔒 תועברי לדף תשלום מאובטח",
+      "development": "🧪 מצב פיתוח: החידוש מבוצע מקומית ללא תשלום"
+    },
+
+    "errors": {
+      "load": "שגיאה בטעינת נתוני המנוי",
+      "paymentSession": "לא ניתן ליצור סשן תשלום",
+      "renewFail": "כשל בחידוש המנוי"
+    },
+
+    "toasts": {
+      "renewSuccess": "המנוי חודש בהצלחה! מעבירה לדף ההזמנות..."
+    }
   }
 }

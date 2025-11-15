@@ -2,9 +2,11 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
+import { useTranslation } from "react-i18next";
 
 export default function BookingsHub() {
   const { mode, BRAND } = useThemeMode();
+  const { t } = useTranslation();
 
   // 📦 الحالة العامة
   const [activeTab, setActiveTab] = useState("available"); // available | mybookings
@@ -17,7 +19,7 @@ export default function BookingsHub() {
   const [bookingId, setBookingId] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [view, setView] = useState("month");
-  const [hoveredDay, setHoveredDay] = useState(null); // (غير مستخدم الآن لكن لا يضر)
+  const [hoveredDay, setHoveredDay] = useState(null); // غير مستخدم الآن لكن لا يضر
 
   // 📋 حجوزاتي
   const [allBookings, setAllBookings] = useState([]);
@@ -25,13 +27,13 @@ export default function BookingsHub() {
   const [refreshing, setRefreshing] = useState(false);
 
   const dayNames = [
-    "الأحد",
-    "الاثنين",
-    "الثلاثاء",
-    "الأربعاء",
-    "الخميس",
-    "الجمعة",
-    "السبت",
+    t("weekdays.sunday"),
+    t("weekdays.monday"),
+    t("weekdays.tuesday"),
+    t("weekdays.wednesday"),
+    t("weekdays.thursday"),
+    t("weekdays.friday"),
+    t("weekdays.saturday"),
   ];
 
   const toLocalKey = (d) => {
@@ -71,12 +73,12 @@ export default function BookingsHub() {
       setMyBookings(myActive);
       setAllBookings(bookingsRes.data);
     } catch {
-      toast.error("فشل تحميل البيانات");
+      toast.error(t("bookingsHub.errors.fetch"));
     } finally {
       setLoading(false);
       setTimeout(() => setAnimateIn(true), 150);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchData();
@@ -88,15 +90,17 @@ export default function BookingsHub() {
       setBookingId(slotId);
       try {
         await Api.post("/bookings", { slotId });
-        toast.success("تم الحجز بنجاح ✅");
+        toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
-        toast.error(err?.response?.data?.message || "فشل الحجز");
+        toast.error(
+          err?.response?.data?.message || t("bookingsHub.toasts.bookFail")
+        );
       } finally {
         setBookingId(null);
       }
     },
-    [fetchData]
+    [fetchData, t]
   );
 
   const handleCancel = useCallback(
@@ -104,46 +108,45 @@ export default function BookingsHub() {
       setBookingId(slotId);
       setRefreshing(true);
       try {
-        let bookingId = bookingIdDirect;
-        if (!bookingId) {
+        let bookingIdLocal = bookingIdDirect;
+        if (!bookingIdLocal) {
           const { data } = await Api.get("/bookings/me");
           const booking = data.find(
             (b) => b.slot._id === slotId && b.status === "booked"
           );
           if (!booking) {
-            toast.error("لم يتم العثور على الحجز لإلغائه");
+            toast.error(t("bookingsHub.errors.notFoundToCancel"));
             return;
           }
-          bookingId = booking._id;
+          bookingIdLocal = booking._id;
         }
 
-        if (
-          !fromMyBookings &&
-          !window.confirm("هل أنتِ متأكدة من إلغاء هذا الحجز؟")
-        ) {
+        if (!fromMyBookings && !window.confirm(t("bookingsHub.confirmCancel"))) {
           return;
         }
 
-        await Api.delete(`/bookings/${bookingId}`);
-        toast.success("تم الإلغاء ❌");
+        await Api.delete(`/bookings/${bookingIdLocal}`);
+        toast.success(t("bookingsHub.toasts.cancelSuccess"));
         await fetchData();
       } catch (err) {
-        toast.error(err?.response?.data?.message || "تعذر الإلغاء");
+        toast.error(
+          err?.response?.data?.message || t("bookingsHub.toasts.cancelFail")
+        );
       } finally {
         setBookingId(null);
         setRefreshing(false);
       }
     },
-    [fetchData]
+    [fetchData, t]
   );
 
   const handleRebook = async (slotId) => {
     try {
       await Api.post("/bookings", { slotId });
-      toast.success("تمت إعادة الحجز بنجاح 🔁");
+      toast.success(t("bookingsHub.toasts.rebookSuccess"));
       await fetchData();
     } catch {
-      toast.error("فشل إعادة الحجز");
+      toast.error(t("bookingsHub.toasts.rebookFail"));
     }
   };
 
@@ -235,13 +238,17 @@ export default function BookingsHub() {
       >
         {[
           {
-            label: "القادمة",
+            label: t("bookingsHub.stats.upcoming"),
             count: upcomingBookings.length,
             color: BRAND.purple,
           },
-          { label: "المنتهية", count: pastBookings.length, color: "#10b981" },
           {
-            label: "الملغاة",
+            label: t("bookingsHub.stats.past"),
+            count: pastBookings.length,
+            color: "#10b981",
+          },
+          {
+            label: t("bookingsHub.stats.cancelled"),
             count: cancelledBookings.length,
             color: "#ef4444",
           },
@@ -273,8 +280,8 @@ export default function BookingsHub() {
         }}
       >
         {[
-          { value: "available", label: "🗓️ الحجوزات المتاحة" },
-          { value: "mybookings", label: "📋 حجوزاتي" },
+          { value: "available", label: t("bookingsHub.tabs.available") },
+          { value: "mybookings", label: t("bookingsHub.tabs.myBookings") },
         ].map((tab) => {
           const isActive = activeTab === tab.value;
           return (
@@ -316,7 +323,9 @@ export default function BookingsHub() {
               animation: "spin 1s linear infinite",
             }}
           />
-          <p style={{ color: "#999", marginTop: 20 }}>جاري تحميل البيانات...</p>
+          <p style={{ color: "#999", marginTop: 20 }}>
+            {t("bookingsHub.loading")}
+          </p>
         </div>
       ) : (
         <>
@@ -339,6 +348,7 @@ export default function BookingsHub() {
                 handleCancel,
                 bookingId,
                 toLocalKey,
+                t,
               }}
             />
           )}
@@ -354,6 +364,7 @@ export default function BookingsHub() {
                 refreshing,
                 handleCancel,
                 handleRebook,
+                t,
               }}
             />
           )}
@@ -381,6 +392,7 @@ function AvailableView({
   handleCancel,
   bookingId,
   toLocalKey,
+  t,
 }) {
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
@@ -395,8 +407,8 @@ function AvailableView({
         }}
       >
         {[
-          { value: "week", label: "📅 الأسبوع" },
-          { value: "month", label: "🗓️ الشهر الكامل" },
+          { value: "week", label: t("bookingsHub.views.week") },
+          { value: "month", label: t("bookingsHub.views.month") },
         ].map((btn) => (
           <button
             key={btn.value}
@@ -483,8 +495,7 @@ function AvailableView({
                 position: "relative",
               }}
             >
-              {/* 🔹 رقم اليوم */}
-              {/* 🔹 اليوم أعلى المربع */}
+              {/* اليوم */}
               <div
                 style={{
                   fontSize: 11,
@@ -493,10 +504,10 @@ function AvailableView({
                   marginBottom: 4,
                 }}
               >
-                {dayNames[d.getDay()]} {/* يعرض مثل: الأحد */}
+                {dayNames[d.getDay()]}
               </div>
 
-              {/* 🔹 التاريخ بصيغة رقم/شهر */}
+              {/* التاريخ */}
               <strong
                 style={{
                   fontSize: 16,
@@ -507,7 +518,7 @@ function AvailableView({
                 {`${d.getDate()}/${d.getMonth() + 1}`}
               </strong>
 
-              {/* 🔹 عدد الحصص أسفل التاريخ */}
+              {/* عدد الحصص */}
               {isAvailable && (
                 <span
                   style={{
@@ -518,11 +529,11 @@ function AvailableView({
                     fontWeight: 600,
                   }}
                 >
-                  {slotsCount} حصة
+                  {slotsCount} {t("bookingsHub.slotsLabel")}
                 </span>
               )}
 
-              {/* 🔴 نقطة اليوم الحالي */}
+              {/* اليوم الحالي */}
               {isToday && (
                 <div
                   style={{
@@ -535,7 +546,7 @@ function AvailableView({
                 />
               )}
 
-              {/* ✅ رمز الحجز في الزاوية اليمنى العليا */}
+              {/* رمز متحجّز */}
               {hasMyBooking && (
                 <div
                   style={{
@@ -610,7 +621,7 @@ function AvailableView({
               margin: "0 auto",
             }}
           >
-            {slotsByDay[selectedDate].map((slot, idx) => {
+            {slotsByDay[selectedDate].map((slot) => {
               const isBooked = myBookings.includes(slot._id);
               const isFull = slot.bookedCount >= slot.capacity;
               const isProcessing = bookingId === slot._id;
@@ -653,7 +664,8 @@ function AvailableView({
                       marginBottom: 12,
                     }}
                   >
-                    المقاعد: {slot.bookedCount}/{slot.capacity}
+                    {t("bookingsHub.capacityLabel")}: {slot.bookedCount}/
+                    {slot.capacity}
                   </div>
 
                   <button
@@ -687,12 +699,12 @@ function AvailableView({
                     }}
                   >
                     {isProcessing
-                      ? "⏳ جاري التنفيذ..."
+                      ? t("bookingsHub.buttons.processing")
                       : isBooked
-                      ? "✅ محجوز - اضغطي للإلغاء"
+                      ? t("bookingsHub.buttons.booked")
                       : isFull
-                      ? "🔒 ممتلئة"
-                      : "🎯 احجزي الآن"}
+                      ? t("bookingsHub.buttons.full")
+                      : t("bookingsHub.buttons.bookNow")}
                   </button>
                 </div>
               );
@@ -715,6 +727,7 @@ function MyBookingsView({
   refreshing,
   handleCancel,
   handleRebook,
+  t,
 }) {
   const now = new Date();
 
@@ -731,9 +744,9 @@ function MyBookingsView({
         }}
       >
         {[
-          { value: "upcoming", label: "📆 القادمة" },
-          { value: "past", label: "✅ السابقة" },
-          { value: "cancelled", label: "❌ الملغاة" },
+          { value: "upcoming", label: t("bookingsHub.filters.upcoming") },
+          { value: "past", label: t("bookingsHub.filters.past") },
+          { value: "cancelled", label: t("bookingsHub.filters.cancelled") },
         ].map((f) => (
           <button
             key={f.value}
@@ -762,7 +775,7 @@ function MyBookingsView({
 
       {filteredBookings.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: 80, opacity: 0.7 }}>
-          <p>لا توجد حجوزات في هذا القسم</p>
+          <p>{t("bookingsHub.emptySection")}</p>
         </div>
       ) : (
         <div
@@ -796,7 +809,12 @@ function MyBookingsView({
                 }}
               >
                 <div style={{ fontWeight: 700, marginBottom: 8 }}>
-                  📅 {new Date(b.slot.date).toLocaleDateString("ar-EG")}
+                  📅{" "}
+                  {new Date(b.slot.date).toLocaleDateString("ar-EG", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  })}
                 </div>
                 <div style={{ opacity: 0.8, marginBottom: 12 }}>
                   🕒 {b.slot.startTime}
@@ -811,7 +829,8 @@ function MyBookingsView({
                       width: "100%",
                       padding: "10px 0",
                       borderRadius: 12,
-                      background: `linear-gradient(135deg, #ef4444, #dc2626)`,
+                      background:
+                        "linear-gradient(135deg, #ef4444, #dc2626)",
                       color: "#fff",
                       border: "none",
                       fontWeight: 700,
@@ -819,7 +838,7 @@ function MyBookingsView({
                       marginBottom: 8,
                     }}
                   >
-                    🗑️ إلغاء الحجز
+                    {t("bookingsHub.buttons.cancelBooking")}
                   </button>
                 )}
 
@@ -838,7 +857,7 @@ function MyBookingsView({
                       cursor: "pointer",
                     }}
                   >
-                    🔁 إعادة الحجز
+                    {t("bookingsHub.buttons.rebook")}
                   </button>
                 )}
               </div>

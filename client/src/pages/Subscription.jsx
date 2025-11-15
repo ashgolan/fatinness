@@ -1,3 +1,4 @@
+// client/src/pages/Subscription.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -9,28 +10,25 @@ import {
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Subscription() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [renewing, setRenewing] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
-  // 🧩 وضع التشغيل
   const isPaymentEnabled = process.env.REACT_APP_PAYMENT_MODE === "production";
-  // يمكنك ضبطه في ملف .env مثلاً:
-  // REACT_APP_PAYMENT_MODE=development  ← للتجارب
-  // REACT_APP_PAYMENT_MODE=production   ← عند تفعيل الدفع
 
-  // 🔹 جلب بيانات الاشتراك
+  // جلب الاشتراك
   const fetchSubscription = async () => {
     setLoading(true);
     try {
       const { data } = await Api.get("/users/me");
       setUser(data);
     } catch (err) {
-      console.error(err);
-      toast.error("حدث خطأ أثناء تحميل بيانات الاشتراك");
+      toast.error(t("subscription.errors.load"));
     } finally {
       setLoading(false);
     }
@@ -40,34 +38,30 @@ export default function Subscription() {
     fetchSubscription();
   }, []);
 
-  // 🔹 عند الضغط على "تجديد الاشتراك"
+  // التجديد
   const handleRenew = async () => {
     setRenewing(true);
     try {
       if (isPaymentEnabled) {
-        // 🔹 الوضع الحقيقي → بوابة الدفع (Stripe / Bit)
         const { data } = await Api.post("/payments/checkout", {
           plan: "monthly",
         });
+
         if (data?.url) {
-          window.location.href = data.url; // فتح صفحة الدفع الآمنة
+          window.location.href = data.url;
         } else {
-          toast.error("تعذر إنشاء جلسة الدفع");
+          toast.error(t("subscription.errors.paymentSession"));
         }
       } else {
-        // 🔹 الوضع التجريبي → تجديد محلي سريع
         await Api.post("/users/renew-subscription");
-        toast.success("تم تجديد الاشتراك بنجاح ✅ سيتم تحويلك إلى صفحة الحجز...");
+        toast.success(t("subscription.toasts.renewSuccess"));
 
-        // إعادة تحميل بيانات المستخدم
         fetchSubscription();
 
-        // ⏳ إعادة التوجيه التلقائي بعد 3 ثوانٍ
         setTimeout(() => navigate("/available-slots"), 3000);
       }
     } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "فشل تجديد الاشتراك");
+      toast.error(err?.response?.data?.message || t("subscription.errors.renewFail"));
     } finally {
       setRenewing(false);
     }
@@ -83,11 +77,13 @@ export default function Subscription() {
 
   const subscription = user?.subscription;
   const isActive = subscription?.active;
+
   const startDate = subscription?.currentPeriodStart
-    ? new Date(subscription.currentPeriodStart).toLocaleDateString("ar-EG")
+    ? new Date(subscription.currentPeriodStart).toLocaleDateString()
     : "—";
+
   const endDate = subscription?.currentPeriodEnd
-    ? new Date(subscription.currentPeriodEnd).toLocaleDateString("ar-EG")
+    ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
     : "—";
 
   return (
@@ -102,22 +98,22 @@ export default function Subscription() {
       }}
     >
       <Typography variant="h5" textAlign="center" gutterBottom>
-        💳 اشتراكك الشهري
+        {t("subscription.title")}
       </Typography>
 
       <Paper sx={{ p: 3, textAlign: "center", borderRadius: 3 }}>
         <Typography variant="h6" mb={2}>
-          الحالة:{" "}
+          {t("subscription.status")}:{" "}
           <span style={{ color: isActive ? "green" : "red" }}>
-            {isActive ? "نشط ✅" : "منتهي ❌"}
+            {isActive ? t("subscription.active") : t("subscription.inactive")}
           </span>
         </Typography>
 
         <Typography variant="body1">
-          <strong>تاريخ البداية:</strong> {startDate}
+          <strong>{t("subscription.startDate")}:</strong> {startDate}
         </Typography>
         <Typography variant="body1" mb={2}>
-          <strong>تاريخ النهاية:</strong> {endDate}
+          <strong>{t("subscription.endDate")}:</strong> {endDate}
         </Typography>
 
         <Button
@@ -126,7 +122,7 @@ export default function Subscription() {
           onClick={handleRenew}
           disabled={renewing}
         >
-          {renewing ? <CircularProgress size={24} /> : "تجديد الاشتراك"}
+          {renewing ? <CircularProgress size={24} /> : t("subscription.buttons.renew")}
         </Button>
 
         <Typography
@@ -136,8 +132,8 @@ export default function Subscription() {
           color="text.secondary"
         >
           {isPaymentEnabled
-            ? "🔒 سيتم نقلك إلى صفحة الدفع الآمنة"
-            : "🧪 وضع التطوير: التجديد يتم محليًا دون دفع"}
+            ? t("subscription.notes.production")
+            : t("subscription.notes.development")}
         </Typography>
       </Paper>
     </Box>

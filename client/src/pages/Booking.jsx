@@ -12,6 +12,7 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { fmtLocal } from "../utils/date";
 import { colors, labels } from "../theme/colors";
+import { useTranslation } from "react-i18next";
 
 // 🔹 دالة مساعدة لتوليد الأيام السبعة القادمة
 function getWeekDays(start = new Date()) {
@@ -33,51 +34,49 @@ function getWeekDays(start = new Date()) {
 }
 
 export default function Booking() {
+  const { t } = useTranslation();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [weekDays, setWeekDays] = useState(getWeekDays());
 
-const fetchSlots = async (date) => {
-  setLoading(true);
-  try {
-    // 🔹 نستخدم fmtLocal بدل toISOString لتفادي انزلاق اليوم
-    const dateStr = fmtLocal(date);
-
-    const { data } = await Api.get(`/slots/day/${dateStr}`);
-    setSlots(data);
-  } catch (err) {
-    toast.error("حدث خطأ أثناء جلب المواعيد");
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchSlots = async (date) => {
+    setLoading(true);
+    try {
+      const dateStr = fmtLocal(date);
+      const { data } = await Api.get(`/slots/day/${dateStr}`);
+      setSlots(data);
+    } catch (err) {
+      toast.error(t("booking.error"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchSlots(selectedDate);
   }, [selectedDate]);
 
-const handleBook = async (slotId) => {
-  try {
-    await Api.post("/bookings", { slotId });
-    toast.success("تم حجز الموعد بنجاح");
-    await fetchSlots(selectedDate); // ✅ انتظر حتى تكتمل إعادة التحميل
-  } catch (err) {
-    toast.error(err?.response?.data?.message || "حدث خطأ أثناء الحجز");
-  }
-};
+  const handleBook = async (slotId) => {
+    try {
+      await Api.post("/bookings", { slotId });
+      toast.success(t("booking.success"));
+      await fetchSlots(selectedDate);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || t("booking.error"));
+    }
+  };
 
   return (
     <Box sx={{ maxWidth: 950, mx: "auto", mt: 3 }}>
       <Typography variant="h5" gutterBottom>
-        جدول الحصص
+        {t("booking.title")}
       </Typography>
 
       {/* 🔹 شريط الأيام */}
       <Stack direction="row" spacing={1} sx={{ overflowX: "auto", mb: 2 }}>
         {weekDays.map((d) => {
-          const isActive =
-            d.date.toDateString() === selectedDate.toDateString();
+          const isActive = d.date.toDateString() === selectedDate.toDateString();
           return (
             <Button
               key={d.label}
@@ -115,13 +114,16 @@ const handleBook = async (slotId) => {
                 }}
               >
                 <Typography variant="h6">{slot.time}</Typography>
+
                 <Typography variant="body2">
-                  {slot.available > 0 ? `متاحة (${slot.available})` : "ممتلئة"}
+                  {slot.available > 0
+                    ? `${t("booking.available")} (${slot.available})`
+                    : t("booking.full")}
                 </Typography>
 
                 {slot.isPast ? (
                   <Typography variant="caption" color="text.secondary">
-                    انتهت الحصة
+                    {t("booking.past")}
                   </Typography>
                 ) : slot.available > 0 && !slot.isBooked ? (
                   <Button
@@ -130,10 +132,10 @@ const handleBook = async (slotId) => {
                     sx={{ mt: 1, backgroundColor: colors.primary }}
                     onClick={() => handleBook(slot._id)}
                   >
-                    حجز
+                    {t("booking.book")}
                   </Button>
                 ) : slot.available === 0 ? (
-                  <Typography variant="caption">{labels.full}</Typography>
+                  <Typography variant="caption">{t("booking.full")}</Typography>
                 ) : (
                   <Typography variant="caption">{labels.booked}</Typography>
                 )}
@@ -143,7 +145,7 @@ const handleBook = async (slotId) => {
         </Grid>
       ) : (
         <Typography sx={{ textAlign: "center", mt: 3 }}>
-          لا توجد حصص في هذا اليوم.
+          {t("booking.noSlots")}
         </Typography>
       )}
     </Box>
