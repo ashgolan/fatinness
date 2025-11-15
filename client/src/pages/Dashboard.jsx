@@ -1,3 +1,4 @@
+// client/src/pages/Dashboard.jsx
 import React from "react";
 import {
   Box,
@@ -8,46 +9,48 @@ import {
   Container,
   CircularProgress,
 } from "@mui/material";
+
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+
 import { useNavigate } from "react-router-dom";
 import { keyframes } from "@mui/system";
+
 import { useThemeMode } from "../context/ThemeContext";
-import { useBrand } from "../context/BrandContext"; // ✅ تمت إضافتها
+import { useBrand } from "../context/BrandContext";
+
+import { useTranslation } from "react-i18next";
 
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
 `;
 
-const rotate = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
-
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { mode, BRAND } = useThemeMode();
-  const isDark = mode === "dark";
-  const { cardUrl, loading: loadingBrand } = useBrand(); // ✅ جلب صورة الكارت من السيرفر
+  const { t } = useTranslation();
 
-  // صورة بديلة في حال عدم وجود كارت
+  const { mode } = useThemeMode();
+  const isDark = mode === "dark";
+  const { cardUrl, loading: loadingBrand } = useBrand();
+
   const fallbackCard = "/uploads/gym-cover.jpg";
   const imgSrc = loadingBrand ? null : cardUrl || fallbackCard;
 
+  // 🔹 الاختصارات مع الترجمة
   const shortcuts = [
     {
-      title: "الملف الشخصي",
-      desc: "عرض بياناتك وتطور الوزن",
+      title: t("dashboard.profile_title"),
+      desc: t("dashboard.profile_desc"),
       icon: <AccountCircleIcon sx={{ fontSize: 50 }} />,
       path: "/profile",
       gradient: "linear-gradient(135deg, #9B6FD6 0%, #E8B54D 100%)",
       bgGlow: "rgba(155, 111, 214, 0.25)",
     },
     {
-      title: "مركز الحجوزات",
-      desc: "احجزي المواعيد وتابعي حجوزاتك السابقة والقادمة",
+      title: t("dashboard.booking_title"),
+      desc: t("dashboard.booking_desc"),
       icon: <CalendarMonthIcon sx={{ fontSize: 50 }} />,
       path: "/bookings-hub",
       gradient: "linear-gradient(135deg, #EC407A 0%, #9B6FD6 100%)",
@@ -57,7 +60,7 @@ export default function Dashboard() {
 
   return (
     <Box
-      dir="rtl"
+      dir={t("dir")}
       sx={{
         minHeight: "100vh",
         py: { xs: 4, md: 8 },
@@ -86,6 +89,7 @@ export default function Dashboard() {
           animation: `${float} 6s ease-in-out infinite`,
         }}
       />
+
       <Box
         sx={{
           position: "absolute",
@@ -103,7 +107,7 @@ export default function Dashboard() {
       />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        {/* ✅ صورة الغلاف من البراند */}
+        {/* صورة الغلاف */}
         <Box
           sx={{
             position: "relative",
@@ -136,15 +140,13 @@ export default function Dashboard() {
               <Box
                 component="img"
                 src={imgSrc}
-                alt="صورة النادي"
+                alt=""
                 onError={(e) => (e.target.src = fallbackCard)}
                 sx={{
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
                   filter: "brightness(0.75)",
-                  transition: "opacity 0.6s ease",
-                  opacity: loadingBrand ? 0.4 : 1,
                 }}
               />
               <Box
@@ -174,8 +176,9 @@ export default function Dashboard() {
                     textShadow: "0 3px 10px rgba(0,0,0,0.7)",
                   }}
                 >
-                  مرحبًا بكِ في Fatinness 💜
+                  {t("dashboard.welcome")}
                 </Typography>
+
                 <Typography
                   variant="h6"
                   sx={{
@@ -185,21 +188,20 @@ export default function Dashboard() {
                     textShadow: "0 2px 6px rgba(0,0,0,0.6)",
                   }}
                 >
-                  ناديكِ الرياضي المفضل يبدأ من هنا ✨
+                  {t("dashboard.subtitle")}
                 </Typography>
               </Box>
             </>
           )}
         </Box>
 
-        {/* بطاقات الاختصارات */}
+        {/* البطاقات */}
         <Box
           sx={{
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: 3,
             justifyContent: "center",
-            alignItems: "stretch",
             mb: 8,
             maxWidth: "900px",
             mx: "auto",
@@ -246,11 +248,11 @@ export default function Dashboard() {
                     justifyContent: "center",
                     margin: "0 auto 24px",
                     color: "#fff",
-                    boxShadow: `0 12px 35px ${item.bgGlow}`,
                   }}
                 >
                   {item.icon}
                 </Box>
+
                 <Typography
                   variant="h5"
                   sx={{
@@ -261,6 +263,7 @@ export default function Dashboard() {
                 >
                   {item.title}
                 </Typography>
+
                 <Typography
                   variant="body2"
                   sx={{
@@ -280,17 +283,14 @@ export default function Dashboard() {
                   color: "#fff",
                   fontWeight: 700,
                   py: 1.5,
-                  px: { xs: 4, md: 5 },
                   borderRadius: 3,
                   textTransform: "none",
-                  fontSize: { xs: "0.95rem", md: "1rem" },
                   "&:hover": {
                     transform: "scale(1.05)",
-                    boxShadow: `0 10px 30px ${item.bgGlow}`,
                   },
                 }}
               >
-                ادخلي الآن 🚀
+                {t("dashboard.enter_now")}
               </Button>
             </Paper>
           ))}
@@ -314,13 +314,12 @@ export default function Dashboard() {
               px: { xs: 4, md: 6 },
               py: { xs: 2.5, md: 3 },
               borderRadius: 50,
-              boxShadow: "0 8px 30px rgba(155,111,214,0.4)",
               fontWeight: 600,
               fontSize: { xs: "1rem", md: "1.2rem" },
             }}
           >
             <TrendingUpIcon />
-            <span>استمري في التقدم نحو أهدافك!</span>
+            <span>{t("dashboard.keep_going")}</span>
             <span>💪</span>
           </Box>
         </Box>

@@ -678,7 +678,7 @@
       "rebookFail": "Rebook failed"
     }
   },
-   "subscription": {
+  "subscription": {
     "title": "💳 Your Monthly Subscription",
     "status": "Status",
     "active": "Active ✅",
@@ -704,5 +704,20 @@
     "toasts": {
       "renewSuccess": "Subscription renewed successfully! Redirecting..."
     }
+  },
+
+  "dashboard": {
+    "dir": "ltr",
+    "welcome": "Welcome to Fatinness 💜",
+    "subtitle": "Your favorite fitness journey begins here ✨",
+
+    "profile_title": "Profile",
+    "profile_desc": "View your data and weight progress",
+
+    "booking_title": "Booking Hub",
+    "booking_desc": "Book sessions and track past & upcoming bookings",
+
+    "enter_now": "Enter Now 🚀",
+    "keep_going": "Keep pushing toward your goals!"
   }
 }
