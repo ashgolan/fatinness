@@ -8,33 +8,22 @@ import {
   Button,
   Tabs,
   Tab,
-  TextField,
-  Chip,
   CircularProgress,
+  Chip,
   Stack,
-  IconButton,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Tooltip,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
-// Icons
+
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
-import DeleteIcon from "@mui/icons-material/Delete";
 import SaveIcon from "@mui/icons-material/Save";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import CloseIcon from "@mui/icons-material/Close";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import DaySection from "../../components/schedule/DaySection";
 import { useThemeMode } from "../../context/ThemeContext";
-import { useTranslation } from "react-i18next";
 
 // ===================== أدوات التاريخ =====================
 function startOfWeek(date = new Date()) {
@@ -43,17 +32,20 @@ function startOfWeek(date = new Date()) {
   d.setDate(d.getDate() - d.getDay());
   return d;
 }
+
 function addDays(date, days) {
   const d = new Date(date);
   d.setDate(d.getDate() + days);
   return d;
 }
+
 function fmt(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const dd = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${dd}`;
 }
+
 function isPastDay(date) {
   const d = new Date(date);
   const today = new Date();
@@ -61,6 +53,7 @@ function isPastDay(date) {
   d.setHours(0, 0, 0, 0);
   return d < today;
 }
+
 function isToday(date) {
   const d = new Date(date);
   const t = new Date();
@@ -71,35 +64,25 @@ function isToday(date) {
   );
 }
 
+const DAY_NAMES = [
+  "الأحد",
+  "الإثنين",
+  "الثلاثاء",
+  "الأربعاء",
+  "الخميس",
+  "الجمعة",
+  "السبت",
+];
+
 export default function AdminSchedule() {
-  const { mode, BRAND } = useThemeMode();
+  const { mode } = useThemeMode();
   const isDark = mode === "dark";
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { t } = useTranslation();
 
-  const dayNames = [
-    t("days.0"),
-    t("days.1"),
-    t("days.2"),
-    t("days.3"),
-    t("days.4"),
-    t("days.5"),
-    t("days.6"),
-  ];
-
-  // 🎨 ألوان التصميم
-  const COLORS = {
-    primary: isDark ? "#B794F6" : "#9B6FD6",
-    secondary: isDark ? "#F6C86E" : "#E8B54D",
-    bgMain: isDark ? "#1a1a1f" : "#FAFAFA",
-    bgCard: isDark ? "#25252b" : "#FFFFFF",
-    bgSoft: isDark ? "#2d2d35" : "#F5F5F7",
-    border: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-    borderAccent: isDark ? "rgba(183,148,246,0.25)" : "rgba(155,111,214,0.25)",
-    text: isDark ? "#E5E5E5" : "#2D2D2D",
-    textSoft: isDark ? "#A0A0A0" : "#666666",
-    error: isDark ? "#D57373" : "#E57373",
+  // ألوان وهوية فاخرة
+  const BRAND = {
+    purple: "#9B6FD6",
+    pink: "#EC4899",
+    gold: "#F59E0B",
   };
 
   // ===================== الحالة =====================
@@ -110,7 +93,7 @@ export default function AdminSchedule() {
   const [loading, setLoading] = useState(true);
   const [currentEdits, setCurrentEdits] = useState({});
   const [nextWeek, setNextWeek] = useState([]);
-  const [expandedDay, setExpandedDay] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   // ===================== جلب البيانات =====================
   const fetchCurrentWeek = async () => {
@@ -121,7 +104,7 @@ export default function AdminSchedule() {
       });
       setWeekData(data);
     } catch {
-      toast.error(t("adminSchedule.errors.fetchCurrent"));
+      toast.error("فشل في جلب بيانات الأسبوع الحالي");
     } finally {
       setLoading(false);
     }
@@ -156,7 +139,10 @@ export default function AdminSchedule() {
     const key = fmt(addDays(weekStart, dayIndex));
     setCurrentEdits((prev) => ({
       ...prev,
-      [key]: [...(prev[key] || []), { startTime: "", endTime: "", capacity: "20" }],
+      [key]: [
+        ...(prev[key] || []),
+        { startTime: "", endTime: "", capacity: "20" },
+      ],
     }));
   };
 
@@ -182,14 +168,17 @@ export default function AdminSchedule() {
   };
 
   const deleteSlot = async (id) => {
-    if (!window.confirm(t("adminSchedule.confirm.deleteSlot"))) return;
+    if (!window.confirm("هل أنت متأكد من حذف هذه الحصة؟")) return;
 
     try {
       await Api.delete(`/admin/slots/${id}`);
-      toast.success(t("adminSchedule.success.deleted"));
-      fetchCurrentWeek();
+      toast.success("تم حذف الحصة بنجاح");
+
+      // 🔥 أهم شيء:
+      await fetchCurrentWeek();
+      await fetchNextWeek();
     } catch {
-      toast.error(t("adminSchedule.errors.deleteFailed"));
+      toast.error("فشل في حذف الحصة");
     }
   };
 
@@ -209,15 +198,21 @@ export default function AdminSchedule() {
       });
     });
 
-    if (!changes.length) return toast.info(t("adminSchedule.info.noValidChanges"));
+    if (!changes.length) return toast.info("لا توجد تغييرات صالحة للحفظ");
 
+    setSaving(true);
     try {
       await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
-      toast.success(t("adminSchedule.success.saved"));
+
+      toast.success(`تم حفظ ${changes.length} حصة بنجاح`);
+
+      // 🔥 الحل الحقيقي:
       setCurrentEdits({});
-      fetchCurrentWeek();
-    } catch {
-      toast.error(t("adminSchedule.errors.saveFailed"));
+      await fetchCurrentWeek();
+    } catch (e) {
+      toast.error("فشل في حفظ التغييرات");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -252,11 +247,12 @@ export default function AdminSchedule() {
         }))
     );
 
-    if (!items.length) return toast.warn(t("adminSchedule.info.addValid"));
+    if (!items.length) return toast.warn("أضف حصصاً صالحة أولاً");
 
+    setSaving(true);
     try {
       const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
-      toast.success(t("adminSchedule.success.createdNext", { count: data.created }));
+      toast.success(`تم إنشاء ${data.created} حصة للأسبوع القادم`);
       fetchNextWeek();
 
       setNextWeek(
@@ -264,382 +260,350 @@ export default function AdminSchedule() {
       );
       setTab(1);
     } catch {
-      toast.error(t("adminSchedule.errors.createNextFailed"));
+      toast.error("فشل في إنشاء الأسبوع القادم");
+    } finally {
+      setSaving(false);
     }
   };
 
-  // ===================== بطاقة اليوم =====================
-  const DayCard = ({
-    dayIndex,
-    dayKey,
-    existing,
-    pending,
-    isPast,
-    isNextWeek = false,
-  }) => {
-    const isTodayFlag = isToday(new Date(dayKey));
-
-    const cardContent = (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {/* حصص قديمة */}
-        {!!existing.length && (
-          <Stack spacing={1.5}>
-            {existing.map((s) => (
-              <Paper
-                key={s._id}
-                elevation={0}
-                sx={{
-                  p: 2,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  borderRadius: 2,
-                  background: COLORS.bgSoft,
-                  border: `1px solid ${COLORS.border}`,
-                }}
-              >
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <AccessTimeIcon sx={{ color: COLORS.primary }} />
-
-                  <Typography sx={{ fontWeight: 600, color: COLORS.text }}>
-                    {s.startTime} - {s.endTime}
-                  </Typography>
-
-                  <Chip
-                    size="small"
-                    label={`${t("adminSchedule.capacity")} ${s.capacity}`}
-                    sx={{
-                      background: isDark
-                        ? "rgba(183,148,246,0.15)"
-                        : "rgba(155,111,214,0.1)",
-                      color: COLORS.primary,
-                      fontWeight: 600,
-                    }}
-                  />
-
-                  {s.isBlocked && (
-                    <Chip
-                      size="small"
-                      label={t("adminSchedule.blocked")}
-                      sx={{
-                        background: isDark
-                          ? "rgba(213,115,115,0.15)"
-                          : "rgba(229,115,115,0.1)",
-                        color: COLORS.error,
-                        fontWeight: 600,
-                      }}
-                    />
-                  )}
-                </Box>
-
-                {/* زر حذف */}
-                {!isNextWeek && (
-                  <Tooltip
-                    title={
-                      isPast
-                        ? t("adminSchedule.noDeletePast")
-                        : t("adminSchedule.deleteSlot")
-                    }
-                  >
-                    <span>
-                      <IconButton
-                        disabled={isPast}
-                        onClick={() => !isPast && deleteSlot(s._id)}
-                        sx={{
-                          background: isPast ? COLORS.textSoft : COLORS.error,
-                          color: "#fff",
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                )}
-              </Paper>
-            ))}
-          </Stack>
-        )}
-
-        {/* حصص جديدة */}
-        {!!pending.length && (
-          <Stack spacing={1.5}>
-            {pending.map((s, idx) => (
-              <Paper
-                key={idx}
-                sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  background: isDark
-                    ? "rgba(183,148,246,0.08)"
-                    : "rgba(155,111,214,0.05)",
-                  border: `1px dashed ${COLORS.borderAccent}`,
-                }}
-              >
-                <Grid container spacing={1.5}>
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      type="time"
-                      size="small"
-                      fullWidth
-                      value={s.startTime}
-                      onChange={(e) =>
-                        isNextWeek
-                          ? updateNextSlot(dayIndex, idx, "startTime", e.target.value)
-                          : updateSlot(dayKey, idx, "startTime", e.target.value)
-                      }
-                    />
-                  </Grid>
-
-                  <Grid item xs={12} sm={4}>
-                    <TextField
-                      type="time"
-                      size="small"
-                      fullWidth
-                      value={s.endTime}
-                      onChange={(e) =>
-                        isNextWeek
-                          ? updateNextSlot(dayIndex, idx, "endTime", e.target.value)
-                          : updateSlot(dayKey, idx, "endTime", e.target.value)
-                      }
-                    />
-                  </Grid>
-
-                  <Grid item xs={8} sm={3}>
-                    <TextField
-                      type="number"
-                      size="small"
-                      fullWidth
-                      placeholder={t("adminSchedule.capacity")}
-                      value={s.capacity}
-                      onChange={(e) =>
-                        isNextWeek
-                          ? updateNextSlot(dayIndex, idx, "capacity", e.target.value)
-                          : updateSlot(dayKey, idx, "capacity", e.target.value)
-                      }
-                    />
-                  </Grid>
-
-                  <Grid item xs={4} sm={1}>
-                    <IconButton
-                      onClick={() =>
-                        isNextWeek
-                          ? removeNextSlot(dayIndex, idx)
-                          : removeSlot(dayKey, idx)
-                      }
-                      sx={{
-                        background: COLORS.error,
-                        color: "#fff",
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Grid>
-                </Grid>
-              </Paper>
-            ))}
-          </Stack>
-        )}
-
-        {/* زر إضافة */}
-        <Button
-          variant="outlined"
-          fullWidth
-          disabled={isPast}
-          onClick={() =>
-            isNextWeek ? addNextSlot(dayIndex) : addSlot(dayIndex)
-          }
-          startIcon={<AddCircleIcon />}
-        >
-          {t("adminSchedule.addSlot")}
-        </Button>
-      </Box>
-    );
-
-    return (
-      <>
-        {/* بطاقة اليوم */}
-        <Paper
-          sx={{
-            borderRadius: 2,
-            minHeight: 260,
-            background: COLORS.bgCard,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          {isTodayFlag && (
-            <Box
-              sx={{
-                height: 4,
-                background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`,
-              }}
-            />
-          )}
-
-          <Box
-            sx={{
-              p: 2,
-              borderBottom: `1px solid ${COLORS.border}`,
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <Box>
-              <Typography sx={{ fontWeight: 700 }}>
-                {dayNames[dayIndex]}
-              </Typography>
-              <Typography sx={{ color: COLORS.textSoft, fontSize: 12 }}>
-                {new Date(dayKey).toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                })}
-              </Typography>
-            </Box>
-
-            <Tooltip title={t("adminSchedule.expand")}>
-              <IconButton
-                onClick={() =>
-                  setExpandedDay({
-                    dayIndex,
-                    dayKey,
-                    existing,
-                    pending,
-                    isPast,
-                    isNextWeek,
-                  })
-                }
-                sx={{ color: COLORS.primary }}
-              >
-                <ZoomInIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          <Box sx={{ p: 2, flex: 1, overflowY: "auto" }}>
-            {cardContent}
-          </Box>
-        </Paper>
-      </>
-    );
-  };
-
-  // ===================== واجهة الصفحة الأساسية =====================
+  // ===================== واجهة الصفحة =====================
   return (
     <Box
       dir="rtl"
       sx={{
         minHeight: "100vh",
-        py: 3,
-        px: 2,
-        background: COLORS.bgMain,
+        py: 4,
+        px: { xs: 1, sm: 2, md: 3 },
+        background: isDark
+          ? "radial-gradient(circle at top, #111827 0%, #020617 40%, #000 100%)"
+          : "linear-gradient(135deg, #fdfbff 0%, #f3f4ff 40%, #fee2f2 100%)",
+        transition: "all 0.3s ease",
       }}
     >
-      <Box sx={{ maxWidth: 1600, mx: "auto" }}>
-        {/* العنوان + Tabs */}
+      <Box sx={{ width: "100%", mx: "auto" }}>
+        {/* ===== عنوان + Tabs داخل كرت زجاجي فاخر ===== */}
         <Paper
+          elevation={isDark ? 2 : 4}
           sx={{
-            p: 3,
-            mb: 3,
-            borderRadius: 2,
-            background: COLORS.bgCard,
-            border: `1px solid ${COLORS.border}`,
+            p: 4,
+            mb: 4,
+            borderRadius: 4,
+            position: "relative",
+            overflow: "hidden",
+            background: isDark
+              ? "linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,64,175,0.85))"
+              : "linear-gradient(135deg, rgba(255,255,255,0.9), rgba(249,250,251,0.9))",
+            border: isDark
+              ? "1px solid rgba(148,163,184,0.25)"
+              : "1px solid rgba(0,0,0,0.06)",
+            backdropFilter: "blur(18px)",
+            boxShadow: isDark
+              ? "0 24px 60px rgba(0,0,0,0.7)"
+              : "0 20px 50px rgba(148,163,184,0.45)",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <CalendarTodayIcon sx={{ color: COLORS.primary, fontSize: 30 }} />
-            <Box>
-              <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                {t("adminSchedule.title")}
-              </Typography>
-              <Typography sx={{ color: COLORS.textSoft }}>
-                {t("adminSchedule.subtitle")}
-              </Typography>
-            </Box>
-          </Box>
-
-          <Tabs
-            value={tab}
-            onChange={(_, v) => setTab(v)}
-            TabIndicatorProps={{
-              style: {
-                height: 3,
-                background: COLORS.primary,
-              },
+          {/* دوائر خلفية ديكورية */}
+          <Box
+            sx={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
             }}
           >
-            <Tab label={t("adminSchedule.currentWeek")} />
-            <Tab label={t("adminSchedule.nextWeek")} />
-          </Tabs>
+            <Box
+              sx={{
+                position: "absolute",
+                width: 180,
+                height: 180,
+                borderRadius: "50%",
+                top: -60,
+                left: -40,
+                background: `radial-gradient(circle, ${BRAND.pink}40, transparent 70%)`,
+              }}
+            />
+            <Box
+              sx={{
+                position: "absolute",
+                width: 220,
+                height: 220,
+                borderRadius: "50%",
+                bottom: -80,
+                right: -60,
+                background: `radial-gradient(circle, ${BRAND.purple}35, transparent 70%)`,
+              }}
+            />
+          </Box>
+
+          <Box sx={{ position: "relative" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 3,
+                mb: 3,
+                flexWrap: "wrap",
+              }}
+            >
+              {/* أيقونة كبيرة */}
+              <Box
+                sx={{
+                  width: 70,
+                  height: 70,
+                  borderRadius: 4,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
+                  boxShadow: "0 18px 45px rgba(236,72,153,0.45)",
+                }}
+              >
+                <CalendarTodayIcon sx={{ color: "#fff", fontSize: 36 }} />
+              </Box>
+
+              {/* نص العنوان والوصف */}
+              <Box sx={{ flex: 1, minWidth: 220 }}>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 900,
+                    letterSpacing: 0.5,
+                    background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    mb: 0.5,
+                  }}
+                >
+                  إدارة جدول المواعيد
+                </Typography>
+                <Typography
+                  sx={{
+                    color: isDark ? "#cbd5f5" : "rgba(15,23,42,0.7)",
+                    fontWeight: 500,
+                    fontSize: 15,
+                  }}
+                >
+                  تحكم كامل في حصص النادي للأسبوع الحالي والقادم، مع تجربة بصرية
+                  فاخرة تناسب نادي رياضي نسائي.
+                </Typography>
+              </Box>
+
+              {/* شريحة معلومات سريعة */}
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{
+                  background: isDark
+                    ? "rgba(15,23,42,0.9)"
+                    : "rgba(255,255,255,0.9)",
+                  borderRadius: 999,
+                  px: 2,
+                  py: 0.7,
+                  border: isDark
+                    ? "1px solid rgba(148,163,184,0.5)"
+                    : "1px solid rgba(148,163,184,0.35)",
+                }}
+              >
+                <AccessTimeIcon
+                  sx={{ fontSize: 18, color: isDark ? "#e5e7eb" : "#4b5563" }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: isDark ? "#e5e7eb" : "#111827",
+                  }}
+                >
+                  {weekData?.weekStart} ← {weekData?.weekEnd}
+                </Typography>
+              </Stack>
+            </Box>
+
+            {/* Tabs */}
+            <Tabs
+              value={tab}
+              onChange={(_, v) => setTab(v)}
+              TabIndicatorProps={{
+                style: {
+                  height: 4,
+                  background: `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.pink})`,
+                  borderRadius: 999,
+                },
+              }}
+              sx={{
+                mt: 1,
+                "& .MuiTab-root": {
+                  fontWeight: 700,
+                  fontSize: 15,
+                  minHeight: 52,
+                  color: isDark ? "#e5e7eb" : "#111827",
+                  textTransform: "none",
+                },
+                "& .MuiTab-root.Mui-selected": {
+                  color: isDark ? "#fff" : BRAND.pink,
+                },
+              }}
+            >
+              <Tab
+                icon={<EventAvailableIcon />}
+                iconPosition="start"
+                label="الأسبوع الحالي"
+              />
+              <Tab
+                icon={<NavigateNextIcon />}
+                iconPosition="start"
+                label="الأسبوع القادم"
+              />
+            </Tabs>
+          </Box>
         </Paper>
 
-        {/* الأسبوع الحالي */}
+        {/* ===== محتوى الأسبوع الحالي ===== */}
         {tab === 0 && (
           <>
             {loading ? (
-              <Box sx={{ textAlign: "center", py: 5 }}>
-                <CircularProgress sx={{ color: COLORS.primary }} />
+              <Box sx={{ textAlign: "center", py: 8 }}>
+                <CircularProgress
+                  size={60}
+                  sx={{
+                    color: BRAND.purple,
+                  }}
+                />
               </Box>
             ) : (
               <>
-                {/* نطاق الأسبوع */}
-                <Box
+                {/* نطاق الأسبوع الحالي */}
+                <Paper
+                  elevation={isDark ? 1 : 2}
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    gap: 1,
-                    mb: 2,
-                    color: COLORS.textSoft,
-                    fontWeight: 600,
+                    justifyContent: "space-between",
+                    gap: 2,
+                    mb: 3,
+                    p: 2.5,
+                    borderRadius: 3,
+                    background: isDark ? "#020617" : "#ffffff",
+                    border: isDark
+                      ? "1px solid rgba(148,163,184,0.5)"
+                      : "1px solid rgba(0,0,0,0.05)",
                   }}
                 >
-                  <NavigateBeforeIcon />
-                  <Typography>
-                    {weekData?.weekStart} → {weekData?.weekEnd}
-                  </Typography>
-                  <Chip
-                    label={t("adminSchedule.current")}
+                  <Box
                     sx={{
-                      background: COLORS.primary,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      color: isDark ? "#e5e7eb" : "#111827",
+                    }}
+                  >
+                    <NavigateBeforeIcon sx={{ opacity: 0.6 }} />
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: 15,
+                      }}
+                    >
+                      {weekData?.weekStart} ← {weekData?.weekEnd}
+                    </Typography>
+                  </Box>
+                  <Chip
+                    label="الأسبوع الحالي"
+                    icon={
+                      <EventAvailableIcon sx={{ color: "#fff !important" }} />
+                    }
+                    sx={{
+                      background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
                       color: "#fff",
-                      ml: "auto",
+                      fontWeight: 700,
+                      px: 1.5,
                     }}
                   />
-                </Box>
+                </Paper>
 
-                <Grid container spacing={2}>
+                {/* كروت الأيام */}
+                <Grid
+                  container
+                  spacing={3}
+                  sx={{
+                    width: "100%",
+                    margin: 0,
+                  }}
+                >
                   {Array.from({ length: 7 }, (_, i) => {
                     const d = addDays(weekStart, i);
                     const key = fmt(d);
 
                     return (
-                      <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
-                        <DayCard
-                          dayIndex={i}
-                          dayKey={key}
-                          existing={weekData?.days?.[key] || []}
-                          pending={currentEdits[key] || []}
+                      <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        md={4}
+                        lg={3}
+                        sx={{ width: "100%" }}
+                        key={i}
+                      >
+                        <DaySection
+                          style={{ width: "100%" }}
+                          dayName={DAY_NAMES[i]}
+                          date={key}
+                          existingSlots={weekData?.days?.[key] || []}
+                          newSlots={currentEdits[key] || []}
                           isPast={isPastDay(d)}
+                          isToday={isToday(d)}
+                          onAddSlot={() => addSlot(i)}
+                          onUpdateNew={(idx, field, value) =>
+                            updateSlot(key, idx, field, value)
+                          }
+                          onRemoveNew={(idx) => removeSlot(key, idx)}
+                          onDeleteExisting={deleteSlot}
                         />
                       </Grid>
                     );
                   })}
                 </Grid>
 
-                <Box sx={{ textAlign: "center", mt: 3 }}>
+                {/* زر الحفظ */}
+                <Box sx={{ textAlign: "center", mt: 4 }}>
                   <Button
                     variant="contained"
-                    startIcon={<SaveIcon />}
+                    startIcon={
+                      saving ? (
+                        <CircularProgress size={20} color="inherit" />
+                      ) : (
+                        <SaveIcon />
+                      )
+                    }
                     onClick={saveChanges}
+                    disabled={saving || Object.keys(currentEdits).length === 0}
                     sx={{
-                      background: COLORS.primary,
+                      background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
                       color: "#fff",
-                      px: 4,
-                      py: 1.5,
-                      fontWeight: 700,
+                      px: 6,
+                      py: 2,
+                      fontSize: 15,
+                      fontWeight: 800,
+                      borderRadius: 999,
+                      boxShadow: isDark
+                        ? "0 18px 45px rgba(236,72,153,0.45)"
+                        : "0 18px 45px rgba(155,111,214,0.45)",
+                      "&:hover": {
+                        background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
+                        transform: "translateY(-2px)",
+                        boxShadow: isDark
+                          ? "0 24px 55px rgba(236,72,153,0.6)"
+                          : "0 24px 55px rgba(155,111,214,0.6)",
+                      },
+                      "&:disabled": {
+                        background: "rgba(148,163,184,0.5)",
+                        boxShadow: "none",
+                        transform: "none",
+                      },
+                      transition: "all 0.25s ease",
                     }}
                   >
-                    {t("adminSchedule.saveAll")}
+                    {saving ? "جاري الحفظ..." : "حفظ جميع التغييرات"}
                   </Button>
                 </Box>
               </>
@@ -647,128 +611,139 @@ export default function AdminSchedule() {
           </>
         )}
 
-        {/* الأسبوع القادم */}
+        {/* ===== محتوى الأسبوع القادم ===== */}
         {tab === 1 && (
           <>
             {/* نطاق الأسبوع القادم */}
-            <Box
+            <Paper
+              elevation={isDark ? 1 : 2}
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
-                mb: 2,
-                color: COLORS.textSoft,
-                fontWeight: 600,
+                justifyContent: "space-between",
+                gap: 2,
+                mb: 3,
+                p: 2.5,
+                borderRadius: 3,
+                background: isDark ? "#020617" : "#ffffff",
+                border: isDark
+                  ? "1px solid rgba(248,250,252,0.25)"
+                  : "1px solid rgba(0,0,0,0.05)",
               }}
             >
-              <NavigateNextIcon />
-              <Typography>
-                {nextWeekData?.weekStart} → {nextWeekData?.weekEnd}
-              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  color: isDark ? "#e5e7eb" : "#111827",
+                }}
+              >
+                <NavigateNextIcon sx={{ opacity: 0.6 }} />
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: 15,
+                  }}
+                >
+                  {nextWeekData?.weekStart} ← {nextWeekData?.weekEnd}
+                </Typography>
+              </Box>
 
               <Chip
-                label={t("adminSchedule.next")}
+                label="الأسبوع القادم"
+                icon={<CalendarTodayIcon sx={{ color: "#fff !important" }} />}
                 sx={{
-                  background: COLORS.secondary,
-                  color: isDark ? "#2D2D2D" : "#fff",
-                  ml: "auto",
+                  background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.pink})`,
+                  color: "#fff",
+                  fontWeight: 700,
+                  px: 1.5,
                 }}
               />
-            </Box>
+            </Paper>
 
-            <Grid container spacing={2}>
+            {/* أيام الأسبوع القادم */}
+            <Grid container spacing={3}>
               {Array.from({ length: 7 }, (_, i) => {
                 const date = fmt(addDays(addDays(weekStart, 7), i));
 
                 return (
-                  <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
-                    <DayCard
-                      dayIndex={i}
-                      dayKey={date}
-                      existing={nextWeekData?.days?.[date] || []}
-                      pending={nextWeek[i]?.items || []}
+                  <Grid
+                    item
+                    xs={12}
+                    sm={6}
+                    md={4}
+                    lg={3}
+                    xl={3}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column", // 🔥 الحل
+                      width: "100%",
+                    }}
+                  >
+                    <DaySection
+                      dayName={DAY_NAMES[i]}
+                      date={date}
+                      existingSlots={nextWeekData?.days?.[date] || []}
+                      newSlots={nextWeek[i]?.items || []}
                       isPast={false}
-                      isNextWeek={true}
+                      isToday={false}
+                      onAddSlot={() => addNextSlot(i)}
+                      onUpdateNew={(idx, field, value) =>
+                        updateNextSlot(i, idx, field, value)
+                      }
+                      onRemoveNew={(idx) => removeNextSlot(i, idx)}
+                      onDeleteExisting={deleteSlot}
                     />
                   </Grid>
                 );
               })}
             </Grid>
 
-            <Box sx={{ textAlign: "center", mt: 3 }}>
+            {/* زر إنشاء الأسبوع القادم */}
+            <Box sx={{ textAlign: "center", mt: 4 }}>
               <Button
                 variant="contained"
-                startIcon={<SaveIcon />}
+                startIcon={
+                  saving ? (
+                    <CircularProgress size={20} color="inherit" />
+                  ) : (
+                    <SaveIcon />
+                  )
+                }
                 onClick={saveNextWeek}
+                disabled={saving}
                 sx={{
-                  background: COLORS.secondary,
-                  color: isDark ? "#2D2D2D" : "#fff",
-                  px: 4,
-                  py: 1.5,
-                  fontWeight: 700,
+                  background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.pink})`,
+                  color: "#fff",
+                  px: 6,
+                  py: 2,
+                  fontSize: 15,
+                  fontWeight: 800,
+                  borderRadius: 999,
+                  boxShadow: isDark
+                    ? "0 18px 45px rgba(245,158,11,0.45)"
+                    : "0 18px 45px rgba(245,158,11,0.45)",
+                  "&:hover": {
+                    background: `linear-gradient(135deg, #D97706, #DB2777)`,
+                    transform: "translateY(-2px)",
+                    boxShadow: isDark
+                      ? "0 24px 55px rgba(245,158,11,0.6)"
+                      : "0 24px 55px rgba(245,158,11,0.6)",
+                  },
+                  "&:disabled": {
+                    background: "rgba(148,163,184,0.5)",
+                    boxShadow: "none",
+                    transform: "none",
+                  },
+                  transition: "all 0.25s ease",
                 }}
               >
-                {t("adminSchedule.saveNextWeek")}
+                {saving ? "جاري الإنشاء..." : "إنشاء الأسبوع القادم"}
               </Button>
             </Box>
           </>
         )}
-
-        {/* نافذة تكبير اليوم */}
-        <Dialog
-          open={!!expandedDay}
-          onClose={() => setExpandedDay(null)}
-          fullWidth
-          maxWidth="md"
-          fullScreen={isMobile}
-          PaperProps={{
-            sx: {
-              background: COLORS.bgCard,
-              borderRadius: isMobile ? 0 : 2,
-            },
-          }}
-        >
-          {expandedDay && (
-            <>
-              <DialogTitle
-                sx={{
-                  borderBottom: `1px solid ${COLORS.border}`,
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Box>
-                  <Typography sx={{ fontWeight: 800 }}>
-                    {dayNames[expandedDay.dayIndex]}
-                  </Typography>
-
-                  <Typography sx={{ fontSize: 13, color: COLORS.textSoft }}>
-                    {new Date(expandedDay.dayKey).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </Typography>
-                </Box>
-
-                <IconButton onClick={() => setExpandedDay(null)}>
-                  <CloseIcon />
-                </IconButton>
-              </DialogTitle>
-
-              <DialogContent sx={{ p: 3 }}>
-                <DayCard
-                  dayIndex={expandedDay.dayIndex}
-                  dayKey={expandedDay.dayKey}
-                  existing={expandedDay.existing}
-                  pending={expandedDay.pending}
-                  isPast={expandedDay.isPast}
-                  isNextWeek={expandedDay.isNextWeek}
-                />
-              </DialogContent>
-            </>
-          )}
-        </Dialog>
       </Box>
     </Box>
   );

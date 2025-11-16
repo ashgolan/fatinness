@@ -41,7 +41,9 @@ export const createWeekTemplate = async (req, res) => {
   try {
     const { name, slots } = req.body;
     if (!name || !slots?.length) {
-      return res.status(400).json({ message: "Template name and slots required" });
+      return res
+        .status(400)
+        .json({ message: "Template name and slots required" });
     }
 
     const template = await WeekTemplate.create({ name, slots });
@@ -60,7 +62,8 @@ export const applyTemplate = async (req, res) => {
     const { templateId, startDate } = req.body;
 
     const template = await WeekTemplate.findById(templateId);
-    if (!template) return res.status(404).json({ message: "Template not found" });
+    if (!template)
+      return res.status(404).json({ message: "Template not found" });
 
     const start = parseLocalDate(startDate);
 
@@ -93,7 +96,9 @@ export const applyTemplate = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error applying template", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error applying template", error: error.message });
   }
 };
 
@@ -195,6 +200,10 @@ export const exportAttendanceReport = async (req, res) => {
 export const getDashboardStats = async (req, res) => {
   try {
     const now = new Date();
+
+    // =======================
+    // 📅 آخر 7 أيام
+    // =======================
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - 6);
 
@@ -229,6 +238,9 @@ export const getDashboardStats = async (req, res) => {
       });
     }
 
+    // =======================
+    // ☀️ جلسات اليوم
+    // =======================
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -239,6 +251,9 @@ export const getDashboardStats = async (req, res) => {
       date: { $gte: startOfDay, $lte: endOfDay },
     });
 
+    // =======================
+    // 🔥 الحجوزات النشطة (غير منتهية)
+    // =======================
     const booked = await Booking.find({ status: "booked" }).populate("slot");
 
     const activeBookings = booked.filter((b) => {
@@ -249,6 +264,33 @@ export const getDashboardStats = async (req, res) => {
       return end >= now;
     }).length;
 
+    // =======================
+    // 🌈 حساب الأسبوع القادم الصحيح (الأحد → السبت)
+    // =======================
+    const today = new Date();
+    const dow = today.getDay(); // 0 = Sunday
+
+    // بداية الأسبوع الحالي (الأحد)
+    const startOfThisWeek = new Date(today);
+    startOfThisWeek.setDate(today.getDate() - dow);
+    startOfThisWeek.setHours(0, 0, 0, 0);
+
+    // بداية الأسبوع القادم
+    const startOfNextWeek = new Date(startOfThisWeek);
+    startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
+
+    // نهاية الأسبوع القادم (السبت)
+    const endOfNextWeek = new Date(startOfNextWeek);
+    endOfNextWeek.setDate(endOfNextWeek.getDate() + 6);
+    endOfNextWeek.setHours(23, 59, 59, 999);
+
+    const upcomingWeekSessions = await Slot.countDocuments({
+      date: { $gte: startOfNextWeek, $lte: endOfNextWeek },
+    });
+
+    // =======================
+    // 📦 جميع الإحصائيات الأخرى
+    // =======================
     const [
       totalUsers,
       blockedUsers,
@@ -256,7 +298,6 @@ export const getDashboardStats = async (req, res) => {
       cancelled,
       completedBookings,
       totalSlots,
-      upcomingWeekSessions,
     ] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ isBlocked: true }),
@@ -264,14 +305,11 @@ export const getDashboardStats = async (req, res) => {
       Booking.countDocuments({ status: "cancelled" }),
       Booking.countDocuments({ status: "completed" }),
       Slot.countDocuments(),
-      Slot.countDocuments({
-        date: {
-          $gte: new Date(),
-          $lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        },
-      }),
     ]);
 
+    // =======================
+    // 🎯 النتيجة النهائية
+    // =======================
     res.json({
       totalUsers,
       activeUsers: totalUsers - blockedUsers,
@@ -401,7 +439,9 @@ export const sendCustomNotification = async (req, res) => {
     const adminUser = req.user?._id;
 
     if (!title || !body)
-      return res.status(400).json({ message: "الرجاء إدخال العنوان والمحتوى." });
+      return res
+        .status(400)
+        .json({ message: "الرجاء إدخال العنوان والمحتوى." });
 
     let users = [];
     if (target === "all") {

@@ -1,6 +1,9 @@
 {
   "short_name": "Fateness",
   "name": "Fateness Ladies Fitness",
+
+  "display_override": ["browser"],
+
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -15,6 +18,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#000000"
+  "theme_color": "#F0C73B",
+  "background_color": "#F0C73B"
 }

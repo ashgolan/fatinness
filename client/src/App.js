@@ -1,19 +1,28 @@
 // App.jsx
 import React from "react";
 import "./i18n/i18n";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { useThemeMode } from "./context/ThemeContext"; // 👈 تأكد أنها موجودة
 
-// 🔹 مكونات التصميم
+// 🔹 MUI
 import { CssBaseline, GlobalStyles } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
+// 🔹 RTL Support
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
+import rtlPlugin from "stylis-plugin-rtl";
 
-// 🔹 مزود الوضع العام
+// 🔹 Context
 import { ThemeModeProvider } from "./context/ThemeContext";
+import { DirectionProvider, useDirection } from "./context/DirectionContext";
 
-// 🔹 المكونات العامة
+// 🔹 Layout
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-// 🔹 صفحات المستخدم
+// 🔹 User pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -21,11 +30,10 @@ import Profile from "./pages/Profile";
 import Booking from "./pages/Booking";
 import MyBookings from "./pages/MyBookings";
 import Subscription from "./pages/Subscription";
+import BookingsHub from "./pages/BookingsHub";
+import Splash from "./pages/Splash";
 
-// 🔹 أدوات
-import PrivateRoute from "./utils/PrivateRoute";
-
-// 🔹 صفحات المشرف
+// 🔹 Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import BookingsAdmin from "./pages/admin/BookingsAdmin";
 import UsersAdmin from "./pages/admin/UsersAdmin";
@@ -36,84 +44,133 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import ControlCenter from "./pages/admin/ControlCenter";
 import AdminSchedule from "./pages/admin/AdminSchedule";
 
-import BookingsHub from "./pages/BookingsHub";
-import Splash from "./pages/Splash";
+// 🔹 Tools
+import PrivateRoute from "./utils/PrivateRoute";
 import i18n from "./i18n/i18n";
 
+// ======================================================
+// ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
+// ======================================================
+
+function DirectionWrapper({ children }) {
+  const { direction } = useDirection();
+  const { theme } = useThemeMode(); // 👈 أخذ الثيم الأصلي (Light/Dark)
+
+  // دمج الاتجاه مع الثيم الأصلي
+  const themed = React.useMemo(
+    () => ({
+      ...theme,
+      direction,
+    }),
+    [theme, direction]
+  );
+
+  const cache = createCache({
+    key: direction === "rtl" ? "rtl" : "css",
+    stylisPlugins: direction === "rtl" ? [rtlPlugin] : [],
+  });
+
+  return (
+    <CacheProvider value={cache}>
+      <ThemeProvider theme={themed}>{children}</ThemeProvider>
+    </CacheProvider>
+  );
+}
+
+// ======================================================
+// 🚀 التطبيق الرئيسي
+// ======================================================
 export default function App() {
   const location = useLocation();
 
-  // 🔥 إخفاء Navbar & Footer & Padding في صفحة Splash فقط
+  // 🔥 إخفاء Navbar & Footer في صفحة Splash فقط
   const isSplash = location.pathname === "/";
-const savedLang = localStorage.getItem("appLanguage") || "ar";
-i18n.changeLanguage(savedLang);
+
+  // 🔥 تحميل اللغة المحفوظة
+  const savedLang = localStorage.getItem("appLanguage") || "ar";
+  i18n.changeLanguage(savedLang);
+
   return (
     <ThemeModeProvider>
-      <GlobalStyles
-        styles={{
-          "input:-webkit-autofill": {
-            WebkitBoxShadow: "0 0 0 1000px transparent inset !important",
-            WebkitTextFillColor: "inherit !important",
-            transition: "background-color 9999s ease-in-out 0s",
-          },
-        }}
-      />
-      <CssBaseline />
+      <DirectionProvider>
+        <DirectionWrapper>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {/* إعدادات الحقول */}
+            <GlobalStyles
+              styles={{
+                "input:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 1000px transparent inset !important",
+                  WebkitTextFillColor: "inherit !important",
+                },
+              }}
+            />
+            <CssBaseline />
 
-      <div
-        className="app-container"
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        {/* ❌ إخفاء الـ Navbar في صفحة Splash */}
-        {!isSplash && <Navbar />}
+            {/* بنية التطبيق */}
+            <div
+              className="app-container"
+              style={{
+                minHeight: "100vh",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              {/* ❌ إخفاء Navbar في صفحة Splash */}
+              {!isSplash && <Navbar />}
 
-        <div style={{ flex: 1, padding: isSplash ? "0" : "16px" }}>
-          <Routes>
-            {/* 🌟 صفحة السبلاش */}
-            <Route path="/" element={<Splash />} />
+              {/* محتوى الصفحة */}
+              <div style={{ flex: 1, padding: isSplash ? 0 : "16px" }}>
+                <Routes>
+                  {/* 🌟 صفحة Splash */}
+                  <Route path="/" element={<Splash />} />
 
-            {/* صفحة تسجيل الدخول */}
-            <Route path="/login" element={<Login />} />
+                  {/* تسجيل الدخول */}
+                  <Route path="/login" element={<Login />} />
 
-            {/* 🔹 مسارات المستخدم */}
-            <Route element={<PrivateRoute role="user" />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/bookings" element={<Booking />} />
-              <Route path="/my-bookings" element={<MyBookings />} />
-              <Route path="/bookings-Hub" element={<BookingsHub />} />
-              <Route path="/subscription" element={<Subscription />} />
-            </Route>
+                  {/* 🔹 مسارات المستخدم */}
+                  <Route element={<PrivateRoute role="user" />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/bookings" element={<Booking />} />
+                    <Route path="/my-bookings" element={<MyBookings />} />
+                    <Route path="/bookings-Hub" element={<BookingsHub />} />
+                    <Route path="/subscription" element={<Subscription />} />
+                  </Route>
 
-            {/* 🔹 مسارات المشرف */}
-            <Route element={<PrivateRoute role="admin" />}>
-              <Route path="/register" element={<Register />} />
-              <Route path="/admin/control" element={<ControlCenter />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/bookings" element={<BookingsAdmin />} />
-              <Route path="/admin/schedule" element={<AdminSchedule />} />
-              <Route path="/admin/users" element={<UsersAdmin />} />
-              <Route path="/admin/slots" element={<SlotsAdmin />} />
-              <Route
-                path="/admin/notifications"
-                element={<AdminNotifications />}
-              />
-              <Route path="/admin/reports" element={<AdminReports />} />
-              <Route path="/admin/settings" element={<AdminSettings />} />
-            </Route>
+                  {/* 🔹 مسارات المشرف */}
+                  <Route element={<PrivateRoute role="admin" />}>
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/admin/control" element={<ControlCenter />} />
+                    <Route
+                      path="/admin/dashboard"
+                      element={<AdminDashboard />}
+                    />
+                    <Route path="/admin/bookings" element={<BookingsAdmin />} />
+                    <Route path="/admin/schedule" element={<AdminSchedule />} />
+                    <Route path="/admin/users" element={<UsersAdmin />} />
+                    <Route path="/admin/slots" element={<SlotsAdmin />} />
+                    <Route
+                      path="/admin/notifications"
+                      element={<AdminNotifications />}
+                    />
+                    <Route path="/admin/reports" element={<AdminReports />} />
+                    <Route path="/admin/settings" element={<AdminSettings />} />
+                  </Route>
 
-            {/* 🔹 إعادة توجيه افتراضية */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </div>
+                  {/* 🔹 إعادة توجيه افتراضية */}
+                  <Route
+                    path="*"
+                    element={<Navigate to="/dashboard" replace />}
+                  />
+                </Routes>
+              </div>
 
-        {/* ❌ إخفاء Footer في صفحة Splash */}
-        {!isSplash && <Footer />}
-      </div>
+              {/* ❌ إخفاء Footer في صفحة Splash */}
+              {!isSplash && <Footer />}
+            </div>
+          </LocalizationProvider>
+        </DirectionWrapper>
+      </DirectionProvider>
     </ThemeModeProvider>
   );
 }
