@@ -47,6 +47,7 @@ import AdminSchedule from "./pages/admin/AdminSchedule";
 // 🔹 Tools
 import PrivateRoute from "./utils/PrivateRoute";
 import i18n from "./i18n/i18n";
+import Gallery from "./pages/Gallery";
 
 // ======================================================
 // ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
@@ -131,6 +132,7 @@ export default function App() {
                   <Route element={<PrivateRoute role="user" />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/gallery" element={<Gallery />} />
                     <Route path="/bookings" element={<Booking />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
                     <Route path="/bookings-Hub" element={<BookingsHub />} />

@@ -8,6 +8,7 @@ import { handleWebhook } from "./controllers/payments.controller.js";
 import mainRoutes from "./routes/index.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
 import { startScheduler } from "./utils/scheduler.js";
+import galleryRoutes from "./routes/gallery.routes.js";
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.get("/health", (req, res) => {
 });
 // ✅ عرض ملفات الصور الثابتة
 app.use("/uploads", express.static("uploads"));
+app.use("/gallery", galleryRoutes);
 
 // ✅ جميع المسارات عبر index.js
 app.use("/maintenance", maintenanceRoutes);

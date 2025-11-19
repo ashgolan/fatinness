@@ -15,6 +15,8 @@ import {
   Switch,
   Divider,
 } from "@mui/material";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+
 import { useLocation } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -93,18 +95,29 @@ export default function Navbar() {
 
     if (user.role === "admin") {
       return [
-        { label: t("navbar.admin_panel"), to: "/admin/control", icon: <DashboardIcon /> },
+        {
+          label: t("navbar.admin_panel"),
+          to: "/admin/control",
+          icon: <DashboardIcon />,
+        },
         { label: t("navbar.logout"), action: logout, icon: <LogoutIcon /> },
       ];
     }
-
     return [
       { label: t("navbar.home"), to: "/dashboard", icon: <HomeIcon /> },
-      { label: t("navbar.bookings_hub"), to: "/bookings-hub", icon: <CalendarMonthIcon /> },
+      {
+        label: t("navbar.bookings_hub"),
+        to: "/bookings-hub",
+        icon: <CalendarMonthIcon />,
+      },
+      {
+        label: t("navbar.gallery"),
+        to: "/gallery",
+        icon: <PhotoLibraryIcon />,
+      },
       { label: t("navbar.logout"), action: logout, icon: <LogoutIcon /> },
     ];
   }, [user, loadingUser, t]);
-  
 
   if (loadingUser) {
     return (
@@ -114,7 +127,9 @@ export default function Navbar() {
         sx={{
           backgroundColor: mode === "dark" ? BRAND.paperDark : "#fff",
           color: mode === "dark" ? BRAND.textDark : "#333",
-          borderBottom: `1px solid ${mode === "dark" ? BRAND.lineDark : "#ddd"}`,
+          borderBottom: `1px solid ${
+            mode === "dark" ? BRAND.lineDark : "#ddd"
+          }`,
         }}
       >
         <Toolbar sx={{ justifyContent: "center" }}>
@@ -406,9 +421,7 @@ export default function Navbar() {
                     borderRadius: "8px",
                     "&:hover": {
                       backgroundColor:
-                        mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "#f2f2f2",
+                        mode === "dark" ? "rgba(255,255,255,0.08)" : "#f2f2f2",
                     },
                   }}
                 >

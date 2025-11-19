@@ -5,43 +5,58 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { storage } from "./config";
+import { v4 as uuidv4 } from "uuid";
 
 /**
- * 🔹 رفع صورة إلى Firebase واستبدال القديمة إذا وجدت
- * @param {File} file - ملف الصورة
- * @param {"logo" | "card"} type - نوع الصورة ("logo" أو "card")
- * @returns {Promise<string>} رابط الصورة الجديدة
+ * رفع الصور للوغو / الكارت / الألبوم
  */
 export const uploadBrandImage = async (file, type = "logo") => {
   if (!file) throw new Error("❌ لم يتم تحديد ملف للرفع");
 
-  const folder = type === "card" ? "cards" : "logos";
-  const fileRef = ref(storage, `${folder}/${type}.png`);
+  let filePath;
+
+  // 🟣 لوغو → ملف واحد ثابت
+  if (type === "logo") {
+    filePath = `logos/logo.png`;
+  }
+
+  // 🟡 كارت → ملف واحد ثابت
+  else if (type === "card") {
+    filePath = `cards/card.png`;
+  }
+
+  // 🔵 ألبوم صور → أسماء فريدة
+  else if (type === "gallery") {
+    // ⚠️ التفافي على مشكلة الامتداد
+    const ext = file.type.split("/")[1] || "jpg";
+    const id = uuidv4();
+    filePath = `gallery/${id}.${ext}`;
+  }
+
+  const fileRef = ref(storage, filePath);
+  console.log("🔥 رفع إلى:", filePath);
 
   try {
-    // 🧹 حذف الصورة القديمة (إن وجدت)
-    await deleteObject(fileRef).catch(() => {});
-
-    // ⏫ رفع الصورة الجديدة
-    const snapshot = await uploadBytes(fileRef, file);
-
-    // 🔗 الحصول على رابط التنزيل
-    let downloadURL = await getDownloadURL(snapshot.ref);
-
-    // ⚙️ إصلاح الرابط ليستخدم النطاق الصحيح دائمًا
-    if (downloadURL.includes("appspot.com")) {
-      downloadURL = downloadURL.replace(
-        "fateness-364c3.appspot.com",
-        "fateness-364c3.firebasestorage.app"
-      );
+    // حذف القديم فقط مع logo & card
+    if (type === "logo" || type === "card") {
+      await deleteObject(fileRef).catch(() => {});
     }
 
-    console.log(`✅ ${type} uploaded successfully:`, downloadURL);
+    // رفع الصورة
+    await uploadBytes(fileRef, file);
+
+    // جلب الرابط
+    let downloadURL = await getDownloadURL(fileRef);
+
+    // إصلاح الرابط إذا لزم
+    downloadURL = downloadURL.replace(
+      "fateness-364c3.appspot.com",
+      "fateness-364c3.firebasestorage.app"
+    );
+
     return downloadURL;
   } catch (error) {
-    console.error(`🔥 Error uploading ${type}:`, error);
-    throw new Error(
-      "حدث خطأ أثناء رفع الصورة. تحقق من اتصال الإنترنت أو إعدادات CORS."
-    );
+    console.error("🔥 خطأ في رفع الصورة:", error);
+    throw new Error("فشل رفع الصورة – تحقق من الإنترنت أو CORS");
   }
 };
