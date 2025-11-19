@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
@@ -8,20 +14,20 @@ export default function BookingsHub() {
   const { mode, BRAND } = useThemeMode();
   const { t } = useTranslation();
 
-  // 📦 الحالة العامة
-  const [activeTab, setActiveTab] = useState("available"); // available | mybookings
+  // ⬇️ المرجع الخاص بالسكرول
+  const slotsRef = useRef(null);
+
+  // الحالة العامة
+  const [activeTab, setActiveTab] = useState("available");
   const [loading, setLoading] = useState(true);
   const [animateIn, setAnimateIn] = useState(false);
 
-  // 🗓️ الحجوزات المتاحة
   const [slotsByDay, setSlotsByDay] = useState({});
   const [myBookings, setMyBookings] = useState([]);
   const [bookingId, setBookingId] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
   const [view, setView] = useState("month");
-  const [hoveredDay, setHoveredDay] = useState(null); // غير مستخدم الآن لكن لا يضر
 
-  // 📋 حجوزاتي
   const [allBookings, setAllBookings] = useState([]);
   const [bookingsFilter, setBookingsFilter] = useState("upcoming");
   const [refreshing, setRefreshing] = useState(false);
@@ -36,14 +42,11 @@ export default function BookingsHub() {
     t("weekdays.saturday"),
   ];
 
-  const toLocalKey = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const dd = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${dd}`;
-  };
+  const toLocalKey = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+      d.getDate()
+    ).padStart(2, "0")}`;
 
-  // 🎯 تحميل البيانات
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -72,8 +75,9 @@ export default function BookingsHub() {
         .map((b) => b.slot._id);
       setMyBookings(myActive);
       setAllBookings(bookingsRes.data);
-    } catch {
-      toast.error(t("bookingsHub.errors.fetch"));
+    } catch (err) {
+      if (err?.config?.method !== "options" && err?.response?.status)
+        toast.error(t("bookingsHub.errors.fetch"));
     } finally {
       setLoading(false);
       setTimeout(() => setAnimateIn(true), 150);
@@ -84,7 +88,6 @@ export default function BookingsHub() {
     fetchData();
   }, [fetchData]);
 
-  // 🧩 دوال الحجز والإلغاء
   const handleBook = useCallback(
     async (slotId) => {
       setBookingId(slotId);
@@ -121,7 +124,10 @@ export default function BookingsHub() {
           bookingIdLocal = booking._id;
         }
 
-        if (!fromMyBookings && !window.confirm(t("bookingsHub.confirmCancel"))) {
+        if (
+          !fromMyBookings &&
+          !window.confirm(t("bookingsHub.confirmCancel"))
+        ) {
           return;
         }
 
@@ -150,8 +156,25 @@ export default function BookingsHub() {
     }
   };
 
-  // 🧮 تصنيفات الحجوزات
   const now = new Date();
+  const todayKey = toLocalKey(now);
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthDates = [...Array(daysInMonth)].map(
+    (_, i) => new Date(year, month, i + 1)
+  );
+
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  const weekDates = [...Array(7)].map((_, i) => {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    return d;
+  });
+
+  const gridDates = view === "week" ? weekDates : monthDates;
+
   const upcomingBookings = allBookings.filter(
     (b) =>
       new Date(b.slot.date) >= now && b.status === "booked" && !b.slot.isBlocked
@@ -171,25 +194,6 @@ export default function BookingsHub() {
     if (bookingsFilter === "past") return pastBookings;
     return cancelledBookings;
   }, [bookingsFilter, upcomingBookings, pastBookings, cancelledBookings]);
-
-  // 🗓️ حساب التواريخ
-  const today = new Date();
-  const todayKey = toLocalKey(today);
-  const year = today.getFullYear();
-  const month = today.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthDates = Array.from(
-    { length: daysInMonth },
-    (_, i) => new Date(year, month, i + 1)
-  );
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
-  const weekDates = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    return d;
-  });
-  const gridDates = view === "week" ? weekDates : monthDates;
 
   const baseCard = (color) => ({
     borderRadius: 20,
@@ -212,11 +216,8 @@ export default function BookingsHub() {
             ? `linear-gradient(135deg, ${BRAND.bgDarkTop}, ${BRAND.bgDarkBottom})`
             : "linear-gradient(135deg, #f8f9ff, #fff8f4)",
         color: mode === "dark" ? "#f3f3f3" : "#111",
-        fontFamily: "Tajawal, Cairo, sans-serif",
-        transition: "all 0.4s ease",
       }}
     >
-      {/* keyframes للأنيميشن المستخدمة */}
       <style>{`
         @keyframes spin { to { transform: rotate(360deg) } }
         @keyframes fadeInUp {
@@ -225,90 +226,45 @@ export default function BookingsHub() {
         }
       `}</style>
 
-      {/* 🧮 شريط الإحصاءات */}
+      {/* التبويبات */}
       <div
         style={{
           display: "flex",
           justifyContent: "center",
-          flexWrap: "wrap",
-          gap: 16,
-          margin: "10px auto 24px",
-          maxWidth: "800px",
-        }}
-      >
-        {[
-          {
-            label: t("bookingsHub.stats.upcoming"),
-            count: upcomingBookings.length,
-            color: BRAND.purple,
-          },
-          {
-            label: t("bookingsHub.stats.past"),
-            count: pastBookings.length,
-            color: "#10b981",
-          },
-          {
-            label: t("bookingsHub.stats.cancelled"),
-            count: cancelledBookings.length,
-            color: "#ef4444",
-          },
-        ].map((s, i) => (
-          <div key={i} style={baseCard(s.color)}>
-            <div
-              style={{
-                padding: "10px 18px",
-                minWidth: 100,
-                textAlign: "center",
-                color: s.color,
-                fontWeight: 700,
-              }}
-            >
-              {s.label}: {s.count}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 🔘 التبويبات */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
           gap: 12,
           marginBottom: 32,
         }}
       >
-        {[
+        {[ 
           { value: "available", label: t("bookingsHub.tabs.available") },
           { value: "mybookings", label: t("bookingsHub.tabs.myBookings") },
-        ].map((tab) => {
-          const isActive = activeTab === tab.value;
-          return (
-            <button
-              key={tab.value}
-              onClick={() => setActiveTab(tab.value)}
-              style={{
-                padding: "12px 26px",
-                borderRadius: 40,
-                border: isActive ? "none" : `1.5px solid ${BRAND.purple}33`,
-                background: isActive
+        ].map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setActiveTab(tab.value)}
+            style={{
+              padding: "12px 26px",
+              borderRadius: 40,
+              border:
+                activeTab === tab.value
+                  ? "none"
+                  : `1.5px solid ${BRAND.purple}33`,
+              background:
+                activeTab === tab.value
                   ? `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`
                   : "transparent",
-                color: isActive ? "#fff" : BRAND.purple,
-                fontWeight: 700,
-                cursor: "pointer",
-                transition: "all 0.3s ease",
-                boxShadow: isActive ? `0 4px 14px ${BRAND.purple}55` : "none",
-              }}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+              color: activeTab === tab.value ? "#fff" : BRAND.purple,
+              fontWeight: 700,
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* 🔄 التحميل */}
+      {/* تحميل */}
       {loading ? (
         <div style={{ textAlign: "center", marginTop: 100 }}>
           <div
@@ -334,7 +290,6 @@ export default function BookingsHub() {
               {...{
                 mode,
                 BRAND,
-                animateIn,
                 gridDates,
                 todayKey,
                 dayNames,
@@ -349,15 +304,18 @@ export default function BookingsHub() {
                 bookingId,
                 toLocalKey,
                 t,
+
+                // ⬇️ نمرر المرجع
+                slotsRef,
               }}
             />
           )}
+
           {activeTab === "mybookings" && (
             <MyBookingsView
               {...{
                 mode,
                 BRAND,
-                animateIn,
                 filteredBookings,
                 bookingsFilter,
                 setBookingsFilter,
@@ -374,11 +332,13 @@ export default function BookingsHub() {
   );
 }
 
-// 🟣 الحجوزات المتاحة
+/* ===========================
+      🟣 AvailableView
+=========================== */
+
 function AvailableView({
   mode,
   BRAND,
-  animateIn,
   gridDates,
   todayKey,
   dayNames,
@@ -393,10 +353,13 @@ function AvailableView({
   bookingId,
   toLocalKey,
   t,
+
+  // ⬇️ المرجع القادم من الأعلى
+  slotsRef,
 }) {
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
-      {/* 🔘 أزرار التبديل بين الأسبوع والشهر */}
+      {/* أزرار Week/Month */}
       <div
         style={{
           textAlign: "center",
@@ -436,7 +399,7 @@ function AvailableView({
         ))}
       </div>
 
-      {/* 🗓️ شبكة الأيام */}
+      {/* شبكة الأيام */}
       <div
         style={{
           display: "grid",
@@ -459,9 +422,19 @@ function AvailableView({
           return (
             <div
               key={key}
-              onClick={() =>
-                isAvailable && setSelectedDate(isSelected ? null : key)
-              }
+              onClick={() => {
+                if (!isAvailable) return;
+
+                setSelectedDate(isSelected ? null : key);
+
+                // ⬇️ السكرووووول بعد الضغط
+                setTimeout(() => {
+                  slotsRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                }, 300);
+              }}
               style={{
                 aspectRatio: "1",
                 borderRadius: 18,
@@ -484,48 +457,30 @@ function AvailableView({
                 justifyContent: "center",
                 flexDirection: "column",
                 cursor: isAvailable ? "pointer" : "default",
-                boxShadow: isSelected
-                  ? `0 0 14px ${BRAND.gold}88`
-                  : isAvailable
-                  ? `0 0 10px ${BRAND.purple}55`
-                  : mode === "dark"
-                  ? "0 0 6px rgba(255,255,255,0.06)"
-                  : "0 0 4px rgba(0,0,0,0.05)",
                 transition: "all 0.25s ease",
                 position: "relative",
               }}
             >
-              {/* اليوم */}
               <div
                 style={{
                   fontSize: 11,
                   fontWeight: 700,
-                  color: mode === "dark" ? "#ccc" : "#333",
                   marginBottom: 4,
                 }}
               >
                 {dayNames[d.getDay()]}
               </div>
 
-              {/* التاريخ */}
-              <strong
-                style={{
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: isAvailable ? BRAND.purple : "#999",
-                }}
-              >
+              <strong style={{ fontSize: 16, fontWeight: 800 }}>
                 {`${d.getDate()}/${d.getMonth() + 1}`}
               </strong>
 
-              {/* عدد الحصص */}
               {isAvailable && (
                 <span
                   style={{
                     fontSize: 12,
                     opacity: 0.8,
                     marginTop: 2,
-                    color: mode === "dark" ? "#ddd" : "#555",
                     fontWeight: 600,
                   }}
                 >
@@ -533,7 +488,6 @@ function AvailableView({
                 </span>
               )}
 
-              {/* اليوم الحالي */}
               {isToday && (
                 <div
                   style={{
@@ -546,7 +500,6 @@ function AvailableView({
                 />
               )}
 
-              {/* رمز متحجّز */}
               {hasMyBooking && (
                 <div
                   style={{
@@ -556,13 +509,13 @@ function AvailableView({
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
-                    background: `linear-gradient(135deg, #10b981, #059669)`,
+                    background:
+                      "linear-gradient(135deg, #10b981, #059669)",
                     color: "white",
                     fontSize: 12,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    boxShadow: "0 0 6px rgba(16,185,129,0.6)",
                   }}
                 >
                   ✓
@@ -573,154 +526,151 @@ function AvailableView({
         })}
       </div>
 
-      {/* 💜 المواعيد عند تحديد يوم */}
-      {selectedDate && slotsByDay[selectedDate] && (
-        <div
-          style={{
-            opacity: animateIn ? 1 : 0,
-            transform: animateIn ? "translateY(0)" : "translateY(20px)",
-            transition: "all 0.5s ease 0.3s",
-          }}
-        >
+      {/* هنا يبدأ قسم الحصص — وضعنا ref */}
+      <div ref={slotsRef}>
+        {selectedDate && slotsByDay[selectedDate] && (
           <div
             style={{
-              background: mode === "dark" ? "rgba(255,255,255,0.05)" : "white",
-              borderRadius: "20px",
-              padding: "20px",
-              marginBottom: 24,
-              boxShadow:
-                mode === "dark"
-                  ? "0 8px 24px rgba(0,0,0,0.3)"
-                  : "0 8px 24px rgba(0,0,0,0.08)",
-              border:
-                mode === "dark" ? "1px solid rgba(255,255,255,0.1)" : "none",
-              textAlign: "center",
+              opacity: 1,
+              transition: "all 0.5s ease 0.3s",
             }}
           >
-            <h3
+            <div
               style={{
-                color: BRAND.purple,
-                fontWeight: 800,
-                fontSize: "clamp(18px, 4vw, 22px)",
+                background:
+                  mode === "dark"
+                    ? "rgba(255,255,255,0.05)"
+                    : "white",
+                borderRadius: "20px",
+                padding: "20px",
+                marginBottom: 24,
+                textAlign: "center",
               }}
             >
-              {dayNames[new Date(selectedDate).getDay()]} - {selectedDate}
-            </h3>
-          </div>
+              <h3
+                style={{
+                  color: BRAND.purple,
+                  fontWeight: 800,
+                  fontSize: "clamp(18px, 4vw, 22px)",
+                }}
+              >
+                {dayNames[new Date(selectedDate).getDay()]} -{" "}
+                {selectedDate}
+              </h3>
+            </div>
 
-          {/* 🕓 بطاقات المواعيد */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                window.innerWidth < 768
-                  ? "1fr"
-                  : "repeat(auto-fit, minmax(280px, 1fr))",
-              gap: 16,
-              maxWidth: "1000px",
-              margin: "0 auto",
-            }}
-          >
-            {slotsByDay[selectedDate].map((slot) => {
-              const isBooked = myBookings.includes(slot._id);
-              const isFull = slot.bookedCount >= slot.capacity;
-              const isProcessing = bookingId === slot._id;
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  window.innerWidth < 768
+                    ? "1fr"
+                    : "repeat(auto-fit, minmax(280px, 1fr))",
+                gap: 16,
+                maxWidth: "1000px",
+                margin: "0 auto",
+              }}
+            >
+              {slotsByDay[selectedDate].map((slot) => {
+                const isBooked = myBookings.includes(slot._id);
+                const isFull = slot.bookedCount >= slot.capacity;
+                const isProcessing = bookingId === slot._id;
 
-              return (
-                <div
-                  key={slot._id}
-                  style={{
-                    background:
-                      mode === "dark"
-                        ? "rgba(255,255,255,0.05)"
-                        : "rgba(255,255,255,0.95)",
-                    borderRadius: 18,
-                    padding: 16,
-                    border: isBooked
-                      ? "2px solid #10b981"
-                      : isFull
-                      ? `2px solid ${mode === "dark" ? "#444" : "#ddd"}`
-                      : `2px solid ${BRAND.purple}`,
-                    boxShadow: isBooked
-                      ? "0 8px 24px rgba(16,185,129,0.25)"
-                      : `0 4px 16px ${BRAND.purple}22`,
-                    transition: "all 0.3s ease",
-                  }}
-                >
+                return (
                   <div
+                    key={slot._id}
                     style={{
-                      fontWeight: 700,
-                      fontSize: "16px",
-                      marginBottom: 8,
-                    }}
-                  >
-                    🕒 {slot.startTime} - {slot.endTime}
-                  </div>
-
-                  <div
-                    style={{
-                      color: isFull ? "#ef4444" : "#10b981",
-                      fontWeight: 600,
-                      marginBottom: 12,
-                    }}
-                  >
-                    {t("bookingsHub.capacityLabel")}: {slot.bookedCount}/
-                    {slot.capacity}
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      isBooked ? handleCancel(slot._id) : handleBook(slot._id)
-                    }
-                    disabled={isProcessing || (isFull && !isBooked)}
-                    style={{
-                      width: "100%",
-                      padding: "10px 0",
-                      borderRadius: 12,
-                      border: "none",
-                      fontWeight: 700,
-                      fontSize: 15,
-                      color: "#fff",
-                      background: isProcessing
-                        ? "#999"
-                        : isFull && !isBooked
-                        ? "#999"
-                        : isBooked
-                        ? "linear-gradient(135deg, #10b981, #059669)"
-                        : `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
-                      cursor:
-                        isProcessing || (isFull && !isBooked)
-                          ? "not-allowed"
-                          : "pointer",
-                      boxShadow: isBooked
-                        ? "0 6px 16px rgba(16,185,129,0.4)"
-                        : `0 6px 16px ${BRAND.purple}44`,
+                      background:
+                        mode === "dark"
+                          ? "rgba(255,255,255,0.05)"
+                          : "rgba(255,255,255,0.95)",
+                      borderRadius: 18,
+                      padding: 16,
+                      border: isBooked
+                        ? "2px solid #10b981"
+                        : isFull
+                        ? `2px solid ${
+                            mode === "dark" ? "#444" : "#ddd"
+                          }`
+                        : `2px solid ${BRAND.purple}`,
                       transition: "all 0.3s ease",
                     }}
                   >
-                    {isProcessing
-                      ? t("bookingsHub.buttons.processing")
-                      : isBooked
-                      ? t("bookingsHub.buttons.booked")
-                      : isFull
-                      ? t("bookingsHub.buttons.full")
-                      : t("bookingsHub.buttons.bookNow")}
-                  </button>
-                </div>
-              );
-            })}
+                    <div
+                      style={{
+                        fontWeight: 700,
+                        fontSize: "16px",
+                        marginBottom: 8,
+                      }}
+                    >
+                      🕒 {slot.startTime} - {slot.endTime}
+                    </div>
+
+                    <div
+                      style={{
+                        fontWeight: 600,
+                        marginBottom: 12,
+                      }}
+                    >
+                      {t("bookingsHub.capacityLabel")}:{" "}
+                      {slot.bookedCount}/{slot.capacity}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        isBooked
+                          ? handleCancel(slot._id)
+                          : handleBook(slot._id)
+                      }
+                      disabled={isProcessing || (isFull && !isBooked)}
+                      style={{
+                        width: "100%",
+                        padding: "10px 0",
+                        borderRadius: 12,
+                        border: "none",
+                        fontWeight: 700,
+                        fontSize: 15,
+                        color: "#fff",
+                        background: isProcessing
+                          ? "#999"
+                          : isFull && !isBooked
+                          ? "#999"
+                          : isBooked
+                          ? "linear-gradient(135deg, #10b981, #059669)"
+                          : `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
+                        cursor:
+                          isProcessing || (isFull && !isBooked)
+                            ? "not-allowed"
+                            : "pointer",
+                        transition: "all 0.3s ease",
+                      }}
+                    >
+                      {isProcessing
+                        ? t("bookingsHub.buttons.processing")
+                        : isBooked
+                        ? t("bookingsHub.buttons.booked")
+                        : isFull
+                        ? t("bookingsHub.buttons.full")
+                        : t("bookingsHub.buttons.bookNow")}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
-// 🟡 حجوزاتي
+/* ===========================
+      🟡 MyBookings
+=========================== */
+
 function MyBookingsView({
   mode,
   BRAND,
-  animateIn,
   filteredBookings,
   bookingsFilter,
   setBookingsFilter,
@@ -733,6 +683,7 @@ function MyBookingsView({
 
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
+      {/* الفلاتر */}
       <div
         style={{
           textAlign: "center",
@@ -765,7 +716,6 @@ function MyBookingsView({
               color: bookingsFilter === f.value ? "#fff" : BRAND.purple,
               fontWeight: 700,
               cursor: "pointer",
-              transition: "all 0.25s ease",
             }}
           >
             {f.label}
@@ -773,6 +723,7 @@ function MyBookingsView({
         ))}
       </div>
 
+      {/* النتائج */}
       {filteredBookings.length === 0 ? (
         <div style={{ textAlign: "center", marginTop: 80, opacity: 0.7 }}>
           <p>{t("bookingsHub.emptySection")}</p>
@@ -804,7 +755,6 @@ function MyBookingsView({
                     mode === "dark"
                       ? "rgba(255,255,255,0.04)"
                       : "rgba(255,255,255,0.9)",
-                  boxShadow: `0 4px 14px ${BRAND.purple}22`,
                   padding: 16,
                 }}
               >
@@ -816,11 +766,11 @@ function MyBookingsView({
                     day: "2-digit",
                   })}
                 </div>
+
                 <div style={{ opacity: 0.8, marginBottom: 12 }}>
                   🕒 {b.slot.startTime}
                 </div>
 
-                {/* زر الإلغاء */}
                 {!isPast && !isCancelled && (
                   <button
                     onClick={() => handleCancel(b.slot._id, true, b._id)}
@@ -829,12 +779,11 @@ function MyBookingsView({
                       width: "100%",
                       padding: "10px 0",
                       borderRadius: 12,
-                      background:
-                        "linear-gradient(135deg, #ef4444, #dc2626)",
+                      background: "linear-gradient(135deg, #ef4444, #dc2626)",
                       color: "#fff",
                       border: "none",
                       fontWeight: 700,
-                      cursor: refreshing ? "not-allowed" : "pointer",
+                      cursor: "pointer",
                       marginBottom: 8,
                     }}
                   >
@@ -842,7 +791,6 @@ function MyBookingsView({
                   </button>
                 )}
 
-                {/* زر إعادة الحجز */}
                 {isPast && !isCancelled && (
                   <button
                     onClick={() => handleRebook(b.slot._id)}
