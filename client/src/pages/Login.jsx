@@ -32,7 +32,6 @@ export default function Login() {
   const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ نأخذ الشعار وحالة التحميل
   const { t } = useTranslation();
 
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
