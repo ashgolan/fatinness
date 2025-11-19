@@ -12,7 +12,7 @@
     "reminder_system_off": "⚠️ מערכת התזכורות אינה פעילה כרגע"
   },
   "adminDashboard": {
-    "welcomeTitle": "👋 שלום {{name}}!",
+    "welcomeTitle": "👋 שלום",
     "welcomeMessage": "יש לך היום {{sessions}} אימונים פעילים ו- {{newUsers}} נרשמות חדשות 💪",
     "mainTitle": "📊 לוח סטטיסטיקות כללי",
     "noData": "אין נתונים זמינים כרגע.",
@@ -686,5 +686,14 @@
 
     "enter_now": "היכנסי עכשיו 🚀",
     "keep_going": "תמשיכי להתקדם לעבר המטרות שלך!"
+  },
+   "schedule": {
+    "existing": "שיעורים קיימים",
+    "new": "שיעורים חדשים",
+    "add": "הוסף שיעור חדש",
+    "delete": "מחיקה",
+    "from": "מ־",
+    "to": "עד",
+    "capacity": "קיבולת"
   }
 }

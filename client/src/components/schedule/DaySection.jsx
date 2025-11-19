@@ -1,4 +1,6 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
+
 import {
   Box,
   Paper,
@@ -27,6 +29,7 @@ export default function DaySection({
 }) {
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
+  const { t } = useTranslation();
 
   const colors = {
     bg: isDark ? "#1f1f1f" : "#fff",
@@ -39,6 +42,18 @@ export default function DaySection({
     newSlotBg: isDark ? "#3b3342" : "#fff7ff",
     newSlotBorder: isDark ? "1px solid #5c4666" : "1px solid #f3c1df",
   };
+
+  // 🔥 تحديد انتهاء الحصة بناءً على تاريخ ووقت النهاية
+function isSlotPast(slot) {
+  if (!slot?.endTime) return false;
+
+  // نستخدم تاريخ اليوم من props وليس من بيانات السيرفر
+  const slotEnd = new Date(`${date}T${slot.endTime}:00`);
+  const now = new Date();
+
+  return slotEnd < now;
+}
+
 
   return (
     <Paper
@@ -104,7 +119,7 @@ export default function DaySection({
               mb: 1,
             }}
           >
-            الحصص الموجودة:
+            {t("schedule.existing")}
           </Typography>
 
           {existingSlots.map((slot) => (
@@ -136,15 +151,18 @@ export default function DaySection({
                   {slot.startTime} - {slot.endTime}
                 </Typography>
 
-                <Tooltip title="حذف الحصة" arrow>
-                  <IconButton
-                    color="error"
-                    size="small"
-                    onClick={() => onDeleteExisting(slot._id)}
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                {/* 🔥 زر الحذف فقط إذا لم تنتهِ الحصة */}
+                {!isSlotPast(slot) && (
+                  <Tooltip title={t("schedule.delete")} arrow>
+                    <IconButton
+                      color="error"
+                      size="small"
+                      onClick={() => onDeleteExisting(slot._id)}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Box>
             </Paper>
           ))}
@@ -162,24 +180,23 @@ export default function DaySection({
           mb: 1,
         }}
       >
-        حصص جديدة:
+        {t("schedule.new")}
       </Typography>
 
       {newSlots.map((slot, idx) => (
         <Paper
           key={idx}
           sx={{
-            width: "100%", // ⬅⬅⬅ الحل الأساسي
-            display: "block", // ⬅ لضمان التمدد بدون ضغط
+            width: "100%",
+            display: "block",
             p: 1.5,
             mb: 1,
             borderRadius: 2,
             background: colors.newSlotBg,
             border: colors.newSlotBorder,
-            boxSizing: "border-box", // ⬅ مهم لمنع الانكماش
+            boxSizing: "border-box",
           }}
         >
-          {/* وقت البداية والنهاية */}
           <Box
             sx={{
               display: "flex",
@@ -189,7 +206,7 @@ export default function DaySection({
             }}
           >
             <TextField
-              label="من"
+              label={t("schedule.from")}
               type="time"
               value={slot.startTime}
               onChange={(e) => onUpdateNew(idx, "startTime", e.target.value)}
@@ -198,7 +215,7 @@ export default function DaySection({
             />
 
             <TextField
-              label="إلى"
+              label={t("schedule.to")}
               type="time"
               value={slot.endTime}
               onChange={(e) => onUpdateNew(idx, "endTime", e.target.value)}
@@ -207,9 +224,8 @@ export default function DaySection({
             />
           </Box>
 
-          {/* السعة */}
           <TextField
-            label="السعة"
+            label={t("schedule.capacity")}
             value={slot.capacity}
             onChange={(e) => onUpdateNew(idx, "capacity", e.target.value)}
             type="number"
@@ -218,9 +234,8 @@ export default function DaySection({
             InputLabelProps={{ shrink: true }}
           />
 
-          {/* زر الحذف */}
           <Box sx={{ width: "100%", textAlign: "right", mt: 1 }}>
-            <Tooltip title="حذف" arrow>
+            <Tooltip title={t("schedule.delete")} arrow>
               <IconButton
                 color="error"
                 size="small"
@@ -233,10 +248,10 @@ export default function DaySection({
         </Paper>
       ))}
 
-      {/* زر إضافة حصة */}
+      {/* ===== زر إضافة حصة جديدة ===== */}
       {!isPast && (
         <Box sx={{ textAlign: "center", mt: 2 }}>
-          <Tooltip title="إضافة حصة جديدة" arrow>
+          <Tooltip title={t("schedule.add")} arrow>
             <IconButton
               onClick={onAddSlot}
               sx={{

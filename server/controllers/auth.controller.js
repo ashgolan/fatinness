@@ -41,7 +41,7 @@ export const registerUser = async (req, res) => {
     } = req.body;
 
     // ✅ التحقق من الحقول الأساسية
-    if (!username || !password || !email) {
+    if (!username || !password) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -114,64 +114,54 @@ export const registerUser = async (req, res) => {
 // 🔹 تسجيل الدخول
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    // ✅ فحص المدخلات
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+    if (!identifier || !password) {
+      return res.status(400).json({
+        message: "اسم المستخدم أو رقم الهاتف وكلمة المرور مطلوبة",
+      });
     }
 
-    // ✅ البحث عن المستخدم حسب البريد الإلكتروني (غير حساس لحالة الأحرف)
+    // 🔍 البحث عن المستخدم عبر username أو الهاتف
     const user = await User.findOne({
-      email: { $regex: new RegExp(`^${email.trim()}$`, "i") },
+      $or: [
+        { username: { $regex: new RegExp(`^${identifier}$`, "i") } },
+        { phone: identifier },
+      ],
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ message: "المستخدم غير موجود" });
     }
 
-    // 🚫 فحص إذا كان المستخدم محظورًا
     if (user.isBlocked) {
-      return res
-        .status(403)
-        .json({
-          message: "تم حظر حسابك مؤقتًا 🚫، الرجاء التواصل مع الإدارة.",
-        });
+      return res.status(403).json({
+        message: "🚫 حسابك محظور مؤقتًا، الرجاء التواصل مع الإدارة.",
+      });
     }
+
     if (maintenanceMode && user.role !== "admin") {
       return res.status(503).json({
         message: "🚧 النظام تحت الصيانة مؤقتًا، يرجى المحاولة لاحقًا.",
       });
     }
-    // ✅ تأكد أن كلمة المرور محفوظة
-    if (!user.passwordHash) {
-      console.error("⚠️ user.passwordHash is missing in DB for user:", email);
-      return res
-        .status(500)
-        .json({ message: "User record invalid (missing password hash)" });
-    }
 
-    // ✅ المقارنة الآمنة بين كلمة المرور المدخلة والمحفوظة
+    // مقارنة كلمة المرور
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
     }
 
-    // ✅ توليد التوكن
     const token = generateToken(user);
 
-    // ✅ الرد بالبيانات الأساسية
     res.json({
-      message: "Login successful",
+      message: "تم تسجيل الدخول بنجاح",
       token,
       user: {
         id: user._id,
         username: user.username,
-        email: user.email,
-        name: user.name,
         phone: user.phone,
+        role: user.role,
       },
     });
   } catch (err) {

@@ -12,7 +12,7 @@
     "reminder_system_off": "⚠️ Reminder system is currently inactive"
   },
   "adminDashboard": {
-    "welcomeTitle": "👋 Welcome, {{name}}!",
+    "welcomeTitle": "👋 Welcome",
     "welcomeMessage": "You have {{sessions}} active sessions today and {{newUsers}} new members 💪",
     "mainTitle": "📊 Global Statistics Dashboard",
     "noData": "No data available at the moment.",
@@ -719,5 +719,14 @@
 
     "enter_now": "Enter Now 🚀",
     "keep_going": "Keep pushing toward your goals!"
+  },
+    "schedule": {
+    "existing": "Existing Slots",
+    "new": "New Slots",
+    "add": "Add Slot",
+    "delete": "Delete",
+    "from": "From",
+    "to": "To",
+    "capacity": "Capacity"
   }
 }

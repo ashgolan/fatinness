@@ -9,6 +9,8 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
+
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Api } from "../api/Api";
 import { setToken } from "../utils/tokensStorage";
@@ -17,7 +19,6 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 
-import EmailIcon from "@mui/icons-material/Email";
 import LockIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
@@ -39,6 +40,8 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
+
+  const [identifier, setIdentifier] = useState("");
 
   // ✅ شعار افتراضي فوري
   const fallbackLogo = "/uploads/fatiness_logo.png";
@@ -71,7 +74,10 @@ export default function Login() {
 
     try {
       // 🔹 إرسال بيانات الدخول
-      const { data } = await Api.post("/auth/login", { email, password });
+      const { data } = await Api.post("/auth/login", {
+        identifier,
+        password,
+      });
 
       if (data?.token) {
         // ✅ حفظ التوكن
@@ -249,15 +255,15 @@ export default function Login() {
         >
           <TextField
             fullWidth
-            label={t("login.email")}
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            label="اسم المستخدم أو رقم الهاتف"
+            type="text"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             required
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <EmailIcon
+                  <PersonIcon
                     sx={{ color: isDark ? BRAND.gold : BRAND.purple }}
                   />
                 </InputAdornment>
@@ -268,22 +274,6 @@ export default function Login() {
                 ? "rgba(255,255,255,0.05)"
                 : "rgba(160, 24, 96, 0.05)",
               borderRadius: "10px",
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: isDark ? "#444" : "#ddd" },
-                "&:hover fieldset": {
-                  borderColor: isDark ? BRAND.gold : BRAND.purple,
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: isDark ? BRAND.gold : BRAND.purple,
-                  borderWidth: 2,
-                  boxShadow: `0 0 8px ${
-                    isDark ? "rgba(251,192,45,0.25)" : "rgba(160,24,96,0.25)"
-                  }`,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: isDark ? BRAND.gold : BRAND.purple,
-              },
             }}
           />
 

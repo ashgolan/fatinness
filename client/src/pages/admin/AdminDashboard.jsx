@@ -202,9 +202,9 @@ export default function AdminDashboard() {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-          {/* 👋 مرحبًا {stats?.adminName || "آلاء"}! */}
+          {/* 👋 مرحبًا {stats?.adminName || ""} */}
           {t("adminDashboard.welcomeTitle", {
-            name: stats?.adminName || "آلاء",
+            name: stats?.adminName || "",
           })}
         </Typography>
         <Typography variant="body1" sx={{ fontSize: "1.05rem" }}>

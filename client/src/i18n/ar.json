@@ -12,7 +12,7 @@
     "reminder_system_off": "⚠️ نظام التذكيرات غير فعّال حالياً"
   },
   "adminDashboard": {
-    "welcomeTitle": "👋 مرحبًا {{name}}!",
+    "welcomeTitle": "👋 مرحبًا",
     "welcomeMessage": "لديكِ اليوم {{sessions}} جلسات نشطة و {{newUsers}} مشتركات جديدات 💪",
     "mainTitle": "📊 لوحة الإحصاءات العامة",
     "noData": "لا توجد بيانات متاحة حالياً.",
@@ -725,5 +725,14 @@
 
     "enter_now": "ادخلي الآن 🚀",
     "keep_going": "استمري في التقدم نحو أهدافك!"
+  },
+    "schedule": {
+    "existing": "الحصص الموجودة",
+    "new": "حصص جديدة",
+    "add": "إضافة حصة جديدة",
+    "delete": "حذف",
+    "from": "من",
+    "to": "إلى",
+    "capacity": "السعة"
   }
 }
