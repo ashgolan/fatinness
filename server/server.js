@@ -1,71 +1,124 @@
 import "dotenv/config";
 process.env.TZ = process.env.TZ || "Asia/Jerusalem";
+
+// ============================
+// 🛡️ الحماية الأساسية
+// ============================
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import express from "express";
 import cors from "cors";
+
+// ============================
+// ⚙️ إعدادات داخلية
+// ============================
 import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
 import { handleWebhook } from "./controllers/payments.controller.js";
 import mainRoutes from "./routes/index.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
-import { startScheduler } from "./utils/scheduler.js";
 import galleryRoutes from "./routes/gallery.routes.js";
+import { startScheduler } from "./utils/scheduler.js";
 
+// ============================
+// 🚀 إنشاء التطبيق
+// ============================
 const app = express();
 
-// ✅ تفعيل CORS
-// ✅ تفعيل CORS للسماح للفرونت من Render بالوصول للسيرفر في Railway
+// ============================
+// 🛡️ Helmet – حماية الرؤوس
+// ============================
+app.use(helmet());
+
+// ============================
+// 🔇 منع console.log في الإنتاج
+// ============================
+if (process.env.NODE_ENV === "production") {
+  console.log = function () {};
+  console.debug = function () {};
+}
+
+// ============================
+// 🔐 CORS المسموح فقط
+// ============================
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", // أثناء التطوير
-      "https://fateness.onrender.com", // الموقع المنشور في Render
+      "http://localhost:3000",
+      "https://fateness.onrender.com",
     ],
     credentials: true,
   })
 );
-// ✅ زيادة حجم body المسموح (حتى 10 MB للروابط الكبيرة أو الصور)
+
+// ============================
+// 🚦 Rate Limit – لمنع الهجوم
+// ============================
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 دقيقة
+  max: 200,                 // 200 طلب في الربع ساعة
+  message: "Too many requests, please try again later.",
+});
+app.use("/api", apiLimiter);
+
+// ============================
+// 📦 Body Parser
+// ============================
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// ✅ Stripe Webhook قبل JSON middleware
+// ============================
+// 💳 Stripe Webhook – مهم جداً
+// ============================
 app.post(
   "/payments/webhook",
   express.raw({ type: "application/json" }),
   (req, res, next) => {
-    req.rawBody = req.body;
-    if (Buffer.isBuffer(req.rawBody)) {
-      req.rawBody = req.rawBody;
-    } else if (typeof req.rawBody === "string") {
-      req.rawBody = Buffer.from(req.rawBody);
-    }
+    req.rawBody = Buffer.isBuffer(req.body)
+      ? req.body
+      : Buffer.from(req.body);
+
     next();
   },
   handleWebhook
 );
 
-// ✅ تفعيل JSON لباقي المسارات
+// إعادة تفعيل JSON بعد الـ raw
 app.use(express.json());
 
-// ✅ Health Check
+// ============================
+// 🩺 Health Check
+// ============================
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
-// ✅ عرض ملفات الصور الثابتة
+
+// ============================
+// 🖼️ Static Files (الصور)
+// ============================
 app.use("/uploads", express.static("uploads"));
 app.use("/gallery", galleryRoutes);
 
-// ✅ جميع المسارات عبر index.js
+// ============================
+// 🧭 Routing
+// ============================
 app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
-// ✅ منع توقف السيرفر عند أي خطأ غير متوقع
+
+// ============================
+// 🔥 Catch all errors
+// ============================
 process.on("uncaughtException", (err) => {
   console.error("❌ Uncaught Exception:", err);
 });
+
 process.on("unhandledRejection", (reason) => {
   console.error("❌ Unhandled Rejection:", reason);
 });
 
-// 🟢 تشغيل السيرفر فقط (بدون React)
+// ============================
+// 🚀 تشغيل السيرفر
+// ============================
 const PORT = process.env.PORT || 4000;
 
 (async () => {
@@ -73,12 +126,10 @@ const PORT = process.env.PORT || 4000;
     // 1️⃣ الاتصال بقاعدة البيانات
     await connectDB();
 
-    // 2️⃣ تعريف وظائف المجدول (reminder + completed)
-
-    // 3️⃣ تشغيل المجدول (Agenda)
+    // 2️⃣ تشغيل المجدول
     await startScheduler();
 
-    // 4️⃣ تشغيل السيرفر
+    // 3️⃣ تشغيل السيرفر
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
