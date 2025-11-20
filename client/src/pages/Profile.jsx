@@ -17,17 +17,26 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
 
-ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler);
+ChartJS.register(
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 export default function Profile() {
   const handleServerError = useServerError();
-
   const { t, i18n } = useTranslation();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [newWeight, setNewWeight] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
 
@@ -36,8 +45,9 @@ export default function Profile() {
     try {
       const { data } = await Api.get("/users/me");
       setUser(data);
-    } catch(err) {
-  handleServerError(err);     } finally {
+    } catch (err) {
+      handleServerError(err);
+    } finally {
       setLoading(false);
     }
   };
@@ -59,49 +69,57 @@ export default function Profile() {
       setNewWeight("");
       setNote("");
       fetchProfile();
-    } catch(err) {
-  handleServerError(err);     } finally {
+    } catch (err) {
+      handleServerError(err);
+    } finally {
       setSaving(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: isDark
-            ? "linear-gradient(135deg, #1E1E2F 0%, #2B1D3A 50%, #201C29 100%)"
-            : "linear-gradient(135deg, #e0e7ff 0%, #ffffff 50%, #fae8ff 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <div
-          style={{
-            width: "64px",
-            height: "64px",
-            border: "4px solid #e5e7eb",
-            borderTopColor: "#a855f7",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
+  // ===============================
+  // ▶ BMI CALCULATIONS
+  // ===============================
+  const heightM = user?.height ? user.height / 100 : 0;
+  const bmi =
+    user?.weight && heightM
+      ? (user.weight / (heightM * heightM)).toFixed(1)
+      : null;
+
+  let bmiStatus = "";
+  let bmiColor = "";
+
+  if (bmi) {
+    if (bmi < 18.5) {
+      bmiStatus = t("profile.bmi.underweight");
+      bmiColor = "#3b82f6"; // blue
+    } else if (bmi < 25) {
+      bmiStatus = t("profile.bmi.normal");
+      bmiColor = "#22c55e"; // green
+    } else if (bmi < 30) {
+      bmiStatus = t("profile.bmi.overweight");
+      bmiColor = "#eab308"; // yellow
+    } else {
+      bmiStatus = t("profile.bmi.obese");
+      bmiColor = "#ef4444"; // red
+    }
   }
 
-  const isSubscriptionActive =
-    user?.role === "admin" || user?.subscription?.active !== false;
+  const idealMin = user?.height ? (18.5 * heightM * heightM).toFixed(1) : null;
+  const idealMax = user?.height ? (24.9 * heightM * heightM).toFixed(1) : null;
 
+  // ===============================
+  // ▶ CHART DATA
+  // ===============================
   const weightHistory = user?.weightHistory || [];
 
   const chartData = {
     labels: weightHistory.map((w) =>
       new Date(w.date).toLocaleDateString(
-        i18n.language === "ar" ? "ar-EG" : i18n.language === "he" ? "he-IL" : "en-US",
+        i18n.language === "ar"
+          ? "ar-EG"
+          : i18n.language === "he"
+          ? "he-IL"
+          : "en-US",
         { month: "short", day: "numeric" }
       )
     ),
@@ -113,7 +131,10 @@ export default function Profile() {
         backgroundColor: (context) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-          gradient.addColorStop(0, isDark ? "rgba(168,85,247,0.3)" : "rgba(99,102,241,0.3)");
+          gradient.addColorStop(
+            0,
+            isDark ? "rgba(168,85,247,0.3)" : "rgba(99,102,241,0.3)"
+          );
           gradient.addColorStop(1, "rgba(0,0,0,0)");
           return gradient;
         },
@@ -129,33 +150,13 @@ export default function Profile() {
     ],
   };
 
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: "top",
-        align: "end",
-        labels: {
-          font: { size: 12, family: "Tajawal, Cairo, sans-serif" },
-          color: isDark ? "#E5E7EB" : "#6b7280",
-        },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => `${context.parsed.y} ${t("profile.units.kg")}`,
-        },
-      },
-    },
-  };
-
-  const cardBg = isDark ? "#2B2B3D" : "#FFFFFF";
-  const cardShadow = isDark
-    ? "0 8px 24px rgba(0,0,0,0.4)"
-    : "0 4px 6px -1px rgba(0,0,0,0.1)";
   const textMain = isDark ? "#FFF" : "#111827";
   const textSub = isDark ? "#AAA" : "#6b7280";
+  const cardBg = isDark ? "#232334" : "#FFFFFF";
+
+  // ===============================
+  // ▶ PAGE LAYOUT
+  // ===============================
 
   return (
     <div
@@ -167,111 +168,172 @@ export default function Profile() {
         dir: i18n.language === "ar" ? "rtl" : "ltr",
       }}
     >
-      <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 16px" }}>
-
-        {/* Header */}
+      <div
+        style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 16px" }}
+      >
+        {/* ===============================
+            HEADER
+        =============================== */}
         <div
           style={{
+            padding: "40px 24px",
             borderRadius: "24px",
-            boxShadow: cardShadow,
             background: isDark
               ? "linear-gradient(135deg, #312E81 0%, #5B21B6 50%, #831843 100%)"
               : "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)",
-            padding: "48px",
             textAlign: "center",
+            color: "#fff",
+            marginBottom: "32px",
           }}
         >
-          <h1 style={{ fontSize: "36px", color: "#fff" }}>
+          <h1 style={{ fontSize: "34px", marginBottom: "8px" }}>
             {user?.username || t("profile.labels.user")}
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.9)" }}>
-            👤{" "}
-            {user?.role === "admin"
-              ? t("profile.roles.admin")
-              : t("profile.roles.member")}{" "}
-            • {user?.email}
-          </p>
+          <p>{user?.email}</p>
         </div>
 
-        {/* Stats */}
+        {/* ===============================
+            BMI SECTION (OPTION 4)
+        =============================== */}
+        {bmi && (
+          <div
+            style={{
+              background: cardBg,
+              borderRadius: "24px",
+              padding: "28px",
+              marginBottom: "32px",
+              boxShadow: "0 4px 16px rgba(0,0,0,0.1)",
+            }}
+          >
+            <h2 style={{ marginBottom: "16px", color: textMain }}>
+              {t("profile.bmi.title")}
+            </h2>
+
+            <div
+              style={{
+                padding: "20px",
+                borderRadius: "16px",
+                background: bmiColor + "22",
+                border: `2px solid ${bmiColor}`,
+                textAlign: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <h1 style={{ fontSize: "48px", margin: 0, color: bmiColor }}>
+                {bmi}
+              </h1>
+              <p
+                style={{ fontSize: "20px", color: bmiColor, fontWeight: "600" }}
+              >
+                {bmiStatus}
+              </p>
+            </div>
+
+            <p style={{ color: textSub }}>
+              {t("profile.bmi.healthyRange")}: <strong>18.5 – 24.9</strong>
+            </p>
+
+            {idealMin && idealMax && (
+              <p style={{ color: textSub }}>
+                {t("profile.bmi.idealWeight")}:{" "}
+                <strong>
+                  {idealMin}–{idealMax} {t("profile.units.kg")}
+                </strong>
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ===============================
+            OTHER STATS (GRID)
+        =============================== */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: window.innerWidth < 768 ? "repeat(2,1fr)" : "repeat(4,1fr)",
+            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
             gap: "24px",
-            marginTop: "32px",
+            marginBottom: "32px",
           }}
         >
-          {[ 
+          {/* وزن / طول / اشتراك ... */}
+          {[
             {
               icon: "⚖️",
               label: t("profile.stats.currentWeight"),
-              value: user?.weight ? `${user.weight} ${t("profile.units.kg")}` : "-",
+              value: user?.weight
+                ? `${user.weight} ${t("profile.units.kg")}`
+                : "-",
             },
             {
               icon: "📏",
               label: t("profile.stats.height"),
-              value: user?.height ? `${user.height} ${t("profile.units.cm")}` : "-",
+              value: user?.height
+                ? `${user.height} ${t("profile.units.cm")}`
+                : "-",
             },
             {
               icon: "🏋️",
               label: t("profile.stats.completed"),
               value: user?.stats?.completedBookings || 0,
             },
-            {
-              icon: isSubscriptionActive ? "✅" : "❌",
-              label: t("profile.stats.subscription"),
-              value: isSubscriptionActive
-                ? t("profile.status.active")
-                : t("profile.status.expired"),
-            },
           ].map((stat) => (
             <div
               key={stat.label}
               style={{
                 background: cardBg,
+                padding: "20px",
                 borderRadius: "16px",
-                padding: "24px",
                 textAlign: "center",
-                boxShadow: cardShadow,
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               }}
             >
               <div style={{ fontSize: "28px" }}>{stat.icon}</div>
               <p style={{ color: textSub }}>{stat.label}</p>
-              <p style={{ fontSize: "22px", fontWeight: "bold" }}>{stat.value}</p>
+              <h3 style={{ color: textMain }}>{stat.value}</h3>
             </div>
           ))}
         </div>
 
-        {/* Chart */}
+        {/* ===============================
+            CHART
+        =============================== */}
         <div
           style={{
             background: cardBg,
             borderRadius: "24px",
             padding: "24px",
-            marginTop: "32px",
+            marginBottom: "32px",
           }}
         >
           <h2>{t("profile.sections.weightProgress")}</h2>
 
           {weightHistory.length > 0 ? (
-            <div style={{ height: "400px" }}>
-              <Line data={chartData} options={chartOptions} />
+            <div
+              style={{
+                width: "100%",
+                position: "relative",
+              }}
+            >
+              <Line data={chartData} />
             </div>
           ) : (
-            <p style={{ textAlign: "center", color: textSub, padding: "64px 0" }}>
+            <p
+              style={{ textAlign: "center", color: textSub, padding: "64px 0" }}
+            >
               {t("profile.messages.noWeightData")}
             </p>
           )}
         </div>
 
-        {/* Add Weight */}
+        {/* ===============================
+            ADD WEIGHT
+        =============================== */}
         <div
           style={{
             background: cardBg,
             borderRadius: "24px",
             padding: "24px",
-            marginTop: "32px",
+            marginBottom: "64px",
           }}
         >
           <h2>{t("profile.sections.addWeight")}</h2>

@@ -521,7 +521,17 @@
     "units": {
       "kg": "kg",
       "cm": "cm"
-    }
+    },
+    "bmi": {
+  "title": "Body Mass Index (BMI)",
+  "underweight": "Underweight",
+  "normal": "Normal",
+  "overweight": "Overweight",
+  "obese": "Obese",
+  "healthyRange": "Healthy Range",
+  "idealWeight": "Ideal Weight"
+}
+
   },
 
   "myBookings": {

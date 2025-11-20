@@ -522,6 +522,15 @@
     "units": {
       "kg": "ק\"ג",
       "cm": "ס\"מ"
+    },
+    "bmi": {
+      "title": "מדד מסת גוף (BMI)",
+      "underweight": "תת־משקל",
+      "normal": "תקין",
+      "overweight": "עודף משקל קל",
+      "obese": "השמנה",
+      "healthyRange": "טווח בריא",
+      "idealWeight": "משקל אידיאלי"
     }
   },
 
