@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { fmtLocal } from "../utils/date";
 import { colors, labels } from "../theme/colors";
 import { useTranslation } from "react-i18next";
+import useServerError from "../hooks/useServerError";
 
 // 🔹 دالة مساعدة لتوليد الأيام السبعة القادمة
 function getWeekDays(start = new Date()) {
@@ -34,6 +35,8 @@ function getWeekDays(start = new Date()) {
 }
 
 export default function Booking() {
+  const handleServerError = useServerError();
+
   const { t } = useTranslation();
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +50,7 @@ export default function Booking() {
       const { data } = await Api.get(`/slots/day/${dateStr}`);
       setSlots(data);
     } catch (err) {
-      toast.error(t("booking.error"));
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -63,7 +66,7 @@ export default function Booking() {
       toast.success(t("booking.success"));
       await fetchSlots(selectedDate);
     } catch (err) {
-      toast.error(err?.response?.data?.message || t("booking.error"));
+      handleServerError(err);
     }
   };
 
@@ -76,7 +79,8 @@ export default function Booking() {
       {/* 🔹 شريط الأيام */}
       <Stack direction="row" spacing={1} sx={{ overflowX: "auto", mb: 2 }}>
         {weekDays.map((d) => {
-          const isActive = d.date.toDateString() === selectedDate.toDateString();
+          const isActive =
+            d.date.toDateString() === selectedDate.toDateString();
           return (
             <Button
               key={d.label}

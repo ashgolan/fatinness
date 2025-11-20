@@ -12,7 +12,6 @@ export const createCheckoutSession = async (req, res) => {
   try {
     const user = req.user;
 
-    // 50$ شهريًا كمثال
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -21,7 +20,7 @@ export const createCheckoutSession = async (req, res) => {
           price_data: {
             currency: 'usd',
             product_data: { name: 'Fitness Studio Monthly Subscription' },
-            unit_amount: 5000, // 50 دولار = 5000 سنت
+            unit_amount: 5000,
             recurring: { interval: 'month' },
           },
           quantity: 1,
@@ -38,12 +37,12 @@ export const createCheckoutSession = async (req, res) => {
     console.error('Stripe session error:', error);
     return res
       .status(500)
-      .json({ message: 'Failed to create checkout session' });
+      .json({ code: 'ADMIN_SUBSCRIPTION_CREATE_SESSION_ERROR' });
   }
 };
 
 /**
- * 🔹 Webhook من Stripe - يتم استدعاؤه تلقائيًا بعد كل عملية دفع
+ * 🔹 Webhook من Stripe
  */
 export const handleWebhook = async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -51,7 +50,7 @@ export const handleWebhook = async (req, res) => {
   let event;
   try {
     event = stripe.webhooks.constructEvent(
-      req.rawBody, // rawBody مهم جدًا - لا تستخدم express.json هنا
+      req.rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET
     );
@@ -62,10 +61,10 @@ export const handleWebhook = async (req, res) => {
 
   try {
     switch (event.type) {
-      // ✅ عند نجاح الاشتراك أو التجديد
       case 'checkout.session.completed': {
         const session = event.data.object;
         const userId = session.metadata?.userId;
+
         if (userId) {
           const user = await User.findById(userId);
           if (user) {
@@ -83,7 +82,6 @@ export const handleWebhook = async (req, res) => {
         break;
       }
 
-      // ❌ عند فشل الدفع الشهري
       case 'invoice.payment_failed': {
         const invoice = event.data.object;
         const userId = invoice.metadata?.userId;
@@ -96,12 +94,12 @@ export const handleWebhook = async (req, res) => {
         break;
       }
 
-      // 🟠 عند تجديد الاشتراك بنجاح
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object;
         const user = await User.findOne({
           'subscription.providerCustomerId': invoice.customer,
         });
+
         if (user) {
           user.subscription.active = true;
           user.subscription.currentPeriodStart = new Date();
@@ -118,18 +116,17 @@ export const handleWebhook = async (req, res) => {
     res.status(200).json({ received: true });
   } catch (error) {
     console.error('Webhook handling error:', error);
-    return res.status(500).json({ message: 'Error processing webhook' });
+    return res.status(500).json({ code: 'ADMIN_SUBSCRIPTION_WEBHOOK_ERROR' });
   }
 };
 
 /**
- * 🔹 إلغاء الاشتراك الشهري يدويًا من حساب المستخدم
+ * 🔹 إلغاء الاشتراك الشهري يدويًا
  */
 export const cancelSubscription = async (req, res) => {
   try {
     const user = req.user;
 
-    // هنا يمكن تنفيذ الإلغاء من Stripe فعليًا:
     if (user.subscription?.providerCustomerId) {
       const subscriptions = await stripe.subscriptions.list({
         customer: user.subscription.providerCustomerId,
@@ -146,20 +143,21 @@ export const cancelSubscription = async (req, res) => {
     user.subscription = { ...(user.subscription || {}), active: false };
     await user.save();
 
-    return res.json({ message: 'Subscription cancelled successfully' });
+    return res.json({ code: 'ADMIN_SUBSCRIPTION_CANCELLED' });
   } catch (error) {
     console.error('Cancel subscription error:', error);
-    return res.status(500).json({ message: 'Error cancelling subscription' });
+    return res.status(500).json({ code: 'ADMIN_SUBSCRIPTION_CANCEL_ERROR' });
   }
 };
 
 /**
- * 🔹 التحقق من حالة الاشتراك الحالي للمستخدم
+ * 🔹 التحقق من حالة الاشتراك الحالي
  */
 export const getSubscriptionStatus = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('subscription');
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!user)
+      return res.status(404).json({ code: 'ADMIN_SUBSCRIPTION_USER_NOT_FOUND' });
 
     res.json({
       active: user.subscription?.active || false,
@@ -168,6 +166,8 @@ export const getSubscriptionStatus = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error fetching subscription status' });
+    res
+      .status(500)
+      .json({ code: 'ADMIN_SUBSCRIPTION_STATUS_ERROR' });
   }
 };

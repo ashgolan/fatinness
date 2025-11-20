@@ -24,6 +24,8 @@ import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 import DaySection from "../../components/schedule/DaySection";
 import { useThemeMode } from "../../context/ThemeContext";
+import useServerError from "../../hooks/useServerError";
+import { useTranslation } from "react-i18next";
 
 // ===================== أدوات التاريخ =====================
 function startOfWeek(date = new Date()) {
@@ -64,19 +66,23 @@ function isToday(date) {
   );
 }
 
-const DAY_NAMES = [
-  "الأحد",
-  "الإثنين",
-  "الثلاثاء",
-  "الأربعاء",
-  "الخميس",
-  "الجمعة",
-  "السبت",
+// 🔤 مفاتيح أيام الأسبوع من ملفات الترجمة
+const DAY_KEYS = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
 ];
 
 export default function AdminSchedule() {
+  const handleServerError = useServerError();
+
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
+  const { t } = useTranslation();
 
   // ألوان وهوية فاخرة
   const BRAND = {
@@ -103,8 +109,8 @@ export default function AdminSchedule() {
         params: { start: fmt(weekStart) },
       });
       setWeekData(data);
-    } catch {
-      toast.error("فشل في جلب بيانات الأسبوع الحالي");
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -117,8 +123,8 @@ export default function AdminSchedule() {
         params: { start: fmt(nextStart) },
       });
       setNextWeekData(data);
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      handleServerError(err);
     }
   };
 
@@ -168,17 +174,17 @@ export default function AdminSchedule() {
   };
 
   const deleteSlot = async (id) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذه الحصة؟")) return;
+    if (!window.confirm(t("adminSchedule.confirm.deleteSlot"))) return;
 
     try {
       await Api.delete(`/admin/slots/${id}`);
-      toast.success("تم حذف الحصة بنجاح");
+      toast.success(t("adminSchedule.success.deleted"));
 
-      // 🔥 أهم شيء:
+      // إعادة تحميل الأسابيع
       await fetchCurrentWeek();
       await fetchNextWeek();
-    } catch {
-      toast.error("فشل في حذف الحصة");
+    } catch (err) {
+      handleServerError(err);
     }
   };
 
@@ -198,19 +204,20 @@ export default function AdminSchedule() {
       });
     });
 
-    if (!changes.length) return toast.info("لا توجد تغييرات صالحة للحفظ");
+    if (!changes.length) {
+      return toast.info(t("adminSchedule.info.noValidChanges"));
+    }
 
     setSaving(true);
     try {
       await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
 
-      toast.success(`تم حفظ ${changes.length} حصة بنجاح`);
+      toast.success(t("adminSchedule.success.saved"));
 
-      // 🔥 الحل الحقيقي:
       setCurrentEdits({});
       await fetchCurrentWeek();
-    } catch (e) {
-      toast.error("فشل في حفظ التغييرات");
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setSaving(false);
     }
@@ -247,20 +254,28 @@ export default function AdminSchedule() {
         }))
     );
 
-    if (!items.length) return toast.warn("أضف حصصاً صالحة أولاً");
+    if (!items.length) {
+      return toast.warn(t("adminSchedule.info.addValid"));
+    }
 
     setSaving(true);
     try {
       const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
-      toast.success(`تم إنشاء ${data.created} حصة للأسبوع القادم`);
+
+      toast.success(
+        t("adminSchedule.success.createdNext", {
+          count: data?.created ?? items.length,
+        })
+      );
+
       fetchNextWeek();
 
       setNextWeek(
         Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] }))
       );
       setTab(1);
-    } catch {
-      toast.error("فشل في إنشاء الأسبوع القادم");
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setSaving(false);
     }
@@ -373,7 +388,7 @@ export default function AdminSchedule() {
                     mb: 0.5,
                   }}
                 >
-                  إدارة جدول المواعيد
+                  {t("adminSchedule.title")}
                 </Typography>
                 <Typography
                   sx={{
@@ -382,8 +397,7 @@ export default function AdminSchedule() {
                     fontSize: 15,
                   }}
                 >
-                  تحكم كامل في حصص النادي للأسبوع الحالي والقادم، مع تجربة بصرية
-                  فاخرة تناسب نادي رياضي نسائي.
+                  {t("adminSchedule.subtitle")}
                 </Typography>
               </Box>
 
@@ -447,12 +461,12 @@ export default function AdminSchedule() {
               <Tab
                 icon={<EventAvailableIcon />}
                 iconPosition="start"
-                label="الأسبوع الحالي"
+                label={t("adminSchedule.currentWeek")}
               />
               <Tab
                 icon={<NavigateNextIcon />}
                 iconPosition="start"
-                label="الأسبوع القادم"
+                label={t("adminSchedule.nextWeek")}
               />
             </Tabs>
           </Box>
@@ -508,7 +522,7 @@ export default function AdminSchedule() {
                     </Typography>
                   </Box>
                   <Chip
-                    label="الأسبوع الحالي"
+                    label={t("adminSchedule.current")}
                     icon={
                       <EventAvailableIcon sx={{ color: "#fff !important" }} />
                     }
@@ -546,7 +560,7 @@ export default function AdminSchedule() {
                       >
                         <DaySection
                           style={{ width: "100%" }}
-                          dayName={DAY_NAMES[i]}
+                          dayName={t(`weekdays.${DAY_KEYS[i]}`)}
                           date={key}
                           existingSlots={weekData?.days?.[key] || []}
                           newSlots={currentEdits[key] || []}
@@ -603,7 +617,9 @@ export default function AdminSchedule() {
                       transition: "all 0.25s ease",
                     }}
                   >
-                    {saving ? "جاري الحفظ..." : "حفظ جميع التغييرات"}
+                    {saving
+                      ? t("adminSchedule.savingLabel", "جاري الحفظ...")
+                      : t("adminSchedule.saveAll")}
                   </Button>
                 </Box>
               </>
@@ -651,8 +667,10 @@ export default function AdminSchedule() {
               </Box>
 
               <Chip
-                label="الأسبوع القادم"
-                icon={<CalendarTodayIcon sx={{ color: "#fff !important" }} />}
+                label={t("adminSchedule.next")}
+                icon={
+                  <CalendarTodayIcon sx={{ color: "#fff !important" }} />
+                }
                 sx={{
                   background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.pink})`,
                   color: "#fff",
@@ -675,14 +693,15 @@ export default function AdminSchedule() {
                     md={4}
                     lg={3}
                     xl={3}
+                    key={i}
                     sx={{
                       display: "flex",
-                      flexDirection: "column", // 🔥 الحل
+                      flexDirection: "column",
                       width: "100%",
                     }}
                   >
                     <DaySection
-                      dayName={DAY_NAMES[i]}
+                      dayName={t(`weekdays.${DAY_KEYS[i]}`)}
                       date={date}
                       existingSlots={nextWeekData?.days?.[date] || []}
                       newSlots={nextWeek[i]?.items || []}
@@ -739,7 +758,9 @@ export default function AdminSchedule() {
                   transition: "all 0.25s ease",
                 }}
               >
-                {saving ? "جاري الإنشاء..." : "إنشاء الأسبوع القادم"}
+                {saving
+                  ? t("adminSchedule.creatingLabel", "جاري الإنشاء...")
+                  : t("adminSchedule.saveNextWeek")}
               </Button>
             </Box>
           </>

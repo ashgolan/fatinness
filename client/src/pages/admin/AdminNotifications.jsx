@@ -31,8 +31,11 @@ import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import { fixDigits } from "../../utils/fixDigits";
+import useServerError from "../../hooks/useServerError";
 
 export default function AdminNotifications() {
+  const handleServerError = useServerError();
+
   const theme = useTheme();
   const mode = theme.palette.mode;
   const { t } = useTranslation();
@@ -76,9 +79,8 @@ export default function AdminNotifications() {
       ]);
       setHistory(historyData);
       setUsers(usersData);
-    } catch {
-      toast.error(t("adminNotifications.fetchError"));
-    }
+    } catch(err) {
+handleServerError(err);     }
   };
 
   useEffect(() => {
@@ -103,9 +105,7 @@ export default function AdminNotifications() {
       setBody("");
       fetchHistory();
     } catch (err) {
-      toast.error(
-        err?.response?.data?.message || t("adminNotifications.sendFailed")
-      );
+ handleServerError(err); 
     } finally {
       setLoading(false);
     }
@@ -139,8 +139,7 @@ export default function AdminNotifications() {
       toast.success(data.message);
       fetchHistory();
     } catch (err) {
-      toast.error(t("adminNotifications.resendFailed"));
-    } finally {
+handleServerError(err);     } finally {
       setResending(false);
       setConfirmOpen(false);
       setNotificationToResend(null);
@@ -155,9 +154,8 @@ export default function AdminNotifications() {
       await Api.delete(`/admin/notifications/${id}`);
       toast.success(t("adminNotifications.deletedOne"));
       setHistory((prev) => prev.filter((h) => h._id !== id));
-    } catch {
-      toast.error(t("adminNotifications.deleteFailed"));
-    }
+    } catch(err) {
+handleServerError(err);     }
   };
 
   // 🧹 مسح السجل بالكامل
@@ -168,9 +166,8 @@ export default function AdminNotifications() {
       await Api.delete("/admin/notifications");
       toast.success(t("adminNotifications.allDeleted"));
       setHistory([]);
-    } catch {
-      toast.error(t("adminNotifications.deleteFailed"));
-    }
+    } catch(err) {
+handleServerError(err);     }
   };
 
   return (

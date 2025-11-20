@@ -28,6 +28,7 @@ const float = keyframes`
 `;
 
 export default function Dashboard() {
+
   const navigate = useNavigate();
   const { t } = useTranslation();
 

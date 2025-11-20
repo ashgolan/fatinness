@@ -9,52 +9,36 @@ import {
 import { toLocal } from "../utils/date.js";
 
 /**
- * 🔹 إنشاء حجز جديد (مع تحقق من الاشتراك الشهري)
+ * 🔹 إنشاء حجز جديد
  */
 export const createBooking = async (req, res) => {
   try {
     const user = req.user;
     const { slotId, paymentRef } = req.body;
 
-    // ✅ تحقق من الاشتراك الشهري (معلق مؤقتًا)
-    // if (user.role !== "admin") {
-    //   if (!user.subscription?.active) {
-    //     return res.status(403).json({
-    //       message:
-    //         "Your subscription is inactive. Please renew before booking.",
-    //     });
-    //   }
-    // }
-
-    // ✅ التحقق من وجود الفتحة وصلاحيتها
     const slot = await Slot.findById(slotId);
     if (!slot || slot.isBlocked)
-      return res.status(400).json({ message: "Slot not available" });
+      return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
 
-    // ✅ لا يمكن الحجز في مواعيد منتهية
-    // ✅ لا يمكن الحجز في مواعيد منتهية (نأخذ التاريخ + وقت بداية الحصة)
     const now = new Date();
+    const sessionStart = toLocal(slot.date);
 
-    const sessionStart = toLocal(slot.date); // نحول تاريخ Mongo إلى Local
     if (slot.startTime) {
       const [sh, sm] = slot.startTime.split(":").map(Number);
-      sessionStart.setHours(sh, sm, 0, 0);  // نضع ساعة بداية الحصة
+      sessionStart.setHours(sh, sm, 0, 0);
     }
 
     if (sessionStart <= now) {
-      return res.status(400).json({
-        message: "This slot has already passed or is in progress.",
-      });
+      return res
+        .status(400)
+        .json({ code: "ADMIN_BOOKING_SLOT_PAST" });
     }
 
-
-    // ✅ حساب بداية ونهاية الأسبوع
     const startOfWeek = new Date(slot.date);
     startOfWeek.setDate(slot.date.getDate() - slot.date.getDay());
     const endOfWeek = new Date(startOfWeek);
     endOfWeek.setDate(startOfWeek.getDate() + 6);
 
-    // ✅ التحقق من الحد الأسبوعي للمستخدم
     const userBookingsThisWeek = await Booking.countDocuments({
       user: user._id,
       status: "booked",
@@ -63,27 +47,26 @@ export const createBooking = async (req, res) => {
 
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
+
     if (userBookingsThisWeek >= allowed)
       return res
         .status(403)
-        .json({ message: "لقد وصلت إلى الحد الأقصى للحجوزات الأسبوعية." });
+        .json({ code: "ADMIN_BOOKING_WEEKLY_LIMIT" });
 
-    // ✅ التحقق من سعة الحصة
     const slotBookingsCount = await Booking.countDocuments({
       slot: slot._id,
       status: "booked",
     });
-    if (slotBookingsCount >= (slot.capacity || 9999))
-      return res.status(400).json({ message: "هذه الحصة ممتلئة بالفعل." });
 
-    // ✅ إنشاء الحجز الجديد
+    if (slotBookingsCount >= (slot.capacity || 9999))
+      return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_FULL" });
+
     const booking = await Booking.create({
       user: user._id,
       slot: slot._id,
       paymentRef,
     });
 
-    // ✅ إنشاء حدث في Google Calendar إذا كان المستخدم موصولًا
     if (user.google?.accessToken) {
       try {
         await createGoogleEvent(user, booking);
@@ -92,52 +75,40 @@ export const createBooking = async (req, res) => {
       }
     }
 
-    // ✅ جدولة التذكير قبل ساعتين من موعد الحصة
     if (slot?.date) {
       try {
-        const slotDate = new Date(slot.date);
         await scheduleReminder(
           booking._id,
           slot.date,
           slot.startTime,
           slot.endTime
         );
-        console.log(
-          `⏰ Reminder scheduled for booking ${
-            booking._id
-          } (${slotDate.toISOString()})`
-        );
       } catch (err) {
         console.warn("⚠️ Reminder scheduling failed:", err.message);
       }
-    } else {
-      console.warn(
-        `⚠️ Skipped reminder: slot.date missing for booking ${booking._id}`
-      );
     }
 
-    // ✅ الرد النهائي للواجهة
     res.status(201).json({
-      message: "تم إنشاء الحجز بنجاح ✅",
+      code: "ADMIN_BOOKING_CREATED",
       booking,
     });
   } catch (error) {
     console.error("❌ Error in createBooking:", error);
-    res.status(500).json({ message: "حدث خطأ في إنشاء الحجز" });
+    res.status(500).json({ code: "ADMIN_BOOKING_CREATE_ERROR" });
   }
 };
 
 /**
- * 🔹 إلغاء الحجز (مسموح قبل 12 ساعة فقط)
+ * 🔹 إلغاء الحجز
  */
 export const cancelBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate("slot user");
-    if (!booking) return res.status(404).json({ message: "Booking not found" });
+    if (!booking)
+      return res.status(404).json({ code: "ADMIN_BOOKING_NOT_FOUND" });
 
-    // السماح فقط لصاحب الحجز أو المدير
     if (!booking.user._id.equals(req.user._id) && req.user.role !== "admin")
-      return res.status(403).json({ message: "Forbidden" });
+      return res.status(403).json({ code: "ADMIN_BOOKING_FORBIDDEN" });
 
     const now = new Date();
     const slotDate = new Date(booking.slot.date);
@@ -145,17 +116,15 @@ export const cancelBooking = async (req, res) => {
       slotDate.getTime() - 12 * 60 * 60 * 1000
     );
 
-    // 🔹 لا تسمح بالإلغاء خلال 12 ساعة إلا للمسؤول
     if (req.user.role !== "admin" && now > twelveHoursBefore) {
       return res
         .status(403)
-        .json({ message: "لا يمكن إلغاء الحجز خلال آخر 12 ساعة قبل الحصة." });
+        .json({ code: "ADMIN_BOOKING_CANCEL_TOO_LATE" });
     }
 
     booking.status = "cancelled";
     await booking.save();
 
-    // ✅ حذف من Google Calendar إن وُجد
     if (booking.calendarEventId && booking.user.google?.accessToken) {
       try {
         await deleteGoogleEvent(booking.user, booking.calendarEventId);
@@ -164,20 +133,20 @@ export const cancelBooking = async (req, res) => {
       }
     }
 
-    res.json({ message: "تم إلغاء الحجز بنجاح ❌" });
+    res.json({ code: "ADMIN_BOOKING_CANCELLED" });
   } catch (error) {
     console.error("❌ Error cancelling booking:", error);
-    res.status(500).json({ message: "تعذر إلغاء الحجز" });
+    res.status(500).json({ code: "ADMIN_BOOKING_CANCEL_ERROR" });
   }
 };
 
 /**
- * 🔹 عرض جميع الحجوزات (للمشرفة فقط)
+ * 🔹 عرض جميع الحجوزات (مدير فقط)
  */
 export const getAllBookings = async (req, res) => {
   try {
     if (req.user.role !== "admin") {
-      return res.status(403).json({ message: "Forbidden" });
+      return res.status(403).json({ code: "ADMIN_BOOKING_FETCH_FORBIDDEN" });
     }
 
     const bookings = await Booking.find()
@@ -188,12 +157,12 @@ export const getAllBookings = async (req, res) => {
     res.json(bookings);
   } catch (error) {
     console.error("❌ Error fetching all bookings:", error);
-    res.status(500).json({ message: "Error fetching bookings" });
+    res.status(500).json({ code: "ADMIN_BOOKING_FETCH_ERROR" });
   }
 };
 
 /**
- * 🔹 عرض حجوزات المستخدم الحالية
+ * 🔹 عرض حجوزات المستخدم
  */
 export const getMyBookings = async (req, res) => {
   try {
@@ -204,6 +173,6 @@ export const getMyBookings = async (req, res) => {
     res.json(bookings);
   } catch (error) {
     console.error("❌ Error fetching user bookings:", error);
-    res.status(500).json({ message: "Error fetching your bookings" });
+    res.status(500).json({ code: "ADMIN_BOOKING_MY_FETCH_ERROR" });
   }
 };

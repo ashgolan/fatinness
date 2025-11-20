@@ -10,8 +10,11 @@ import {
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import useServerError from "../../hooks/useServerError";
 
 export default function AdminReports() {
+  const handleServerError = useServerError();
+
   const { t } = useTranslation();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -39,8 +42,8 @@ export default function AdminReports() {
       link.remove();
 
       toast.success(t("adminReports.success"));
-    } catch (error) {
-      toast.error(t("adminReports.fail"));
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -53,9 +56,7 @@ export default function AdminReports() {
       </Typography>
 
       <Paper sx={{ p: 3, mt: 2 }}>
-        <Typography sx={{ mb: 2 }}>
-          {t("adminReports.description")}
-        </Typography>
+        <Typography sx={{ mb: 2 }}>{t("adminReports.description")}</Typography>
 
         <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
           <TextField

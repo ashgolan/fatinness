@@ -26,8 +26,11 @@ import { toast } from "react-toastify";
 import { useBrand } from "../../context/BrandContext";
 import { useTranslation } from "react-i18next";
 import CloseIcon from "@mui/icons-material/Close";
+import useServerError from "../../hooks/useServerError";
 
 export default function AdminSettings() {
+  const handleServerError = useServerError();
+
   const { t } = useTranslation();
   const { updateBrand } = useBrand();
 
@@ -61,8 +64,8 @@ export default function AdminSettings() {
       normalized.galleryImages = gallery.data;
 
       setSettings(normalized);
-    } catch (error) {
-      toast.error(t("adminSettings.errors.loadFailed"));
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -72,8 +75,8 @@ export default function AdminSettings() {
     try {
       const { data } = await Api.get("/maintenance/status");
       setMaintenance(data.maintenanceMode);
-    } catch {
-      toast.error(t("adminSettings.errors.maintenanceLoadFailed"));
+    } catch (err) {
+      handleServerError(err);
     }
   };
 
@@ -95,8 +98,8 @@ export default function AdminSettings() {
       setSaving(true);
       await Api.put("/admin/settings", settings);
       toast.success(t("adminSettings.success.saved"));
-    } catch {
-      toast.error(t("adminSettings.errors.saveFailed"));
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setSaving(false);
     }
@@ -128,8 +131,8 @@ export default function AdminSettings() {
         }));
 
         toast.success(t("adminSettings.gallery.uploadSuccess"));
-      } catch {
-        toast.error(t("adminSettings.gallery.uploadFailed"));
+      } catch (err) {
+        handleServerError(err);
       } finally {
         setUploading(false);
       }
@@ -175,8 +178,8 @@ export default function AdminSettings() {
         }));
 
         toast.success(t("adminSettings.success.imageUpdated"));
-      } catch {
-        toast.error(t("adminSettings.errors.uploadFailed"));
+      } catch (err) {
+        handleServerError(err);
       } finally {
         setUploading(false);
       }
@@ -203,8 +206,8 @@ export default function AdminSettings() {
       const { data } = await Api.put("/maintenance/toggle");
       setMaintenance(data.maintenanceMode);
       toast.success(data.message);
-    } catch {
-      toast.error(t("adminSettings.errors.maintenanceToggleFailed"));
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setLoadingMaintenance(false);
     }
@@ -226,7 +229,8 @@ export default function AdminSettings() {
       <Paper sx={{ p: 3, borderRadius: "20px" }}>
         {/* ألبوم الصور */}
         <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
-          {t("adminSettings.gallery.title")} ({settings.galleryImages.length}/10)
+          {t("adminSettings.gallery.title")} ({settings.galleryImages.length}
+          /10)
         </Typography>
 
         <Box
@@ -258,18 +262,7 @@ export default function AdminSettings() {
                 }}
               />
 
-              <Button
-                variant="contained"
-                color="error"
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 5,
-                  right: 5,
-                  minWidth: "32px",
-                  height: "32px",
-                  borderRadius: "50%",
-                }}
+              <IconButton
                 onClick={async () => {
                   if (!window.confirm(t("adminSettings.gallery.confirmDelete")))
                     return;
@@ -283,13 +276,34 @@ export default function AdminSettings() {
                       ),
                     }));
                     toast.success(t("adminSettings.gallery.deleteSuccess"));
-                  } catch {
-                    toast.error(t("adminSettings.gallery.deleteFailed"));
+                  } catch (err) {
+                    handleServerError(err);
                   }
                 }}
+                sx={{
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(0,0,0,0.45)",
+                  backdropFilter: "blur(4px)",
+                  transition: "0.2s",
+                  "&:hover": {
+                    backgroundColor: "rgba(255,0,0,0.55)",
+                  },
+                }}
               >
-                <DeleteIcon fontSize="small" />
-              </Button>
+                <Box
+                  sx={{
+                    width: "14px",
+                    height: "2.5px",
+                    borderRadius: "2px",
+                    backgroundColor: "white",
+                  }}
+                />
+              </IconButton>
             </Box>
           ))}
         </Box>

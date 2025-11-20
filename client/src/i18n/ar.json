@@ -105,7 +105,8 @@
     "nextWeek": "الأسبوع القادم",
     "current": "حالي",
     "next": "قادم",
-
+    "savingLabel": "جاري الحفظ...",
+    "creatingLabel": "جاري الإنشاء...",
     "capacity": "السعة",
     "addSlot": "إضافة حصة",
     "saveAll": "حفظ التغييرات",
@@ -348,74 +349,76 @@
 
   "usersAdmin": {
     "title": "إدارة المشتركات",
-    "subtitle": "إدارة بيانات وحجوزات المشتركات في الاستوديو",
+    "subtitle": "إدارة بيانات المشتركات والحجوزات في النادي",
 
     "search": {
-      "placeholder": "ابحثي بالاسم أو البريد الإلكتروني أو رقم الهاتف..."
+      "placeholder": "ابحثي بالاسم، الإيميل، أو رقم الهاتف..."
     },
 
     "card": {
-      "email": "البريد الإلكتروني",
-      "phone": "رقم الهاتف",
-      "bookingsCount": "عدد الحجوزات",
       "active": "نشطة",
       "blocked": "محظورة"
     },
 
+    "totalBookings": "عدد الحجوزات",
+
     "extraBooking": {
-      "label": "السماح بالحجز الإضافي",
+      "label": "السماح بحجز إضافي",
       "updated": "تم تحديث حالة الحجز الإضافي"
-    },
-
-    "block": {
-      "cannotBlockAdmin": "لا يمكن حظر مديرة النظام 👑",
-      "confirmBlock": "هل أنتِ متأكدة من حظر هذه المشتركة؟",
-      "confirmUnblock": "هل ترغبين في إلغاء الحظر عن هذه المشتركة؟",
-      "blockedSuccess": "تم حظر المشتركة بنجاح 🚫",
-      "unblockedSuccess": "تم إلغاء الحظر عن المشتركة بنجاح ✅",
-      "error": "حدث خطأ أثناء تعديل حالة الحظر"
-    },
-
-    "editDialog": {
-      "title": "تعديل بيانات المشتركة",
-
-      "fields": {
-        "username": "الاسم",
-        "email": "البريد الإلكتروني",
-        "phone": "رقم الهاتف",
-        "height": "الطول (سم)",
-        "weight": "الوزن (كغ)",
-        "age": "العمر",
-        "gender": "الجنس",
-        "genderFemale": "أنثى",
-        "genderMale": "ذكر",
-        "role": "الدور",
-        "roleUser": "مشتركة",
-        "roleAdmin": "مديرة"
-      },
-
-      "roleConfirm": {
-        "title": "⚠️ تأكيد التغيير إلى مديرة",
-        "text": "هل أنتِ متأكدة أنكِ ترغبين بتحويل هذه المشتركة إلى مديرة؟ 👑",
-        "subtext": "هذا التغيير يمنحها صلاحيات الإدارة داخل النظام.",
-        "cancel": "إلغاء",
-        "confirm": "نعم، تأكيد التغيير"
-      }
     },
 
     "buttons": {
       "edit": "تعديل",
       "block": "حظر",
-      "unblock": "إلغاء الحظر",
-      "save": "حفظ التغييرات",
-      "cancel": "إلغاء"
+      "unblock": "إلغاء الحظر"
+    },
+
+    "noResults": "لا توجد نتائج مطابقة",
+
+    "editUser": "تعديل بيانات المشتركة",
+
+    "fields": {
+      "name": "الاسم",
+      "email": "الإيميل",
+      "phone": "رقم الهاتف",
+      "height": "الطول (سم)",
+      "weight": "الوزن (كغ)",
+      "age": "العمر",
+      "gender": "الجنس",
+      "role": "الدور"
+    },
+
+    "gender": {
+      "female": "أنثى",
+      "male": "ذكر"
+    },
+
+    "roles": {
+      "user": "مستخدمة",
+      "admin": "مديرة"
+    },
+
+    "confirm": {
+      "block": "هل أنتِ متأكدة أنك ترغبين بحظر هذه المشتركة؟",
+      "unblock": "هل أنتِ متأكدة أنك ترغبين بإلغاء الحظر عن هذه المشتركة؟"
+    },
+
+    "confirmRole": {
+      "title": "⚠️ تأكيد ترقية إلى مديرة",
+      "text": "هل أنتِ متأكدة أنك تريدين ترقية هذه المشتركة إلى مديرة؟",
+      "note": "سيمنحها هذا الإجراء جميع صلاحيات الإدارة.",
+      "confirm": "تأكيد"
     },
 
     "messages": {
-      "loadError": "حدث خطأ أثناء جلب المشتركات",
-      "notFound": "لا توجد مشتركات مطابقة للبحث",
-      "updateSuccess": "تم تحديث بيانات المشتركة بنجاح ✅",
-      "updateError": "فشل تحديث بيانات المشتركة"
+      "updated": "تم تحديث بيانات المشتركة بنجاح",
+      "blocked": "تم حظر المشتركة بنجاح",
+      "unblocked": "تم إلغاء الحظر عن المشتركة",
+      "tempAdmin": "تم تعيين المشتركة كمديرة مؤقتًا (لم يُحفظ بعد)"
+    },
+
+    "errors": {
+      "cannotBlockAdmin": "لا يمكن حظر مديرة النظام"
     }
   },
 
@@ -423,9 +426,9 @@
     "cancel": "إلغاء",
     "save": "حفظ"
   },
-
   "login": {
     "title": "Fatinness Studio",
+    "identifier": "اسم المستخدم أو رقم الهاتف",
     "welcome": "مرحباً بعودتك 💪",
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
@@ -659,5 +662,92 @@
     "title": "ألبوم صور النادي",
     "empty": "لا توجد صور بعد",
     "close": "إغلاق"
-  }
+  },
+  "server": {
+  "NETWORK_ERROR": "لا يوجد اتصال بالسيرفر.",
+  "UNKNOWN_ERROR": "حدث خطأ غير متوقع.",
+
+  "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
+  "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",
+  "WEEK_TEMPLATE_CREATE_SUCCESS": "تم إنشاء قالب الأسبوع بنجاح.",
+  "WEEK_TEMPLATE_CREATE_ERROR": "حدث خطأ أثناء إنشاء قالب الأسبوع.",
+  "WEEK_TEMPLATE_NOT_FOUND": "القالب غير موجود.",
+  "WEEK_TEMPLATE_APPLY_SUCCESS": "تم تطبيق القالب بنجاح.",
+  "WEEK_TEMPLATE_APPLY_ERROR": "حدث خطأ أثناء تطبيق القالب.",
+
+  "USER_NOT_FOUND": "المستخدمة غير موجودة.",
+  "USER_UPDATE_SUCCESS": "تم تحديث بيانات المشتركة بنجاح.",
+  "USER_UPDATE_ERROR": "تعذر تحديث بيانات المشتركة.",
+
+  "CSV_NO_DATA": "لا توجد بيانات لتصديرها.",
+  "CSV_EXPORT_ERROR": "فشل تصدير التقرير.",
+
+  "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "لا يمكن حظر مديرة النظام.",
+  "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "تم حظر المشتركة بنجاح.",
+  "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "تم إلغاء الحظر عن المشتركة.",
+  "ADMIN_TOGGLE_BLOCK_ERROR": "حدث خطأ أثناء تغيير حالة الحظر.",
+
+  "ADMIN_NOTIFICATION_MISSING_FIELDS": "الرجاء إدخال العنوان والمحتوى.",
+  "ADMIN_NOTIFICATION_USER_NOT_FOUND": "لم يتم العثور على المشتركة.",
+  "ADMIN_NOTIFICATION_NO_TARGETS": "لا توجد مشتركات مستهدفات.",
+  "ADMIN_NOTIFICATION_SEND_ERROR": "حدث خطأ أثناء إرسال الإشعار.",
+  "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "الإشعار غير موجود.",
+  "ADMIN_NOTIFICATION_DELETE_SUCCESS": "تم حذف الإشعار.",
+  "ADMIN_NOTIFICATION_CLEAR_SUCCESS": "تم مسح سجل الإشعارات بالكامل.",
+  "ADMIN_NOTIFICATION_CLEAR_ERROR": "فشل مسح سجل الإشعارات.",
+
+  "SCHEDULER_STATUS_FETCH_ERROR": "تعذر جلب حالة المجدول.",
+
+  "SETTINGS_FETCH_ERROR": "فشل جلب الإعدادات.",
+  "SETTINGS_UPDATE_SUCCESS": "تم تحديث الإعدادات بنجاح.",
+  "SETTINGS_UPDATE_ERROR": "فشل تحديث الإعدادات.",
+  "LOGO_UPLOAD_MISSING_FILE": "يرجى اختيار صورة للشعار.",
+  "LOGO_UPLOAD_ERROR": "فشل رفع الشعار.",
+  "LOGO_UPLOAD_SUCCESS": "تم تحديث الشعار بنجاح.",
+
+  "ADMIN_SLOTS_WEEK_FETCH_ERROR": "حدث خطأ أثناء جلب حصص الأسبوع.",
+  "ADMIN_SLOTS_DAY_FETCH_ERROR": "حدث خطأ أثناء جلب حصص هذا اليوم.",
+  "ADMIN_SLOTS_UPCOMING_FETCH_ERROR": "حدث خطأ أثناء جلب الحصص القادمة.",
+
+  "AUTH_REGISTER_MISSING_FIELDS": "الحقول الأساسية مطلوبة.",
+  "AUTH_REGISTER_USER_EXISTS": "المستخدم موجود مسبقًا.",
+  "AUTH_REGISTER_SUCCESS": "تم إنشاء الحساب بنجاح.",
+  "AUTH_REGISTER_SERVER_ERROR": "حدث خطأ في إنشاء الحساب.",
+
+  "AUTH_LOGIN_INVALID_FIELDS": "اسم المستخدم أو الهاتف وكلمة المرور مطلوبة.",
+  "AUTH_LOGIN_NOT_FOUND": "المستخدم غير موجود.",
+  "AUTH_LOGIN_BLOCKED": "حسابك محظور مؤقتًا. الرجاء التواصل مع الإدارة.",
+  "AUTH_LOGIN_MAINTENANCE": "النظام تحت الصيانة. يرجى المحاولة لاحقًا.",
+  "AUTH_LOGIN_INCORRECT": "بيانات الدخول غير صحيحة.",
+  "AUTH_LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح.",
+
+  "BOOKING_SLOT_NOT_AVAILABLE": "هذه الحصة غير متاحة.",
+  "BOOKING_SLOT_PAST": "هذه الحصة قد انتهت أو بدأت بالفعل.",
+  "BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأسبوعي للحجوزات.",
+  "BOOKING_SLOT_FULL": "هذه الحصة ممتلئة.",
+  "BOOKING_CREATE_SUCCESS": "تم إنشاء الحجز بنجاح.",
+  "BOOKING_CREATE_ERROR": "حدث خطأ أثناء إنشاء الحجز.",
+  "BOOKING_CANCEL_NOT_FOUND": "الحجز غير موجود.",
+  "BOOKING_CANCEL_FORBIDDEN": "غير مسموح بإلغاء هذا الحجز.",
+  "BOOKING_CANCEL_TOO_LATE": "لا يمكن إلغاء الحجز قبل 12 ساعة من الموعد.",
+  "BOOKING_CANCEL_SUCCESS": "تم إلغاء الحجز بنجاح.",
+  "BOOKING_CANCEL_ERROR": "حدث خطأ أثناء إلغاء الحجز.",
+
+  "PROFILE_NOT_FOUND": "لم يتم العثور على المستخدم.",
+  "PROFILE_UPDATE_SUCCESS": "تم تحديث الملف الشخصي.",
+  "PROFILE_UPDATE_ERROR": "حدث خطأ أثناء تحديث البيانات.",
+
+  "WEIGHT_ADD_MISSING": "الوزن مطلوب.",
+  "WEIGHT_ADD_SUCCESS": "تم تحديث الوزن بنجاح.",
+  "WEIGHT_ADD_ERROR": "خطأ أثناء تحديث الوزن.",
+
+  "WEIGHT_HISTORY_NOT_FOUND": "لم يتم العثور على سجل الأوزان.",
+  "WEIGHT_HISTORY_FETCH_ERROR": "خطأ أثناء جلب سجل الأوزان.",
+
+  "FCM_TOKEN_MISSING": "رمز FCM مفقود.",
+  "FCM_TOKEN_SAVED": "تم حفظ رمز FCM بنجاح.",
+
+  "SUB_RENEW_SUCCESS": "تم تجديد الاشتراك بنجاح.",
+  "SUB_RENEW_ERROR": "خطأ أثناء تجديد الاشتراك."
+}
 }

@@ -9,8 +9,11 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
+import useServerError from "../hooks/useServerError";
 
 export default function BookingsHub() {
+  const handleServerError = useServerError();
+
   const { mode, BRAND } = useThemeMode();
   const { t } = useTranslation();
 
@@ -77,7 +80,7 @@ export default function BookingsHub() {
       setAllBookings(bookingsRes.data);
     } catch (err) {
       if (err?.config?.method !== "options" && err?.response?.status)
-        toast.error(t("bookingsHub.errors.fetch"));
+        handleServerError(err);
     } finally {
       setLoading(false);
       setTimeout(() => setAnimateIn(true), 150);
@@ -96,9 +99,7 @@ export default function BookingsHub() {
         toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
-        toast.error(
-          err?.response?.data?.message || t("bookingsHub.toasts.bookFail")
-        );
+        handleServerError(err);
       } finally {
         setBookingId(null);
       }
@@ -135,9 +136,7 @@ export default function BookingsHub() {
         toast.success(t("bookingsHub.toasts.cancelSuccess"));
         await fetchData();
       } catch (err) {
-        toast.error(
-          err?.response?.data?.message || t("bookingsHub.toasts.cancelFail")
-        );
+        handleServerError(err);
       } finally {
         setBookingId(null);
         setRefreshing(false);
@@ -151,8 +150,8 @@ export default function BookingsHub() {
       await Api.post("/bookings", { slotId });
       toast.success(t("bookingsHub.toasts.rebookSuccess"));
       await fetchData();
-    } catch {
-      toast.error(t("bookingsHub.toasts.rebookFail"));
+    } catch (err) {
+      handleServerError(err);
     }
   };
 
@@ -235,7 +234,7 @@ export default function BookingsHub() {
           marginBottom: 32,
         }}
       >
-        {[ 
+        {[
           { value: "available", label: t("bookingsHub.tabs.available") },
           { value: "mybookings", label: t("bookingsHub.tabs.myBookings") },
         ].map((tab) => (
@@ -509,8 +508,7 @@ function AvailableView({
                     width: 20,
                     height: 20,
                     borderRadius: "50%",
-                    background:
-                      "linear-gradient(135deg, #10b981, #059669)",
+                    background: "linear-gradient(135deg, #10b981, #059669)",
                     color: "white",
                     fontSize: 12,
                     display: "flex",
@@ -538,9 +536,7 @@ function AvailableView({
             <div
               style={{
                 background:
-                  mode === "dark"
-                    ? "rgba(255,255,255,0.05)"
-                    : "white",
+                  mode === "dark" ? "rgba(255,255,255,0.05)" : "white",
                 borderRadius: "20px",
                 padding: "20px",
                 marginBottom: 24,
@@ -554,8 +550,7 @@ function AvailableView({
                   fontSize: "clamp(18px, 4vw, 22px)",
                 }}
               >
-                {dayNames[new Date(selectedDate).getDay()]} -{" "}
-                {selectedDate}
+                {dayNames[new Date(selectedDate).getDay()]} - {selectedDate}
               </h3>
             </div>
 
@@ -589,9 +584,7 @@ function AvailableView({
                       border: isBooked
                         ? "2px solid #10b981"
                         : isFull
-                        ? `2px solid ${
-                            mode === "dark" ? "#444" : "#ddd"
-                          }`
+                        ? `2px solid ${mode === "dark" ? "#444" : "#ddd"}`
                         : `2px solid ${BRAND.purple}`,
                       transition: "all 0.3s ease",
                     }}
@@ -612,15 +605,13 @@ function AvailableView({
                         marginBottom: 12,
                       }}
                     >
-                      {t("bookingsHub.capacityLabel")}:{" "}
-                      {slot.bookedCount}/{slot.capacity}
+                      {t("bookingsHub.capacityLabel")}: {slot.bookedCount}/
+                      {slot.capacity}
                     </div>
 
                     <button
                       onClick={() =>
-                        isBooked
-                          ? handleCancel(slot._id)
-                          : handleBook(slot._id)
+                        isBooked ? handleCancel(slot._id) : handleBook(slot._id)
                       }
                       disabled={isProcessing || (isFull && !isBooked)}
                       style={{

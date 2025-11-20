@@ -16,7 +16,7 @@ import { sendFcmToTokens as sendFCMNotification } from "../utils/fcm.js";
 import { parseLocalDate } from "../utils/date.js";
 
 // =======================
-// 📸 رفع الشعار
+// 📸 رفع الشعار (multer)
 // =======================
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, "uploads/"),
@@ -41,16 +41,17 @@ export const createWeekTemplate = async (req, res) => {
   try {
     const { name, slots } = req.body;
     if (!name || !slots?.length) {
-      return res
-        .status(400)
-        .json({ message: "Template name and slots required" });
+      return res.status(400).json({ code: "ADMIN_TEMPLATE_REQUIRED" });
     }
 
     const template = await WeekTemplate.create({ name, slots });
-    res.status(201).json({ message: "Template created", template });
+    res.status(201).json({
+      code: "ADMIN_TEMPLATE_CREATE_SUCCESS",
+      template,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error creating template" });
+    res.status(500).json({ code: "ADMIN_TEMPLATE_CREATE_ERROR" });
   }
 };
 
@@ -62,11 +63,11 @@ export const applyTemplate = async (req, res) => {
     const { templateId, startDate } = req.body;
 
     const template = await WeekTemplate.findById(templateId);
-    if (!template)
-      return res.status(404).json({ message: "Template not found" });
+    if (!template) {
+      return res.status(404).json({ code: "ADMIN_TEMPLATE_NOT_FOUND" });
+    }
 
     const start = parseLocalDate(startDate);
-
     const createdSlots = [];
 
     for (const slot of template.slots) {
@@ -91,14 +92,12 @@ export const applyTemplate = async (req, res) => {
     }
 
     res.json({
-      message: "Template applied successfully",
+      code: "ADMIN_TEMPLATE_APPLIED",
       created: createdSlots.length,
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ message: "Error applying template", error: error.message });
+    res.status(500).json({ code: "ADMIN_TEMPLATE_APPLY_ERROR" });
   }
 };
 
@@ -110,15 +109,20 @@ export const setUserExtraBooking = async (req, res) => {
     const { userId, allow } = req.body;
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ code: "ADMIN_USER_NOT_FOUND" });
+    }
 
     user.allowExtraBookings = !!allow;
     await user.save();
 
-    res.json({ message: "User updated successfully", user });
+    res.json({
+      code: "ADMIN_USER_UPDATED",
+      user,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error updating user" });
+    res.status(500).json({ code: "ADMIN_USER_UPDATE_ERROR" });
   }
 };
 
@@ -140,7 +144,7 @@ export const exportAttendanceReport = async (req, res) => {
       .sort({ createdAt: -1 });
 
     if (!bookings.length) {
-      return res.status(404).json({ message: "لا توجد بيانات لتصديرها" });
+      return res.status(404).json({ code: "ADMIN_REPORT_NO_DATA" });
     }
 
     const csv = createObjectCsvStringifier({
@@ -190,7 +194,7 @@ export const exportAttendanceReport = async (req, res) => {
     res.status(200).end("\uFEFF" + csvData);
   } catch (error) {
     console.error("خطأ أثناء تصدير التقرير:", error);
-    res.status(500).json({ message: "فشل تصدير التقرير" });
+    res.status(500).json({ code: "ADMIN_REPORT_EXPORT_ERROR" });
   }
 };
 
@@ -201,9 +205,7 @@ export const getDashboardStats = async (req, res) => {
   try {
     const now = new Date();
 
-    // =======================
     // 📅 آخر 7 أيام
-    // =======================
     const startOfWeek = new Date(now);
     startOfWeek.setDate(now.getDate() - 6);
 
@@ -238,9 +240,7 @@ export const getDashboardStats = async (req, res) => {
       });
     }
 
-    // =======================
     // ☀️ جلسات اليوم
-    // =======================
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -251,9 +251,7 @@ export const getDashboardStats = async (req, res) => {
       date: { $gte: startOfDay, $lte: endOfDay },
     });
 
-    // =======================
     // 🔥 الحجوزات النشطة (غير منتهية)
-    // =======================
     const booked = await Booking.find({ status: "booked" }).populate("slot");
 
     const activeBookings = booked.filter((b) => {
@@ -264,22 +262,17 @@ export const getDashboardStats = async (req, res) => {
       return end >= now;
     }).length;
 
-    // =======================
     // 🌈 حساب الأسبوع القادم الصحيح (الأحد → السبت)
-    // =======================
     const today = new Date();
     const dow = today.getDay(); // 0 = Sunday
 
-    // بداية الأسبوع الحالي (الأحد)
     const startOfThisWeek = new Date(today);
     startOfThisWeek.setDate(today.getDate() - dow);
     startOfThisWeek.setHours(0, 0, 0, 0);
 
-    // بداية الأسبوع القادم
     const startOfNextWeek = new Date(startOfThisWeek);
     startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
 
-    // نهاية الأسبوع القادم (السبت)
     const endOfNextWeek = new Date(startOfNextWeek);
     endOfNextWeek.setDate(endOfNextWeek.getDate() + 6);
     endOfNextWeek.setHours(23, 59, 59, 999);
@@ -288,9 +281,6 @@ export const getDashboardStats = async (req, res) => {
       date: { $gte: startOfNextWeek, $lte: endOfNextWeek },
     });
 
-    // =======================
-    // 📦 جميع الإحصائيات الأخرى
-    // =======================
     const [
       totalUsers,
       blockedUsers,
@@ -307,9 +297,6 @@ export const getDashboardStats = async (req, res) => {
       Slot.countDocuments(),
     ]);
 
-    // =======================
-    // 🎯 النتيجة النهائية
-    // =======================
     res.json({
       totalUsers,
       activeUsers: totalUsers - blockedUsers,
@@ -325,7 +312,7 @@ export const getDashboardStats = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error in getDashboardStats:", error);
-    res.status(500).json({ message: "Error fetching stats" });
+    res.status(500).json({ code: "ADMIN_STATS_ERROR" });
   }
 };
 
@@ -338,7 +325,7 @@ export const getWeekTemplates = async (req, res) => {
     res.json(templates);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching templates" });
+    res.status(500).json({ code: "ADMIN_TEMPLATES_FETCH_ERROR" });
   }
 };
 
@@ -348,13 +335,14 @@ export const getWeekTemplates = async (req, res) => {
 export const deleteWeekTemplate = async (req, res) => {
   try {
     const template = await WeekTemplate.findByIdAndDelete(req.params.id);
-    if (!template)
-      return res.status(404).json({ message: "Template not found" });
+    if (!template) {
+      return res.status(404).json({ code: "ADMIN_TEMPLATE_NOT_FOUND" });
+    }
 
-    res.json({ message: "Template deleted successfully" });
+    res.json({ code: "ADMIN_TEMPLATE_DELETE_SUCCESS" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error deleting template" });
+    res.status(500).json({ code: "ADMIN_TEMPLATE_DELETE_ERROR" });
   }
 };
 
@@ -369,7 +357,7 @@ export const getSchedulerStatus = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "تعذر جلب حالة المجدول" });
+    res.status(500).json({ code: "ADMIN_SCHEDULER_STATUS_ERROR" });
   }
 };
 
@@ -394,7 +382,7 @@ export const getAllUsers = async (req, res) => {
     res.json(usersWithBookings);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching users" });
+    res.status(500).json({ code: "ADMIN_USERS_FETCH_ERROR" });
   }
 };
 
@@ -404,10 +392,12 @@ export const getAllUsers = async (req, res) => {
 export const toggleUserBlock = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ code: "ADMIN_USER_NOT_FOUND" });
+    }
 
     if (user.role === "admin") {
-      return res.status(403).json({ message: "لا يمكن حظر مديرة النظام 👑" });
+      return res.status(403).json({ code: "ADMIN_CANNOT_BLOCK_ADMIN" });
     }
 
     const newStatus = !user.isBlocked;
@@ -419,14 +409,12 @@ export const toggleUserBlock = async (req, res) => {
     );
 
     res.json({
-      message: newStatus
-        ? "🚫 تم حظر المشتركة بنجاح"
-        : "🔓 تم إلغاء الحظر عن المشتركة",
+      code: newStatus ? "ADMIN_BLOCK_SUCCESS" : "ADMIN_UNBLOCK_SUCCESS",
       user: updatedUser,
     });
   } catch (error) {
     console.error("❌ toggleUserBlock error:", error);
-    res.status(500).json({ message: "حدث خطأ أثناء تغيير حالة الحظر" });
+    res.status(500).json({ code: "ADMIN_BLOCK_ERROR" });
   }
 };
 
@@ -438,23 +426,28 @@ export const sendCustomNotification = async (req, res) => {
     const { title, body, target } = req.body;
     const adminUser = req.user?._id;
 
-    if (!title || !body)
+    if (!title || !body) {
       return res
         .status(400)
-        .json({ message: "الرجاء إدخال العنوان والمحتوى." });
+        .json({ code: "ADMIN_NOTIFICATION_FIELDS_REQUIRED" });
+    }
 
     let users = [];
     if (target === "all") {
       users = await User.find({ isBlocked: false });
     } else {
       const user = await User.findById(target);
-      if (!user)
-        return res.status(404).json({ message: "لم يتم العثور على المشتركة." });
+      if (!user) {
+        return res
+          .status(404)
+          .json({ code: "ADMIN_NOTIFICATION_USER_NOT_FOUND" });
+      }
       users = [user];
     }
 
-    if (!users.length)
-      return res.status(400).json({ message: "لا توجد مشتركات مستهدفات." });
+    if (!users.length) {
+      return res.status(400).json({ code: "ADMIN_NOTIFICATION_NO_TARGETS" });
+    }
 
     let totalSuccess = 0;
     let totalFail = 0;
@@ -464,7 +457,7 @@ export const sendCustomNotification = async (req, res) => {
         user: u,
         title,
         body,
-        channel: "push", // فقط Push
+        channel: "push",
       });
 
       totalSuccess += result.successCount || 0;
@@ -483,13 +476,14 @@ export const sendCustomNotification = async (req, res) => {
     });
 
     res.json({
-      message: `✅ تم إرسال الإشعار بنجاح إلى ${users.length} مشتركة.`,
+      code: "ADMIN_NOTIFICATION_SENT",
+      targetCount: users.length,
       successCount: totalSuccess,
       failureCount: totalFail,
     });
   } catch (error) {
     console.error("❌ خطأ أثناء إرسال الإشعار:", error);
-    res.status(500).json({ message: "حدث خطأ أثناء إرسال الإشعار." });
+    res.status(500).json({ code: "ADMIN_NOTIFICATION_ERROR" });
   }
 };
 
@@ -507,7 +501,7 @@ export const getNotificationsHistory = async (req, res) => {
     res.json(notifications);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "تعذر جلب سجل الإشعارات" });
+    res.status(500).json({ code: "ADMIN_NOTIFICATIONS_FETCH_ERROR" });
   }
 };
 
@@ -532,7 +526,7 @@ export const getSettings = async (req, res) => {
     res.json(settings);
   } catch (error) {
     console.error("❌ خطأ أثناء جلب الإعدادات:", error);
-    res.status(500).json({ message: "فشل جلب الإعدادات" });
+    res.status(500).json({ code: "ADMIN_SETTINGS_FETCH_FAILED" });
   }
 };
 
@@ -559,12 +553,12 @@ export const updateSettings = async (req, res) => {
     );
 
     res.json({
-      message: "✅ تم تحديث الإعدادات بنجاح",
+      code: "ADMIN_SETTINGS_UPDATE_SUCCESS",
       settings,
     });
   } catch (error) {
     console.error("❌ خطأ أثناء تحديث الإعدادات:", error);
-    res.status(500).json({ message: "فشل تحديث الإعدادات", error });
+    res.status(500).json({ code: "ADMIN_SETTINGS_UPDATE_FAILED" });
   }
 };
 
@@ -573,8 +567,9 @@ export const updateSettings = async (req, res) => {
 // =======================
 export const uploadLogo = async (req, res) => {
   try {
-    if (!req.file)
-      return res.status(400).json({ message: "يرجى اختيار صورة للشعار" });
+    if (!req.file) {
+      return res.status(400).json({ code: "ADMIN_LOGO_REQUIRED" });
+    }
 
     const baseUrl = `${req.protocol}://${req.get("host")}`;
     const logoUrl = `${baseUrl}/uploads/${req.file.filename}`;
@@ -585,10 +580,13 @@ export const uploadLogo = async (req, res) => {
     settings.logoUrl = logoUrl;
     await settings.save();
 
-    res.json({ message: "تم تحديث الشعار بنجاح ✅", logoUrl });
+    res.json({
+      code: "ADMIN_LOGO_UPDATE_SUCCESS",
+      logoUrl,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "فشل رفع الشعار" });
+    res.status(500).json({ code: "ADMIN_LOGO_UPLOAD_FAILED" });
   }
 };
 
@@ -599,7 +597,7 @@ export const updateUserByAdmin = async (req, res) => {
   try {
     const admin = req.user;
     if (!admin || admin.role !== "admin") {
-      return res.status(403).json({ message: "Unauthorized" });
+      return res.status(403).json({ code: "ADMIN_UNAUTHORIZED" });
     }
 
     const { id } = req.params;
@@ -607,15 +605,15 @@ export const updateUserByAdmin = async (req, res) => {
       req.body;
 
     const user = await User.findById(id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).json({ code: "ADMIN_USER_NOT_FOUND" });
+    }
 
     if (user.role === "admin" && role === "user") {
       const adminCount = await User.countDocuments({ role: "admin" });
 
       if (adminCount <= 1) {
-        return res
-          .status(400)
-          .json({ message: "❌ لا يمكن إزالة آخر مديرة في النظام" });
+        return res.status(400).json({ code: "ADMIN_LAST_ADMIN_ERROR" });
       }
     }
 
@@ -633,10 +631,13 @@ export const updateUserByAdmin = async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "User updated successfully ✅", user });
+    res.json({
+      code: "ADMIN_USER_UPDATE_SUCCESS",
+      user,
+    });
   } catch (err) {
     console.error("❌ Update User Error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "ADMIN_SERVER_ERROR" });
   }
 };
 
@@ -694,7 +695,7 @@ export const getBookingsSummary = async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error("❌ Error in getBookingsSummary:", err);
-    res.status(500).json({ message: "Error fetching booking summary" });
+    res.status(500).json({ code: "ADMIN_BOOKING_SUMMARY_ERROR" });
   }
 };
 
@@ -712,7 +713,7 @@ export const getUserBookings = async (req, res) => {
     res.json(bookings);
   } catch (err) {
     console.error("❌ Error in getUserBookings:", err);
-    res.status(500).json({ message: "Error fetching user bookings" });
+    res.status(500).json({ code: "ADMIN_USER_BOOKINGS_ERROR" });
   }
 };
 
@@ -731,7 +732,7 @@ export const adminGetSlotBookings = async (req, res) => {
     res.json({ bookings });
   } catch (err) {
     console.error("❌ Error loading slot bookings:", err);
-    res.status(500).json({ message: "خطأ في تحميل حجوزات الحصة" });
+    res.status(500).json({ code: "ADMIN_SLOT_BOOKINGS_ERROR" });
   }
 };
 
@@ -745,13 +746,13 @@ export const deleteNotificationById = async (req, res) => {
     const deleted = await Notification.findByIdAndDelete(id);
 
     if (!deleted) {
-      return res.status(404).json({ message: "الإشعار غير موجود" });
+      return res.status(404).json({ code: "ADMIN_NOTIFICATION_NOT_FOUND" });
     }
 
-    res.json({ message: "🗑️ تم حذف الإشعار بنجاح" });
+    res.json({ code: "ADMIN_NOTIFICATION_DELETE_SUCCESS" });
   } catch (err) {
     console.error("❌ deleteNotificationById error:", err);
-    res.status(500).json({ message: "فشل حذف الإشعار" });
+    res.status(500).json({ code: "ADMIN_NOTIFICATION_DELETE_FAIL" });
   }
 };
 
@@ -761,9 +762,9 @@ export const deleteNotificationById = async (req, res) => {
 export const clearAllNotifications = async (req, res) => {
   try {
     await Notification.deleteMany({});
-    res.json({ message: "🧹 تم مسح سجل الإشعارات بالكامل" });
+    res.json({ code: "ADMIN_NOTIFICATIONS_CLEAR_SUCCESS" });
   } catch (err) {
     console.error("❌ clearAllNotifications error:", err);
-    res.status(500).json({ message: "فشل مسح سجل الإشعارات" });
+    res.status(500).json({ code: "ADMIN_NOTIFICATIONS_CLEAR_FAIL" });
   }
 };

@@ -8,8 +8,11 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import DoneAllIcon from "@mui/icons-material/DoneAll";
 import CancelIcon from "@mui/icons-material/Cancel";
+import useServerError from "../hooks/useServerError";
 
 export default function MyBookings() {
+  const handleServerError = useServerError();
+
   const { t } = useTranslation();
   const { mode, BRAND } = useThemeMode();
 
@@ -24,8 +27,8 @@ export default function MyBookings() {
     try {
       const { data } = await Api.get("/bookings/me");
       setBookings(data);
-    } catch {
-      toast.error(t("myBookings.fetchError"));
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -44,8 +47,7 @@ export default function MyBookings() {
       toast.success(t("myBookings.cancelSuccess"));
       fetchBookings();
     } catch (err) {
-      toast.error(err?.response?.data?.message || t("myBookings.cancelFail"));
-    } finally {
+  handleServerError(err);     } finally {
       setRefreshing(false);
     }
   };
@@ -100,7 +102,12 @@ export default function MyBookings() {
         >
           {t("myBookings.title")}
         </h1>
-        <p style={{ color: mode === "dark" ? "#aaa" : "#555", fontSize: "0.95rem" }}>
+        <p
+          style={{
+            color: mode === "dark" ? "#aaa" : "#555",
+            fontSize: "0.95rem",
+          }}
+        >
           {t("myBookings.subtitle")}
         </p>
       </div>
@@ -138,7 +145,12 @@ export default function MyBookings() {
                     ? `linear-gradient(90deg, ${BRAND.gold}, ${BRAND.purple})`
                     : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`
                   : "transparent",
-              color: filter === btn.value ? "#fff" : mode === "dark" ? "#ddd" : "#444",
+              color:
+                filter === btn.value
+                  ? "#fff"
+                  : mode === "dark"
+                  ? "#ddd"
+                  : "#444",
               fontWeight: 600,
               cursor: "pointer",
               transition: "all 0.3s ease",
@@ -152,7 +164,13 @@ export default function MyBookings() {
 
       {/* 🔄 تحميل */}
       {loading ? (
-        <div style={{ display: "flex", justifyContent: "center", padding: "80px 0" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "80px 0",
+          }}
+        >
           <div
             style={{
               width: 50,
@@ -210,9 +228,7 @@ export default function MyBookings() {
                   border: `2.5px solid ${borderColor}`,
                   borderRadius: "20px",
                   padding: "18px",
-                  background: mode === "dark"
-                    ? BRAND.paperDark
-                    : "#ffffffaa",
+                  background: mode === "dark" ? BRAND.paperDark : "#ffffffaa",
                   boxShadow: `0 0 8px ${glow}`,
                   transition: "all 0.3s ease",
                   display: "flex",
@@ -303,7 +319,9 @@ export default function MyBookings() {
                       transition: "all 0.25s ease",
                     }}
                   >
-                    {refreshing ? t("myBookings.cancelling") : t("myBookings.cancelButton")}
+                    {refreshing
+                      ? t("myBookings.cancelling")
+                      : t("myBookings.cancelButton")}
                   </button>
                 )}
               </div>

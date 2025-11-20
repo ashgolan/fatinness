@@ -21,10 +21,12 @@ import {
 
 import SearchIcon from "@mui/icons-material/Search";
 import { Api } from "../../api/Api";
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import useServerError from "../../hooks/useServerError";
 
 export default function BookingsAdmin() {
+  const handleServerError = useServerError();
+
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const { t } = useTranslation();
@@ -73,9 +75,8 @@ export default function BookingsAdmin() {
         return nameA.localeCompare(nameB, "ar");
       });
       setSummary(sorted);
-    } catch {
-      toast.error(t("bookingsAdmin.errors.summaryLoad"));
-    } finally {
+    } catch(err) {
+handleServerError(err);     } finally {
       setLoading(false);
     }
   };
@@ -97,8 +98,8 @@ export default function BookingsAdmin() {
       });
 
       setBookings(sorted);
-    } catch {
-      toast.error(t("bookingsAdmin.errors.detailsLoad"));
+    } catch (err) {
+    handleServerError(err); 
     } finally {
       setLoadingDetails(false);
     }

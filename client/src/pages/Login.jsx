@@ -9,7 +9,12 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
+
 import PersonIcon from "@mui/icons-material/Person";
+import LockIcon from "@mui/icons-material/Lock";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import LoginIcon from "@mui/icons-material/Login";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Api } from "../api/Api";
@@ -19,17 +24,16 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 
-import LockIcon from "@mui/icons-material/Lock";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import LoginIcon from "@mui/icons-material/Login";
 import { registerFcmToken } from "../firebase/registerFcmToken";
 import { useTranslation } from "react-i18next";
+import useServerError from "../hooks/useServerError";
 
 export default function Login() {
+  const handleServerError = useServerError();
+
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
-  const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ نأخذ الشعار وحالة التحميل
+  const { logoUrl, loading: loadingBrand } = useBrand();
   const { t } = useTranslation();
 
   const [password, setPassword] = useState("");
@@ -42,11 +46,10 @@ export default function Login() {
 
   const [identifier, setIdentifier] = useState("");
 
-  // ✅ شعار افتراضي فوري
+  // شعار افتراضي
   const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
-  // ✅ عند تحديث الشعار من BrandContext، نحدّث الصورة فوراً
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
   }, [logoUrl, loadingBrand]);
@@ -68,34 +71,29 @@ export default function Login() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (loading) return; // منع الضغط المزدوج أثناء التحميل
+    if (loading) return;
     setLoading(true);
 
     try {
-      // 🔹 إرسال بيانات الدخول
       const { data } = await Api.post("/auth/login", {
         identifier,
         password,
       });
 
       if (data?.token) {
-        // ✅ حفظ التوكن
         setToken(data.token);
 
-        // 🔹 جلب بيانات المستخدم
         const me = await Api.get("/users/me");
         setUser(me.data);
 
-        // 🔹 إشعار نجاح
         toast.success(t("login.success.login"));
 
-        // 🔹 تسجيل FCM Token بعد الدخول
         if (me.data.role !== "admin") {
           await registerFcmToken().catch(() => {
             toast.info(t("login.success.fcmOptional"));
           });
         }
-        // 🔹 الانتقال حسب الدور
+
         navigate(me.data.role === "admin" ? "/admin/control" : from, {
           replace: true,
         });
@@ -103,8 +101,7 @@ export default function Login() {
         toast.error(data?.message || t("login.errors.loginFailed"));
       }
     } catch (err) {
-      console.error("Login error:", err);
-      toast.error(getErrorMessage(err));
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -116,11 +113,11 @@ export default function Login() {
       sx={{
         minHeight: "100vh",
         display: "flex",
-        alignItems: { xs: "flex-start", sm: "center" }, // ✅ الأعلى في الموبايل، المنتصف في الشاشات الكبيرة
+        alignItems: { xs: "flex-start", sm: "center" },
         justifyContent: "center",
         px: 2,
         py: 4,
-        pt: { xs: 4, sm: 4 }, // ✅ مسافة من الأعلى في الموبايل
+        pt: { xs: 4, sm: 4 },
         position: "relative",
         overflow: "hidden",
         background: isDark
@@ -188,7 +185,7 @@ export default function Login() {
           },
         }}
       >
-        {/* ✅ الشعار */}
+        {/* الشعار */}
         <Box sx={{ textAlign: "center", mb: 4 }}>
           <Box
             sx={{
@@ -234,6 +231,7 @@ export default function Login() {
           >
             {t("login.title")}
           </Typography>
+
           <Typography
             variant="body1"
             sx={{
@@ -252,9 +250,10 @@ export default function Login() {
           onSubmit={onSubmit}
           sx={{ display: "grid", gap: 2.5 }}
         >
+          {/* 🟣 اسم المستخدم / الهاتف */}
           <TextField
             fullWidth
-            label="اسم المستخدم أو رقم الهاتف"
+            label={t("login.identifier")}
             type="text"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
@@ -271,11 +270,12 @@ export default function Login() {
             sx={{
               backgroundColor: isDark
                 ? "rgba(255,255,255,0.05)"
-                : "rgba(160, 24, 96, 0.05)",
+                : "rgba(160,24,96,0.05)",
               borderRadius: "10px",
             }}
           />
 
+          {/* 🟣 كلمة المرور */}
           <TextField
             fullWidth
             label={t("login.password")}
@@ -308,25 +308,10 @@ export default function Login() {
                 ? "rgba(255,255,255,0.05)"
                 : "rgba(160, 24, 96, 0.05)",
               borderRadius: "10px",
-              "& .MuiOutlinedInput-root": {
-                "& fieldset": { borderColor: isDark ? "#444" : "#ddd" },
-                "&:hover fieldset": {
-                  borderColor: isDark ? BRAND.gold : BRAND.purple,
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: isDark ? BRAND.gold : BRAND.purple,
-                  borderWidth: 2,
-                  boxShadow: `0 0 8px ${
-                    isDark ? "rgba(251,192,45,0.25)" : "rgba(160,24,96,0.25)"
-                  }`,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: isDark ? BRAND.gold : BRAND.purple,
-              },
             }}
           />
 
+          {/* زر الدخول */}
           <Button
             type="submit"
             fullWidth
@@ -344,17 +329,12 @@ export default function Login() {
               color: "#fff",
               textTransform: "none",
               gap: "10px",
-              "&:hover": {
-                transform: "translateY(-2px)",
-                boxShadow: isDark
-                  ? "0 6px 15px rgba(251,192,45,0.25)"
-                  : "0 6px 15px rgba(160,24,96,0.25)",
-              },
             }}
           >
             {loading ? t("login.buttonLoading") : t("login.button")}
           </Button>
 
+          {/* إنشاء حساب */}
           <Typography
             variant="body2"
             sx={{
@@ -371,15 +351,6 @@ export default function Login() {
                 toast.info(t("login.contactAdmin"), {
                   position: "top-center",
                   autoClose: 4000,
-                  style: {
-                    fontSize: "1rem",
-                    fontWeight: "bold",
-                    direction: "rtl",
-                    background: isDark ? "#333" : "#fff8e1",
-                    color: isDark ? BRAND.gold : "#a01860",
-                    border: `2px solid ${isDark ? BRAND.gold : BRAND.purple}`,
-                    borderRadius: "10px",
-                  },
                 });
               }}
               style={{
@@ -388,10 +359,6 @@ export default function Login() {
                 textDecoration: "none",
                 cursor: "pointer",
               }}
-              onMouseEnter={(e) =>
-                (e.target.style.textDecoration = "underline")
-              }
-              onMouseLeave={(e) => (e.target.style.textDecoration = "none")}
             >
               {t("login.createAccount")}
             </Link>

@@ -2,23 +2,25 @@ import Slot from "../models/Slot.js";
 import Booking from "../models/Booking.js";
 
 // 🔹 تجميع النتائج حسب اليوم
-import { fmtLocal } from "../utils/date.js"; // المسار حسب مكان الملف
+import { fmtLocal } from "../utils/date.js";
 
-// function groupByDate(slots) {
-//   const grouped = {};
-//   slots.forEach((slot) => {
-//     const dateKey = fmtLocal(slot.date); // ✅ التاريخ المحلي الصحيح
-//     if (!grouped[dateKey]) grouped[dateKey] = [];
-//     grouped[dateKey].push(slot);
-//   });
-//   return grouped;
-// }
+// 🔹 دالة تجميع حسب التاريخ
+function groupByDate(slots) {
+  const grouped = {};
+  slots.forEach((slot) => {
+    const dateKey = fmtLocal(slot.date);
+    if (!grouped[dateKey]) grouped[dateKey] = [];
+    grouped[dateKey].push(slot);
+  });
+  return grouped;
+}
 
-
+// =====================================================
 // 🔹 إرجاع الأيام والساعات المتاحة للأسبوع الحالي أو المحدد
+// =====================================================
 export const getWeekSlots = async (req, res) => {
   try {
-    const { startDate } = req.query; // YYYY-MM-DD
+    const { startDate } = req.query;
     const start = startDate ? new Date(startDate) : new Date();
     const end = new Date(start);
     end.setDate(start.getDate() + 6);
@@ -33,17 +35,18 @@ export const getWeekSlots = async (req, res) => {
     res.json({ weekStart: start, weekEnd: end, slots: groupedSlots });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching week slots" });
+    res.status(500).json({ code: "ADMIN_SLOTS_WEEK_FETCH_ERROR" });
   }
 };
 
+// =====================================================
 // 🔹 إرجاع الساعات المتاحة ليوم معين
+// =====================================================
 export const getDaySlots = async (req, res) => {
   try {
-    const { date } = req.params; // YYYY-MM-DD
+    const { date } = req.params;
     const day = new Date(date);
 
-    // نحسب نطاق اليوم
     const nextDay = new Date(day);
     nextDay.setDate(day.getDate() + 1);
 
@@ -82,29 +85,20 @@ export const getDaySlots = async (req, res) => {
     res.json(enrichedSlots);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Error fetching day slots" });
+    res.status(500).json({ code: "ADMIN_SLOTS_DAY_FETCH_ERROR" });
   }
 };
 
-// 🔹 تجميع الحصص حسب اليوم (محليًا)
-function groupByDate(slots) {
-  const grouped = {};
-  slots.forEach((slot) => {
-    const dateKey = fmtLocal(slot.date);
-    if (!grouped[dateKey]) grouped[dateKey] = [];
-    grouped[dateKey].push(slot);
-  });
-  return grouped;
-}
-
+// =====================================================
 // 🔹 جلب الحصص القادمة للأسبوعين القادمين
+// =====================================================
 export const getUpcomingSlots = async (req, res) => {
   try {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // ✅ نبدأ من بداية اليوم المحلي
+    today.setHours(0, 0, 0, 0);
 
     const end = new Date(today);
-    end.setDate(today.getDate() + 14); // أسبوعين قادمين
+    end.setDate(today.getDate() + 14);
 
     const slots = await Slot.find({
       date: { $gte: today, $lte: end },
@@ -113,7 +107,6 @@ export const getUpcomingSlots = async (req, res) => {
       .sort({ date: 1, startTime: 1 })
       .lean();
 
-    // ✅ تجميع الساعات لكل يوم
     const groupedSlots = groupByDate(slots);
 
     res.json({
@@ -123,6 +116,6 @@ export const getUpcomingSlots = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error in getUpcomingSlots:", error);
-    res.status(500).json({ message: "Error fetching upcoming slots" });
+    res.status(500).json({ code: "ADMIN_SLOTS_UPCOMING_FETCH_ERROR" });
   }
 };

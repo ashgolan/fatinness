@@ -31,8 +31,11 @@ import BlockIcon from "@mui/icons-material/Block";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 
 import { useTranslation } from "react-i18next";
+import useServerError from "../../hooks/useServerError";
 
 export default function UsersAdmin() {
+  const handleServerError = useServerError();
+
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -64,8 +67,8 @@ export default function UsersAdmin() {
       const { data } = await Api.get("/admin/users");
       setUsers(data);
       setFiltered(data);
-    } catch {
-      toast.error(t("usersAdmin.errors.load"));
+    } catch (err) {
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -104,7 +107,9 @@ export default function UsersAdmin() {
         allow: !user.allowExtraBookings,
       });
 
-      toast.success(data.message || t("usersAdmin.messages.extraUpdated"));
+      toast.success(
+        data.message || t("usersAdmin.extraBooking.updated")
+      );
 
       setUsers((prev) =>
         prev.map((u) =>
@@ -113,8 +118,8 @@ export default function UsersAdmin() {
             : u
         )
       );
-    } catch {
-      toast.error(t("usersAdmin.errors.extraBooking"));
+    } catch (err) {
+      handleServerError(err);
     }
   };
 
@@ -144,10 +149,11 @@ export default function UsersAdmin() {
       );
 
       await fetchUsers();
-    } catch {
-      toast.error(t("usersAdmin.errors.blockFailed"));
+    } catch (err) {
+      handleServerError(err);
     }
   };
+
   // ---------------------------
   // ✏️ تعديل بيانات
   // ---------------------------
@@ -183,8 +189,8 @@ export default function UsersAdmin() {
       setFiltered((prev) =>
         prev.map((u) => (u._id === editUser._id ? data.user : u))
       );
-    } catch {
-      toast.error(t("usersAdmin.errors.updateFailed"));
+    } catch (err) {
+      handleServerError(err);
     }
   };
 
@@ -261,7 +267,7 @@ export default function UsersAdmin() {
         >
           <TextField
             fullWidth
-            placeholder={t("usersAdmin.searchPlaceholder")}
+            placeholder={t("usersAdmin.search.placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{
@@ -351,14 +357,14 @@ export default function UsersAdmin() {
 
                       {user.isBlocked ? (
                         <Typography
-                          title={t("usersAdmin.status.blocked")}
+                          title={t("usersAdmin.card.blocked")}
                           sx={{ fontSize: 22, lineHeight: 1 }}
                         >
                           👩‍🦰❌
                         </Typography>
                       ) : (
                         <Typography
-                          title={t("usersAdmin.status.active")}
+                          title={t("usersAdmin.card.active")}
                           sx={{ fontSize: 22, lineHeight: 1 }}
                         >
                           👩‍🦰✅
@@ -448,7 +454,7 @@ export default function UsersAdmin() {
                           color: theme.palette.text.secondary,
                         }}
                       >
-                        {t("usersAdmin.allowExtra")}
+                        {t("usersAdmin.extraBooking.label")}
                       </Typography>
                     }
                     sx={{ mb: 2 }}
@@ -472,7 +478,7 @@ export default function UsersAdmin() {
                       }}
                     >
                       <EditIcon sx={{ fontSize: 18 }} />
-                      {t("usersAdmin.edit")}
+                      {t("usersAdmin.buttons.edit")}
                     </Button>
 
                     <Button
@@ -493,8 +499,8 @@ export default function UsersAdmin() {
                     >
                       <BlockIcon sx={{ fontSize: 18 }} />
                       {user.isBlocked
-                        ? t("usersAdmin.unblock")
-                        : t("usersAdmin.block")}
+                        ? t("usersAdmin.buttons.unblock")
+                        : t("usersAdmin.buttons.block")}
                     </Button>
                   </Box>
                 </Paper>

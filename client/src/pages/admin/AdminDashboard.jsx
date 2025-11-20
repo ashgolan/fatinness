@@ -16,6 +16,7 @@ import {
   Legend,
 } from "chart.js";
 import { useTranslation } from "react-i18next"; // ✅ الترجمة
+import useServerError from "../../hooks/useServerError";
 
 ChartJS.register(
   CategoryScale,
@@ -42,6 +43,8 @@ const cards = [
 ];
 
 export default function AdminDashboard() {
+  const handleServerError = useServerError();
+
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activePercentAnim, setActivePercentAnim] = useState(0);
@@ -69,9 +72,8 @@ export default function AdminDashboard() {
       try {
         const { data } = await Api.get("/admin/dashboard");
         setStats(data);
-      } catch {
-        toast.error(t("adminDashboard.errors.fetchStats"));
-      } finally {
+      } catch(err) {
+ handleServerError(err);       } finally {
         setLoading(false);
       }
     };

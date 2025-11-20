@@ -30,8 +30,11 @@ import PeopleIcon from "@mui/icons-material/People";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import { Api } from "../../api/Api";
 import { toast } from "react-toastify";
+import useServerError from "../../hooks/useServerError";
 
 export default function SlotsAdmin() {
+  const handleServerError = useServerError();
+
   const theme = useTheme();
   const mode = theme.palette.mode;
   const { t, i18n } = useTranslation();
@@ -133,8 +136,8 @@ export default function SlotsAdmin() {
       const allSlots = Object.values(data.days || {}).flat();
       setSlots(allSlots);
       setWeekRange({ start: data.weekStart || "", end: data.weekEnd || "" });
-    } catch {
-      toast.error(t("slotsAdmin.toast.loadError"));
+    } catch (err) {
+    handleServerError(err); 
     } finally {
       setLoading(false);
     }
@@ -303,8 +306,8 @@ export default function SlotsAdmin() {
       toast.success(data.message);
       setOpen(false);
       fetchSlots();
-    } catch {
-      toast.error(t("slotsAdmin.toast.updateError"));
+    } catch (err) {
+    handleServerError(err); 
     }
   };
   // 🌌 Dynamic background

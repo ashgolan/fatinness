@@ -1,21 +1,26 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { Api } from "../api/Api";
+import useServerError from "../hooks/useServerError";
 
 const BrandContext = createContext();
 
 export function BrandProvider({ children }) {
-const [brand, setBrand] = useState({
-  logoUrl: "",
-  cardUrl: "",
-  loading: true, // ✅ مهم جدًا
-});
+  const handleServerError = useServerError();
 
+  const [brand, setBrand] = useState({
+    logoUrl: "",
+    cardUrl: "",
+    loading: true, // ✅ مهم جدًا
+  });
 
   // 📦 جلب الإعدادات من السيرفر عند تشغيل التطبيق
   useEffect(() => {
     const fetchBrand = async () => {
       try {
-        console.log("🚀 جاري جلب إعدادات البراند من:", Api.defaults.baseURL + "/admin/settings");
+        console.log(
+          "🚀 جاري جلب إعدادات البراند من:",
+          Api.defaults.baseURL + "/admin/settings"
+        );
 
         const { data } = await Api.get("/admin/settings");
         setBrand({
@@ -24,7 +29,7 @@ const [brand, setBrand] = useState({
           loading: false,
         });
       } catch (error) {
-        console.error("❌ خطأ أثناء تحميل إعدادات البراند:", error);
+        handleServerError(error);
         setBrand((prev) => ({ ...prev, loading: false }));
       }
     };
@@ -41,9 +46,9 @@ const [brand, setBrand] = useState({
   };
 
   return (
-  <BrandContext.Provider value={{ ...brand, updateBrand }}>
-    {children}
-  </BrandContext.Provider>
+    <BrandContext.Provider value={{ ...brand, updateBrand }}>
+      {children}
+    </BrandContext.Provider>
   );
 }
 

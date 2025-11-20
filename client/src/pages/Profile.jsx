@@ -15,10 +15,13 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
+import useServerError from "../hooks/useServerError";
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend, Filler);
 
 export default function Profile() {
+  const handleServerError = useServerError();
+
   const { t, i18n } = useTranslation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,9 +36,8 @@ export default function Profile() {
     try {
       const { data } = await Api.get("/users/me");
       setUser(data);
-    } catch {
-      toast.error(t("profile.errors.fetchFail"));
-    } finally {
+    } catch(err) {
+  handleServerError(err);     } finally {
       setLoading(false);
     }
   };
@@ -57,9 +59,8 @@ export default function Profile() {
       setNewWeight("");
       setNote("");
       fetchProfile();
-    } catch {
-      toast.error(t("profile.errors.saveFail"));
-    } finally {
+    } catch(err) {
+  handleServerError(err);     } finally {
       setSaving(false);
     }
   };

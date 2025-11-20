@@ -98,44 +98,45 @@
   },
 
   "adminSchedule": {
-    "title": "Schedule",
-    "subtitle": "Manage current and next week sessions",
+    "title": "Schedule Management",
+    "subtitle": "Manage the sessions of the current and next week",
 
     "currentWeek": "Current Week",
     "nextWeek": "Next Week",
     "current": "Current",
     "next": "Next",
-
+    "savingLabel": "Saving...",
+    "creatingLabel": "Creating next week...",
     "capacity": "Capacity",
-    "addSlot": "Add Slot",
+    "addSlot": "Add Session",
     "saveAll": "Save Changes",
-    "saveNextWeek": "Generate Next Week",
+    "saveNextWeek": "Generate Next Week Schedule",
     "blocked": "Blocked",
-    "expand": "Expand",
+    "expand": "Expand View",
 
     "confirm": {
-      "deleteSlot": "Are you sure you want to delete this slot?"
+      "deleteSlot": "Are you sure you want to delete this session?"
     },
 
     "success": {
-      "deleted": "Slot deleted",
-      "saved": "Changes saved",
-      "createdNext": "{{count}} sessions created"
+      "deleted": "Session deleted successfully",
+      "saved": "Changes saved successfully",
+      "createdNext": "{{count}} sessions created for next week"
     },
 
     "errors": {
-      "fetchCurrent": "Failed to load current week data",
+      "fetchCurrent": "Failed to fetch current week data",
       "saveFailed": "Failed to save changes",
-      "deleteFailed": "Failed to delete slot",
-      "createNextFailed": "Failed to create next week"
+      "deleteFailed": "Failed to delete session",
+      "createNextFailed": "Failed to generate next week"
     },
 
     "info": {
       "noValidChanges": "No valid changes to save",
-      "addValid": "Add valid sessions first"
+      "addValid": "Please add valid sessions first"
     },
 
-    "noDeletePast": "Cannot delete a past slot"
+    "noDeletePast": "You cannot delete a session from a previous day"
   },
 
   "adminSettings": {
@@ -345,77 +346,78 @@
       "after": "after"
     }
   },
-
   "usersAdmin": {
     "title": "Users Management",
-    "subtitle": "Manage users’ data and bookings in the studio",
+    "subtitle": "Manage all studio users and their bookings",
 
     "search": {
       "placeholder": "Search by name, email, or phone..."
     },
 
     "card": {
-      "email": "Email",
-      "phone": "Phone",
-      "bookingsCount": "Bookings Count",
       "active": "Active",
       "blocked": "Blocked"
     },
+
+    "totalBookings": "Total bookings",
 
     "extraBooking": {
       "label": "Allow Extra Booking",
       "updated": "Extra booking status updated"
     },
 
-    "block": {
-      "cannotBlockAdmin": "You cannot block the system admin 👑",
-      "confirmBlock": "Are you sure you want to block this user?",
-      "confirmUnblock": "Are you sure you want to unblock this user?",
-      "blockedSuccess": "User blocked successfully 🚫",
-      "unblockedSuccess": "User unblocked successfully ✅",
-      "error": "An error occurred while updating block status"
-    },
-
-    "editDialog": {
-      "title": "Edit Member Information",
-
-      "fields": {
-        "username": "Name",
-        "email": "Email",
-        "phone": "Phone",
-        "height": "Height (cm)",
-        "weight": "Weight (kg)",
-        "age": "Age",
-        "gender": "Gender",
-        "genderFemale": "Female",
-        "genderMale": "Male",
-        "role": "Role",
-        "roleUser": "Member",
-        "roleAdmin": "Admin"
-      },
-
-      "roleConfirm": {
-        "title": "⚠️ Confirm Admin Role",
-        "text": "Are you sure you want to promote this user to admin? 👑",
-        "subtext": "This change grants full administrative privileges.",
-        "cancel": "Cancel",
-        "confirm": "Yes, confirm"
-      }
-    },
-
     "buttons": {
       "edit": "Edit",
       "block": "Block",
-      "unblock": "Unblock",
-      "save": "Save Changes",
-      "cancel": "Cancel"
+      "unblock": "Unblock"
+    },
+
+    "noResults": "No users found",
+
+    "editUser": "Edit User Details",
+
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age",
+      "gender": "Gender",
+      "role": "Role"
+    },
+
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+
+    "roles": {
+      "user": "User",
+      "admin": "Admin"
+    },
+
+    "confirm": {
+      "block": "Are you sure you want to block this user?",
+      "unblock": "Are you sure you want to unblock this user?"
+    },
+
+    "confirmRole": {
+      "title": "⚠️ Admin Role Change Confirmation",
+      "text": "Are you sure you want to make this user an Admin?",
+      "note": "This action grants full admin permissions.",
+      "confirm": "Confirm"
     },
 
     "messages": {
-      "loadError": "Failed to fetch users",
-      "notFound": "No matching users found",
-      "updateSuccess": "User updated successfully",
-      "updateError": "Failed to update user"
+      "updated": "User updated successfully",
+      "blocked": "User blocked successfully",
+      "unblocked": "User unblocked successfully",
+      "tempAdmin": "User set as temporary admin (not saved yet)"
+    },
+
+    "errors": {
+      "cannotBlockAdmin": "You cannot block an administrator"
     }
   },
 
@@ -423,10 +425,10 @@
     "cancel": "Cancel",
     "save": "Save"
   },
-
   "login": {
     "title": "Fatinness Studio",
     "welcome": "Welcome back 💪",
+    "identifier": "Username or phone number",
     "email": "Email Address",
     "password": "Password",
     "button": "Login",
@@ -659,5 +661,80 @@
     "title": "Club Photo Gallery",
     "empty": "No images yet",
     "close": "Close"
+  },
+  "server": {
+    "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",
+    "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and slots are required.",
+    "WEEK_TEMPLATE_CREATE_SUCCESS": "Week template created successfully.",
+    "WEEK_TEMPLATE_CREATE_ERROR": "Failed to create week template.",
+    "WEEK_TEMPLATE_NOT_FOUND": "Template not found.",
+    "WEEK_TEMPLATE_APPLY_SUCCESS": "Template applied successfully.",
+    "WEEK_TEMPLATE_APPLY_ERROR": "Failed to apply template.",
+    "USER_NOT_FOUND": "User not found.",
+    "USER_UPDATE_SUCCESS": "User updated successfully.",
+    "USER_UPDATE_ERROR": "Failed to update user.",
+    "CSV_NO_DATA": "No data available to export.",
+    "CSV_EXPORT_ERROR": "Failed to export CSV report.",
+    "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "Admin accounts cannot be blocked.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "User has been blocked.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "User has been unblocked.",
+    "ADMIN_TOGGLE_BLOCK_ERROR": "Failed to toggle block status.",
+    "ADMIN_NOTIFICATION_MISSING_FIELDS": "Title and message are required.",
+    "ADMIN_NOTIFICATION_USER_NOT_FOUND": "Target user not found.",
+    "ADMIN_NOTIFICATION_NO_TARGETS": "No users to notify.",
+    "ADMIN_NOTIFICATION_SEND_ERROR": "Failed to send notification.",
+    "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "Notification not found.",
+    "ADMIN_NOTIFICATION_DELETE_SUCCESS": "Notification deleted.",
+    "ADMIN_NOTIFICATION_CLEAR_SUCCESS": "Notification history cleared.",
+    "ADMIN_NOTIFICATION_CLEAR_ERROR": "Failed to clear notification history.",
+    "SCHEDULER_STATUS_FETCH_ERROR": "Failed to fetch scheduler status.",
+    "SETTINGS_FETCH_ERROR": "Failed to fetch settings.",
+    "SETTINGS_UPDATE_SUCCESS": "Settings updated successfully.",
+    "SETTINGS_UPDATE_ERROR": "Failed to update settings.",
+    "LOGO_UPLOAD_MISSING_FILE": "Logo image is required.",
+    "LOGO_UPLOAD_ERROR": "Failed to upload logo.",
+    "LOGO_UPLOAD_SUCCESS": "Logo updated successfully.",
+    "ADMIN_SLOTS_WEEK_FETCH_ERROR": "Failed to fetch week slots.",
+    "ADMIN_SLOTS_DAY_FETCH_ERROR": "Failed to fetch day slots.",
+    "ADMIN_SLOTS_UPCOMING_FETCH_ERROR": "Failed to fetch upcoming slots.",
+    "AUTH_REGISTER_MISSING_FIELDS": "Required fields are missing.",
+    "AUTH_REGISTER_USER_EXISTS": "User already exists.",
+    "AUTH_REGISTER_SUCCESS": "Account created successfully.",
+    "AUTH_REGISTER_SERVER_ERROR": "Failed to create account.",
+    "AUTH_LOGIN_INVALID_FIELDS": "Username/phone and password are required.",
+    "AUTH_LOGIN_NOT_FOUND": "User not found.",
+    "AUTH_LOGIN_BLOCKED": "Your account is temporarily blocked.",
+    "AUTH_LOGIN_MAINTENANCE": "System is under maintenance.",
+    "AUTH_LOGIN_INCORRECT": "Incorrect login credentials.",
+    "AUTH_LOGIN_SUCCESS": "Logged in successfully.",
+    "BOOKING_SLOT_NOT_AVAILABLE": "The selected slot is not available.",
+    "BOOKING_SLOT_PAST": "This slot has already started or passed.",
+    "BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit.",
+    "BOOKING_SLOT_FULL": "This slot is already full.",
+    "BOOKING_CREATE_SUCCESS": "Booking created successfully.",
+    "BOOKING_CREATE_ERROR": "Failed to create booking.",
+    "BOOKING_CANCEL_NOT_FOUND": "Booking not found.",
+    "BOOKING_CANCEL_FORBIDDEN": "You cannot cancel this booking.",
+    "BOOKING_CANCEL_TOO_LATE": "Cannot cancel within 12 hours of the session.",
+    "BOOKING_CANCEL_SUCCESS": "Booking cancelled successfully.",
+    "BOOKING_CANCEL_ERROR": "Failed to cancel booking.",
+    "PROFILE_NOT_FOUND": "User not found.",
+    "PROFILE_UPDATE_SUCCESS": "Profile updated successfully.",
+    "PROFILE_UPDATE_ERROR": "Failed to update profile.",
+    "WEIGHT_ADD_MISSING": "Weight is required.",
+    "WEIGHT_ADD_SUCCESS": "Weight updated successfully.",
+    "WEIGHT_ADD_ERROR": "Failed to update weight.",
+    "WEIGHT_HISTORY_NOT_FOUND": "Weight history not found.",
+    "WEIGHT_HISTORY_FETCH_ERROR": "Failed to fetch weight history.",
+    "FCM_TOKEN_MISSING": "FCM token is required.",
+    "FCM_TOKEN_SAVED": "FCM token saved successfully.",
+    "SUB_RENEW_SUCCESS": "Subscription renewed successfully.",
+    "SUB_RENEW_ERROR": "Failed to renew subscription.",
+    "NETWORK_ERROR": "Network error: could not reach server",
+    "UNKNOWN_ERROR": "Unexpected error occurred"
+  },
+  "errors": {
+    "network": "Cannot reach the server. Please try again later.",
+    "unknown": "An unexpected error occurred."
   }
 }

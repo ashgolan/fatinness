@@ -6,7 +6,7 @@ export const toggleMaintenance = async (req, res) => {
   try {
     // فقط المديرة يمكنها التبديل
     if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ message: "Unauthorized" });
+      return res.status(403).json({ code: "ADMIN_MAINTENANCE_UNAUTHORIZED" });
     }
 
     maintenanceMode = !maintenanceMode;
@@ -18,14 +18,14 @@ export const toggleMaintenance = async (req, res) => {
     }
 
     res.json({
-      message: maintenanceMode
-        ? "🚧 تم تفعيل وضع الصيانة، جميع المشتركات محظورات مؤقتًا."
-        : "✅ تم إيقاف وضع الصيانة وعاد النظام للعمل.",
+      code: maintenanceMode
+        ? "ADMIN_MAINTENANCE_ENABLED"
+        : "ADMIN_MAINTENANCE_DISABLED",
       maintenanceMode,
     });
   } catch (err) {
     console.error("❌ Maintenance toggle error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "ADMIN_MAINTENANCE_ERROR" });
   }
 };
 

@@ -12,12 +12,29 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      ar: { translation: ar },
-      he: { translation: he },
-      en: { translation: en },
+      ar: {
+        translation: ar,
+        server: ar.server, // ⭐ إضافة namespace server
+      },
+      he: {
+        translation: he,
+        server: he.server,
+      },
+      en: {
+        translation: en,
+        server: en.server,
+      },
     },
+
+    // ⭐ تعريف الـ namespaces
+    ns: ["translation", "server"], 
+    defaultNS: "translation",
+
     fallbackLng: "en",
-    interpolation: { escapeValue: false },
+
+    interpolation: {
+      escapeValue: false,
+    },
   });
 
 export default i18n;

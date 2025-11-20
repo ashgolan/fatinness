@@ -11,8 +11,11 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import useServerError from "../hooks/useServerError";
 
 export default function Subscription() {
+  const handleServerError = useServerError();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [renewing, setRenewing] = useState(false);
@@ -28,7 +31,7 @@ export default function Subscription() {
       const { data } = await Api.get("/users/me");
       setUser(data);
     } catch (err) {
-      toast.error(t("subscription.errors.load"));
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -61,7 +64,7 @@ export default function Subscription() {
         setTimeout(() => navigate("/available-slots"), 3000);
       }
     } catch (err) {
-      toast.error(err?.response?.data?.message || t("subscription.errors.renewFail"));
+      handleServerError(err);
     } finally {
       setRenewing(false);
     }
@@ -122,7 +125,11 @@ export default function Subscription() {
           onClick={handleRenew}
           disabled={renewing}
         >
-          {renewing ? <CircularProgress size={24} /> : t("subscription.buttons.renew")}
+          {renewing ? (
+            <CircularProgress size={24} />
+          ) : (
+            t("subscription.buttons.renew")
+          )}
         </Button>
 
         <Typography

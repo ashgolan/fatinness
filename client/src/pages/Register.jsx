@@ -31,8 +31,11 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // 👑
+import useServerError from "../hooks/useServerError";
 
 export default function Register() {
+  const handleServerError = useServerError();
+
   const { t } = useTranslation();
   const { mode, BRAND } = useThemeMode();
 
@@ -72,8 +75,7 @@ export default function Register() {
       toast.success(t("register.success"));
       navigate("/admin/users");
     } catch (err) {
-      toast.error(err?.response?.data?.message || t("register.fail"));
-    } finally {
+handleServerError(err);    } finally {
       setLoading(false);
     }
   };

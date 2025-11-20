@@ -3,7 +3,6 @@ import Booking from "../models/Booking.js";
 
 /**
  * 🔹 الحصول على الملف الشخصي للمستخدم
- * يعيد جميع بياناته الأساسية وسجل الأوزان والتقدم
  */
 export const getUserProfile = async (req, res) => {
   try {
@@ -11,66 +10,55 @@ export const getUserProfile = async (req, res) => {
       .select("-password -__v")
       .lean();
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user)
+      return res.status(404).json({ code: "USER_PROFILE_NOT_FOUND" });
 
-    // ✅ حساب الإحصائيات العامة للمستخدمة
     const completedBookings = await Booking.countDocuments({
       user: user._id,
-      status: "completed", // الحصص المنجزة فقط
+      status: "completed",
     });
 
     const cancelledBookings = await Booking.countDocuments({
       user: user._id,
-      status: "cancelled", // الحصص الملغاة
+      status: "cancelled",
     });
 
     const activeBookings = await Booking.countDocuments({
       user: user._id,
-      status: "booked", // الحصص القادمة (النشطة)
+      status: "booked",
     });
 
-    // ✅ استخراج آخر وزن تم تسجيله
     const lastWeight =
       user.weightHistory?.length > 0
         ? user.weightHistory[user.weightHistory.length - 1]
         : null;
 
-    // ✅ الرد النهائي
     res.json({
       ...user,
       stats: {
-        completedBookings, // ✅ عدد الحصص المنجزة
-        cancelledBookings, // ❌ عدد الحصص الملغاة
-        activeBookings, // 🔹 عدد الحصص النشطة (القادمة)
+        completedBookings,
+        cancelledBookings,
+        activeBookings,
         lastWeight: lastWeight?.weight || null,
         lastWeightNote: lastWeight?.note || null,
         lastWeightDate: lastWeight?.date || null,
       },
-      // 🔹 مصفوفة الأوزان الكاملة لعرضها في الرسم البياني
       weightHistory: user.weightHistory || [],
     });
   } catch (err) {
     console.error("❌ getUserProfile Error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "USER_PROFILE_FETCH_ERROR" });
   }
 };
 
 /**
  * 🔹 تحديث الملف الشخصي
- * يسمح للمستخدم بتعديل الاسم، الهاتف، البريد، إلخ
  */
 export const updateUserProfile = async (req, res) => {
   try {
-    const allowedFields = [
-      "name",
-      "phone",
-      "email",
-      "height",
-      "age",
-      "gender",
-    ];
-
+    const allowedFields = ["name", "phone", "email", "height", "age", "gender"];
     const updates = {};
+
     for (const key of allowedFields) {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
@@ -79,62 +67,54 @@ export const updateUserProfile = async (req, res) => {
       new: true,
     }).select("-password -__v");
 
-    res.json({ message: "Profile updated", user });
+    res.json({ code: "USER_PROFILE_UPDATED", user });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "USER_PROFILE_UPDATE_ERROR" });
   }
 };
 
 /**
- * 🔹 إضافة نقطة وزن جديدة لسجل المستخدم
- * تُستخدم لعرض تقدم المستخدم في الرسم البياني
+ * 🔹 إضافة نقطة وزن جديدة
  */
-// 🔹 إضافة نقطة وزن جديدة للمستخدم الحالي
 export const addWeightPoint = async (req, res) => {
   try {
     const { weight, note } = req.body;
 
     if (!weight) {
-      return res.status(400).json({ message: "Weight is required" });
+      return res.status(400).json({ code: "USER_WEIGHT_REQUIRED" });
     }
 
-    // ✅ المستخدم الحالي مأخوذ من الـ token
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ code: "USER_WEIGHT_NOT_FOUND" });
 
-    // ✅ تحديث سجل الوزن
     user.weightHistory.push({ weight, note, date: new Date() });
     user.weight = weight;
 
     await user.save();
 
     res.json({
-      message: "Weight updated successfully",
+      code: "USER_WEIGHT_UPDATED",
       weightHistory: user.weightHistory,
     });
   } catch (err) {
     console.error("❌ Error in addWeightPoint:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "USER_WEIGHT_ERROR" });
   }
 };
 
-
 /**
- * 🔹 جلب سجل الأوزان لعرضه في المخطط البياني
+ * 🔹 جلب سجل الأوزان
  */
 export const getWeightHistory = async (req, res) => {
   try {
-    // ✅ جلب المستخدم الحالي من الـ token
     const user = await User.findById(req.user._id)
       .select("weightHistory weight")
       .lean();
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user)
+      return res.status(404).json({ code: "USER_WEIGHT_HISTORY_NOT_FOUND" });
 
-    // ✅ الرد المنسق والواضح
     res.json({
       success: true,
       weightHistory: user.weightHistory,
@@ -142,44 +122,48 @@ export const getWeightHistory = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Error in getWeightHistory:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "USER_WEIGHT_HISTORY_ERROR" });
   }
 };
 
-
 /**
- * 🔹 تحديث رمز FCM Token الخاص بالمستخدم
- * (حتى نرسل له إشعارات من الخادم)
+ * 🔹 تحديث رمز FCM
  */
 export const updateFcmToken = async (req, res) => {
   try {
     const { fcmToken } = req.body;
+
     if (!fcmToken)
-      return res.status(400).json({ message: "fcmToken is required" });
+      return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
 
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user)
+      return res.status(404).json({ code: "FCM_TOKEN_USER_NOT_FOUND" });
 
-    // نحفظ التوكن داخل المصفوفة لتعدد الأجهزة
     if (!user.fcmTokens.includes(fcmToken)) {
       user.fcmTokens.push(fcmToken);
       await user.save();
     }
 
-    res.json({ message: "FCM token saved successfully" });
+    res.json({ code: "FCM_TOKEN_SAVED" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "FCM_TOKEN_ERROR" });
   }
 };
+
+/**
+ * 🔹 تجديد الاشتراك يدويًا
+ */
 export const renewSubscription = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user)
+      return res.status(404).json({ code: "USER_SUBSCRIPTION_NOT_FOUND" });
 
     const now = new Date();
     const newEnd = new Date();
-    newEnd.setMonth(now.getMonth() + 1); // تمديد شهر
+    newEnd.setMonth(now.getMonth() + 1);
 
     user.subscription = {
       ...user.subscription,
@@ -189,9 +173,9 @@ export const renewSubscription = async (req, res) => {
     };
 
     await user.save();
-    res.json({ message: "Subscription renewed successfully" });
+    res.json({ code: "USER_SUBSCRIPTION_RENEWED" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ code: "USER_SUBSCRIPTION_ERROR" });
   }
 };
