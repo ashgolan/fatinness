@@ -117,7 +117,7 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({
       $or: [
         { username: { $regex: new RegExp(`^${identifier}$`, "i") } },
-        { phone: identifier },
+        { phone: { $regex: new RegExp(`^${identifier}$`) } },
       ],
     });
 
@@ -176,7 +176,8 @@ export const updateUserRole = async (req, res) => {
     }
 
     const user = await User.findByIdAndUpdate(userId, { role }, { new: true });
-    if (!user) return res.status(404).json({ code: "ADMIN_ROLE_USER_NOT_FOUND" });
+    if (!user)
+      return res.status(404).json({ code: "ADMIN_ROLE_USER_NOT_FOUND" });
 
     res.json({ code: "ADMIN_ROLE_UPDATED", user });
   } catch (err) {

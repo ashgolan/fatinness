@@ -92,6 +92,7 @@ export const getDaySlots = async (req, res) => {
 // =====================================================
 // 🔹 جلب الحصص القادمة للأسبوعين القادمين
 // =====================================================
+
 export const getUpcomingSlots = async (req, res) => {
   try {
     const today = new Date();
@@ -100,6 +101,7 @@ export const getUpcomingSlots = async (req, res) => {
     const end = new Date(today);
     end.setDate(today.getDate() + 14);
 
+    // 1) جلب كل الحصص القادمة
     const slots = await Slot.find({
       date: { $gte: today, $lte: end },
       isBlocked: false,
@@ -107,12 +109,47 @@ export const getUpcomingSlots = async (req, res) => {
       .sort({ date: 1, startTime: 1 })
       .lean();
 
-    const groupedSlots = groupByDate(slots);
+    if (!slots.length) {
+      return res.json({
+        start: today,
+        end,
+        slots: {},
+      });
+    }
+
+    // 2) جلب عدد الحجوزات لكل Slot مرة واحدة فقط
+    const bookingCounts = await Booking.aggregate([
+      {
+        $match: {
+          slot: { $in: slots.map((s) => s._id) },
+          status: "booked",
+        },
+      },
+      {
+        $group: {
+          _id: "$slot",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // 3) تحويل نتائج الـ aggregate إلى Map لسهولة القراءة
+    const countsMap = new Map();
+    bookingCounts.forEach((b) => countsMap.set(b._id.toString(), b.count));
+
+    // 4) دمج bookedCount داخل كل Slot
+    const slotsWithCount = slots.map((slot) => ({
+      ...slot,
+      bookedCount: countsMap.get(slot._id.toString()) || 0,
+    }));
+
+    // 5) تجميعهم حسب التاريخ
+    const grouped = groupByDate(slotsWithCount);
 
     res.json({
       start: today,
       end,
-      slots: groupedSlots,
+      slots: grouped,
     });
   } catch (error) {
     console.error("❌ Error in getUpcomingSlots:", error);
