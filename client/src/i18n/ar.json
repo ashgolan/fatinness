@@ -684,6 +684,10 @@
     "WEEK_TEMPLATE_APPLY_SUCCESS": "تم تطبيق القالب بنجاح.",
     "WEEK_TEMPLATE_APPLY_ERROR": "حدث خطأ أثناء تطبيق القالب.",
 
+    "ADMIN_BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأقصى (4) من الحجوزات الأسبوعية 🌸",
+    "ADMIN_BOOKING_SLOT_ID_REQUIRED": "رقم الحصة مطلوب.",
+    "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "حدث خطأ أثناء التحقق من الحد الأسبوعي.",
+
     "USER_NOT_FOUND": "المستخدمة غير موجودة.",
     "USER_UPDATE_SUCCESS": "تم تحديث بيانات المشتركة بنجاح.",
     "USER_UPDATE_ERROR": "تعذر تحديث بيانات المشتركة.",

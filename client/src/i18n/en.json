@@ -684,6 +684,12 @@
     "USER_UPDATE_SUCCESS": "User updated successfully.",
     "USER_UPDATE_ERROR": "Failed to update user.",
     "CSV_NO_DATA": "No data available to export.",
+
+"ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit (4) 🌸",
+"ADMIN_BOOKING_SLOT_ID_REQUIRED": "Slot ID is required.",
+"ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "An error occurred while verifying the weekly booking limit.",
+
+
     "CSV_EXPORT_ERROR": "Failed to export CSV report.",
     "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "Admin accounts cannot be blocked.",
     "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "User has been blocked.",
