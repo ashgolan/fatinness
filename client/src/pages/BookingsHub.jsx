@@ -71,7 +71,7 @@ export default function BookingsHub() {
         });
         if (validSlots.length > 0) filtered[dateKey] = validSlots;
       });
-console.log("SLOTS FROM SERVER:", slotsRes.data);
+      console.log("SLOTS FROM SERVER:", slotsRes.data);
 
       setSlotsByDay(filtered);
       const myActive = bookingsRes.data
@@ -92,24 +92,23 @@ console.log("SLOTS FROM SERVER:", slotsRes.data);
     fetchData();
   }, [fetchData]);
 
-const handleBook = useCallback(
-  async (slotId) => {
-    console.log("BOOKING SLOT:", slotId);
-    setBookingId(slotId);
-    try {
-      const res = await Api.post("/bookings", { slotId });
-      console.log("BOOK RESPONSE:", res.data);  // <<<<<< أريد هذا
-      toast.success("تم الحجز بنجاح");
-      await fetchData();
-    } catch (err) {
-      console.log("BOOK ERR:", err.response?.data || err);
-    } finally {
-      setBookingId(null);
-    }
-  },
-  [fetchData]
-);
-
+  const handleBook = useCallback(
+    async (slotId) => {
+      console.log("BOOKING SLOT:", slotId);
+      setBookingId(slotId);
+      try {
+        const res = await Api.post("/bookings", { slotId });
+        console.log("BOOK RESPONSE:", res.data); // <<<<<< أريد هذا
+        toast.success("تم الحجز بنجاح");
+        await fetchData();
+      } catch (err) {
+        handleServerError(err); // ⬅️ الآن سيظهر التوست الصحيح
+      } finally {
+        setBookingId(null);
+      }
+    },
+    [fetchData]
+  );
 
   const handleCancel = useCallback(
     async (slotId, fromMyBookings = false, bookingIdDirect = null) => {
