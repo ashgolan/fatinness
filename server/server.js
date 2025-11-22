@@ -44,19 +44,28 @@ if (process.env.NODE_ENV === "production") {
 app.use(
   cors({
     origin: [
+      // واجهة التطوير
       "http://localhost:3000",
+      "http://localhost:5173",
+
+      // واجهة الإنتاج على الويب
+      "https://fatinness.onrender.com",
       "https://fateness.onrender.com",
+
+      // تطبيق الموبايل (Capacitor)
+      "capacitor://localhost",
+      "http://localhost",
     ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
-
 // ============================
 // 🚦 Rate Limit – لمنع الهجوم
 // ============================
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 دقيقة
-  max: 200,                 // 200 طلب في الربع ساعة
+  max: 200, // 200 طلب في الربع ساعة
   message: "Too many requests, please try again later.",
 });
 app.use("/api", apiLimiter);
@@ -74,9 +83,7 @@ app.post(
   "/payments/webhook",
   express.raw({ type: "application/json" }),
   (req, res, next) => {
-    req.rawBody = Buffer.isBuffer(req.body)
-      ? req.body
-      : Buffer.from(req.body);
+    req.rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
 
     next();
   },

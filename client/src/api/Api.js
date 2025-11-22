@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const Api = axios.create({
-  baseURL: process.env.REACT_APP_API || "http://localhost:4000", // ✅ استخدم المحلي أولاً
+  baseURL: "https://fateness-server-production.up.railway.app", 
 });
 
 Api.interceptors.request.use((config) => {
