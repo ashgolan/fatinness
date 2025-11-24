@@ -41,9 +41,6 @@ if (process.env.NODE_ENV === "production") {
 // ============================
 // 🔐 CORS المسموح فقط
 // ============================
-import cors from "cors";
-import express from "express";
-
 
 
 app.use(
