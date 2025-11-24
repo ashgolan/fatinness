@@ -28,7 +28,6 @@ const app = express();
 // ============================
 // 🛡️ Helmet – حماية الرؤوس
 // ============================
-app.use(helmet());
 
 // ============================
 // 🔇 منع console.log في الإنتاج
@@ -42,19 +41,26 @@ if (process.env.NODE_ENV === "production") {
 // 🔐 CORS المسموح فقط
 // ============================
 
+app.set("trust proxy", 1);
+app.use(helmet());
 
 app.use(
   cors({
     origin: [
-      "http://localhost:3000", // أثناء التطوير
-      "https://fateness.onrender.com", // الموقع المنشور في Render
       "http://localhost:3000",
       "https://fateness.onrender.com",
+      "https://fateness-production.up.railway.app",
+      /\.railway\.app$/,
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// السماح بكل طلبات OPTIONS
 app.options("*", cors());
+
 
 
 
