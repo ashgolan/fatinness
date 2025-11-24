@@ -41,25 +41,23 @@ if (process.env.NODE_ENV === "production") {
 // ============================
 // 🔐 CORS المسموح فقط
 // ============================
-app.use(
-  cors({
-    origin: [
-      // واجهة التطوير
-      "http://localhost:3000",
-      "http://localhost:5173",
+import cors from "cors";
+import express from "express";
 
-      // واجهة الإنتاج على الويب
-      "https://fatinness.onrender.com",
-      "https://fateness.onrender.com",
 
-      // تطبيق الموبايل (Capacitor)
-      "capacitor://localhost",
-      "http://localhost",
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: [
+    "https://fateness.onrender.com",   // الموقع
+    "http://localhost:3000"            // لو تستخدمه محلياً
+  ],
+  credentials: true,
+}));
+app.options("*", cors());
+
+
+
+
+
 // ============================
 // 🚦 Rate Limit – لمنع الهجوم
 // ============================

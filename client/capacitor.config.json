@@ -1,0 +1,10 @@
+{
+  "appId": "com.fatinness.app",
+  "appName": "Fatinness",
+  "webDir": "build",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://fateness.onrender.com",
+    "cleartext": true
+  }
+}

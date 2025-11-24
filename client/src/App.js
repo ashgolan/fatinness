@@ -48,6 +48,7 @@ import AdminSchedule from "./pages/admin/AdminSchedule";
 import PrivateRoute from "./utils/PrivateRoute";
 import i18n from "./i18n/i18n";
 import Gallery from "./pages/Gallery";
+import DebugApi from "./pages/DebugApi";
 
 // ======================================================
 // ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
@@ -127,6 +128,7 @@ export default function App() {
 
                   {/* تسجيل الدخول */}
                   <Route path="/login" element={<Login />} />
+<Route path="/debug-api" element={<DebugApi />} />
 
                   {/* 🔹 مسارات المستخدم */}
                   <Route element={<PrivateRoute role="user" />}>
