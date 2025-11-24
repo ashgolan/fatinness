@@ -58,8 +58,6 @@ app.use(
   })
 );
 
-// السماح بكل طلبات OPTIONS
-app.options("*", cors());
 
 
 
