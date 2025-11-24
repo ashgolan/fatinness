@@ -45,13 +45,18 @@ import cors from "cors";
 import express from "express";
 
 
-app.use(cors({
-  origin: [
-    "https://fateness.onrender.com",   // الموقع
-    "http://localhost:3000"            // لو تستخدمه محلياً
-  ],
-  credentials: true,
-}));
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000", // أثناء التطوير
+      "https://fateness.onrender.com", // الموقع المنشور في Render
+      "http://localhost:3000",
+      "https://fateness.onrender.com",
+    ],
+    credentials: true,
+  })
+);
 app.options("*", cors());
 
 
