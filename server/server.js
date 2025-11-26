@@ -45,17 +45,23 @@ app.set("trust proxy", 1);
 app.use(helmet());
 
 const allowedOrigins = [
-  "https://fateness.onrender.com/",   // موقع الويب (React)
-  "http://localhost:5173",            // للتطوير فقط
+  "http://localhost:3000",   // تطوير React
+  "http://localhost:5173",   // تطوير Vite
+  "https://fatinness-studio.com",  // موقعك الرسمي
+  "https://www.fatinness-studio.com",
+  "https://api.fatinness-studio.com",  // دومين API
+  "https://fateness-production.up.railway.app", // دومين Railway
 ];
+
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // للسماح لتطبيقات الموبايل (Capacitor)
+      if (!origin) return callback(null, true); // للسماح للموبايل والتطبيقات
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
+        console.log("❌ CORS blocked:", origin);
         return callback(new Error("Not allowed by CORS"));
       }
     },
