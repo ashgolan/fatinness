@@ -366,25 +366,28 @@ export const getSchedulerStatus = async (req, res) => {
 // =======================
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find()
-      .select(
-        "username email phone allowExtraBookings role isBlocked createdAt"
-      )
-      .sort({ createdAt: -1 });
+    const users = await User.find().lean();
 
     const usersWithBookings = await Promise.all(
       users.map(async (u) => {
         const totalBookings = await Booking.countDocuments({ user: u._id });
-        return { ...u.toObject(), totalBookings };
+        return { 
+          ...u,
+          totalBookings
+        };
       })
     );
 
+    console.log("🔥 USERS SENT:", usersWithBookings[0]); // مهم جداً
+
     res.json(usersWithBookings);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: "ADMIN_USERS_FETCH_ERROR" });
   }
 };
+
 
 // =======================
 // 🚫 حظر مشتركة
@@ -405,7 +408,7 @@ export const toggleUserBlock = async (req, res) => {
     await User.updateOne({ _id: user._id }, { $set: { isBlocked: newStatus } });
 
     const updatedUser = await User.findById(user._id).select(
-      "username email phone role allowExtraBookings isBlocked"
+      "username email phone allowExtraBookings role isBlocked createdAt height weight age gender"
     );
 
     res.json({

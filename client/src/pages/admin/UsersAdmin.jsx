@@ -65,6 +65,7 @@ export default function UsersAdmin() {
     setLoading(true);
     try {
       const { data } = await Api.get("/admin/users");
+      console.warn(data)
       setUsers(data);
       setFiltered(data);
     } catch (err) {
@@ -459,7 +460,6 @@ export default function UsersAdmin() {
                     }
                     sx={{ mb: 2 }}
                   />
-
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
                   {/* --------------------------- */}

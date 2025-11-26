@@ -347,84 +347,85 @@
     }
   },
   "usersAdmin": {
-    "title": "Users Management",
-    "subtitle": "Manage all studio users and their bookings",
+  "title": "Users Management",
+  "subtitle": "Manage all users and their booking activity in the studio",
 
-    "search": {
-      "placeholder": "Search by name, email, or phone..."
-    },
-
-    "card": {
-      "active": "Active",
-      "blocked": "Blocked"
-    },
-
-    "totalBookings": "Total bookings",
-
-    "extraBooking": {
-      "label": "Allow Extra Booking",
-      "updated": "Extra booking status updated"
-    },
-
-    "buttons": {
-      "edit": "Edit",
-      "block": "Block",
-      "unblock": "Unblock"
-    },
-
-    "noResults": "No users found",
-
-    "editUser": "Edit User Details",
-
-    "fields": {
-      "name": "Name",
-      "email": "Email",
-      "phone": "Phone",
-      "height": "Height (cm)",
-      "weight": "Weight (kg)",
-      "age": "Age",
-      "gender": "Gender",
-      "role": "Role"
-    },
-
-    "gender": {
-      "female": "Female",
-      "male": "Male"
-    },
-
-    "roles": {
-      "user": "User",
-      "admin": "Admin"
-    },
-
-    "confirm": {
-      "block": "Are you sure you want to block this user?",
-      "unblock": "Are you sure you want to unblock this user?"
-    },
-
-    "confirmRole": {
-      "title": "⚠️ Admin Role Change Confirmation",
-      "text": "Are you sure you want to make this user an Admin?",
-      "note": "This action grants full admin permissions.",
-      "confirm": "Confirm"
-    },
-
-    "messages": {
-      "updated": "User updated successfully",
-      "blocked": "User blocked successfully",
-      "unblocked": "User unblocked successfully",
-      "tempAdmin": "User set as temporary admin (not saved yet)"
-    },
-
-    "errors": {
-      "cannotBlockAdmin": "You cannot block an administrator"
-    }
+  "search": {
+    "placeholder": "Search by name, email, or phone..."
   },
 
-  "common": {
-    "cancel": "Cancel",
-    "save": "Save"
+  "card": {
+    "active": "Active",
+    "blocked": "Blocked"
   },
+
+  "totalBookings": "Total Bookings",
+
+  "extraBooking": {
+    "label": "Allow Extra Booking",
+    "updated": "Extra booking setting updated successfully"
+  },
+
+  "buttons": {
+    "edit": "Edit",
+    "block": "Block",
+    "unblock": "Unblock"
+  },
+
+  "noResults": "No matching users found",
+
+  "editUser": "Edit User Information",
+
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "age": "Age",
+    "gender": "Gender",
+    "role": "Role"
+  },
+
+  "gender": {
+    "female": "Female",
+    "male": "Male"
+  },
+
+  "roles": {
+    "user": "User",
+    "admin": "Admin"
+  },
+
+  "confirm": {
+    "block": "Are you sure you want to block this user?",
+    "unblock": "Are you sure you want to unblock this user?"
+  },
+
+  "confirmRole": {
+    "title": "⚠️ Confirm Admin Promotion",
+    "text": "You are about to promote this user to an Admin.",
+    "note": "This action grants full administrative access.",
+    "confirm": "Confirm Promotion"
+  },
+
+  "messages": {
+    "updated": "User information updated successfully",
+    "blocked": "User has been blocked successfully",
+    "unblocked": "User has been unblocked successfully",
+    "tempAdmin": "User set as admin temporarily — changes must be saved to take effect"
+  },
+
+  "errors": {
+    "cannotBlockAdmin": "You cannot block a system administrator"
+  }
+},
+
+"common": {
+  "cancel": "Cancel",
+  "save": "Save"
+}
+,
   "login": {
     "title": "Fatinness Studio",
     "welcome": "Welcome back 💪",

@@ -10,6 +10,10 @@ import {
   IconButton,
   Grid,
   CssBaseline,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { Api } from "../api/Api";
@@ -35,6 +39,8 @@ import useServerError from "../hooks/useServerError";
 
 export default function Register() {
   const handleServerError = useServerError();
+
+  const [pendingRoleChange, setPendingRoleChange] = useState(false);
 
   const { t } = useTranslation();
   const { mode, BRAND } = useThemeMode();
@@ -71,11 +77,18 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     try {
-      await Api.post("/auth/register", form);
+      const cleanForm = {
+        ...form,
+        height: form.height ? Number(form.height) : null,
+        weight: form.weight ? Number(form.weight) : null,
+        age: form.age ? Number(form.age) : null,
+      };
+      await Api.post("/auth/register", cleanForm);
       toast.success(t("register.success"));
       navigate("/admin/users");
     } catch (err) {
-handleServerError(err);    } finally {
+      handleServerError(err);
+    } finally {
       setLoading(false);
     }
   };
@@ -288,7 +301,11 @@ handleServerError(err);    } finally {
                       edge="end"
                       sx={{ color: BRAND.purple }}
                     >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      {showPassword ? (
+                        <VisibilityOffIcon />
+                      ) : (
+                        <VisibilityIcon />
+                      )}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -335,7 +352,16 @@ handleServerError(err);    } finally {
               label={t("register.fields.role")}
               name="role"
               value={form.role}
-              onChange={handleChange}
+              onChange={(e) => {
+                const newRole = e.target.value;
+
+                // عند اختيار المديرة → نفتح نافذة التأكيد
+                if (newRole === "admin") {
+                  setPendingRoleChange(true);
+                } else {
+                  setForm((prev) => ({ ...prev, role: "user" }));
+                }
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -351,6 +377,61 @@ handleServerError(err);    } finally {
                 {t("register.fields.roleAdmin")}
               </MenuItem>
             </TextField>
+            <Dialog
+              open={pendingRoleChange}
+              onClose={() => setPendingRoleChange(false)}
+              PaperProps={{
+                sx: {
+                  borderRadius: 3,
+                  p: 1,
+                  textAlign: "center",
+                  maxWidth: 400,
+                },
+              }}
+            >
+              <DialogTitle sx={{ fontWeight: 700, color: "#d32f2f" }}>
+                {t("usersAdmin.confirmRole.title")}
+              </DialogTitle>
+
+              <DialogContent>
+                <Typography sx={{ fontSize: "1rem", mb: 1 }}>
+                  {t("usersAdmin.confirmRole.text")}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                  {t("usersAdmin.confirmRole.note")}
+                </Typography>
+              </DialogContent>
+
+              <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setPendingRoleChange(false);
+                    setForm((prev) => ({ ...prev, role: "user" }));
+                  }}
+                  sx={{ color: "#666", borderColor: "#ccc" }}
+                >
+                  {t("common.cancel")}
+                </Button>
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    setPendingRoleChange(false);
+                    setForm((prev) => ({ ...prev, role: "admin" }));
+                    toast.info(t("usersAdmin.messages.tempAdmin"));
+                  }}
+                  sx={{
+                    fontWeight: 600,
+                    backgroundColor: BRAND.purple,
+                    "&:hover": { backgroundColor: BRAND.purpleDark },
+                  }}
+                >
+                  {t("usersAdmin.confirmRole.confirm")}
+                </Button>
+              </DialogActions>
+            </Dialog>
 
             <Grid container spacing={2}>
               {[
