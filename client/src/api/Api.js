@@ -1,12 +1,15 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-// 🔥 اختيار الرابط الصحيح تلقائياً
-let baseURL = process.env.REACT_APP_API_URL;
+// 🔥 تحديد الرابط حسب البيئة تلقائياً
+let baseURL;
 
-// 👉 إذا التطبيق يعمل على localhost نستخدم السيرفر المحلي
+// 👉 إذا نعمل محلياً
 if (window.location.hostname === "localhost") {
   baseURL = "http://localhost:4000";
+} else {
+  // 👉 إذا نحن على Production نقرأ من ENV
+  baseURL = process.env.REACT_APP_API_URL || "https://fateness-production.up.railway.app";
 }
 
 const Api = axios.create({
