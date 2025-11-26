@@ -44,25 +44,25 @@ if (process.env.NODE_ENV === "production") {
 app.set("trust proxy", 1);
 app.use(helmet());
 
+const allowedOrigins = [
+  "https://fateness.onrender.com/",   // موقع الويب (React)
+  "http://localhost:5173",            // للتطوير فقط
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://fateness.onrender.com",
-      "https://fateness-production.up.railway.app",
-      /\.railway\.app$/,
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // للسماح لتطبيقات الموبايل (Capacitor)
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-
-
-
-
-
 
 // ============================
 // 🚦 Rate Limit – لمنع الهجوم

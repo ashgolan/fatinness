@@ -17,7 +17,8 @@ export default function Splash() {
   const chooseLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("appLanguage", lang);
-    navigate("/debug-api");
+    // navigate("/debug-api");
+    navigate("/login");
   };
 
   return (

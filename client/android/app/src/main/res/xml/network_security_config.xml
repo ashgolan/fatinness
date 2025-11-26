@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-
-    <!-- السماح باتصال التطبيق بالسيرفر في Railway -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">fateness-production.up.railway.app</domain>
     </domain-config>
-
-    <!-- السماح باتصال التطبيق بالواجهة (Render) -->
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">fateness.onrender.com</domain>
-    </domain-config>
-
-    <!-- السماح باتصالات HTTPS من WebView -->
     <base-config cleartextTrafficPermitted="true" />
-    
 </network-security-config>

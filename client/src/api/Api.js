@@ -2,7 +2,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 
 const Api = axios.create({
-  baseURL: "https://fateness-production.up.railway.app",
+  baseURL: "fateness-production.up.railway.app",
 });
 
 Api.interceptors.request.use((config) => {
