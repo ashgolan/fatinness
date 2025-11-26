@@ -742,9 +742,8 @@ function MyBookingsView({
                 key={b._id}
                 style={{
                   borderRadius: 18,
-                  border: `1.6px solid ${
-                    isCancelled ? "#f44336" : isPast ? "#999" : BRAND.purple
-                  }55`,
+                  border: `1.6px solid ${BRAND.purple}55`,
+
                   background:
                     mode === "dark"
                       ? "rgba(255,255,255,0.04)"
@@ -785,7 +784,7 @@ function MyBookingsView({
                   </button>
                 )}
 
-                {isPast && !isCancelled && (
+                {!isPast && isCancelled && (
                   <button
                     onClick={() => handleRebook(b.slot._id)}
                     style={{

@@ -47,7 +47,7 @@ app.use(helmet());
 const allowedOrigins = [
   "http://localhost:3000",   // تطوير React
   "http://localhost:5173",   // تطوير Vite
-  "https://fatinness-studio.com",  // موقعك الرسمي
+  "https://fateness.onrender.com",  // موقعك الرسمي
   "https://www.fatinness-studio.com",
   "https://api.fatinness-studio.com",  // دومين API
   "https://fateness-production.up.railway.app", // دومين Railway

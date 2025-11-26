@@ -88,14 +88,14 @@ export default function Gallery() {
       <Box
         sx={{
           columnCount: { xs: 2, sm: 3, md: 4 },
-          columnGap: "12px",
+          columnGap: "6px",
         }}
       >
         {images.map((img) => (
           <Box
             key={img._id}
             sx={{
-              mb: "12px",
+              mb: "6px",
               breakInside: "avoid",
               cursor: "pointer",
               overflow: "hidden",
