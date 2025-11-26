@@ -366,28 +366,25 @@ export const getSchedulerStatus = async (req, res) => {
 // =======================
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().lean();
+    const users = await User.find()
+      .select(
+        "username email phone allowExtraBookings role isBlocked createdAt height weight age gender"
+      )
+      .sort({ createdAt: -1 });
 
     const usersWithBookings = await Promise.all(
       users.map(async (u) => {
         const totalBookings = await Booking.countDocuments({ user: u._id });
-        return { 
-          ...u,
-          totalBookings
-        };
+        return { ...u.toObject(), totalBookings };
       })
     );
 
-    console.log("🔥 USERS SENT:", usersWithBookings[0]); // مهم جداً
-
     res.json(usersWithBookings);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ code: "ADMIN_USERS_FETCH_ERROR" });
   }
 };
-
 
 // =======================
 // 🚫 حظر مشتركة
