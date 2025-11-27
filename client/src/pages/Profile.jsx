@@ -311,10 +311,11 @@ export default function Profile() {
             <div
               style={{
                 width: "100%",
+                height: window.innerWidth < 600 ? "280px" : "480px", // ← هنا السحر
                 position: "relative",
               }}
             >
-              <Line data={chartData} />
+              <Line data={chartData} options={{ maintainAspectRatio: false }} />
             </div>
           ) : (
             <p

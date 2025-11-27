@@ -463,7 +463,7 @@ export default function UsersAdmin() {
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
                   {/* --------------------------- */}
-                  <Box sx={{ display: "flex", gap: 1.5 }}>
+                  <Box sx={{ display: "grid", gap: 1.5 }}>
                     <Button
                       fullWidth
                       variant="outlined"
@@ -487,6 +487,7 @@ export default function UsersAdmin() {
                       onClick={() => toggleUserBlock(user)}
                       sx={{
                         fontWeight: 600,
+                        gap: 0.6,
                         borderRadius: "8px",
                         textTransform: "none",
                         backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
