@@ -212,7 +212,11 @@ export default function AdminSchedule() {
     try {
       await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
 
-      toast.success(t("adminSchedule.success.saved"));
+      toast.success(
+        t("adminSchedule.success.createdSlots", {
+          count: changes.length,
+        })
+      );
 
       setCurrentEdits({});
       await fetchCurrentWeek();
@@ -668,9 +672,7 @@ export default function AdminSchedule() {
 
               <Chip
                 label={t("adminSchedule.next")}
-                icon={
-                  <CalendarTodayIcon sx={{ color: "#fff !important" }} />
-                }
+                icon={<CalendarTodayIcon sx={{ color: "#fff !important" }} />}
                 sx={{
                   background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.pink})`,
                   color: "#fff",
