@@ -8,16 +8,15 @@ export default function Splash() {
   const navigate = useNavigate();
   const [showButtons, setShowButtons] = useState(false);
 
-  // ⏱️ بعد 5 ثواني يظهر اختيار اللغة
+  // يظهر بعد 4 ثوانٍ
   useEffect(() => {
-    const timer = setTimeout(() => setShowButtons(true), 5000);
+    const timer = setTimeout(() => setShowButtons(true), 4000);
     return () => clearTimeout(timer);
   }, []);
 
   const chooseLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("appLanguage", lang);
-    // navigate("/debug-api");
     navigate("/login");
   };
 
@@ -29,12 +28,12 @@ export default function Splash() {
         left: 0,
         width: "100vw",
         height: "100vh",
+        backgroundColor: "#fbd555",
         overflow: "hidden",
-        backgroundColor: "#fbd555", // ← اللون الصحيح المطابق للوغو
         zIndex: 9999,
       }}
     >
-      {/* الفيديو داخل إطار */}
+      {/* الفيديو */}
       <Box
         sx={{
           position: "absolute",
@@ -44,7 +43,8 @@ export default function Splash() {
           width: "70%",
           height: "70%",
           overflow: "hidden",
-          borderRadius: "20px",
+          borderRadius: "22px",
+          boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
         }}
       >
         <video
@@ -57,6 +57,9 @@ export default function Splash() {
             height: "100%",
             objectFit: "cover",
           }}
+          onLoadedMetadata={(e) => {
+            e.target.playbackRate = 1.25; // من 5 ثواني إلى 4 ثواني
+          }}
         />
       </Box>
 
@@ -64,70 +67,48 @@ export default function Splash() {
       {showButtons && (
         <Stack
           direction="row"
-          spacing={2}
+          spacing={3}
           sx={{
             position: "absolute",
-            bottom: "50px",
+            bottom: "25px", // ↓↓↓ تم تنزيلها للأسفل
             left: "50%",
             transform: "translateX(-50%)",
           }}
         >
-          {/* زر العربية */}
-          <Button
-            variant="outlined"
-            sx={{
-              backgroundColor: "white",
-              color: "#9C1C6B",
-              borderColor: "#9C1C6B",
-              fontWeight: "bold",
-              "&:hover": {
-                backgroundColor: "#ffffff",
-                borderColor: "#7a1554",
-                boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
-              },
-            }}
-            onClick={() => chooseLanguage("ar")}
-          >
-            العربية
-          </Button>
+          {[
+            { label: "العربية", code: "ar" },
+            { label: "עברית", code: "he" },
+            { label: "English", code: "en" },
+          ].map((btn) => (
+            <Button
+              key={btn.code}
+              variant="outlined"     // ← نوع OUTLINED
+              onClick={() => chooseLanguage(btn.code)}
+              sx={{
+                paddingX: "30px",
+                paddingY: "10px",
+                borderRadius: "30px",
+                fontWeight: "bold",
+                fontSize: "15px",
+                textTransform: "none",
+                color: "#9C1C6B",
+                borderColor: "#9C1C6B",
+                backgroundColor: "white",
+                transition: "0.25s ease-in-out",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
 
-          {/* زر العبرية */}
-          <Button
-            variant="outlined"
-            sx={{
-              backgroundColor: "white",
-              color: "#9C1C6B",
-              borderColor: "#9C1C6B",
-              fontWeight: "bold",
-              "&:hover": {
-                backgroundColor: "#ffffff",
-                borderColor: "#7a1554",
-                boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
-              },
-            }}
-            onClick={() => chooseLanguage("he")}
-          >
-            עברית
-          </Button>
-
-          {/* زر الإنجليزية */}
-          <Button
-            variant="outlined"
-            sx={{
-              backgroundColor: "white",
-              color: "#9C1C6B",
-              borderColor: "#9C1C6B",
-              fontWeight: "bold",
-              "&:hover": {
-                backgroundColor: "#ffffff",
-                borderColor: "#7a1554",
-                boxShadow: "0 0 10px rgba(156, 28, 107, 0.25)",
-              },
-            }}
-            onClick={() => chooseLanguage("en")}
-          >
-            English
-          </Button>
+                "&:hover": {
+                  backgroundColor: "#9C1C6B",
+                  color: "white",
+                  borderColor: "#7A1554",
+                  transform: "translateY(-3px)",
+                  boxShadow: "0 8px 20px rgba(156, 28, 107, 0.35)",
+                },
+              }}
+            >
+              {btn.label}
+            </Button>
+          ))}
         </Stack>
       )}
     </Box>
