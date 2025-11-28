@@ -461,6 +461,8 @@ function AvailableView({
                 cursor: isAvailable ? "pointer" : "default",
                 transition: "all 0.25s ease",
                 position: "relative",
+                paddingTop: 10,
+                paddingRight: 4,
               }}
             >
               <div
@@ -517,6 +519,7 @@ function AvailableView({
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    fontWeight: "bold",
                   }}
                 >
                   ✓
