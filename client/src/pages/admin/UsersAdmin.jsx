@@ -535,7 +535,7 @@ const handleDeleteUser = async () => {
       fullWidth
       variant="outlined"
       onClick={() => handleEdit(user)}
-disabled={ user.isSuperAdmin || user.role==="admin" }
+disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdmin }
 
       sx={{
         borderColor: "#1976d2",
@@ -555,7 +555,7 @@ disabled={ user.isSuperAdmin || user.role==="admin" }
       fullWidth
       variant="contained"
       onClick={() => toggleUserBlock(user)}
-disabled={ user.isSuperAdmin || user.role==="admin" }
+disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdmin }
 
       sx={{
         fontWeight: 600,
@@ -580,7 +580,7 @@ disabled={ user.isSuperAdmin || user.role==="admin" }
       variant="contained"
       color="error"
       onClick={() => openDeleteConfirm(user)}
-disabled={ user.isSuperAdmin || user.role==="admin" }
+disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdmin }
       sx={{
         fontWeight: 600,
         gap: 0.6,

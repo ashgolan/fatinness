@@ -26,14 +26,19 @@ const AdminSystemReset = () => {
   if (!user?.isSuperAdmin) {
     return (
       <Box p={3}>
-        <Typography color="error" variant="h6" align="center">
+        <Typography
+          color="error"
+          variant="h6"
+          align="center"
+          fontWeight={600}
+        >
           {t("systemReset.noPermission")}
         </Typography>
       </Box>
     );
   }
 
-  // جميع خيارات Reset — الآن مترجمة
+  // 🔧 خيارات النظام
   const resetOptions = [
     {
       key: "light",
@@ -65,34 +70,49 @@ const AdminSystemReset = () => {
     try {
       const option = resetOptions.find((o) => o.key === resetType);
       await Api.post(option.endpoint);
-
       alert(t("systemReset.success"));
     } catch (err) {
       console.error(err);
       alert(t("systemReset.error"));
     }
-
     setConfirmOpen(false);
   };
 
   return (
     <Box p={3}>
-      <Typography variant="h4" mb={3} textAlign="center">
+      {/* عنوان الصفحة */}
+      <Typography
+        variant="h4"
+        mb={4}
+        textAlign="center"
+        fontWeight={700}
+      >
         {t("systemReset.pageTitle")}
       </Typography>
 
+      {/* الكروت */}
       <Grid container spacing={3}>
         {resetOptions.map((opt) => (
           <Grid item xs={12} md={6} key={opt.key}>
-            <Card sx={{ borderLeft: "5px solid #d32f2f" }}>
+            <Card
+              sx={{
+                borderLeft: "5px solid #d32f2f",
+                boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+                p: 1,
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                <Typography
+                  variant="h6"
+                  fontWeight={700}
+                  gutterBottom
+                >
                   {opt.title}
                 </Typography>
 
                 <Typography
                   variant="body1"
-                  sx={{ opacity: 0.8, marginBottom: 2 }}
+                  sx={{ opacity: 0.8, mb: 2, lineHeight: 1.6 }}
                 >
                   {opt.description}
                 </Typography>
@@ -113,20 +133,29 @@ const AdminSystemReset = () => {
         ))}
       </Grid>
 
-      {/* ⚠️ نافذة تأكيد */}
+      {/* نافذة التأكيد */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>{t("systemReset.confirmTitle")}</DialogTitle>
+        <DialogTitle>
+          {t("systemReset.confirmTitle")}
+        </DialogTitle>
+
         <DialogContent>
           <Typography>
             {t("systemReset.confirmMessage")}{" "}
             <strong>{resetType?.toUpperCase()}</strong>
           </Typography>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>
             {t("systemReset.cancel")}
           </Button>
-          <Button color="error" variant="contained" onClick={handleConfirm}>
+
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleConfirm}
+          >
             {t("systemReset.confirmButton")}
           </Button>
         </DialogActions>
