@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -32,6 +32,7 @@ import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 
 import { useTranslation } from "react-i18next";
 import useServerError from "../../hooks/useServerError";
+import { UserContext } from "../../context/UserContext";
 
 export default function UsersAdmin() {
   const handleServerError = useServerError();
@@ -43,6 +44,9 @@ export default function UsersAdmin() {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+
+const [newRoleValue, setNewRoleValue] = useState(null);
+
 
   const [editOpen, setEditOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
@@ -59,6 +63,8 @@ export default function UsersAdmin() {
   const [pendingRoleChange, setPendingRoleChange] = useState(false);
 const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 const [deleteUser, setDeleteUser] = useState(null);
+const { user: currentUser } = useContext(UserContext);
+
 const openDeleteConfirm = (user) => {
   // منع حذف المدير الرئيسي
   if (user.isSuperAdmin) {
@@ -485,13 +491,12 @@ const handleDeleteUser = async () => {
                   {/* --------------------------- */}
                   {/* ⚡ السماح بالحجز الإضافي */}
                   {/* --------------------------- */}
-                  {user.admin !== true && (
                   <FormControlLabel
                     control={
                       <Switch
                         checked={user.allowExtraBookings}
                         onChange={() => toggleExtraBooking(user)}
-                        disabled={user.isBlocked}
+                        disabled={user.isBlocked || user.role === "admin"}
                         sx={{
                           "& .MuiSwitch-switchBase.Mui-checked": {
                             color: "#FFD700",
@@ -518,12 +523,11 @@ const handleDeleteUser = async () => {
                     }
                     sx={{ mb: 2 }}
                   />
-                  )}
+                  
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
                   {/* --------------------------- */}
          {/* إخفاء كل الأزرار إذا كان هذا المستخدم هو السوبر أدمن */}
-{!user.isSuperAdmin && (
   <Box sx={{ display: "grid", gap: 1.5 }}>
     
     {/* زر التعديل */}
@@ -531,6 +535,8 @@ const handleDeleteUser = async () => {
       fullWidth
       variant="outlined"
       onClick={() => handleEdit(user)}
+disabled={ user.isSuperAdmin || user.role==="admin" }
+
       sx={{
         borderColor: "#1976d2",
         color: "#1976d2",
@@ -549,6 +555,8 @@ const handleDeleteUser = async () => {
       fullWidth
       variant="contained"
       onClick={() => toggleUserBlock(user)}
+disabled={ user.isSuperAdmin || user.role==="admin" }
+
       sx={{
         fontWeight: 600,
         gap: 0.6,
@@ -572,6 +580,7 @@ const handleDeleteUser = async () => {
       variant="contained"
       color="error"
       onClick={() => openDeleteConfirm(user)}
+disabled={ user.isSuperAdmin || user.role==="admin" }
       sx={{
         fontWeight: 600,
         gap: 0.6,
@@ -585,7 +594,6 @@ const handleDeleteUser = async () => {
     </Button>
 
   </Box>
-)}
 
                 </Paper>
               </Grid>
@@ -694,24 +702,34 @@ const handleDeleteUser = async () => {
             {/* --------------------------- */}
             {/* 🟣 حقل الدور + نافذة تأكيد */}
             {/* --------------------------- */}
-            <TextField
-              select
-              label={t("usersAdmin.fields.role")}
-              name="role"
-              value={editData.role || "user"}
-              onChange={(e) => {
-                const newRole = e.target.value;
-                if (newRole === "admin" && editData.role !== "admin") {
-                  setPendingRoleChange(true);
-                } else {
-                  setEditData((prev) => ({ ...prev, role: newRole }));
-                }
-              }}
-              sx={textFieldStyle}
-            >
-              <MenuItem value="user">{t("usersAdmin.roles.user")}</MenuItem>
-              <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
-            </TextField>
+           <TextField
+  select
+  label={t("usersAdmin.fields.role")}
+  name="role"
+  value={editData.role || "user"}
+  onChange={(e) => {
+  const newRole = e.target.value;
+
+  // منع المديرات من ترقية أحد
+  if (newRole === "admin" && !currentUser?.isSuperAdmin) {
+    toast.error(t("usersAdmin.errors.onlySuperAdminCanPromote"));
+    return;
+  }
+
+  setNewRoleValue(newRole);  // 👈 خزّنت الدور مؤقتًا
+  setPendingRoleChange(true); // 👈 افتح النافذة
+}}
+
+  sx={textFieldStyle}
+>
+  <MenuItem value="user">{t("usersAdmin.roles.user")}</MenuItem>
+
+  {/* ✨ خيار المدير يظهر فقط للسوبر أدمن */}
+  {currentUser?.isSuperAdmin && (
+    <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
+  )}
+</TextField>
+
 
             {/* نافذة تأكيد ترقية المديرة */}
             <Dialog
@@ -734,35 +752,48 @@ const handleDeleteUser = async () => {
                 </Typography>
               </DialogContent>
 
-              <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setPendingRoleChange(false);
-                    setEditData((prev) => ({ ...prev, role: "user" }));
-                  }}
-                  sx={{ color: "#666", borderColor: "#ccc" }}
-                >
-                  {t("common.cancel")}
-                </Button>
+             <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+  
+  {/* ❌ إلغاء – نغلق النافذة ولا نغيّر الدور */}
+  <Button
+    variant="outlined"
+    onClick={() => {
+      setPendingRoleChange(false);
+      setNewRoleValue(null); // نلغي التغيير
+    }}
+    sx={{ color: "#666", borderColor: "#ccc" }}
+  >
+    {t("common.cancel")}
+  </Button>
 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    setPendingRoleChange(false);
-                    setEditData((prev) => ({ ...prev, role: "admin" }));
-                    toast.info(t("usersAdmin.messages.tempAdmin"));
-                  }}
-                  sx={{
-                    fontWeight: 600,
-                    backgroundColor: "#1976d2",
-                    "&:hover": { backgroundColor: "#1565c0" },
-                  }}
-                >
-                  {t("usersAdmin.confirmRole.confirm")}
-                </Button>
-              </DialogActions>
+  {/* ✔ موافقة – نطبق الدور الجديد */}
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={() => {
+      setPendingRoleChange(false);
+
+      // هنا يتم التغيير الفعلي
+      setEditData((prev) => ({
+        ...prev,
+        role: newRoleValue,
+      }));
+
+      setNewRoleValue(null);
+
+      toast.info(t("usersAdmin.messages.tempAdmin"));
+    }}
+    sx={{
+      fontWeight: 600,
+      backgroundColor: "#1976d2",
+      "&:hover": { backgroundColor: "#1565c0" },
+    }}
+  >
+    {t("usersAdmin.confirmRole.confirm")}
+  </Button>
+
+</DialogActions>
+
             </Dialog>
           </DialogContent>
 

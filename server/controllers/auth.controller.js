@@ -163,8 +163,9 @@ user: {
 // =====================================================
 export const updateUserRole = async (req, res) => {
   try {
-    if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ code: "ADMIN_ROLE_UNAUTHORIZED" });
+    // ❌ فقط السوبر أدمن يستطيع تغيير الأدوار
+    if (!req.user || !req.user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_ROLE_ONLY_SUPERADMIN" });
     }
 
     const { userId, role } = req.body;
@@ -173,7 +174,14 @@ export const updateUserRole = async (req, res) => {
       return res.status(400).json({ code: "ADMIN_ROLE_INVALID" });
     }
 
+    // 🔒 لا يمكن تعديل السوبر أدمن نفسه
+    const target = await User.findById(userId);
+    if (target?.isSuperAdmin) {
+      return res.status(400).json({ code: "ADMIN_ROLE_CANNOT_EDIT_SUPERADMIN" });
+    }
+
     const user = await User.findByIdAndUpdate(userId, { role }, { new: true });
+
     if (!user)
       return res.status(404).json({ code: "ADMIN_ROLE_USER_NOT_FOUND" });
 
@@ -183,3 +191,4 @@ export const updateUserRole = async (req, res) => {
     res.status(500).json({ code: "ADMIN_ROLE_SERVER_ERROR" });
   }
 };
+
