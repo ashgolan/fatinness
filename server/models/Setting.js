@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const settingSchema = new mongoose.Schema(
   {
-    clubName: { type: String, default: "Fateness Club" },
+    clubName: { type: String, default: "Fatinness Club" },
     contactNumber: { type: String, default: "" },
     autoMessage: { type: String, default: "مرحباً بك في نادينا الرياضي 💪" },
     logoUrl: { type: String, default: "" },

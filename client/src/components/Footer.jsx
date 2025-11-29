@@ -24,7 +24,7 @@ export default function Footer() {
       >
         © 2025{" "}
         <b style={{ color: isDark ? BRAND.gold : BRAND.purple }}>
-          Fateness Studio
+          Fatinness Studio
         </b>{" "}
         - {t("footer.subtitle")}
       </Typography>

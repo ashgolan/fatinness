@@ -17,30 +17,31 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 /*
-  🟢 القاعدة الذهبية:
-  إذا كانت الرسالة تحتوي على notification جاهز → FCM سيعرضه وحده → لا نعرض إشعار إضافي
-  إذا كانت Data Only → نحن فقط نعرض الإشعار
+  🟢 قاعدة مهمة:
+  - نتجاهل أي إشعار فيه notification لأن FCM سيعرضه (ويظهر حرف F)
+  - نعرض نحن فقط إشعارات Data لنعرض معها الأيقونة الخاصة بنا
 */
 
 messaging.onBackgroundMessage((payload) => {
-  // إذا كان الإشعار يحتوي على notification → FCM يعرضه تلقائياً
+  // ❌ إذا فيها notification → تجاهل كي لا يظهر حرف F
   if (payload.notification) {
-    return; // ⛔️ إلغاء الإشعار المكرر
+    return;
   }
 
-  // 🟡 إشعارات Data فقط → نعرضها يدويًا
+  // ✔ Data Only → نحن نعرض الإشعار مع الأيقونة الصحيحة
   const notificationTitle = payload.data?.title || "Fatinness Studio";
   const notificationBody = payload.data?.body || "";
-  const icon = payload.data?.icon || "/logo192.png";
+  const icon = payload.data?.icon || "/icons/logo192.png";
 
   self.registration.showNotification(notificationTitle, {
     body: notificationBody,
     icon: icon,
+    badge: icon,        // مهم للمتصفحات لتثبيت الصورة بدلاً من حرف F
     data: { url: payload.data?.url || "/" },
   });
 });
 
-// فتح رابط عند الضغط على الإشعار
+// فتح رابط عند الضغط
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification?.data?.url || "/";
