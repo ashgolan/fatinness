@@ -31,7 +31,7 @@ messaging.onBackgroundMessage((payload) => {
   // ✔ Data Only → نحن نعرض الإشعار مع الأيقونة الصحيحة
   const notificationTitle = payload.data?.title || "Fatinness Studio";
   const notificationBody = payload.data?.body || "";
-  const icon = payload.data?.icon || "/logo192.png";
+  const icon = payload.data?.icon || "/logo192x192.png";
 
   self.registration.showNotification(notificationTitle, {
     body: notificationBody,
