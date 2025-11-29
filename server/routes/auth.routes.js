@@ -26,26 +26,36 @@ router.post(
 router.post("/login", loginLimiter, loginUser);
 
 // 🌟 إنشاء السوبر أدمن لأول مرة
+// 🌟 إنشاء السوبر أدمن لأول مرة
 router.post("/register-superadmin", async (req, res) => {
   try {
-    const { username, email, phone, pin } = req.body;
+    const { username, email, phone, password, gender, height, weight, age } =
+      req.body;
 
+    // هل يوجد مستخدم واحد على الأقل؟
     const userCount = await User.countDocuments();
     if (userCount > 0) {
       return res.status(400).json({ code: "SETUP_ALREADY_DONE" });
     }
 
-    const hashedPIN = await bcrypt.hash(pin, 10);
+    // تشفير الباسوورد
+    const hashedPassword = await bcrypt.hash(password, 10);
 
+    // إنشاء السوبر أدمن
     const superAdmin = await User.create({
       username,
       email,
       phone,
-      passwordHash: hashedPIN,  // 🔥 يجب استخدام passwordHash وليس password
-      role: "admin",
-      isSuperAdmin: true,
+      passwordHash: hashedPassword,
+      gender,
+      height,
+      weight,
+      age,
+      role: "admin",        // 👑 أدمن
+      isSuperAdmin: true,   // 👑 سوبر أدمن
     });
 
+    // إنشاء JWT
     const token = jwt.sign(
       {
         _id: superAdmin._id,
@@ -76,6 +86,7 @@ router.post("/register-superadmin", async (req, res) => {
     res.status(500).json({ code: "SETUP_ERROR" });
   }
 });
+
 
 // 🔍 فحص هل النظام يحتاج إعداد أول مرة
 router.get("/check-first-run", async (req, res) => {

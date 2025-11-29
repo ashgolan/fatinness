@@ -4,6 +4,7 @@
   "scripts": {
     "install": "npm install --prefix server && npm install --prefix client",
     "start": "node server/server.js",
+    "dev": "nodemon server.js",
     "build": "cd client && npm run build"
   }
 }

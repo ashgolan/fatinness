@@ -725,6 +725,27 @@
     "empty": "אין תמונות עדיין",
     "close": "סגור"
   },
+ "superAdminRegister": {
+    "title": "יצירת סופר אדמין",
+    "subtitle": "שלב זה מתבצע פעם אחת בלבד להגדרת המערכת.",
+    "fields": {
+      "username": "שם משתמש",
+      "email": "אימייל",
+      "password": "סיסמה",
+      "phone": "טלפון",
+      "gender": "מין",
+      "female": "נקבה",
+      "male": "זכר",
+      "height": "גובה (ס\"מ)",
+      "weight": "משקל (ק\"ג)",
+      "age": "גיל"
+    },
+    "submit": "צור סופר אדמין",
+    "submitting": "יוצר...",
+    "success": "הסופר אדמין נוצר בהצלחה!",
+    "error": "אירעה שגיאה בעת יצירת הסופר אדמין"
+  }
+  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "נדרש שם תבנית ורשימת שיעורים.",

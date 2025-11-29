@@ -30,5 +30,8 @@
     "nodemailer": "^7.0.9",
     "stripe": "^19.1.0",
     "twilio": "^5.10.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
   }
 }

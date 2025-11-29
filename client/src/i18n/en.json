@@ -724,6 +724,27 @@
     "empty": "No images yet",
     "close": "Close"
   },
+ "superAdminRegister": {
+    "title": "Create Super Admin",
+    "subtitle": "This setup is required only once to initialize the system.",
+    "fields": {
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "phone": "Phone Number",
+      "gender": "Gender",
+      "female": "Female",
+      "male": "Male",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age"
+    },
+    "submit": "Create Super Admin",
+    "submitting": "Creating...",
+    "success": "Super Admin created successfully!",
+    "error": "Error creating Super Admin"
+  }
+  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and slots are required.",
