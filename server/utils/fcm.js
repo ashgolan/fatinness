@@ -1,4 +1,3 @@
-// 📁 server/utils/fcm.js
 import admin from "firebase-admin";
 import fs from "fs";
 
@@ -9,13 +8,11 @@ if (!admin.apps.length) {
   let serviceAccount = null;
 
   try {
-    // من ENV مباشرة
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
     if (raw && raw.trim() !== "{}") {
       serviceAccount = JSON.parse(raw);
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      // من ملف خارجي
       const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
       if (fs.existsSync(path)) {
@@ -52,13 +49,20 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
   try {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
-  data: {
-  title: message.title || "Fatinness Studio 🔥",
-  body: message.body || "",
-  icon: message.icon || "/logo192x192.png",
-  url: message.url || "https://fateness.onrender.com",
-  ...message.data
-},
+
+      // ✨ إشعار Android الرسمي (يُظهر اسم التطبيق)
+      notification: {
+        title: message.title || "Fatinness Studio 🔥",
+        body: message.body || "",
+      },
+
+      // 🔥 Data فقط للتمرير للـ Service Worker
+      data: {
+        icon: message.icon || "/logo192x192.png",
+        url: message.url || "https://fateness.onrender.com",
+        ...message.data,
+      },
+
       android: { priority: "high" },
       apns: { payload: { aps: { sound: "default" } } },
     });
@@ -85,19 +89,25 @@ export async function sendPushNotification(token, title, body, data = {}) {
   try {
     const message = {
       token,
- data: {
-  title: title || "Fatinness Studio 🔥",
-  body: body || "",
-  icon: data.icon || "/logo192x192.png",
-  url: data.url || "https://fateness.onrender.com",
-  ...data
-},
+
+      // ✨ Android Notification (يُظهر اسم التطبيق)
+      notification: {
+        title: title || "Fatinness Studio 🔥",
+        body: body || "",
+      },
+
+      // 🔥 Data فقط للـ SW
+      data: {
+        icon: data.icon || "/logo192x192.png",
+        url: data.url || "https://fateness.onrender.com",
+        ...data,
+      },
+
       android: { priority: "high" },
       apns: { payload: { aps: { sound: "default" } } },
     };
 
-    const res = await admin.messaging().send(message);
-    return res;
+    return await admin.messaging().send(message);
   } catch (err) {
     console.error("❌ Single push error:", err.message);
   }
