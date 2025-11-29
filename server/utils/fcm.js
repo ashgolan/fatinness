@@ -105,7 +105,7 @@ export async function sendPushNotification(token, title, body, data = {}) {
       // ✨ إشعار رسمي يظهر حتى والشاشة مغلقة
       notification: {
         title: "",
-        body: (" 🔥 Fatinness Studio" + body) || "",
+        body: body || "",
       },
 
       data: {
