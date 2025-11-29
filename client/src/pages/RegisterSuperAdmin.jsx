@@ -87,27 +87,44 @@ export default function RegisterSuperAdmin() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
+  try {
+    const cleanForm = {
+      ...form,
+      height: form.height ? Number(form.height) : null,
+      weight: form.weight ? Number(form.weight) : null,
+      age: form.age ? Number(form.age) : null,
+      role: "superAdmin",
+    };
+
+    await Api.post("/auth/register-superadmin", cleanForm);
+
+    toast.success(t("superAdminRegister.success"));
+
+    // 🔥 1) تسجيل خروج من السيرفر (اختياري لكنه نظيف)
     try {
-      const cleanForm = {
-        ...form,
-        height: form.height ? Number(form.height) : null,
-        weight: form.weight ? Number(form.weight) : null,
-        age: form.age ? Number(form.age) : null,
-        role: "superAdmin",
-      };
-
-      await Api.post("/auth/register-superadmin", cleanForm);
-      toast.success(t("superAdminRegister.success"));
-      navigate("/admin/dashboard");
+      await Api.post("/auth/logout");
     } catch (err) {
-      toast.error(t("superAdminRegister.error"));
-    } finally {
-      setLoading(false);
+      console.log("Logout skipped", err);
     }
-  };
+
+    // 🔥 2) حذف كعكة الجلسة القديمة
+    document.cookie =
+      "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
+
+    // 🔥 3) إعادة التوجيه إلى تسجيل الدخول
+    setTimeout(() => {
+      navigate("/login");
+    }, 500);
+  } catch (err) {
+    toast.error(t("superAdminRegister.error"));
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const textFieldStyle = {
     backgroundColor:

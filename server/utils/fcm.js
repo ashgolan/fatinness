@@ -52,11 +52,13 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
   try {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
-      notification: {
-        title: message.title || "Fatinness Studio 🔥",
-        body: message.body || "",
-      },
-      data: message.data || {},
+  data: {
+  title: message.title || "Fatinness Studio 🔥",
+  body: message.body || "",
+  icon: message.icon || "/logo192x192.png",
+  url: message.url || "https://fateness.onrender.com",
+  ...message.data
+},
       android: { priority: "high" },
       apns: { payload: { aps: { sound: "default" } } },
     });
