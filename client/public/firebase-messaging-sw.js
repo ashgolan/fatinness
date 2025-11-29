@@ -23,23 +23,26 @@ const messaging = firebase.messaging();
 */
 
 messaging.onBackgroundMessage((payload) => {
-  // ❌ إذا فيها notification → تجاهل كي لا يظهر حرف F
-  if (payload.notification) {
-    return;
-  }
+  console.log("[SW] Received:", payload);
 
-  // ✔ Data Only → نحن نعرض الإشعار مع الأيقونة الصحيحة
-  const notificationTitle = payload.data?.title || "Fatinness Studio";
-  const notificationBody = payload.data?.body || "";
-  const icon = payload.data?.icon || "/logo192x192.png";
+  // لا نسمح أبداً بإشعارات notification
+  if (payload.notification) return;
+
+  const data = payload.data || {};
+
+  const notificationTitle = data.title || "Fatinness Studio";
+  const notificationBody = data.body || "";
+  const icon = data.icon || "/logo192x192.png";
+  const url = data.url || "/";
 
   self.registration.showNotification(notificationTitle, {
     body: notificationBody,
-    icon: icon,
-    badge: icon,        // مهم للمتصفحات لتثبيت الصورة بدلاً من حرف F
-    data: { url: payload.data?.url || "https://fateness.onrender.com" },
+    icon,
+    badge: icon,
+    data: { url },
   });
 });
+
 
 // فتح رابط عند الضغط
 self.addEventListener("notificationclick", (event) => {
