@@ -373,24 +373,24 @@ const handleDeleteUser = async () => {
                   }}
                 >
                   {/* 👑 تاج المديرة */}
-                  {user.role === "admin" && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        top: -10,
-                        right: -10,
-                        backgroundColor: "#fff",
-                        borderRadius: "50%",
-                        border: "2px solid #ffeb3b",
-                        padding: "4px 6px",
-                        boxShadow: "0 0 10px rgba(255, 215, 0, 0.6)",
-                        fontSize: "18px",
-                        zIndex: 3,
-                      }}
-                    >
-                      👑
-                    </Box>
-                  )}
+        {user.role === "admin" && (
+  <Box
+    sx={{
+      position: "absolute",
+      top: -10,
+      right: -10,
+      backgroundColor: "#fff",
+      borderRadius: "50%",
+      border: "2px solid #ffeb3b",
+      padding: "5px 5px",
+      boxShadow: "0 0 12px rgba(255, 215, 0, 0.8)",
+      fontSize: "20px",
+      zIndex: 3,
+    }}
+  >
+    {user.isSuperAdmin ? "🛡️✨" : "👑"}
+  </Box>
+)}
                   {/* --------------------------- */}
                   {/* 👤 رأس البطاقة */}
                   {/* --------------------------- */}

@@ -33,8 +33,21 @@ export const getUserProfile = async (req, res) => {
         ? user.weightHistory[user.weightHistory.length - 1]
         : null;
 
-    res.json({
-      ...user,
+    return res.json({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      gender: user.gender,
+      height: user.height,
+      weight: user.weight,
+      age: user.age,
+
+      // 🔥 أهم نقطة:
+      role: user.role,                  
+      isSuperAdmin: user.isSuperAdmin || false,  
+      allowExtraBookings: user.allowExtraBookings || false,
+
       stats: {
         completedBookings,
         cancelledBookings,
@@ -43,6 +56,7 @@ export const getUserProfile = async (req, res) => {
         lastWeightNote: lastWeight?.note || null,
         lastWeightDate: lastWeight?.date || null,
       },
+
       weightHistory: user.weightHistory || [],
     });
   } catch (err) {

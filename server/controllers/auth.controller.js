@@ -5,7 +5,7 @@ import { maintenanceMode } from "./maintenance.controller.js";
 
 // 🔹 توليد التوكن
 function generateToken(user) {
-  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+  return jwt.sign({ id: user._id, role: user.role ,isSuperAdmin: user.isSuperAdmin}, process.env.JWT_SECRET, {
     expiresIn: "12h",
   });
 }
@@ -144,12 +144,13 @@ export const loginUser = async (req, res) => {
     res.json({
       code: "ADMIN_LOGIN_SUCCESS",
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        phone: user.phone,
-        role: user.role,
-      },
+user: {
+  id: user._id,
+  username: user.username,
+  phone: user.phone,
+  role: user.role,
+  isSuperAdmin: user.isSuperAdmin,
+},
     });
   } catch (err) {
     console.error("❌ Login Error:", err);
