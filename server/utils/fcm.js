@@ -9,13 +9,11 @@ if (!admin.apps.length) {
   let serviceAccount = null;
 
   try {
-    // من ENV مباشرة
     const raw = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
 
     if (raw && raw.trim() !== "{}") {
       serviceAccount = JSON.parse(raw);
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
-      // من ملف خارجي
       const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
       if (fs.existsSync(path)) {
@@ -42,7 +40,7 @@ if (!admin.apps.length) {
 }
 
 // ======================================================
-// 🔥 إرسال إشعار إلى عدة أجهزة (مع إرجاع عدد النجاح/الفشل)
+// 🔥 إرسال إشعار إلى عدة أجهزة — Notification Message
 // ======================================================
 export async function sendFcmToTokens(tokens = [], message = {}) {
   if (!tokens.length) {
@@ -52,15 +50,33 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
   try {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
-  data: {
-  title: message.title || "Fatinness Studio 🔥",
-  body: message.body || "",
-  icon: message.icon || "/logo192x192.png",
-  url: message.url || "https://fateness.onrender.com",
-  ...message.data
-},
-      android: { priority: "high" },
-      apns: { payload: { aps: { sound: "default" } } },
+
+      // ✨ إشعار رسمي يظهر حتى الشاشة مغلقة
+      notification: {
+        title: message.title || "Fatinness Studio",
+        body: message.body || "",
+      },
+
+      // 📌 Data فقط للضغط وفتح رابط
+      data: {
+        url: message.url || "https://fateness.onrender.com",
+        ...message.data,
+      },
+
+      android: {
+        priority: "high",
+        notification: {
+          sound: "default",
+        },
+      },
+
+      apns: {
+        payload: {
+          aps: {
+            sound: "default",
+          },
+        },
+      },
     });
 
     console.log(
@@ -79,25 +95,35 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
 }
 
 // ======================================================
-// 🔥 إرسال إشعار لجهاز واحد
+// 🔥 إرسال إشعار لجهاز واحد — Notification Message
 // ======================================================
 export async function sendPushNotification(token, title, body, data = {}) {
   try {
-    const message = {
+    const messageObj = {
       token,
- data: {
-  title: title || "Fatinness Studio 🔥",
-  body: body || "",
-  icon: data.icon || "/logo192x192.png",
-  url: data.url || "https://fateness.onrender.com",
-  ...data
-},
-      android: { priority: "high" },
-      apns: { payload: { aps: { sound: "default" } } },
+
+      // ✨ إشعار رسمي يظهر حتى والشاشة مغلقة
+      notification: {
+        title: "",
+        body: (" 🔥 Fatinness Studio" + body) || "",
+      },
+
+      data: {
+        url: data.url || "https://fateness.onrender.com",
+        ...data,
+      },
+
+      android: {
+        priority: "high",
+        notification: { sound: "default" },
+      },
+
+      apns: {
+        payload: { aps: { sound: "default" } },
+      },
     };
 
-    const res = await admin.messaging().send(message);
-    return res;
+    return await admin.messaging().send(messageObj);
   } catch (err) {
     console.error("❌ Single push error:", err.message);
   }

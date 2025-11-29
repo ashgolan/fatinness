@@ -17,25 +17,34 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 /*
-  🟢 قاعدة مهمة:
-  - نتجاهل أي إشعار فيه notification لأن FCM سيعرضه (ويظهر حرف F)
-  - نعرض نحن فقط إشعارات Data لنعرض معها الأيقونة الخاصة بنا
+  ✔ إشعارات Notification فقط يتم عرضها تلقائياً من النظام
+  ✔ لا نحتاج لعرض إشعار يدوي هنا
+  ✔ لكن نحتاج دعم الضغط على الإشعار فقط
 */
 
 messaging.onBackgroundMessage((payload) => {
-  const appName = payload.data.appName || "Fatinness Studio";
-  const title = payload.data.title || "";
-  const body = payload.data.body || "";
-  const icon = payload.data.icon || "/logo192x192.png";
-
-  const finalTitle = appName; // ← يظهر كعنوان رئيسي
-  const finalBody = `${ " 🔥 " + title}\n${body}`; // ← تحت الاسم مباشرة
-
-  self.registration.showNotification(finalTitle, {
-    body: finalBody,
-    icon,
-    badge: icon,
-    data: { url: payload.data.url },
-  });
+  // في إشعار Notification → النظام يعرضه تلقائياً
+  // نحن فقط نستطيع التعامل مع الضغط عليه
 });
 
+/* فتح الرابط عند الضغط */
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification?.data?.url || "/";
+  
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then((clientList) => {
+      // إذا هناك نافذة مفتوحة → نستخدمها
+      for (const client of clientList) {
+        if (client.url === url && "focus" in client) {
+          return client.focus();
+        }
+      }
+      // وإلا → افتح صفحة جديدة
+      if (clients.openWindow) {
+        return clients.openWindow(url);
+      }
+    })
+  );
+});
