@@ -9,7 +9,7 @@ export const useSystemSetupCheck = () => {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await Api.get("/check-first-run");
+        const res = await Api.get("/auth/check-first-run");
 
         if (res.data.needsSetup) {
           navigate("/register-superadmin");

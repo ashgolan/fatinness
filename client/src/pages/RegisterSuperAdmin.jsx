@@ -31,7 +31,7 @@ export default function RegisterSuperAdmin() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await Api.get("/check-first-run");
+        const res = await Api.get("/auth/check-first-run");
         setNeedsSetup(res.data.needsSetup);
 
         if (!res.data.needsSetup) {

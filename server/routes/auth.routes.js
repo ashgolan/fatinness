@@ -6,24 +6,26 @@ import {
   apiLimiter,
   loginLimiter,
 } from "../middlewares/rateLimit.middleware.js";
+
+import User from "../models/User.js";   // ✅ مفقودة ومهمة جداً
+import bcrypt from "bcrypt";            // ✅ كان مفقود
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
+// 🔹 تسجيل مستخدم جديد
 router.post(
   "/register",
-  authMiddleware, // ✅ أضف هذا السطر
+  authMiddleware,
   apiLimiter,
   validateRegistration,
   registerUser
 );
 
-// 🔹 تسجيل الدخول (بحماية أقوى ضد محاولات التخمين)
+// 🔹 تسجيل الدخول
 router.post("/login", loginLimiter, loginUser);
 
-
-
-// 🌟 إنشاء مدير رئيسي لأول مرة
+// 🌟 إنشاء السوبر أدمن لأول مرة
 router.post("/register-superadmin", async (req, res) => {
   try {
     const { username, email, phone, pin } = req.body;
@@ -39,47 +41,43 @@ router.post("/register-superadmin", async (req, res) => {
       username,
       email,
       phone,
-      password: hashedPIN,
+      passwordHash: hashedPIN,  // 🔥 يجب استخدام passwordHash وليس password
       role: "admin",
       isSuperAdmin: true,
     });
 
-const token = jwt.sign(
-  {
-    _id: superAdmin._id,
-    role: "admin",
-    isSuperAdmin: true,
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
+    const token = jwt.sign(
+      {
+        _id: superAdmin._id,
+        role: "admin",
+        isSuperAdmin: true,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-res.cookie("JWT", token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
-});
+    res.cookie("JWT", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
 
-return res.json({
-  code: "SUPERADMIN_CREATED",
-  user: {
-    id: superAdmin._id,
-    username: superAdmin.username,
-    isSuperAdmin: true,
-    role: "admin",
-  },
-});
-
+    return res.json({
+      code: "SUPERADMIN_CREATED",
+      user: {
+        id: superAdmin._id,
+        username: superAdmin.username,
+        isSuperAdmin: true,
+        role: "admin",
+      },
+    });
   } catch (err) {
     console.error("❌ register-superadmin error:", err);
     res.status(500).json({ code: "SETUP_ERROR" });
   }
 });
 
-
-
-
-// 🔍 فحص هل النظام يحتوي مدير رئيسي أم لا
+// 🔍 فحص هل النظام يحتاج إعداد أول مرة
 router.get("/check-first-run", async (req, res) => {
   try {
     const userCount = await User.countDocuments();
@@ -91,4 +89,3 @@ router.get("/check-first-run", async (req, res) => {
 });
 
 export default router;
-

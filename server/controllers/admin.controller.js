@@ -369,7 +369,7 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
       .select(
-        "username email phone allowExtraBookings role isBlocked createdAt height weight age gender"
+        "username email phone allowExtraBookings role isSuperAdmin isBlocked createdAt height weight age gender"
       )
       .sort({ createdAt: -1 });
 
