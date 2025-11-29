@@ -85,11 +85,13 @@ export async function sendPushNotification(token, title, body, data = {}) {
   try {
     const message = {
       token,
-      notification: {
-        title: title || "Fatinness Studio 🔥",
-        body: body || "",
-      },
-      data,
+ data: {
+  title: title || "Fatinness Studio 🔥",
+  body: body || "",
+  icon: data.icon || "/logo192x192.png",
+  url: data.url || "https://fateness.onrender.com",
+  ...data
+},
       android: { priority: "high" },
       apns: { payload: { aps: { sound: "default" } } },
     };
