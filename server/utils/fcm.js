@@ -53,7 +53,7 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
       notification: {
-        title: message.title || "Fatinness Studio",
+        title: message.title || "Fatinness Studio 🔥",
         body: message.body || "",
       },
       data: message.data || {},
@@ -84,7 +84,7 @@ export async function sendPushNotification(token, title, body, data = {}) {
     const message = {
       token,
       notification: {
-        title: title || "Fatinness Studio",
+        title: title || "Fatinness Studio 🔥",
         body: body || "",
       },
       data,

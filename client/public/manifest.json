@@ -1,22 +1,28 @@
 {
-  "short_name": "Fateness",
-  "name": "Fateness Ladies Fitness",
+  "short_name": "Fatinness",
+  "name": "Fatinness Studio",
   "icons": [
     {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
     },
     {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
+      "src": "icon192.png",
       "type": "image/png",
-      "purpose": "any"
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#F0C73B",
-  "background_color": "#F0C73B"
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
+
+  "gcm_sender_id": "103953800507",
+  "permissions": ["notifications"]
 }
