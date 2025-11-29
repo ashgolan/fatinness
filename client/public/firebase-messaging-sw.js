@@ -23,31 +23,19 @@ const messaging = firebase.messaging();
 */
 
 messaging.onBackgroundMessage((payload) => {
-  if (payload.notification) return;
+  const appName = payload.data.appName || "Fatinness Studio";
+  const title = payload.data.title || "";
+  const body = payload.data.body || "";
+  const icon = payload.data.icon || "/logo192x192.png";
 
-  const data = payload.data || {};
+  const finalTitle = appName; // ← يظهر كعنوان رئيسي
+  const finalBody = `${ " 🔥 " + title}\n${body}`; // ← تحت الاسم مباشرة
 
-  // عنوان الإشعار + :
-  const notificationTitle = data.title ? `${data.title} 🔥:` : "";
-
-  // نص الرسالة فقط
-  const notificationBody = data.body || "";
-
-  const icon = data.icon || "/logo192x192.png";
-  const url = data.url || "/";
-
-  self.registration.showNotification(notificationTitle, {
-    body: notificationBody,
+  self.registration.showNotification(finalTitle, {
+    body: finalBody,
     icon,
     badge: icon,
-    data: { url },
+    data: { url: payload.data.url },
   });
 });
 
-
-// فتح رابط عند الضغط
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-  const url = event.notification?.data?.url || "/";
-  event.waitUntil(clients.openWindow(url));
-});
