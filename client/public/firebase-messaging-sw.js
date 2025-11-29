@@ -23,15 +23,16 @@ const messaging = firebase.messaging();
 */
 
 messaging.onBackgroundMessage((payload) => {
-  console.log("[SW] Received:", payload);
-
-  // لا نسمح أبداً بإشعارات notification
   if (payload.notification) return;
 
   const data = payload.data || {};
 
-  const notificationTitle = data.title || "Fatinness Studio";
+  // عنوان الإشعار + :
+  const notificationTitle = data.title ? `${data.title} 🔥:` : "";
+
+  // نص الرسالة فقط
   const notificationBody = data.body || "";
+
   const icon = data.icon || "/logo192x192.png";
   const url = data.url || "/";
 
