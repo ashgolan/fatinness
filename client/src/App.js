@@ -49,7 +49,10 @@ import PrivateRoute from "./utils/PrivateRoute";
 import i18n from "./i18n/i18n";
 import Gallery from "./pages/Gallery";
 import DebugApi from "./pages/DebugApi";
+import AdminSystemReset from "./pages/admin/AdminSystemReset";
+import RegisterSuperAdmin from "./pages/RegisterSuperAdmin";
 
+import { useSystemSetupCheck } from "./hooks/useSystemSetupCheck";
 // ======================================================
 // ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
 // ======================================================
@@ -84,6 +87,10 @@ function DirectionWrapper({ children }) {
 // ======================================================
 export default function App() {
   const location = useLocation();
+  // ✔️ First Run Protection
+  const { loading } = useSystemSetupCheck();
+
+  if (loading) return null;
 
   // 🔥 إخفاء Navbar & Footer في صفحة Splash فقط
   const isSplash = location.pathname === "/";
@@ -125,6 +132,7 @@ export default function App() {
                 <Routes>
                   {/* 🌟 صفحة Splash */}
                   <Route path="/" element={<Splash />} />
+<Route path="/register-superadmin" element={<RegisterSuperAdmin />} />
 
                   {/* تسجيل الدخول */}
                   <Route path="/login" element={<Login />} />
@@ -149,6 +157,8 @@ export default function App() {
                       path="/admin/dashboard"
                       element={<AdminDashboard />}
                     />
+                    <Route path="/admin/system-reset" element={<AdminSystemReset/>} />
+
                     <Route path="/admin/bookings" element={<BookingsAdmin />} />
                     <Route path="/admin/schedule" element={<AdminSchedule />} />
                     <Route path="/admin/users" element={<UsersAdmin />} />

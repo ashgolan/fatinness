@@ -123,7 +123,6 @@
       "saved": "Changes saved successfully",
       "createdNext": "{{count}} sessions created for next week",
       "createdSlots": "{{count}} new slots have been created successfully"
-
     },
 
     "errors": {
@@ -276,7 +275,8 @@
       "weeklySlots": "Weekly Schedule",
       "templates": "Weekly Templates",
       "notifications": "Notifications",
-      "settings": "General Settings"
+      "settings": "General Settings",
+      "systemReset": "System Reset"
     },
 
     "footerTitle": "A Complete Dashboard to Manage Fateness Studio",
@@ -348,86 +348,136 @@
       "after": "after"
     }
   },
-  "usersAdmin": {
-  "title": "Users Management",
-  "subtitle": "Manage all users and their booking activity in the studio",
+  "systemReset": {
+    "noPermission": "You do not have permission to access this page.",
+    "pageTitle": "⚠️ System Reset — Reset Settings",
 
-  "search": {
-    "placeholder": "Search by name, email, or phone..."
+    "execute": "Execute",
+
+    "confirmTitle": "Confirm Action",
+    "confirmMessage": "Are you sure you want to execute",
+    "cancel": "Cancel",
+    "confirmButton": "Yes, Execute",
+
+    "success": "Operation completed successfully.",
+    "error": "An error occurred during execution.",
+
+    "light": {
+      "title": "Light Reset",
+      "desc": "Deletes bookings, notifications, sessions, and templates only. Users remain untouched."
+    },
+
+    "medium": {
+      "title": "Medium Reset",
+      "desc": "Everything from Light Reset + delete all regular users and admins. Super Admin stays."
+    },
+
+    "hard": {
+      "title": "Hard Reset",
+      "desc": "Deletes almost everything except the Super Admin. Includes images and settings."
+    },
+
+    "factory": {
+      "title": "Factory Reset",
+      "desc": "Deletes the entire database. When entering the system, a new Super Admin will be required."
+    }
   },
-
-  "card": {
-    "active": "Active",
-    "blocked": "Blocked"
-  },
-
-  "totalBookings": "Total Bookings",
-
-  "extraBooking": {
-    "label": "Allow Extra Booking",
-    "updated": "Extra booking setting updated successfully"
-  },
-
-  "buttons": {
-    "edit": "Edit",
-    "block": "Block",
-    "unblock": "Unblock"
-  },
-
-  "noResults": "No matching users found",
-
-  "editUser": "Edit User Information",
-
-  "fields": {
-    "name": "Name",
+  "registerSuperAdmin": {
+    "title": "Register Super Admin",
+    "username": "Username",
     "email": "Email",
     "phone": "Phone",
-    "height": "Height (cm)",
-    "weight": "Weight (kg)",
-    "age": "Age",
-    "gender": "Gender",
-    "role": "Role"
+    "pin": "PIN Code",
+    "confirmPin": "Confirm PIN",
+    "submit": "Create Super Admin",
+    "pinTooShort": "PIN must be at least 4 digits.",
+    "pinMismatch": "PIN codes do not match.",
+    "success": "Super Admin created successfully!"
+  },
+  "usersAdmin": {
+    "title": "Users Management",
+    "subtitle": "Manage all users and their booking activity in the studio",
+
+    "search": {
+      "placeholder": "Search by name, email, or phone..."
+    },
+
+    "card": {
+      "active": "Active",
+      "blocked": "Blocked"
+    },
+
+    "totalBookings": "Total Bookings",
+
+    "extraBooking": {
+      "label": "Allow Extra Booking",
+      "updated": "Extra booking setting updated successfully"
+    },
+
+    "buttons": {
+      "edit": "Edit",
+      "block": "Block",
+      "unblock": "Unblock",
+      "delete": "Delete User"
+    },
+
+    "noResults": "No matching users found",
+
+    "editUser": "Edit User Information",
+
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age",
+      "gender": "Gender",
+      "role": "Role"
+    },
+
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+
+    "roles": {
+      "user": "User",
+      "admin": "Admin"
+    },
+
+    "confirm": {
+      "block": "Are you sure you want to block this user?",
+      "unblock": "Are you sure you want to unblock this user?",
+      "deleteUser": "Are you sure you want to delete this user? All bookings will be removed permanently!",
+      "deleteTitle": "Confirm Delete"
+    },
+
+    "confirmRole": {
+      "title": "⚠️ Confirm Admin Promotion",
+      "text": "You are about to promote this user to an Admin.",
+      "note": "This action grants full administrative access.",
+      "confirm": "Confirm Promotion"
+    },
+
+    "messages": {
+      "updated": "User information updated successfully",
+      "blocked": "User has been blocked successfully",
+      "unblocked": "User has been unblocked successfully",
+      "tempAdmin": "User set as admin temporarily — changes must be saved to take effect",
+      "deleted": "User deleted successfully."
+    },
+
+    "errors": {
+      "cannotBlockAdmin": "You cannot block a system administrator",
+      "cannotDeleteSuperAdmin": "You cannot delete the Super Admin."
+    }
   },
 
-  "gender": {
-    "female": "Female",
-    "male": "Male"
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save"
   },
-
-  "roles": {
-    "user": "User",
-    "admin": "Admin"
-  },
-
-  "confirm": {
-    "block": "Are you sure you want to block this user?",
-    "unblock": "Are you sure you want to unblock this user?"
-  },
-
-  "confirmRole": {
-    "title": "⚠️ Confirm Admin Promotion",
-    "text": "You are about to promote this user to an Admin.",
-    "note": "This action grants full administrative access.",
-    "confirm": "Confirm Promotion"
-  },
-
-  "messages": {
-    "updated": "User information updated successfully",
-    "blocked": "User has been blocked successfully",
-    "unblocked": "User has been unblocked successfully",
-    "tempAdmin": "User set as admin temporarily — changes must be saved to take effect"
-  },
-
-  "errors": {
-    "cannotBlockAdmin": "You cannot block a system administrator"
-  }
-},
-
-"common": {
-  "cancel": "Cancel",
-  "save": "Save"
-}
-,
   "login": {
     "title": "Fatinness Studio",
     "welcome": "Welcome back 💪",
@@ -526,15 +576,14 @@
       "cm": "cm"
     },
     "bmi": {
-  "title": "Body Mass Index (BMI)",
-  "underweight": "Underweight",
-  "normal": "Normal",
-  "overweight": "Overweight",
-  "obese": "Obese",
-  "healthyRange": "Healthy Range",
-  "idealWeight": "Ideal Weight"
-}
-
+      "title": "Body Mass Index (BMI)",
+      "underweight": "Underweight",
+      "normal": "Normal",
+      "overweight": "Overweight",
+      "obese": "Obese",
+      "healthyRange": "Healthy Range",
+      "idealWeight": "Ideal Weight"
+    }
   },
 
   "myBookings": {
@@ -688,10 +737,9 @@
     "USER_UPDATE_ERROR": "Failed to update user.",
     "CSV_NO_DATA": "No data available to export.",
 
-"ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit (4) 🌸",
-"ADMIN_BOOKING_SLOT_ID_REQUIRED": "Slot ID is required.",
-"ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "An error occurred while verifying the weekly booking limit.",
-
+    "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit (4) 🌸",
+    "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Slot ID is required.",
+    "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "An error occurred while verifying the weekly booking limit.",
 
     "CSV_EXPORT_ERROR": "Failed to export CSV report.",
     "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "Admin accounts cannot be blocked.",
@@ -750,7 +798,24 @@
     "SUB_RENEW_SUCCESS": "Subscription renewed successfully.",
     "SUB_RENEW_ERROR": "Failed to renew subscription.",
     "NETWORK_ERROR": "Network error: could not reach server",
-    "UNKNOWN_ERROR": "Unexpected error occurred"
+    "UNKNOWN_ERROR": "Unexpected error occurred",
+
+    "ADMIN_RESET_NOT_ALLOWED": "Only the Super Admin can perform system reset.",
+    "ADMIN_RESET_LIGHT_SUCCESS": "Light reset completed successfully.",
+    "ADMIN_RESET_MEDIUM_SUCCESS": "Medium reset completed successfully.",
+    "ADMIN_RESET_HARD_SUCCESS": "Hard reset completed successfully.",
+    "ADMIN_RESET_FACTORY_SUCCESS": "Factory reset completed successfully.",
+    "ADMIN_RESET_LIGHT_ERROR": "Error during light reset.",
+    "ADMIN_RESET_MEDIUM_ERROR": "Error during medium reset.",
+    "ADMIN_RESET_HARD_ERROR": "Error during hard reset.",
+    "ADMIN_RESET_FACTORY_ERROR": "Error during factory reset.",
+
+    "ADMIN_DELETE_USER_NOT_FOUND": "User not found.",
+    "ADMIN_DELETE_NOT_ALLOWED": "Only the Super Admin can delete users.",
+    "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "Cannot delete the Super Admin.",
+    "ADMIN_DELETE_SELF_FORBIDDEN": "You cannot delete yourself.",
+    "ADMIN_DELETE_SUCCESS": "User deleted successfully.",
+    "ADMIN_DELETE_ERROR": "Unexpected error during deletion."
   },
   "errors": {
     "network": "Cannot reach the server. Please try again later.",

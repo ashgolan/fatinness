@@ -57,6 +57,34 @@ export default function UsersAdmin() {
   });
 
   const [pendingRoleChange, setPendingRoleChange] = useState(false);
+const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+const [deleteUser, setDeleteUser] = useState(null);
+const openDeleteConfirm = (user) => {
+  // منع حذف المدير الرئيسي
+  if (user.isSuperAdmin) {
+    toast.error(t("usersAdmin.errors.cannotDeleteSuperAdmin"));
+    return;
+  }
+
+  setDeleteUser(user);
+  setDeleteConfirmOpen(true);
+};
+const confirmDeleteUser = async () => {
+  try {
+    await Api.delete(`/admin/users/${deleteUser._id}`);
+
+    toast.success(t("usersAdmin.messages.deleted"));
+
+    // إغلاق النافذة
+    setDeleteConfirmOpen(false);
+
+    // تحديث القائمة
+    setUsers((prev) => prev.filter((u) => u._id !== deleteUser._id));
+    setFiltered((prev) => prev.filter((u) => u._id !== deleteUser._id));
+  } catch (err) {
+    handleServerError(err);
+  }
+};
 
   // ---------------------------
   // 🔹 جلب المشتركات
@@ -212,6 +240,35 @@ export default function UsersAdmin() {
     },
     "& .MuiInputLabel-root.Mui-focused": { color: "#1976d2" },
   };
+// ---------------------------
+// 🗑️ حذف مشتركة
+// ---------------------------
+const handleDeleteUser = async () => {
+  if (!editUser) return;
+
+  // منع حذف المدير الرئيسي
+  if (editUser.isSuperAdmin) {
+    toast.error(t("usersAdmin.errors.cannotDeleteSuperAdmin"));
+    return;
+  }
+
+  // نافذة تأكيد
+  if (!window.confirm(t("usersAdmin.confirm.deleteUser"))) return;
+
+  try {
+    await Api.delete(`/admin/users/${editUser._id}`);
+
+    toast.success(t("usersAdmin.messages.deleted"));
+
+    setEditOpen(false);
+
+    // تحديث القائمة
+    setUsers((prev) => prev.filter((u) => u._id !== editUser._id));
+    setFiltered((prev) => prev.filter((u) => u._id !== editUser._id));
+  } catch (err) {
+    handleServerError(err);
+  }
+};
 
   return (
     <Box
@@ -463,47 +520,71 @@ export default function UsersAdmin() {
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
                   {/* --------------------------- */}
-                  <Box sx={{ display: "grid", gap: 1.5 }}>
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      onClick={() => handleEdit(user)}
-                      sx={{
-                        borderColor: "#1976d2",
-                        color: "#1976d2",
-                        fontWeight: 600,
-                        borderRadius: "8px",
-                        textTransform: "none",
-                        gap: 0.6,
-                      }}
-                    >
-                      <EditIcon sx={{ fontSize: 18 }} />
-                      {t("usersAdmin.buttons.edit")}
-                    </Button>
+         {/* إخفاء كل الأزرار إذا كان هذا المستخدم هو السوبر أدمن */}
+{!user.isSuperAdmin && (
+  <Box sx={{ display: "grid", gap: 1.5 }}>
+    
+    {/* زر التعديل */}
+    <Button
+      fullWidth
+      variant="outlined"
+      onClick={() => handleEdit(user)}
+      sx={{
+        borderColor: "#1976d2",
+        color: "#1976d2",
+        fontWeight: 600,
+        borderRadius: "8px",
+        textTransform: "none",
+        gap: 0.6,
+      }}
+    >
+      <EditIcon sx={{ fontSize: 18 }} />
+      {t("usersAdmin.buttons.edit")}
+    </Button>
 
-                    <Button
-                      fullWidth
-                      variant="contained"
-                      onClick={() => toggleUserBlock(user)}
-                      sx={{
-                        fontWeight: 600,
-                        gap: 0.6,
-                        borderRadius: "8px",
-                        textTransform: "none",
-                        backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
-                        "&:hover": {
-                          backgroundColor: user.isBlocked
-                            ? "#57a95b"
-                            : "#d32f2f",
-                        },
-                      }}
-                    >
-                      <BlockIcon sx={{ fontSize: 18 }} />
-                      {user.isBlocked
-                        ? t("usersAdmin.buttons.unblock")
-                        : t("usersAdmin.buttons.block")}
-                    </Button>
-                  </Box>
+    {/* زر الحظر */}
+    <Button
+      fullWidth
+      variant="contained"
+      onClick={() => toggleUserBlock(user)}
+      sx={{
+        fontWeight: 600,
+        gap: 0.6,
+        borderRadius: "8px",
+        textTransform: "none",
+        backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
+        "&:hover": {
+          backgroundColor: user.isBlocked ? "#57a95b" : "#d32f2f",
+        },
+      }}
+    >
+      <BlockIcon sx={{ fontSize: 18 }} />
+      {user.isBlocked
+        ? t("usersAdmin.buttons.unblock")
+        : t("usersAdmin.buttons.block")}
+    </Button>
+
+    {/* زر الحذف — ممنوع حذف السوبر أدمن */}
+    <Button
+      fullWidth
+      variant="contained"
+      color="error"
+      onClick={() => openDeleteConfirm(user)}
+      sx={{
+        fontWeight: 600,
+        gap: 0.6,
+        borderRadius: "8px",
+        textTransform: "none",
+        backgroundColor: "#d32f2f",
+        "&:hover": { backgroundColor: "#b71c1c" },
+      }}
+    >
+      🗑️ {t("usersAdmin.buttons.delete")}
+    </Button>
+
+  </Box>
+)}
+
                 </Paper>
               </Grid>
             ))}
@@ -683,27 +764,85 @@ export default function UsersAdmin() {
             </Dialog>
           </DialogContent>
 
-          <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-            <Button
-              onClick={() => setEditOpen(false)}
-              sx={{ color: "#777", fontWeight: 600 }}
-            >
-              {t("common.cancel")}
-            </Button>
+    <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
+  
+  {/* ❌ زر حذف المشتركة */}
+  <Button
+    color="error"
+    onClick={handleDeleteUser}
+    sx={{ fontWeight: 600 }}
+  >
+    {t("usersAdmin.buttons.delete")}
+  </Button>
 
-            <Button
-              variant="contained"
-              onClick={handleSave}
-              sx={{
-                backgroundColor: "#1976d2",
-                "&:hover": { backgroundColor: "#1565c0" },
-                fontWeight: 600,
-              }}
-            >
-              {t("common.save")}
-            </Button>
-          </DialogActions>
+  {/* ❌ زر إلغاء */}
+  <Button
+    onClick={() => setEditOpen(false)}
+    sx={{ color: "#777", fontWeight: 600 }}
+  >
+    {t("common.cancel")}
+  </Button>
+
+  {/* ✔️ زر حفظ */}
+  <Button
+    variant="contained"
+    onClick={handleSave}
+    sx={{
+      backgroundColor: "#1976d2",
+      "&:hover": { backgroundColor: "#1565c0" },
+      fontWeight: 600,
+    }}
+  >
+    {t("common.save")}
+  </Button>
+
+</DialogActions>
+
         </Dialog>
+        <Dialog
+  open={deleteConfirmOpen}
+  onClose={() => setDeleteConfirmOpen(false)}
+  fullWidth
+  maxWidth="xs"
+  PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+>
+  <DialogTitle sx={{ color: "#d32f2f", fontWeight: 700, textAlign: "center" }}>
+    {t("usersAdmin.confirm.deleteTitle")}
+  </DialogTitle>
+
+  <DialogContent>
+    <Typography align="center" sx={{ mb: 1.5 }}>
+      {t("usersAdmin.confirm.deleteUser")}
+    </Typography>
+    <Typography
+      align="center"
+      variant="body2"
+      sx={{ color: "text.secondary" }}
+    >
+      {deleteUser?.username}
+    </Typography>
+  </DialogContent>
+
+  <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+    <Button
+      variant="outlined"
+      onClick={() => setDeleteConfirmOpen(false)}
+      sx={{ color: "#555", borderColor: "#bbb", textTransform: "none" }}
+    >
+      {t("common.cancel")}
+    </Button>
+
+    <Button
+      variant="contained"
+      color="error"
+      onClick={confirmDeleteUser}
+      sx={{ textTransform: "none", fontWeight: 600 }}
+    >
+      {t("usersAdmin.buttons.delete")}
+    </Button>
+  </DialogActions>
+</Dialog>
+
       </Box>
     </Box>
   );

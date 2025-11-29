@@ -275,7 +275,8 @@
       "weeklySlots": "לוח שבועי",
       "templates": "תבניות שבועיות",
       "notifications": "התראות",
-      "settings": "הגדרות"
+      "settings": "הגדרות",
+      "systemReset": "איפוס מערכת"
     },
 
     "footerTitle": "מערכת שליטה מלאה לניהול Fatinness Studio",
@@ -347,6 +348,52 @@
       "after": "אחרי"
     }
   },
+  "systemReset": {
+    "noPermission": "אין לך הרשאה להיכנס לדף זה.",
+    "pageTitle": "⚠️ הגדרות איפוס מערכת — System Reset",
+
+    "execute": "ביצוע",
+
+    "confirmTitle": "אישור הפעולה",
+    "confirmMessage": "האם אתה בטוח שברצונך לבצע את הפעולה",
+    "cancel": "ביטול",
+    "confirmButton": "כן, ביצוע",
+
+    "success": "הפעולה בוצעה בהצלחה.",
+    "error": "אירעה שגיאה במהלך הביצוע.",
+
+    "light": {
+      "title": "איפוס קל",
+      "desc": "מחיקת הזמנות + התראות + מפגשים + תבניות בלבד. לא מוחק משתמשים."
+    },
+
+    "medium": {
+      "title": "איפוס בינוני",
+      "desc": "מוחק הכל מאיפוס קל + מוחק את כל המשתמשים והמנהלנים הרגילים. רק המנהל הראשי נשאר."
+    },
+
+    "hard": {
+      "title": "איפוס מתקדם",
+      "desc": "מחיקה כמעט מלאה של המערכת. המנהל הראשי נשאר בלבד."
+    },
+
+    "factory": {
+      "title": "איפוס יצרן",
+      "desc": "מחיקת בסיס הנתונים לחלוטין. בעת כניסה תתבקש ליצור מנהל ראשי חדש."
+    }
+  },
+  "registerSuperAdmin": {
+    "title": "רישום מנהל ראשי",
+    "username": "שם משתמש",
+    "email": "אימייל",
+    "phone": "טלפון",
+    "pin": "קוד PIN",
+    "confirmPin": "אשר קוד PIN",
+    "submit": "צור מנהל ראשי",
+    "pinTooShort": "ה-PIN חייב להכיל לפחות 4 ספרות.",
+    "pinMismatch": "קודי ה-PIN אינם תואמים.",
+    "success": "המנהל הראשי נוצר בהצלחה!"
+  },
   "usersAdmin": {
     "title": "ניהול משתמשות",
     "subtitle": "ניהול פרטי המשתמשות וכל פעילות ההזמנות בסטודיו",
@@ -370,7 +417,8 @@
     "buttons": {
       "edit": "עריכה",
       "block": "חסימה",
-      "unblock": "ביטול חסימה"
+      "unblock": "ביטול חסימה",
+      "delete": "מחיקת מתאמנת"
     },
 
     "noResults": "לא נמצאו משתמשות מתאימות",
@@ -400,7 +448,10 @@
 
     "confirm": {
       "block": "האם את בטוחה שברצונך לחסום משתמשת זו?",
-      "unblock": "האם את בטוחה שברצונך לבטל את החסימה?"
+      "unblock": "האם את בטוחה שברצונך לבטל את החסימה?",
+      "deleteUser": "האם את בטוחה שברצונך למחוק את המתאמנת? כל ההזמנות שלה יימחקו לצמיתות!",
+        "deleteTitle": "אישור מחיקה"
+
     },
 
     "confirmRole": {
@@ -414,11 +465,13 @@
       "updated": "פרטי המשתמשת עודכנו בהצלחה",
       "blocked": "המשתמשת נחסמה בהצלחה",
       "unblocked": "החסימה בוטלה בהצלחה",
-      "tempAdmin": "המשתמשת הוגדרה כמנהלת זמנית — יש לשמור כדי להחיל את השינוי"
+      "tempAdmin": "המשתמשת הוגדרה כמנהלת זמנית — יש לשמור כדי להחיל את השינוי",
+      "deleted": "המתאמנת נמחקה בהצלחה."
     },
 
     "errors": {
-      "cannotBlockAdmin": "לא ניתן לחסום מנהלת מערכת"
+      "cannotBlockAdmin": "לא ניתן לחסום מנהלת מערכת",
+      "deleted": "המתאמנת נמחקה בהצלחה."
     }
   },
 
@@ -744,7 +797,24 @@
     "SUB_RENEW_SUCCESS": "המנוי חודש בהצלחה.",
     "SUB_RENEW_ERROR": "שגיאה בחידוש המנוי.",
     "NETWORK_ERROR": "שגיאת רשת: אין קשר לשרת",
-    "UNKNOWN_ERROR": "שגיאה לא צפויה"
+    "UNKNOWN_ERROR": "שגיאה לא צפויה",
+
+    "ADMIN_RESET_NOT_ALLOWED": "רק המנהל הראשי יכול לבצע איפוס מערכת.",
+    "ADMIN_RESET_LIGHT_SUCCESS": "איפוס קל בוצע בהצלחה.",
+    "ADMIN_RESET_MEDIUM_SUCCESS": "איפוס בינוני בוצע בהצלחה.",
+    "ADMIN_RESET_HARD_SUCCESS": "איפוס חזק בוצע בהצלחה.",
+    "ADMIN_RESET_FACTORY_SUCCESS": "איפוס מפעל בוצע בהצלחה.",
+    "ADMIN_RESET_LIGHT_ERROR": "שגיאה במהלך איפוס קל.",
+    "ADMIN_RESET_MEDIUM_ERROR": "שגיאה במהלך איפוס בינוני.",
+    "ADMIN_RESET_HARD_ERROR": "שגיאה במהלך איפוס חזק.",
+    "ADMIN_RESET_FACTORY_ERROR": "שגיאה במהלך איפוס מפעל.",
+
+    "ADMIN_DELETE_USER_NOT_FOUND": "המשתמש לא נמצא.",
+    "ADMIN_DELETE_NOT_ALLOWED": "רק המנהל הראשי יכול למחוק משתמשים.",
+    "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "לא ניתן למחוק את המנהל הראשי.",
+    "ADMIN_DELETE_SELF_FORBIDDEN": "אינך יכול למחוק את עצמך.",
+    "ADMIN_DELETE_SUCCESS": "המשתמש נמחק בהצלחה.",
+    "ADMIN_DELETE_ERROR": "שגיאה במהלך המחיקה."
   },
 
   "errors": {

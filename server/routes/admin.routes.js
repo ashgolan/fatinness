@@ -21,6 +21,11 @@ import {
   getUserBookings,
   deleteNotificationById,
   clearAllNotifications,
+  resetLight,
+  resetMedium,
+  resetHard,
+  resetFactory,
+  deleteUserCompletely,
 } from "../controllers/admin.controller.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -90,4 +95,12 @@ router.delete("/notifications/:id", deleteNotificationById);
 
 // 🧹 مسح جميع الإشعارات
 router.delete("/notifications", clearAllNotifications);
+
+router.delete("/users/:id", deleteUserCompletely);
+
+router.post("/reset/light", resetLight);
+router.post("/reset/medium", resetMedium);
+router.post("/reset/hard", resetHard);
+router.post("/reset/factory", resetFactory);
+
 export default router;

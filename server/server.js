@@ -19,6 +19,7 @@ import mainRoutes from "./routes/index.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
 import galleryRoutes from "./routes/gallery.routes.js";
 import { startScheduler } from "./utils/scheduler.js";
+import authRoutes from "./routes/auth.routes.js";
 
 // ============================
 // 🚀 إنشاء التطبيق
@@ -109,6 +110,7 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
+app.use("/auth", authRoutes);   // ← ملفات المصادقة (بما فيها register-superadmin)
 
 // ============================
 // 🖼️ Static Files (الصور)

@@ -14,6 +14,7 @@ import mongoose from "mongoose";
 import { sendSmartNotification } from "../utils/notify.js";
 import { sendFcmToTokens as sendFCMNotification } from "../utils/fcm.js";
 import { parseLocalDate } from "../utils/date.js";
+import fs from "fs";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -766,5 +767,162 @@ export const clearAllNotifications = async (req, res) => {
   } catch (err) {
     console.error("❌ clearAllNotifications error:", err);
     res.status(500).json({ code: "ADMIN_NOTIFICATIONS_CLEAR_FAIL" });
+  }
+};
+
+export const deleteUserCompletely = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // 🔍 تحقق من وجود المستخدم المراد حذفه
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      return res.status(404).json({ code: "ADMIN_DELETE_USER_NOT_FOUND" });
+    }
+
+    // 🔐 1) فقط المدير الرئيسي يستطيع الحذف
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_DELETE_NOT_ALLOWED" });
+    }
+
+    // 🔐 2) ممنوع حذف المدير الرئيسي نهائيًا
+    if (targetUser.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_DELETE_SUPERADMIN_FORBIDDEN" });
+    }
+
+    // 🔐 3) ممنوع أن يحذف المدير الرئيسي نفسه
+    if (req.user._id.toString() === targetUser._id.toString()) {
+      return res.status(403).json({ code: "ADMIN_DELETE_SELF_FORBIDDEN" });
+    }
+
+    // ============================
+    // 🔥 تنفيذ الحذف الكامل
+    // ============================
+
+    // حذف حجوزاته
+    const bookings = await Booking.find({ user: userId });
+    for (let b of bookings) {
+      if (b.googleEventId) {
+        await deleteGoogleEvent(b.googleEventId).catch(() => {});
+      }
+    }
+
+    await Booking.deleteMany({ user: userId });
+
+    // حذف من الـ Slots
+    await Slot.updateMany(
+      { attendees: userId },
+      { $pull: { attendees: userId } }
+    );
+
+    // حذف الإشعارات
+    await Notification.deleteMany({ userId });
+
+    // حذف المستخدم نفسه
+    await User.findByIdAndDelete(userId);
+
+    return res.json({ code: "ADMIN_DELETE_SUCCESS" });
+
+  } catch (error) {
+    console.error("❌ Error in deleteUserCompletely:", error);
+    return res.status(500).json({ code: "ADMIN_DELETE_ERROR" });
+  }
+};
+
+export const resetLight = async (req, res) => {
+  try {
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
+    }
+
+    await Promise.all([
+      Booking.deleteMany({}),
+      Notification.deleteMany({}),
+      Slot.deleteMany({}),
+      WeekTemplate.deleteMany({})
+    ]);
+
+    res.json({ code: "ADMIN_RESET_LIGHT_SUCCESS" });
+  } catch (error) {
+    console.error("❌ resetLight:", error);
+    res.status(500).json({ code: "ADMIN_RESET_LIGHT_ERROR" });
+  }
+};
+
+
+export const resetMedium = async (req, res) => {
+  try {
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
+    }
+
+    const superAdminId = req.user._id;
+
+    await Promise.all([
+      Booking.deleteMany({}),
+      Notification.deleteMany({}),
+      Slot.deleteMany({}),
+      WeekTemplate.deleteMany({}),
+      User.deleteMany({ _id: { $ne: superAdminId } }),
+      Setting.deleteMany({})
+    ]);
+
+    res.json({ code: "ADMIN_RESET_MEDIUM_SUCCESS" });
+  } catch (error) {
+    console.error("❌ resetMedium:", error);
+    res.status(500).json({ code: "ADMIN_RESET_MEDIUM_ERROR" });
+  }
+};
+
+
+
+
+export const resetHard = async (req, res) => {
+  try {
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
+    }
+
+    const superAdminId = req.user._id;
+
+    await Promise.all([
+      Booking.deleteMany({}),
+      Notification.deleteMany({}),
+      Slot.deleteMany({}),
+      WeekTemplate.deleteMany({}),
+      Setting.deleteMany({}),
+      User.deleteMany({ _id: { $ne: superAdminId } })
+    ]);
+
+    // حذف الملفات من مجلد uploads
+    const uploadsPath = path.join(process.cwd(), "uploads");
+    if (fs.existsSync(uploadsPath)) {
+      const files = fs.readdirSync(uploadsPath);
+      for (const file of files) {
+        fs.unlinkSync(path.join(uploadsPath, file));
+      }
+    }
+
+    res.json({ code: "ADMIN_RESET_HARD_SUCCESS" });
+  } catch (error) {
+    console.error("❌ resetHard:", error);
+    res.status(500).json({ code: "ADMIN_RESET_HARD_ERROR" });
+  }
+};
+
+
+
+export const resetFactory = async (req, res) => {
+  try {
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
+    }
+
+    await mongoose.connection.dropDatabase();
+
+    res.json({ code: "ADMIN_RESET_FACTORY_SUCCESS" });
+  } catch (error) {
+    console.error("❌ resetFactory:", error);
+    res.status(500).json({ code: "ADMIN_RESET_FACTORY_ERROR" });
   }
 };

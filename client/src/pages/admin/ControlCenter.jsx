@@ -14,6 +14,7 @@ import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import LayersIcon from "@mui/icons-material/Layers";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 
 export default function ControlCenter() {
   const navigate = useNavigate();
@@ -87,6 +88,14 @@ export default function ControlCenter() {
       iconBg: "linear-gradient(135deg, rgba(84,110,122,0.15), rgba(120,144,156,0.15))",
       iconColor: "#546e7a",
     },
+    {
+  title: t("controlCenter.sections.systemReset"),
+  icon: <CleaningServicesIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+  path: "/admin/system-reset",
+  gradient: "linear-gradient(135deg, #d50000 0%, #ff8a80 100%)",
+  iconBg: "linear-gradient(135deg, rgba(213,0,0,0.15), rgba(255,138,128,0.15))",
+  iconColor: "#d50000",
+}
   ];
 
   return (
