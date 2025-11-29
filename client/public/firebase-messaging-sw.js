@@ -31,13 +31,13 @@ messaging.onBackgroundMessage((payload) => {
   // ✔ Data Only → نحن نعرض الإشعار مع الأيقونة الصحيحة
   const notificationTitle = payload.data?.title || "Fatinness Studio";
   const notificationBody = payload.data?.body || "";
-  const icon = payload.data?.icon || "/icons/logo192.png";
+  const icon = payload.data?.icon || "/logo192.png";
 
   self.registration.showNotification(notificationTitle, {
     body: notificationBody,
     icon: icon,
     badge: icon,        // مهم للمتصفحات لتثبيت الصورة بدلاً من حرف F
-    data: { url: payload.data?.url || "/" },
+    data: { url: payload.data?.url || "https://fateness.onrender.com" },
   });
 });
 
