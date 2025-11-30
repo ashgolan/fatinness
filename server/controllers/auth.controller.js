@@ -105,12 +105,14 @@ export const loginUser = async (req, res) => {
   try {
     const { identifier, password } = req.body;
 
+    // 🟥 1) حقول ناقصة
     if (!identifier || !password) {
       return res.status(400).json({
-        code: "ADMIN_LOGIN_MISSING_FIELDS",
+        code: "AUTH_LOGIN_INVALID_FIELDS",
       });
     }
 
+    // 🟦 2) البحث عن المستخدم
     const user = await User.findOne({
       $or: [
         { username: { $regex: new RegExp(`^${identifier}$`, "i") } },
@@ -118,45 +120,51 @@ export const loginUser = async (req, res) => {
       ],
     });
 
+    // 🟥 مستخدم غير موجود
     if (!user) {
-      return res.status(404).json({ code: "ADMIN_LOGIN_NOT_FOUND" });
+      return res.status(404).json({ code: "AUTH_LOGIN_NOT_FOUND" });
     }
 
+    // 🟥 حساب محظور
     if (user.isBlocked) {
       return res.status(403).json({
-        code: "ADMIN_LOGIN_BLOCKED",
+        code: "AUTH_LOGIN_BLOCKED",
       });
     }
 
+    // 🟥 وضع الصيانة
     if (maintenanceMode && user.role !== "admin") {
       return res.status(503).json({
-        code: "ADMIN_LOGIN_MAINTENANCE",
+        code: "AUTH_LOGIN_MAINTENANCE",
       });
     }
 
+    // 🟥 كلمة مرور خاطئة
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(401).json({ code: "ADMIN_LOGIN_WRONG_PASSWORD" });
+      return res.status(401).json({ code: "AUTH_LOGIN_INCORRECT" });
     }
 
+    // 🟩 3) نجاح
     const token = generateToken(user);
 
     res.json({
-      code: "ADMIN_LOGIN_SUCCESS",
+      code: "AUTH_LOGIN_SUCCESS",
       token,
-user: {
-  id: user._id,
-  username: user.username,
-  phone: user.phone,
-  role: user.role,
-  isSuperAdmin: user.isSuperAdmin,
-},
+      user: {
+        id: user._id,
+        username: user.username,
+        phone: user.phone,
+        role: user.role,
+        isSuperAdmin: user.isSuperAdmin,
+      },
     });
   } catch (err) {
     console.error("❌ Login Error:", err);
-    res.status(500).json({ code: "ADMIN_LOGIN_SERVER_ERROR" });
+    res.status(500).json({ code: "AUTH_LOGIN_SERVER_ERROR" });
   }
 };
+
 
 // =====================================================
 // 🔹 تعديل دور مستخدم

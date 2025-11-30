@@ -815,6 +815,7 @@
     "AUTH_LOGIN_MAINTENANCE": "النظام تحت الصيانة. يرجى المحاولة لاحقًا.",
     "AUTH_LOGIN_INCORRECT": "بيانات الدخول غير صحيحة.",
     "AUTH_LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح.",
+"AUTH_LOGIN_SERVER_ERROR": "حدث خطأ في الخادم.",
 
     "BOOKING_SLOT_NOT_AVAILABLE": "هذه الحصة غير متاحة.",
     "BOOKING_SLOT_PAST": "هذه الحصة قد انتهت أو بدأت بالفعل.",
