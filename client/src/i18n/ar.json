@@ -322,6 +322,8 @@
     "dialog": {
       "title": "تفاصيل الحصة",
       "membersTitle": "المشتركات المسجلات ({{count}})",
+          "sendNotification": "إرسال إشعار",
+
       "status": {
         "booked": "محجوزة",
         "cancelled": "ملغاة"
@@ -331,7 +333,15 @@
       "activate": "تفعيل الحصة",
       "deactivate": "تعطيل الحصة"
     },
-
+  "notify": {
+    "title": "إرسال إشعار للمشتركات",
+    "notificationTitle": "عنوان الإشعار",
+    "notificationBody": "محتوى الإشعار",
+    "cancel": "إلغاء",
+    "send": "إرسال",
+    "sent": "تم إرسال الإشعار بنجاح",
+    "emptyFields": "الرجاء تعبئة جميع الحقول"
+  },
     "common": {
       "unknownUser": "غير معروف",
       "noPhone": "لا يوجد رقم"
@@ -724,7 +734,7 @@
     "empty": "لا توجد صور بعد",
     "close": "إغلاق"
   },
-   "superAdminRegister": {
+  "superAdminRegister": {
     "title": "إنشاء سوبر أدمن",
     "subtitle": "هذه الخطوة تتم مرة واحدة فقط لإعداد النظام لأول مرة.",
     "fields": {
@@ -844,6 +854,13 @@
     "ADMIN_RESET_MEDIUM_ERROR": "حدث خطأ أثناء إعادة الضبط المتوسطة.",
     "ADMIN_RESET_HARD_ERROR": "حدث خطأ أثناء إعادة الضبط القوية.",
     "ADMIN_RESET_FACTORY_ERROR": "حدث خطأ أثناء إعادة ضبط المصنع.",
+
+    "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "يجب إدخال عنوان الإشعار والنص.",
+    "ADMIN_NOTIFICATION_SENT": "تم إرسال الإشعار بنجاح.",
+    "ADMIN_NOTIFICATION_ERROR": "حدث خطأ أثناء إرسال الإشعار.",
+
+    "ADMIN_NOTIFICATION_SLOT_INFO": "إشعار لجميع مشتركات الجلسة",
+    "ADMIN_NOTIFICATION_SLOT_SENT": "تم إرسال الإشعار لجميع المشتركات في الجلسة.",
 
     "ADMIN_DELETE_USER_NOT_FOUND": "المستخدم غير موجود.",
     "ADMIN_DELETE_NOT_ALLOWED": "فقط المدير الرئيسي يمكنه الحذف.",

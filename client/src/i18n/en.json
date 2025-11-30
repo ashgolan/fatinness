@@ -318,10 +318,20 @@
       "title": "No sessions available this week",
       "range": "From {{start}} to {{end}}"
     },
-
+  "notify": {
+    "title": "Send Notification to Session Members",
+    "notificationTitle": "Notification Title",
+    "notificationBody": "Notification Body",
+    "cancel": "Cancel",
+    "send": "Send",
+    "sent": "Notification sent successfully",
+    "emptyFields": "Please fill in all fields"
+  },
     "dialog": {
       "title": "Session Details",
       "membersTitle": "Registered Members ({{count}})",
+          "sendNotification": "Send Notification"
+,
       "status": {
         "booked": "Booked",
         "cancelled": "Cancelled"
@@ -724,7 +734,7 @@
     "empty": "No images yet",
     "close": "Close"
   },
- "superAdminRegister": {
+  "superAdminRegister": {
     "title": "Create Super Admin",
     "subtitle": "This setup is required only once to initialize the system.",
     "fields": {
@@ -743,8 +753,7 @@
     "submitting": "Creating...",
     "success": "Super Admin created successfully!",
     "error": "Error creating Super Admin"
-  }
-  ,
+  },
   "server": {
     "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and slots are required.",
@@ -820,7 +829,12 @@
     "SUB_RENEW_ERROR": "Failed to renew subscription.",
     "NETWORK_ERROR": "Network error: could not reach server",
     "UNKNOWN_ERROR": "Unexpected error occurred",
+    "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "Notification title and body are required.",
+    "ADMIN_NOTIFICATION_SENT": "Notification sent successfully.",
+    "ADMIN_NOTIFICATION_ERROR": "An error occurred while sending the notification.",
 
+    "ADMIN_NOTIFICATION_SLOT_INFO": "Notification to all members of this session",
+    "ADMIN_NOTIFICATION_SLOT_SENT": "Notification sent to all session members.",
     "ADMIN_RESET_NOT_ALLOWED": "Only the Super Admin can perform system reset.",
     "ADMIN_RESET_LIGHT_SUCCESS": "Light reset completed successfully.",
     "ADMIN_RESET_MEDIUM_SUCCESS": "Medium reset completed successfully.",

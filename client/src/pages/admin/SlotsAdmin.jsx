@@ -20,6 +20,7 @@ import {
   Chip,
   Tooltip,
   useTheme,
+  TextField,
 } from "@mui/material";
 
 import { useTranslation } from "react-i18next";
@@ -38,7 +39,10 @@ export default function SlotsAdmin() {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const { t, i18n } = useTranslation();
-
+const [notifyOpen, setNotifyOpen] = useState(false);
+const [notifyTitle, setNotifyTitle] = useState("");
+const [notifyBody, setNotifyBody] = useState("");
+const [sendingNotification, setSendingNotification] = useState(false);
   const dir = i18n.dir(); // RTL / LTR
 
   // 🎨 Colors
@@ -1288,6 +1292,23 @@ export default function SlotsAdmin() {
               flexDirection: dir === "rtl" ? "row-reverse" : "row",
             }}
           >
+          <Button
+  onClick={() => setNotifyOpen(true)}
+  sx={{
+    textTransform: "none",
+    background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
+    color: "#fff",
+    fontWeight: 900,
+    px: 3,
+    py: 1,
+    borderRadius: 2,
+    boxShadow: `0 6px 18px ${BRAND.purple}55`,
+    "&:hover": { filter: "brightness(.95)" },
+  }}
+>
+  📩 {t("slotsAdmin.dialog.sendNotification")}
+</Button>
+
             <Button
               onClick={() => setOpen(false)}
               sx={{
@@ -1329,6 +1350,118 @@ export default function SlotsAdmin() {
             )}
           </DialogActions>
         </Dialog>
+        <Dialog
+  open={notifyOpen}
+  onClose={() => setNotifyOpen(false)}
+  fullWidth
+  maxWidth="sm"
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      border: `1px solid ${BRAND.line}`,
+      background: BRAND.card,
+    },
+  }}
+>
+  <DialogTitle
+    sx={{
+      textAlign: dir === "rtl" ? "right" : "left",
+      fontWeight: 900,
+      color: BRAND.text,
+      borderBottom: `1px solid ${BRAND.line}`,
+    }}
+  >
+    {t("slotsAdmin.notify.title")}
+  </DialogTitle>
+
+  <DialogContent sx={{ mt: 2 }}>
+    <TextField
+      fullWidth
+      label={t("slotsAdmin.notify.notificationTitle")}
+      value={notifyTitle}
+      onChange={(e) => setNotifyTitle(e.target.value)}
+      sx={{ mb: 2 }}
+    />
+
+    <TextField
+      fullWidth
+      multiline
+      minRows={3}
+      label={t("slotsAdmin.notify.notificationBody")}
+      value={notifyBody}
+      onChange={(e) => setNotifyBody(e.target.value)}
+      sx={{ mb: 1 }}
+    />
+  </DialogContent>
+
+  <DialogActions
+    sx={{
+      px: 3,
+      pb: 2,
+      justifyContent: dir === "rtl" ? "flex-start" : "flex-end",
+    }}
+  >
+    <Button
+      onClick={() => setNotifyOpen(false)}
+      sx={{
+        textTransform: "none",
+        px: 3,
+        py: 1,
+        borderRadius: 2,
+        border: `1px solid ${BRAND.line}`,
+        color: BRAND.sub,
+      }}
+    >
+      {t("slotsAdmin.notify.cancel")}
+    </Button>
+
+    <Button
+      onClick={async () => {
+        if (!notifyTitle.trim() || !notifyBody.trim()) {
+          toast.error(t("slotsAdmin.notify.emptyFields"));
+          return;
+        }
+
+        setSendingNotification(true);
+
+        try {
+          const { data } = await Api.post("/admin/notify", {
+            title: notifyTitle,
+            body: notifyBody,
+            target: "slot:" + selectedSlot._id,
+          });
+
+          toast.success(t("slotsAdmin.notify.sent"));
+          setNotifyOpen(false);
+          setNotifyTitle("");
+          setNotifyBody("");
+        } catch (err) {
+          handleServerError(err);
+        } finally {
+          setSendingNotification(false);
+        }
+      }}
+      disabled={sendingNotification}
+      sx={{
+        textTransform: "none",
+        px: 3,
+        py: 1,
+        borderRadius: 2,
+        fontWeight: 900,
+        background: `linear-gradient(135deg, ${BRAND.fuchsia}, ${BRAND.gold})`,
+        color: "#fff",
+        "&:hover": { filter: "brightness(.95)" },
+      }}
+    >
+      {sendingNotification ? (
+        <CircularProgress size={22} sx={{ color: "#fff" }} />
+      ) : (
+        t("slotsAdmin.notify.send")
+      )}
+    </Button>
+  </DialogActions>
+</Dialog>
+
       </Paper>
     </Box>
   );

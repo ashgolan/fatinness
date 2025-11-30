@@ -427,29 +427,67 @@ export const sendCustomNotification = async (req, res) => {
     const { title, body, target } = req.body;
     const adminUser = req.user?._id;
 
+    // 🔍 Required fields
     if (!title || !body) {
-      return res
-        .status(400)
-        .json({ code: "ADMIN_NOTIFICATION_FIELDS_REQUIRED" });
+      return res.status(400).json({
+        code: "ADMIN_NOTIFICATION_FIELDS_REQUIRED",
+      });
     }
 
     let users = [];
+
+    // ==========================================
+    // 1) Send to all users
+    // ==========================================
     if (target === "all") {
       users = await User.find({ isBlocked: false });
-    } else {
+    }
+
+    // ==========================================
+    // 2) Send to a specific user
+    // ==========================================
+    else if (!target.startsWith("slot:")) {
       const user = await User.findById(target);
+
       if (!user) {
-        return res
-          .status(404)
-          .json({ code: "ADMIN_NOTIFICATION_USER_NOT_FOUND" });
+        return res.status(404).json({
+          code: "ADMIN_NOTIFICATION_USER_NOT_FOUND",
+        });
       }
+
       users = [user];
     }
 
-    if (!users.length) {
-      return res.status(400).json({ code: "ADMIN_NOTIFICATION_NO_TARGETS" });
+    // ==========================================
+    // 3) Send to members of a session (slot:<id>)
+    // ==========================================
+    else if (target.startsWith("slot:")) {
+      const slotId = target.split(":")[1];
+
+      const bookings = await Booking.find({
+        slot: slotId,
+        status: "booked",
+      }).populate("user");
+
+      users = bookings.map((b) => b.user).filter(Boolean);
+
+      if (!users.length) {
+        return res.status(400).json({
+          code: "ADMIN_NOTIFICATION_NO_TARGETS",
+        });
+      }
     }
 
+    // No users found
+    if (!users.length) {
+      return res.status(400).json({
+        code: "ADMIN_NOTIFICATION_NO_TARGETS",
+      });
+    }
+
+    // ==========================================
+    // Send notifications
+    // ==========================================
     let totalSuccess = 0;
     let totalFail = 0;
 
@@ -465,28 +503,53 @@ export const sendCustomNotification = async (req, res) => {
       totalFail += result.failureCount || 0;
     }
 
+    // ==========================================
+    // Save to notifications history
+    // ==========================================
     await Notification.create({
       title,
       body,
-      targetType: target === "all" ? "all" : "user",
-      targetUser: target === "all" ? null : target,
+
+      targetType:
+        target === "all"
+          ? "all"
+          : target.startsWith("slot:")
+          ? "slot"
+          : "user",
+
+      targetUser:
+        target === "all" || target.startsWith("slot:")
+          ? null
+          : target,
+
+      targetSlot:
+        target.startsWith("slot:")
+          ? target.split(":")[1]
+          : null,
+
       sentBy: adminUser,
       successCount: totalSuccess,
       failureCount: totalFail,
       channel: "push",
     });
 
-    res.json({
+    // ==========================================
+    // Response
+    // ==========================================
+    return res.json({
       code: "ADMIN_NOTIFICATION_SENT",
       targetCount: users.length,
       successCount: totalSuccess,
       failureCount: totalFail,
     });
   } catch (error) {
-    console.error("❌ خطأ أثناء إرسال الإشعار:", error);
-    res.status(500).json({ code: "ADMIN_NOTIFICATION_ERROR" });
+    console.error("Error sending notification:", error);
+    return res.status(500).json({
+      code: "ADMIN_NOTIFICATION_ERROR",
+    });
   }
 };
+
 
 // =======================
 // 🗂️ جلب سجل الإشعارات

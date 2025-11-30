@@ -322,6 +322,8 @@
     "dialog": {
       "title": "פרטי אימון",
       "membersTitle": "משתתפות רשומות ({{count}})",
+          "sendNotification": "שליחת התראה"
+,
       "status": {
         "booked": "שמורה",
         "cancelled": "בוטלה"
@@ -331,7 +333,15 @@
       "activate": "הפעלת אימון",
       "deactivate": "חסימת אימון"
     },
-
+  "notify": {
+    "title": "שליחת התראה למשתתפות",
+    "notificationTitle": "כותרת ההתראה",
+    "notificationBody": "תוכן ההתראה",
+    "cancel": "ביטול",
+    "send": "שליחה",
+    "sent": "ההתראה נשלחה בהצלחה",
+    "emptyFields": "אנא מלאי את כל השדות"
+  },
     "common": {
       "unknownUser": "משתמשת לא ידועה",
       "noPhone": "אין מספר טלפון"
@@ -450,8 +460,7 @@
       "block": "האם את בטוחה שברצונך לחסום משתמשת זו?",
       "unblock": "האם את בטוחה שברצונך לבטל את החסימה?",
       "deleteUser": "האם את בטוחה שברצונך למחוק את המתאמנת? כל ההזמנות שלה יימחקו לצמיתות!",
-        "deleteTitle": "אישור מחיקה"
-
+      "deleteTitle": "אישור מחיקה"
     },
 
     "confirmRole": {
@@ -725,7 +734,7 @@
     "empty": "אין תמונות עדיין",
     "close": "סגור"
   },
- "superAdminRegister": {
+  "superAdminRegister": {
     "title": "יצירת סופר אדמין",
     "subtitle": "שלב זה מתבצע פעם אחת בלבד להגדרת המערכת.",
     "fields": {
@@ -744,8 +753,7 @@
     "submitting": "יוצר...",
     "success": "הסופר אדמין נוצר בהצלחה!",
     "error": "אירעה שגיאה בעת יצירת הסופר אדמין"
-  }
-  ,
+  },
   "server": {
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "נדרש שם תבנית ורשימת שיעורים.",
@@ -829,6 +837,12 @@
     "ADMIN_RESET_MEDIUM_ERROR": "שגיאה במהלך איפוס בינוני.",
     "ADMIN_RESET_HARD_ERROR": "שגיאה במהלך איפוס חזק.",
     "ADMIN_RESET_FACTORY_ERROR": "שגיאה במהלך איפוס מפעל.",
+    "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "יש להזין כותרת וטקסט להתראה.",
+    "ADMIN_NOTIFICATION_SENT": "ההתראה נשלחה בהצלחה.",
+    "ADMIN_NOTIFICATION_ERROR": "אירעה שגיאה בעת שליחת ההתראה.",
+
+    "ADMIN_NOTIFICATION_SLOT_INFO": "התראה לכל משתתפות השיעור",
+    "ADMIN_NOTIFICATION_SLOT_SENT": "ההתראה נשלחה לכל המשתתפות בשיעור.",
 
     "ADMIN_DELETE_USER_NOT_FOUND": "המשתמש לא נמצא.",
     "ADMIN_DELETE_NOT_ALLOWED": "רק המנהל הראשי יכול למחוק משתמשים.",
