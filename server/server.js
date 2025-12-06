@@ -1,108 +1,76 @@
 import "dotenv/config";
 process.env.TZ = process.env.TZ || "Asia/Jerusalem";
 
-// ============================
-// 🛡️ الحماية الأساسية
-// ============================
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 
-// ============================
-// ⚙️ إعدادات داخلية
-// ============================
+// 🔧 Internal configs
 import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
-import { handleWebhook } from "./controllers/payments.controller.js";
+
+// 🛣 Routes
 import mainRoutes from "./routes/index.js";
+import authRoutes from "./routes/auth.routes.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
 import galleryRoutes from "./routes/gallery.routes.js";
-import { startScheduler } from "./utils/scheduler.js";
-import authRoutes from "./routes/auth.routes.js";
+import webhookRoutes from "./routes/webhook.routes.js";
 
-// ============================
-// 🚀 إنشاء التطبيق
-// ============================
+// 🕒 Scheduler
+import { startScheduler } from "./utils/scheduler.js";
+
 const app = express();
 
 // ============================
-// 🛡️ Helmet – حماية الرؤوس
+// ⚠️ Stripe Webhook (raw body)
 // ============================
+app.use("/webhook", express.raw({ type: "application/json" }));
+app.use("/webhook", webhookRoutes);
 
 // ============================
-// 🔇 منع console.log في الإنتاج
+// 🛡 Helmet Security
 // ============================
-if (process.env.NODE_ENV === "production") {
-  console.log = function () {};
-  console.debug = function () {};
-}
-
-// ============================
-// 🔐 CORS المسموح فقط
-// ============================
-
-app.set("trust proxy", 1);
 app.use(helmet());
+app.set("trust proxy", 1);
 
+// ============================
+// 🔐 CORS
+// ============================
 const allowedOrigins = [
-  "http://localhost:3000",   // تطوير React
-  "http://localhost:5173",   // تطوير Vite
-  "https://fateness.onrender.com",  // موقعك الرسمي
+  "http://localhost:3000",
+  "http://localhost:5173",
+  "https://fateness.onrender.com",
   "https://www.fatinness-studio.com",
-  "https://api.fatinness-studio.com",  // دومين API
-  "https://fateness-production.up.railway.app", // دومين Railway
+  "https://api.fatinness-studio.com",
+  "https://fateness-production.up.railway.app",
 ];
-
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // للسماح للموبايل والتطبيقات
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        console.log("❌ CORS blocked:", origin);
-        return callback(new Error("Not allowed by CORS"));
-      }
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
     },
-    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 
 // ============================
-// 🚦 Rate Limit – لمنع الهجوم
+// 🚦 Rate Limit
 // ============================
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  max: 200, // 200 طلب في الربع ساعة
-  message: "Too many requests, please try again later.",
+  windowMs: 15 * 60 * 1000,
+  max: 200,
 });
 app.use("/api", apiLimiter);
 
 // ============================
-// 📦 Body Parser
+// JSON & Form Parsing
 // ============================
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-// ============================
-// 💳 Stripe Webhook – مهم جداً
-// ============================
-app.post(
-  "/payments/webhook",
-  express.raw({ type: "application/json" }),
-  (req, res, next) => {
-    req.rawBody = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
-
-    next();
-  },
-  handleWebhook
-);
-
-// إعادة تفعيل JSON بعد الـ raw
-app.use(express.json());
 
 // ============================
 // 🩺 Health Check
@@ -110,45 +78,30 @@ app.use(express.json());
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
-app.use("/auth", authRoutes);   // ← ملفات المصادقة (بما فيها register-superadmin)
 
 // ============================
-// 🖼️ Static Files (الصور)
+// 🔐 Auth & Static
 // ============================
+app.use("/auth", authRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/gallery", galleryRoutes);
 
 // ============================
-// 🧭 Routing
+// 🧭 Main Routes
 // ============================
-app.use("/maintenance", maintenanceRoutes);
 app.use("/", mainRoutes);
+app.use("/maintenance", maintenanceRoutes);
 
 // ============================
-// 🔥 Catch all errors
-// ============================
-process.on("uncaughtException", (err) => {
-  console.error("❌ Uncaught Exception:", err);
-});
-
-process.on("unhandledRejection", (reason) => {
-  console.error("❌ Unhandled Rejection:", reason);
-});
-
-// ============================
-// 🚀 تشغيل السيرفر
+// 🚀 Start Server
 // ============================
 const PORT = process.env.PORT || 4000;
 
 (async () => {
   try {
-    // 1️⃣ الاتصال بقاعدة البيانات
     await connectDB();
-
-    // 2️⃣ تشغيل المجدول
     await startScheduler();
 
-    // 3️⃣ تشغيل السيرفر
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
