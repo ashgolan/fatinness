@@ -93,7 +93,6 @@ app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
 
 
-
 app.post("/deploy", (req, res) => {
   if (req.query.secret !== process.env.DEPLOY_SECRET) {
     return res.status(401).send("Unauthorized");
@@ -104,12 +103,10 @@ app.post("/deploy", (req, res) => {
       console.error("DEPLOY ERROR:", error);
       return res.status(500).send("Deploy failed");
     }
-
     console.log(stdout);
-    res.send("Deployment success");
+    res.send("Deployment completed");
   });
 });
-
 // ============================
 // 🚀 Start Server
 // ============================
