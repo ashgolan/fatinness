@@ -19,7 +19,7 @@ import webhookRoutes from "./routes/webhook.routes.js";
 
 // 🕒 Scheduler
 import { startScheduler } from "./utils/scheduler.js";
-
+import { exec } from "child_process";
 const app = express();
 
 // ============================
@@ -91,6 +91,24 @@ app.use("/gallery", galleryRoutes);
 // ============================
 app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
+
+
+
+app.post("/deploy", (req, res) => {
+  if (req.query.secret !== process.env.DEPLOY_SECRET) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  exec("bash /var/www/fateness-server/deploy.sh", (error, stdout, stderr) => {
+    if (error) {
+      console.error("DEPLOY ERROR:", error);
+      return res.status(500).send("Deploy failed");
+    }
+
+    console.log(stdout);
+    res.send("Deployment success");
+  });
+});
 
 // ============================
 // 🚀 Start Server
