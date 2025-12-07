@@ -7,6 +7,7 @@ import i18n from "../i18n/i18n";
 export default function Splash() {
   const navigate = useNavigate();
   const [showButtons, setShowButtons] = useState(false);
+  const [videoVisible, setVideoVisible] = useState(false); // 👈 جديد
 
   // يظهر بعد 4 ثوانٍ
   useEffect(() => {
@@ -48,17 +49,23 @@ export default function Splash() {
         }}
       >
         <video
+          id="splashVideo"
           src="/videos/splash1.mp4"
           autoPlay
           muted
           playsInline
+          preload="auto"
+          onPlay={() => setVideoVisible(true)} // 👈 إظهار الفيديو فور التشغيل
+          onLoadedMetadata={(e) => {
+            e.target.playbackRate = 1.25;
+          }}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-          }}
-          onLoadedMetadata={(e) => {
-            e.target.playbackRate = 1.25; // من 5 ثواني إلى 4 ثواني
+            opacity: videoVisible ? 1 : 0, // 👈 إخفاء كامل حتى يبدأ التشغيل
+            transition: "opacity 0.4s ease-in-out",
+            backgroundColor: "transparent",
           }}
         />
       </Box>
@@ -70,7 +77,7 @@ export default function Splash() {
           spacing={3}
           sx={{
             position: "absolute",
-            bottom: "25px", // ↓↓↓ تم تنزيلها للأسفل
+            bottom: "25px",
             left: "50%",
             transform: "translateX(-50%)",
           }}
@@ -82,7 +89,7 @@ export default function Splash() {
           ].map((btn) => (
             <Button
               key={btn.code}
-              variant="outlined"     // ← نوع OUTLINED
+              variant="outlined"
               onClick={() => chooseLanguage(btn.code)}
               sx={{
                 paddingX: "30px",

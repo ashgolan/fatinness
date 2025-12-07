@@ -4,7 +4,7 @@
   "webDir": "build",
   "bundledWebRuntime": false,
   "server": {
-    "url": "api.fatinness.cloud",
+    "url": "https://fateness.onrender.com/",
     "cleartext": true
   }
 }
