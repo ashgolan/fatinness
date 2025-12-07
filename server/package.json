@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
-  "description": "Fateness backend server (for Railway)",
+  "description": "Fateness backend server",
   "scripts": {
     "start": "node server.js"
   },

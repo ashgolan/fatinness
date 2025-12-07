@@ -7,7 +7,7 @@ export default function DebugApi() {
   const [errorInfo, setErrorInfo] = useState(null);
   const [extraTests, setExtraTests] = useState({});
 
-  const BASE = "https://fateness-production.up.railway.app";
+  const BASE = "https://api.fatinness.cloud";
 
   useEffect(() => {
     const start = performance.now();
