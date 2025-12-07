@@ -41,8 +41,6 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "https://fateness.onrender.com",
-  "https://www.fatinness-studio.com",
-  "https://api.fatinness-studio.com",
   "https://api.fatinness.cloud",
 ];
 
