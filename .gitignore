@@ -4,3 +4,4 @@ server/node_modules
 client/build
 .env
 server/config/firebase-key.json
+gitHubToken.txt
