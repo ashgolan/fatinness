@@ -43,7 +43,7 @@ const allowedOrigins = [
   "https://fateness.onrender.com",
   "https://www.fatinness-studio.com",
   "https://api.fatinness-studio.com",
-  "https://fateness-production.up.railway.app",
+  "https://api.fatinness.cloud",
 ];
 
 app.use(
