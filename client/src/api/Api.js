@@ -9,7 +9,7 @@ if (window.location.hostname === "localhost") {
   baseURL = "http://localhost:4000";
 } else {
   // 👉 إذا نحن على Production نقرأ من ENV
-  baseURL = process.env.REACT_APP_API_URL || "https://fateness-production.up.railway.app";
+  baseURL = process.env.REACT_APP_API_URL || "https://api.fatinness.cloud";
 }
 
 const Api = axios.create({
