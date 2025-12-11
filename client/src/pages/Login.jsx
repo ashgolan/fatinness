@@ -127,6 +127,30 @@ await Api.put("/auth/language", { preferredLanguage: lang });
         transition: "all 0.4s ease",
       }}
     >
+    <style>
+        {`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+          }
+        
+
+  input:focus, 
+  .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+    border-color: transparent !important;
+  }
+
+  .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+    border-color: transparent !important;
+  }
+`}
+</style>
       {/* خلفيات ضبابية */}
       <Box
         sx={{
@@ -154,14 +178,7 @@ await Api.put("/auth/language", { preferredLanguage: lang });
           animation: "float 10s ease-in-out infinite reverse",
         }}
       />
-      <style>
-        {`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-          }
-        `}
-      </style>
+
 
       {/* البطاقة */}
       <Paper

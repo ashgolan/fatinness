@@ -11,7 +11,8 @@
     "bookings_hub": "מרכז הזמנות",
     "login": "התחברות",
     "reminder_system_on": "🔔 מערכת התזכורות פועלת כעת",
-    "reminder_system_off": "⚠️ מערכת התזכורות אינה פעילה כרגע"
+    "reminder_system_off": "⚠️ מערכת התזכורות אינה פעילה כרגע",
+      "language": "שפה"
   },
 
   "dashboard": {
@@ -540,7 +541,9 @@
       "roleHelper": "בחרי אם המשתמשת רגילה או מנהלת",
       "height": "גובה (ס\"מ)",
       "weight": "משקל (ק\"ג)",
-      "age": "גיל"
+      "age": "גיל",
+        "subscriptionEnd": "תאריך סיום מנוי"
+
     }
   },
 
@@ -771,6 +774,13 @@
     "endDate": "תאריך סיום"
   }
   ,
+    "fcm": {
+    "not_supported": "⚠️ המכשיר או הדפדפן שלך לא תומכים בהתראות.",
+    "permission_denied": "⚠️ ההתראות לא הופעלו (אופציונלי).",
+    "missing_vapid": "מפתח ה-VAPID לא מוגדר.",
+    "success": "ההתראות הופעלו בהצלחה 🎉",
+    "error": "⚠️ ההתראות לא הופעלו (אופציונלי)."
+  },
   "server": {
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "נדרש שם תבנית ורשימת שיעורים.",

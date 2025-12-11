@@ -11,7 +11,8 @@
     "bookings_hub": "Bookings Hub",
     "login": "Login",
     "reminder_system_on": "🔔 Reminder system is running",
-    "reminder_system_off": "⚠️ Reminder system is currently inactive"
+    "reminder_system_off": "⚠️ Reminder system is currently inactive",
+      "language": "Language"
   },
 
   "dashboard": {
@@ -541,7 +542,9 @@
       "roleHelper": "Choose if this is a user or an admin",
       "height": "Height (cm)",
       "weight": "Weight (kg)",
-      "age": "Age"
+      "age": "Age",
+        "subscriptionEnd": "Subscription End Date"
+
     }
   },
 
@@ -770,6 +773,13 @@
     "active": "Active",
     "empty": "No users here",
     "endDate": "End Date"
+  },
+    "fcm": {
+    "not_supported": "⚠️ Your device/browser does not support notifications.",
+    "permission_denied": "⚠️ Notifications were not enabled (optional).",
+    "missing_vapid": "VAPID key is missing.",
+    "success": "Notifications enabled successfully 🎉",
+    "error": "⚠️ Notifications were not enabled (optional)."
   }
   ,
   "server": {

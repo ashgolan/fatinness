@@ -477,7 +477,7 @@ export default function Register() {
               ))}
             </Grid>
 <TextField
-  label="تاريخ نهاية الاشتراك"
+                                label={t("register.fields.subscriptionEnd")}
   type="date"
   name="subscriptionEnd"
   value={form.subscriptionEnd}
