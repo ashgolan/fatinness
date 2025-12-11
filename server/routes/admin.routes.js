@@ -31,6 +31,7 @@ import {
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { adminMiddleware } from "../middlewares/admin.middleware.js";
 import { updateUserRole } from "../controllers/auth.controller.js";
+import { getSubscriptionReport } from "../controllers/adminSubscriptions.controller.js";
 
 const router = express.Router();
 
@@ -102,5 +103,8 @@ router.post("/reset/light", resetLight);
 router.post("/reset/medium", resetMedium);
 router.post("/reset/hard", resetHard);
 router.post("/reset/factory", resetFactory);
+
+
+router.get("/subscriptions/report", getSubscriptionReport);
 
 export default router;

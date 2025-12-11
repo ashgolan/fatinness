@@ -6,5 +6,8 @@
   "server": {
     "url": "https://fateness.onrender.com/",
     "cleartext": true
+  },
+    "android": {
+    "allowMixedContent": true
   }
 }

@@ -276,7 +276,9 @@
       "templates": "Weekly Templates",
       "notifications": "Notifications",
       "settings": "General Settings",
-      "systemReset": "System Reset"
+      "systemReset": "System Reset",
+          "subscriptionsReport": "Expiring Subscriptions"
+
     },
 
     "footerTitle": "A Complete Dashboard to Manage Fateness Studio",
@@ -443,7 +445,11 @@
       "weight": "Weight (kg)",
       "age": "Age",
       "gender": "Gender",
-      "role": "Role"
+      "role": "Role",
+          "subscriptionEnd": "Subscription End Date",
+          "subscriptionStart": "Subscription Start Date"
+
+
     },
 
     "gender": {
@@ -593,7 +599,10 @@
       "obese": "Obese",
       "healthyRange": "Healthy Range",
       "idealWeight": "Ideal Weight"
-    }
+    },
+      "language": {
+    "title": "App Language"
+  }
   },
 
   "myBookings": {
@@ -754,6 +763,15 @@
     "success": "Super Admin created successfully!",
     "error": "Error creating Super Admin"
   },
+  "subscriptions": {
+    "title": "Subscriptions Report",
+    "activeSoon": "Expiring within 5 days",
+    "expired": "Expired",
+    "active": "Active",
+    "empty": "No users here",
+    "endDate": "End Date"
+  }
+  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and slots are required.",

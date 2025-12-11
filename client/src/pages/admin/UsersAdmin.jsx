@@ -192,42 +192,60 @@ const confirmDeleteUser = async () => {
   // ---------------------------
   // ✏️ تعديل بيانات
   // ---------------------------
-  const handleEdit = (user) => {
-    setEditUser(user);
-    setEditData({
-      username: user.username || "",
-      email: user.email || "",
-      phone: user.phone || "",
-      height: user.height || "",
-      weight: user.weight || "",
-      age: user.age || "",
-      gender: user.gender || "female",
-      role: user.role || "user",
-    });
-    setEditOpen(true);
-  };
+const handleEdit = (user) => {
+  setEditUser(user);
+  setEditData({
+    username: user.username || "",
+    email: user.email || "",
+    phone: user.phone || "",
+    height: user.height || "",
+    weight: user.weight || "",
+    age: user.age || "",
+    gender: user.gender || "female",
+    role: user.role || "user",
+
+    // ⭐ جديد
+    subscriptionStart: user.subscriptionStart || "",
+    subscriptionEnd: user.subscriptionEnd || "",
+  });
+
+  setEditOpen(true);
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    try {
-      const { data } = await Api.put(`/admin/users/${editUser._id}`, editData);
-      toast.success(t("usersAdmin.messages.updated"));
-      setEditOpen(false);
+ const handleSave = async () => {
+  try {
+    const payload = {
+      ...editData,
+      height: editData.height ? Number(editData.height) : null,
+      weight: editData.weight ? Number(editData.weight) : null,
+      age: editData.age ? Number(editData.age) : null,
 
-      setUsers((prev) =>
-        prev.map((u) => (u._id === editUser._id ? data.user : u))
-      );
-      setFiltered((prev) =>
-        prev.map((u) => (u._id === editUser._id ? data.user : u))
-      );
-    } catch (err) {
-      handleServerError(err);
-    }
-  };
+      // ⭐ مهم جدًا
+      subscriptionStart: editData.subscriptionStart || null,
+      subscriptionEnd: editData.subscriptionEnd || null,
+    };
+
+    const { data } = await Api.put(`/admin/users/${editUser._id}`, payload);
+
+    toast.success(t("usersAdmin.messages.updated"));
+    setEditOpen(false);
+
+    setUsers((prev) =>
+      prev.map((u) => (u._id === editUser._id ? data.user : u))
+    );
+    setFiltered((prev) =>
+      prev.map((u) => (u._id === editUser._id ? data.user : u))
+    );
+  } catch (err) {
+    handleServerError(err);
+  }
+};
+
 
   // ---------------------------
   // 🎨 أنماط الحقول
@@ -384,7 +402,7 @@ const handleDeleteUser = async () => {
     sx={{
       position: "absolute",
       top: -10,
-      right: -10,
+      right: -13,
       backgroundColor: "#fff",
       borderRadius: "50%",
       border: "2px solid #ffeb3b",
@@ -394,7 +412,7 @@ const handleDeleteUser = async () => {
       zIndex: 3,
     }}
   >
-    {user.isSuperAdmin ? "🛡️✨" : "👑"}
+    {user.isSuperAdmin ? "🛡️" : "👑"}
   </Box>
 )}
                   {/* --------------------------- */}
@@ -634,6 +652,8 @@ disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdm
           </DialogTitle>
 
           <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
+      
+
             <TextField
               label={t("usersAdmin.fields.name")}
               name="username"
@@ -729,8 +749,33 @@ disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdm
     <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
   )}
 </TextField>
+    <TextField
+  label={t("usersAdmin.fields.subscriptionStart")}
+  name="subscriptionStart"
+  type="date"
+  value={
+    editData.subscriptionStart
+      ? editData.subscriptionStart.substring(0, 10)
+      : ""
+  }
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  sx={textFieldStyle}
+/>
 
-
+<TextField
+  label={t("usersAdmin.fields.subscriptionEnd")}
+  name="subscriptionEnd"
+  type="date"
+  value={
+    editData.subscriptionEnd
+      ? editData.subscriptionEnd.substring(0, 10)
+      : ""
+  }
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  sx={textFieldStyle}
+/>
             {/* نافذة تأكيد ترقية المديرة */}
             <Dialog
               open={pendingRoleChange}

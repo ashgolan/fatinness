@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser, loginUser } from "../controllers/auth.controller.js";
+import { registerUser, loginUser, updatePreferredLanguage } from "../controllers/auth.controller.js";
 import { validateRegistration } from "../middlewares/validate.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
@@ -98,5 +98,6 @@ router.get("/check-first-run", async (req, res) => {
     res.status(500).json({ code: "SERVER_ERROR" });
   }
 });
+router.put("/language", authMiddleware, updatePreferredLanguage);
 
 export default router;

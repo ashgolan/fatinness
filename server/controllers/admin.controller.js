@@ -369,7 +369,7 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
       .select(
-        "username email phone allowExtraBookings role isSuperAdmin isBlocked createdAt height weight age gender"
+        "username email phone allowExtraBookings role isSuperAdmin isBlocked createdAt height weight age gender subscriptionEnd subscriptionStart"
       )
       .sort({ createdAt: -1 });
 
@@ -406,7 +406,7 @@ export const toggleUserBlock = async (req, res) => {
     await User.updateOne({ _id: user._id }, { $set: { isBlocked: newStatus } });
 
     const updatedUser = await User.findById(user._id).select(
-      "username email phone allowExtraBookings role isBlocked createdAt height weight age gender"
+      "username email phone allowExtraBookings role isBlocked createdAt height weight age gender subscriptionEnd subscriptionStart"
     );
 
     res.json({
@@ -665,14 +665,25 @@ export const updateUserByAdmin = async (req, res) => {
     }
 
     const { id } = req.params;
-    const { username, email, phone, gender, height, weight, age, role } =
-      req.body;
+
+    const {
+      username,
+      email,
+      phone,
+      gender,
+      height,
+      weight,
+      age,
+      role,
+      subscriptionEnd, // ⭐ جديد
+    } = req.body;
 
     const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({ code: "ADMIN_USER_NOT_FOUND" });
     }
 
+    // 🔒 لا يمكن خفض رتبة آخر أدمين
     if (user.role === "admin" && role === "user") {
       const adminCount = await User.countDocuments({ role: "admin" });
 
@@ -681,6 +692,7 @@ export const updateUserByAdmin = async (req, res) => {
       }
     }
 
+    // 🟦 تحديث الحقول العادية
     if (username !== undefined) user.username = username;
     if (email !== undefined) user.email = email;
     if (phone !== undefined) user.phone = phone;
@@ -691,6 +703,14 @@ export const updateUserByAdmin = async (req, res) => {
 
     if (role !== undefined && ["admin", "user"].includes(role)) {
       user.role = role;
+    }
+
+    // ⭐⭐⭐ أهم جزء — تجديد الاشتراك
+    if (subscriptionEnd !== undefined && subscriptionEnd !== null) {
+      user.subscriptionEnd = new Date(subscriptionEnd);
+
+      // 🟢 عند التجديد → إلغاء الحظر تلقائيًا
+      user.isBlocked = false;
     }
 
     await user.save();
@@ -704,6 +724,7 @@ export const updateUserByAdmin = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SERVER_ERROR" });
   }
 };
+
 
 // =======================
 // 📌 تلخيص الحجوزات

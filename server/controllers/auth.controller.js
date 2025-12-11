@@ -34,6 +34,7 @@ export const registerUser = async (req, res) => {
       weight,
       age,
       role: requestedRole,
+      subscriptionEnd,
     } = req.body;
 
     if (!username || !password) {
@@ -64,6 +65,12 @@ export const registerUser = async (req, res) => {
       weight: weight || null,
       age: age || null,
       role,
+        // ⭐ بداية الاشتراك: اليوم تلقائيًا
+  subscriptionStart: new Date(),
+
+  // ⭐ نهاية الاشتراك: من الفورم (لازم يكون تاريخ)
+  subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null,
+
       subscription: {
         active: false,
         planId: null,
@@ -200,3 +207,27 @@ export const updateUserRole = async (req, res) => {
   }
 };
 
+export const updatePreferredLanguage = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { preferredLanguage } = req.body;
+
+    if (!["ar", "en", "he"].includes(preferredLanguage)) {
+      return res.status(400).json({ code: "INVALID_LANGUAGE" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { preferredLanguage },
+      { new: true }
+    );
+
+    res.json({
+      code: "LANGUAGE_UPDATED",
+      preferredLanguage: user.preferredLanguage,
+    });
+  } catch (err) {
+    console.error("Language update error:", err);
+    res.status(500).json({ code: "SERVER_ERROR" });
+  }
+};

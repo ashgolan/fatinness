@@ -276,7 +276,9 @@
       "templates": "القوالب الأسبوعية",
       "notifications": "الإشعارات",
       "settings": "الإعدادات العامة",
-      "systemReset": "إعادة ضبط النظام"
+      "systemReset": "إعادة ضبط النظام",
+          "subscriptionsReport": "اشتراكات قرب انتهاءها"
+
     },
 
     "footerTitle": "لوحة تحكم متكاملة لإدارة Fatinness Studio",
@@ -443,7 +445,11 @@
       "weight": "الوزن (كغ)",
       "age": "العمر",
       "gender": "الجنس",
-      "role": "الدور"
+      "role": "الدور",
+          "subscriptionEnd": "تاريخ نهاية الاشتراك",
+          "subscriptionStart": "تاريخ بداية الاشتراك"
+
+
     },
 
     "gender": {
@@ -593,7 +599,10 @@
       "obese": "مرتفع",
       "healthyRange": "النطاق الصحي",
       "idealWeight": "الوزن المثالي"
-    }
+    },
+      "language": {
+    "title": "لغة التطبيق"
+  }
   },
 
   "myBookings": {
@@ -753,6 +762,14 @@
     "submitting": "جاري الإنشاء...",
     "success": "تم إنشاء السوبر أدمن بنجاح!",
     "error": "حدث خطأ أثناء إنشاء السوبر أدمن"
+  },
+    "subscriptions": {
+    "title": "تقارير الاشتراكات",
+    "activeSoon": "تنتهي خلال 5 أيام",
+    "expired": "منتهية الاشتراك",
+    "active": "نشطة",
+    "empty": "لا يوجد بيانات",
+    "endDate": "تاريخ الانتهاء"
   },
   "server": {
     "NETWORK_ERROR": "لا يوجد اتصال بالسيرفر.",

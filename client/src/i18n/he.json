@@ -276,7 +276,9 @@
       "templates": "תבניות שבועיות",
       "notifications": "התראות",
       "settings": "הגדרות",
-      "systemReset": "איפוס מערכת"
+      "systemReset": "איפוס מערכת",
+          "subscriptionsReport": "מנויים מתקרבים לסיום"
+
     },
 
     "footerTitle": "מערכת שליטה מלאה לניהול Fatinness Studio",
@@ -443,7 +445,10 @@
       "weight": "משקל (ק\"ג)",
       "age": "גיל",
       "gender": "מין",
-      "role": "תפקיד"
+      "role": "תפקיד",
+          "subscriptionEnd": "תאריך סיום המנוי",
+          "subscriptionStart": "תאריך התחלת מנוי"
+
     },
 
     "gender": {
@@ -593,7 +598,10 @@
       "obese": "השמנה",
       "healthyRange": "טווח בריא",
       "idealWeight": "משקל אידיאלי"
-    }
+    },
+      "language": {
+    "title": "שפת המערכת"
+  }
   },
 
   "myBookings": {
@@ -754,6 +762,15 @@
     "success": "הסופר אדמין נוצר בהצלחה!",
     "error": "אירעה שגיאה בעת יצירת הסופר אדמין"
   },
+  "subscriptions": {
+    "title": "דוח מנויים",
+    "activeSoon": "פג תוך 5 ימים",
+    "expired": "פג תוקף",
+    "active": "פעיל",
+    "empty": "אין נתונים",
+    "endDate": "תאריך סיום"
+  }
+  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "נדרש שם תבנית ורשימת שיעורים.",

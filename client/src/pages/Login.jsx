@@ -93,7 +93,8 @@ export default function Login() {
             toast.info(t("login.success.fcmOptional"));
           });
         }
-
+const lang = localStorage.getItem("appLanguage") || "ar";
+await Api.put("/auth/language", { preferredLanguage: lang });
         navigate(me.data.role === "admin" ? "/admin/control" : from, {
           replace: true,
         });

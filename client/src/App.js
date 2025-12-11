@@ -53,6 +53,7 @@ import AdminSystemReset from "./pages/admin/AdminSystemReset";
 import RegisterSuperAdmin from "./pages/RegisterSuperAdmin";
 
 import { useSystemSetupCheck } from "./hooks/useSystemSetupCheck";
+import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
 // ======================================================
 // ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
 // ======================================================
@@ -158,6 +159,7 @@ export default function App() {
                       element={<AdminDashboard />}
                     />
                     <Route path="/admin/system-reset" element={<AdminSystemReset/>} />
+<Route path="/admin/subscriptions-report" element={<SubscriptionsReport />} />
 
                     <Route path="/admin/bookings" element={<BookingsAdmin />} />
                     <Route path="/admin/schedule" element={<AdminSchedule />} />

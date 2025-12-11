@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
+    <!-- السماح بطلبات https للمواقع التالية -->
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">https://api.fatinness.cloud/</domain>
+        <domain includeSubdomains="true">fateness.onrender.com</domain>
+        <domain includeSubdomains="true">api.fatinness.cloud</domain>
     </domain-config>
-    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

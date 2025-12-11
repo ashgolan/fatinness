@@ -55,6 +55,8 @@ export default function Register() {
     weight: "",
     age: "",
     role: "user",
+    subscriptionEnd: "",
+
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -82,6 +84,7 @@ export default function Register() {
         height: form.height ? Number(form.height) : null,
         weight: form.weight ? Number(form.weight) : null,
         age: form.age ? Number(form.age) : null,
+          subscriptionEnd: form.subscriptionEnd, // ⭐ جديد
       };
       await Api.post("/auth/register", cleanForm);
       toast.success(t("register.success"));
@@ -473,7 +476,16 @@ export default function Register() {
                 </Grid>
               ))}
             </Grid>
-
+<TextField
+  label="تاريخ نهاية الاشتراك"
+  type="date"
+  name="subscriptionEnd"
+  value={form.subscriptionEnd}
+  onChange={handleChange}
+  InputLabelProps={{ shrink: true }}
+  required
+  sx={textFieldStyle}
+/>
             <Button
               type="submit"
               fullWidth

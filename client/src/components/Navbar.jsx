@@ -14,7 +14,11 @@ import {
   CircularProgress,
   Switch,
   Divider,
+  Menu,
+  MenuItem,
 } from "@mui/material";
+import LanguageIcon from "@mui/icons-material/Language";
+
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 
 import { useLocation } from "react-router-dom";
@@ -32,10 +36,10 @@ import { clearToken } from "../utils/tokensStorage";
 import { Api } from "../api/Api";
 import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
-import { useTranslation } from "react-i18next"; // 🟣 الترجمة
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
-  const { t } = useTranslation(); // 🟣
+  const { t, i18n } = useTranslation();
 
   const { user, setUser, loadingUser } = useContext(UserContext);
   const { mode, toggleMode, BRAND } = useThemeMode();
@@ -45,6 +49,17 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
+
+  const [langMenuAnchor, setLangMenuAnchor] = useState(null);
+
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("appLanguage", lang);
+
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.documentElement.dir = i18n.language === "ar" ? "rtl" : "ltr";
+
+  };
 
   const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
@@ -77,9 +92,6 @@ export default function Navbar() {
 
   const isAdmin = user?.role === "admin";
 
-  // =========================
-  // الروابط
-  // =========================
   const navLinks = useMemo(() => {
     if (loadingUser) return [];
 
@@ -103,6 +115,7 @@ export default function Navbar() {
         { label: t("navbar.logout"), action: logout, icon: <LogoutIcon /> },
       ];
     }
+
     return [
       { label: t("navbar.home"), to: "/dashboard", icon: <HomeIcon /> },
       {
@@ -144,7 +157,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* شريط حالة النظام للأدمن */}
+      {/* Admin Status Bar */}
       {isAdmin && !loading && (
         <Box
           sx={{
@@ -163,7 +176,6 @@ export default function Navbar() {
         </Box>
       )}
 
-      {/* THE NAVBAR */}
       <AppBar
         position="sticky"
         elevation={0}
@@ -208,8 +220,8 @@ export default function Navbar() {
                 opacity: loadingBrand ? 0.5 : 1,
                 boxShadow:
                   mode === "dark"
-                    ? "0 0 10px rgba(255, 255, 255, 0.15)"
-                    : "0 0 8px rgba(0, 0, 0, 0.1)",
+                    ? "0 0 10px rgba(255,255,255,0.15)"
+                    : "0 0 8px rgba(0,0,0,0.1)",
               }}
             />
             <Typography
@@ -236,18 +248,12 @@ export default function Navbar() {
               alignItems: "center",
               gap: 1,
               mr: 2,
-              "@keyframes rotate": {
-                "0%": { transform: "rotate(0deg)" },
-                "50%": { transform: "rotate(15deg)" },
-                "100%": { transform: "rotate(0deg)" },
-              },
             }}
           >
             <LightModeIcon
               sx={{
                 color: mode === "dark" ? "#777" : BRAND.gold,
                 fontSize: 22,
-                animation: mode === "light" ? "rotate 1s ease-in-out" : "none",
               }}
             />
             <Switch
@@ -267,9 +273,41 @@ export default function Navbar() {
               sx={{
                 color: mode === "dark" ? BRAND.gold : "#777",
                 fontSize: 22,
-                animation: mode === "dark" ? "rotate 1s ease-in-out" : "none",
               }}
             />
+
+            {/* 🌐 LANGUAGE ICON — DESKTOP */}
+       <IconButton
+  onClick={(e) => setLangMenuAnchor(e.currentTarget)}
+  sx={{
+    color: mode === "dark" ? BRAND.textDark : "#555",
+    ml: 1,
+    "&:hover": {
+      color: mode === "dark" ? BRAND.gold : BRAND.purple,
+      transform: "scale(1.1)",
+      transition: "0.2s",
+    },
+  }}
+>
+  <LanguageIcon />
+</IconButton>
+
+
+            <Menu
+              anchorEl={langMenuAnchor}
+              open={Boolean(langMenuAnchor)}
+              onClose={() => setLangMenuAnchor(null)}
+            >
+              <MenuItem onClick={() => changeLanguage("ar")}>
+                🇸🇦 العربية
+              </MenuItem>
+              <MenuItem onClick={() => changeLanguage("he")}>
+                🇮🇱 עברית
+              </MenuItem>
+              <MenuItem onClick={() => changeLanguage("en")}>
+                🇺🇸 English
+              </MenuItem>
+            </Menu>
           </Box>
 
           {/* Desktop Links */}
@@ -287,20 +325,6 @@ export default function Navbar() {
                     px: 2.2,
                     py: 0.9,
                     borderRadius: "999px",
-                    border:
-                      link.to === "/bookings-hub"
-                        ? `2px solid ${BRAND.purple}55`
-                        : "2px solid transparent",
-                    "&:hover": {
-                      backgroundColor:
-                        link.to === "/bookings-hub"
-                          ? mode === "dark"
-                            ? "rgba(255,255,255,0.06)"
-                            : "#f7f3ff"
-                          : mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "#f5f5f5",
-                    },
                   }}
                 >
                   {link.label}
@@ -318,14 +342,6 @@ export default function Navbar() {
                     px: 2.5,
                     py: 0.9,
                     borderRadius: "999px",
-                    boxShadow:
-                      mode === "dark"
-                        ? `0 6px 16px ${BRAND.gold}33`
-                        : `0 6px 16px ${BRAND.purple}33`,
-                    "&:hover": {
-                      backgroundColor:
-                        mode === "dark" ? BRAND.goldDark : BRAND.purpleDark,
-                    },
                   }}
                 >
                   {link.label}
@@ -334,7 +350,7 @@ export default function Navbar() {
             )}
           </Box>
 
-          {/* Mobile Menu */}
+          {/* Mobile Menu Button */}
           <IconButton
             onClick={() => setDrawerOpen(true)}
             sx={{
@@ -347,7 +363,7 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {/* Drawer mobile */}
+      {/* Drawer Menu (Mobile) */}
       <Drawer
         anchor="right"
         open={drawerOpen}
@@ -361,14 +377,13 @@ export default function Navbar() {
         }}
       >
         <Box sx={{ p: 2 }}>
-          {/* Drawer HEADER */}
+          {/* Drawer Header */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               mb: 1,
-              pb: 1,
             }}
           >
             <img
@@ -381,7 +396,6 @@ export default function Navbar() {
                 borderRadius: "50%",
                 objectFit: "cover",
                 opacity: loadingBrand ? 0.5 : 1,
-                transition: "opacity 0.5s ease",
               }}
             />
             <Typography
@@ -408,6 +422,38 @@ export default function Navbar() {
             }}
           />
 
+          {/* LANGUAGES — MOBILE */}
+          <Box sx={{ mb: 2 }}>
+            <Typography sx={{ fontWeight: 700, mb: 1 }}>
+              {t("navbar.language")}
+            </Typography>
+
+            <Button
+              fullWidth
+              onClick={() => changeLanguage("ar")}
+              sx={{ justifyContent: "flex-start", fontWeight: 600 }}
+            >
+              🇸🇦 العربية
+            </Button>
+
+            <Button
+              fullWidth
+              onClick={() => changeLanguage("he")}
+              sx={{ justifyContent: "flex-start", fontWeight: 600 }}
+            >
+              🇮🇱 עברית
+            </Button>
+
+            <Button
+              fullWidth
+              onClick={() => changeLanguage("en")}
+              sx={{ justifyContent: "flex-start", fontWeight: 600 }}
+            >
+              🇺🇸 English
+            </Button>
+          </Box>
+
+          {/* Navigation Links */}
           <List>
             {navLinks.map((link, index) => (
               <ListItem key={index} disablePadding sx={{ mb: 1 }}>
@@ -421,25 +467,13 @@ export default function Navbar() {
                     borderRadius: "8px",
                     "&:hover": {
                       backgroundColor:
-                        mode === "dark" ? "rgba(255,255,255,0.08)" : "#f2f2f2",
+                        mode === "dark"
+                          ? "rgba(255,255,255,0.08)"
+                          : "#f2f2f2",
                     },
                   }}
                 >
-                  <Box
-                    sx={{
-                      mr: 1.5,
-                      color:
-                        link.to === "/bookings-hub"
-                          ? mode === "dark"
-                            ? BRAND.gold
-                            : BRAND.purple
-                          : mode === "dark"
-                          ? BRAND.textDark
-                          : "#555",
-                    }}
-                  >
-                    {link.icon}
-                  </Box>
+                  <Box sx={{ mr: 1.5 }}>{link.icon}</Box>
                   <ListItemText
                     primary={link.label}
                     primaryTypographyProps={{
