@@ -12,7 +12,9 @@
     "login": "Login",
     "reminder_system_on": "🔔 Reminder system is running",
     "reminder_system_off": "⚠️ Reminder system is currently inactive",
-      "language": "Language"
+      "language": "Language",
+        "about": "About"
+
   },
 
   "dashboard": {
@@ -780,7 +782,16 @@
     "missing_vapid": "VAPID key is missing.",
     "success": "Notifications enabled successfully 🎉",
     "error": "⚠️ Notifications were not enabled (optional)."
-  }
+  },
+  "about": {
+  "title": "About Fatinness App",
+  "description1": "Fatinness is a complete fitness studio management system designed to help members, trainers, and administration work efficiently and smoothly.",
+  "description2": "The app includes class schedules, booking system, notifications, reminders, weight tracking, subscription management, and more.",
+  "developedBy": "Developed by A.Shaalan Tech",
+  "email": "alaa.t.shaalan@gmail.com",
+  "version": "Version 1.0.0"
+}
+
   ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",

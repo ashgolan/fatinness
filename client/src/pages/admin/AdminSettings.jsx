@@ -476,6 +476,50 @@ export default function AdminSettings() {
             )}
           </Button>
         </Box>
+                {/* ⭐ توقيع المطوّر A.Shaalan Tech */}
+        <Box
+          sx={{
+            mt: 5,
+            textAlign: "center",
+            opacity: 0.9,
+          }}
+        >
+          <img
+            src="/brand/ashaalan-tech-gold.png"
+            alt="A.Shaalan Tech"
+            style={{
+              height: 60,
+              objectFit: "contain",
+              marginBottom: 6,
+              filter:
+                "drop-shadow(0 0 3px rgba(0,0,0,0.3))",
+            }}
+          />
+
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              color: "#777",
+              fontSize: "0.75rem",
+              mt: 0.5,
+            }}
+          >
+            Developed by A.Shaalan Tech
+          </Typography>
+
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              color: "#999",
+              fontSize: "0.7rem",
+            }}
+          >
+            alaa.t.shaalan@gmail.com
+          </Typography>
+        </Box>
+
       </Paper>
 
       {/* Lightbox */}

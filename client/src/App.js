@@ -54,6 +54,7 @@ import RegisterSuperAdmin from "./pages/RegisterSuperAdmin";
 
 import { useSystemSetupCheck } from "./hooks/useSystemSetupCheck";
 import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
+import About from "./pages/About";
 // ======================================================
 // ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
 // ======================================================
@@ -138,6 +139,7 @@ export default function App() {
                   {/* تسجيل الدخول */}
                   <Route path="/login" element={<Login />} />
 <Route path="/debug-api" element={<DebugApi />} />
+                    <Route path="/about" element={<About />} />
 
                   {/* 🔹 مسارات المستخدم */}
                   <Route element={<PrivateRoute role="user" />}>
@@ -148,6 +150,7 @@ export default function App() {
                     <Route path="/my-bookings" element={<MyBookings />} />
                     <Route path="/bookings-Hub" element={<BookingsHub />} />
                     <Route path="/subscription" element={<Subscription />} />
+
                   </Route>
 
                   {/* 🔹 مسارات المشرف */}

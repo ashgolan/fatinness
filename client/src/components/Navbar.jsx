@@ -18,6 +18,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
+import StarHalfIcon from "@mui/icons-material/StarHalf";
 
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 
@@ -348,6 +349,21 @@ export default function Navbar() {
                 </Button>
               )
             )}
+            <Button
+  component={Link}
+  to="/about"
+  startIcon={<StarHalfIcon />}   // سنغيرها بعد قليل لأيقونة مناسبة إذا تريد
+  sx={{
+    color: mode === "dark" ? BRAND.textDark : "#333",
+    fontWeight: 600,
+    px: 2.2,
+    py: 0.9,
+    borderRadius: "999px",
+  }}
+>
+  {t("navbar.about")}
+</Button>
+
           </Box>
 
           {/* Mobile Menu Button */}
@@ -364,129 +380,182 @@ export default function Navbar() {
       </AppBar>
 
       {/* Drawer Menu (Mobile) */}
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        PaperProps={{
-          sx: {
-            width: { xs: "75%", sm: "320px" },
-            backgroundColor: mode === "dark" ? BRAND.paperDark : "#fafafa",
-            color: mode === "dark" ? BRAND.textDark : "#333",
+     <Drawer
+  anchor="right"
+  open={drawerOpen}
+  onClose={() => setDrawerOpen(false)}
+  PaperProps={{
+    sx: {
+      width: { xs: "78%", sm: "340px" },
+      backgroundColor: mode === "dark" ? BRAND.paperDark : "#ffffff",
+      color: mode === "dark" ? BRAND.textDark : "#333",
+      paddingTop: 2,
+      borderTopLeftRadius: "16px",
+      borderBottomLeftRadius: "16px",
+    },
+  }}
+>
+  <Box sx={{ px: 2 }}>
+
+    {/* HEADER */}
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        mb: 2,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <img
+          src={imgSrc}
+          onError={() => setImgSrc(fallbackLogo)}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+        <Typography
+          variant="h6"
+          sx={{
+            fontWeight: 800,
+            background: `linear-gradient(135deg, ${
+              mode === "dark" ? BRAND.gold : BRAND.purple
+            }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          }}
+        >
+          Fatinness
+        </Typography>
+      </Box>
+
+      <IconButton onClick={() => setDrawerOpen(false)}>
+        <CloseIcon sx={{ color: mode === "dark" ? "#fff" : "#333" }} />
+      </IconButton>
+    </Box>
+
+    <Divider sx={{ mb: 2, opacity: 0.5 }} />
+
+    {/* LANGUAGES */}
+    <Typography sx={{ fontWeight: 700, mb: 1.5 }}>
+      {t("navbar.language")}
+    </Typography>
+
+    {[
+      { code: "ar", label: "العربية", flag: "🇸🇦" },
+      { code: "he", label: "עברית", flag: "🇮🇱" },
+      { code: "en", label: "English", flag: "🇺🇸" },
+    ].map((lang) => (
+      <Button
+        key={lang.code}
+        fullWidth
+        onClick={() => changeLanguage(lang.code)}
+        sx={{
+          justifyContent: "flex-start",
+          fontWeight: 600,
+          textTransform: "none",
+          px: 2,
+          py: 1.2,
+          borderRadius: "10px",
+          mb: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: 1.4,
+          backgroundColor:
+            i18n.language === lang.code
+              ? mode === "dark"
+                ? "rgba(255,255,255,0.08)"
+                : "rgba(0,0,0,0.05)"
+              : "transparent",
+          "&:hover": {
+            backgroundColor:
+              mode === "dark"
+                ? "rgba(255,255,255,0.1)"
+                : "rgba(0,0,0,0.07)",
           },
         }}
       >
-        <Box sx={{ p: 2 }}>
-          {/* Drawer Header */}
-          <Box
+        <span style={{ fontSize: "1.25rem" }}>{lang.flag}</span>
+        {lang.label}
+      </Button>
+    ))}
+
+    <Divider sx={{ my: 2, opacity: 0.4 }} />
+
+    {/* NAVIGATION LINKS */}
+    <List>
+      {navLinks.map((link, index) => (
+        <ListItem key={index} disablePadding sx={{ mb: 1 }}>
+          <ListItemButton
+            onClick={() => {
+              if (link.action) link.action();
+              else navigate(link.to);
+              setDrawerOpen(false);
+            }}
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 1,
+              borderRadius: "10px",
+              px: 2,
+              py: 1.4,
+              "&:hover": {
+                backgroundColor:
+                  mode === "dark"
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(0,0,0,0.05)",
+              },
             }}
           >
-            <img
-              src={imgSrc}
-              alt="MiniLogo"
-              onError={() => setImgSrc(fallbackLogo)}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: "50%",
-                objectFit: "cover",
-                opacity: loadingBrand ? 0.5 : 1,
+            <Box sx={{ mr: 1.5 }}>{link.icon}</Box>
+            <ListItemText
+              primary={link.label}
+              primaryTypographyProps={{
+                fontWeight: 600,
+                fontSize: "1rem",
               }}
             />
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 700,
-                color: mode === "dark" ? BRAND.gold : BRAND.purple,
-              }}
-            >
-              Fateness
-            </Typography>
+          </ListItemButton>
+        </ListItem>
+      ))}
 
-            <IconButton onClick={() => setDrawerOpen(false)}>
-              <CloseIcon
-                sx={{ color: mode === "dark" ? BRAND.textDark : "#333" }}
-              />
-            </IconButton>
+      {/* ABOUT PAGE */}
+      <ListItem disablePadding sx={{ mb: 1 }}>
+        <ListItemButton
+          onClick={() => {
+            navigate("/about");
+            setDrawerOpen(false);
+          }}
+          sx={{
+            borderRadius: "10px",
+            px: 2,
+            py: 1.4,
+            "&:hover": {
+              backgroundColor:
+                mode === "dark"
+                  ? "rgba(255,255,255,0.08)"
+                  : "rgba(0,0,0,0.05)",
+            },
+          }}
+        >
+          <Box sx={{ mr: 1.5 }}>
+            <StarHalfIcon />
           </Box>
-
-          <Divider
-            sx={{
-              mb: 1.5,
-              borderColor: mode === "dark" ? "rgba(255,255,255,0.1)" : "#ddd",
+          <ListItemText
+            primary={t("navbar.about")}
+            primaryTypographyProps={{
+              fontWeight: 600,
+              fontSize: "1rem",
             }}
           />
+        </ListItemButton>
+      </ListItem>
+    </List>
 
-          {/* LANGUAGES — MOBILE */}
-          <Box sx={{ mb: 2 }}>
-            <Typography sx={{ fontWeight: 700, mb: 1 }}>
-              {t("navbar.language")}
-            </Typography>
+    <Divider sx={{ my: 2, opacity: 0.4 }} />
+  </Box>
+</Drawer>
 
-            <Button
-              fullWidth
-              onClick={() => changeLanguage("ar")}
-              sx={{ justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              🇸🇦 العربية
-            </Button>
-
-            <Button
-              fullWidth
-              onClick={() => changeLanguage("he")}
-              sx={{ justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              🇮🇱 עברית
-            </Button>
-
-            <Button
-              fullWidth
-              onClick={() => changeLanguage("en")}
-              sx={{ justifyContent: "flex-start", fontWeight: 600 }}
-            >
-              🇺🇸 English
-            </Button>
-          </Box>
-
-          {/* Navigation Links */}
-          <List>
-            {navLinks.map((link, index) => (
-              <ListItem key={index} disablePadding sx={{ mb: 1 }}>
-                <ListItemButton
-                  onClick={() => {
-                    if (link.action) link.action();
-                    else navigate(link.to);
-                    setDrawerOpen(false);
-                  }}
-                  sx={{
-                    borderRadius: "8px",
-                    "&:hover": {
-                      backgroundColor:
-                        mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "#f2f2f2",
-                    },
-                  }}
-                >
-                  <Box sx={{ mr: 1.5 }}>{link.icon}</Box>
-                  <ListItemText
-                    primary={link.label}
-                    primaryTypographyProps={{
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                    }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
     </>
   );
 }

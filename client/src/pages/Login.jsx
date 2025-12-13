@@ -382,6 +382,58 @@ await Api.put("/auth/language", { preferredLanguage: lang });
             </Link>
           </Typography>
         </Box>
+                {/* توقيع المطوّر A.Shaalan Tech */}
+        <Box
+          sx={{
+            mt: 4,
+            textAlign: "center",
+            opacity: 0.9,
+          }}
+        >
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 0.5,
+            }}
+          >
+            <img
+              src="/brand/ashaalan-tech-gold.png"
+              alt="A.Shaalan Tech"
+              style={{
+                height: 60,
+                objectFit: "contain",
+                filter: isDark
+                  ? "drop-shadow(0 0 6px rgba(0,0,0,0.7))"
+                  : "drop-shadow(0 0 4px rgba(0,0,0,0.25))",
+              }}
+            />
+          </Box>
+
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              color: isDark ? BRAND.subDark : "#999",
+              fontSize: "0.7rem",
+            }}
+          >
+            Developed by A.Shaalan Tech
+          </Typography>
+
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              color: isDark ? BRAND.subDark : "#b0b0b0",
+              fontSize: "0.65rem",
+            }}
+          >
+            alaa.t.shaalan@gmail.com
+          </Typography>
+        </Box>
+
       </Paper>
     </Box>
   );

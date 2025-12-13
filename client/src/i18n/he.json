@@ -12,7 +12,9 @@
     "login": "התחברות",
     "reminder_system_on": "🔔 מערכת התזכורות פועלת כעת",
     "reminder_system_off": "⚠️ מערכת התזכורות אינה פעילה כרגע",
-      "language": "שפה"
+      "language": "שפה",
+        "about": "אודות"
+
   },
 
   "dashboard": {
@@ -781,6 +783,16 @@
     "success": "ההתראות הופעלו בהצלחה 🎉",
     "error": "⚠️ ההתראות לא הופעלו (אופציונלי)."
   },
+"about": {
+  "title": "אודות אפליקציית Fatinness",
+  "description1": "Fatinness הוא מערכת מלאה לניהול סטודיו כושר, המיועדת לעזור לחברות, למאמנות ולהנהלה לעבוד בצורה יעילה וחלקה.",
+  "description2": "האפליקציה כוללת מערכת שיעורים, מערכת הזמנות, התראות, תזכורות, מעקב משקל, ניהול מנויים ועוד.",
+  "developedBy": "פותח על ידי A.Shaalan Tech",
+  "email": "alaa.t.shaalan@gmail.com",
+  "version": "גרסה 1.0.0"
+}
+
+  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "נדרש שם תבנית ורשימת שיעורים.",

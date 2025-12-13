@@ -1,5 +1,5 @@
 // client/src/pages/Splash.jsx
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
 import i18n from "../i18n/i18n";
@@ -7,14 +7,14 @@ import i18n from "../i18n/i18n";
 export default function Splash() {
   const navigate = useNavigate();
 
+  const [fadeOut, setFadeOut] = useState(false);
+  const [showLogo, setShowLogo] = useState(false);
+
   useEffect(() => {
-    // 1️⃣ اقرأ اللغة من التخزين إن وُجدت
     let lang = localStorage.getItem("appLanguage");
 
-    // 2️⃣ إذا لا يوجد → استخدم لغة الجهاز وحدد ar / he / en
     if (!lang) {
       const browserLang = navigator.language || navigator.userLanguage || "en";
-
       if (browserLang.startsWith("ar")) lang = "ar";
       else if (browserLang.startsWith("he")) lang = "he";
       else lang = "en";
@@ -22,16 +22,26 @@ export default function Splash() {
       localStorage.setItem("appLanguage", lang);
     }
 
-    // 3️⃣ طبّق اللغة في i18next
     i18n.changeLanguage(lang);
+  }, []);
 
-    // 4️⃣ بعد 4 ثواني (مدة الفيديو تقريباً) → انتقال إلى صفحة الدخول
-    const timer = setTimeout(() => {
+  // -------------------------------
+  // 🚀 عند انتهاء الفيديو
+  // -------------------------------
+  const handleVideoEnd = () => {
+    // 1) ظهور الشعار
+    setShowLogo(true);
+
+    // 2) بعد 1 ثانية → FadeOut
+    setTimeout(() => {
+      setFadeOut(true);
+    }, 1000);
+
+    // 3) بعد 1.6 ثانية → الانتقال للوجين
+    setTimeout(() => {
       navigate("/login");
-    }, 4000);
-
-    return () => clearTimeout(timer);
-  }, [navigate]);
+    }, 1600);
+  };
 
   return (
     <Box
@@ -44,6 +54,8 @@ export default function Splash() {
         backgroundColor: "#fbd555",
         overflow: "hidden",
         zIndex: 9999,
+        opacity: fadeOut ? 0 : 1,
+        transition: "opacity 0.6s ease-in-out",
       }}
     >
       {/* الفيديو */}
@@ -65,21 +77,44 @@ export default function Splash() {
           autoPlay
           muted
           playsInline
+          onEnded={handleVideoEnd}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
           }}
           onLoadedMetadata={(e) => {
-            e.target.playbackRate = 1.25; // من 5 ثواني إلى 4 ثواني
+            e.target.playbackRate = 1.25;
           }}
         />
       </Box>
 
-      {/* 🔻 هنا كان يوجد Stack + Buttons لاختيار اللغة
-          تم حذفه بناءً على طلبك:
-          الآن اللغة تُحدد تلقائياً من الجهاز / localStorage
-      */}
+      {/* شعار المطوّر يظهر بعد انتهاء الفيديو */}
+      {showLogo && (
+  <Box
+    sx={{
+      position: "absolute",
+      bottom: "9%", // كان 8% — الآن أكثر تحت بـ 2 سم تقريبًا
+      left: "50%",
+      transform: "translateX(-50%)",
+      opacity: showLogo ? 1 : 0,
+      transition: "opacity 0.6s ease-in-out",
+      textAlign: "center",
+    }}
+  >
+
+    {/* نص تحت الشعار (اختياري) */}
+    
+    <div style={{
+      marginTop: 6,
+      fontSize: "0.75rem",
+      color: "rgba(0,0,0,0.5)"
+    }}>
+      Developed by A.Shaalan Tech
+    </div>
+    
+  </Box>
+)}
     </Box>
   );
 }
