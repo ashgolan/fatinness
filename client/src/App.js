@@ -134,12 +134,15 @@ export default function App() {
                 <Routes>
                   {/* 🌟 صفحة Splash */}
                   <Route path="/" element={<Splash />} />
-<Route path="/register-superadmin" element={<RegisterSuperAdmin />} />
+                  <Route
+                    path="/register-superadmin"
+                    element={<RegisterSuperAdmin />}
+                  />
 
                   {/* تسجيل الدخول */}
                   <Route path="/login" element={<Login />} />
-<Route path="/debug-api" element={<DebugApi />} />
-                    <Route path="/about" element={<About />} />
+                  <Route path="/debug-api" element={<DebugApi />} />
+                  <Route path="/about" element={<About />} />
 
                   {/* 🔹 مسارات المستخدم */}
                   <Route element={<PrivateRoute role="user" />}>
@@ -150,7 +153,6 @@ export default function App() {
                     <Route path="/my-bookings" element={<MyBookings />} />
                     <Route path="/bookings-Hub" element={<BookingsHub />} />
                     <Route path="/subscription" element={<Subscription />} />
-
                   </Route>
 
                   {/* 🔹 مسارات المشرف */}
@@ -161,8 +163,14 @@ export default function App() {
                       path="/admin/dashboard"
                       element={<AdminDashboard />}
                     />
-                    <Route path="/admin/system-reset" element={<AdminSystemReset/>} />
-<Route path="/admin/subscriptions-report" element={<SubscriptionsReport />} />
+                    <Route
+                      path="/admin/system-reset"
+                      element={<AdminSystemReset />}
+                    />
+                    <Route
+                      path="/admin/subscriptions-report"
+                      element={<SubscriptionsReport />}
+                    />
 
                     <Route path="/admin/bookings" element={<BookingsAdmin />} />
                     <Route path="/admin/schedule" element={<AdminSchedule />} />

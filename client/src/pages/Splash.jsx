@@ -3,9 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box } from "@mui/material";
 import i18n from "../i18n/i18n";
+import { useTranslation } from "react-i18next";
 
 export default function Splash() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [fadeOut, setFadeOut] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
@@ -91,30 +93,30 @@ export default function Splash() {
 
       {/* شعار المطوّر يظهر بعد انتهاء الفيديو */}
       {showLogo && (
-  <Box
-    sx={{
-      position: "absolute",
-      bottom: "9%", // كان 8% — الآن أكثر تحت بـ 2 سم تقريبًا
-      left: "50%",
-      transform: "translateX(-50%)",
-      opacity: showLogo ? 1 : 0,
-      transition: "opacity 0.6s ease-in-out",
-      textAlign: "center",
-    }}
-  >
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "9%", // كان 8% — الآن أكثر تحت بـ 2 سم تقريبًا
+            left: "50%",
+            transform: "translateX(-50%)",
+            opacity: showLogo ? 1 : 0,
+            transition: "opacity 0.6s ease-in-out",
+            textAlign: "center",
+          }}
+        >
+          {/* نص تحت الشعار (اختياري) */}
 
-    {/* نص تحت الشعار (اختياري) */}
-    
-    <div style={{
-      marginTop: 6,
-      fontSize: "0.75rem",
-      color: "rgba(0,0,0,0.5)"
-    }}>
-      Developed by A.Shaalan Tech
-    </div>
-    
-  </Box>
-)}
+          <div
+            style={{
+              marginTop: 6,
+              fontSize: "0.75rem",
+              color: "rgba(0,0,0,0.5)",
+            }}
+          >
+            {t("common.developedBy")}
+          </div>
+        </Box>
+      )}
     </Box>
   );
 }

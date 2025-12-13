@@ -505,7 +505,7 @@ export default function AdminSettings() {
               mt: 0.5,
             }}
           >
-            Developed by A.Shaalan Tech
+{t("common.developedBy")}
           </Typography>
 
           <Typography

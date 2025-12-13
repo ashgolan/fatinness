@@ -12,9 +12,8 @@
     "login": "התחברות",
     "reminder_system_on": "🔔 מערכת התזכורות פועלת כעת",
     "reminder_system_off": "⚠️ מערכת התזכורות אינה פעילה כרגע",
-      "language": "שפה",
-        "about": "אודות"
-
+    "language": "שפה",
+    "about": "אודות"
   },
 
   "dashboard": {
@@ -280,8 +279,7 @@
       "notifications": "התראות",
       "settings": "הגדרות",
       "systemReset": "איפוס מערכת",
-          "subscriptionsReport": "מנויים מתקרבים לסיום"
-
+      "subscriptionsReport": "מנויים מתקרבים לסיום"
     },
 
     "footerTitle": "מערכת שליטה מלאה לניהול Fatinness Studio",
@@ -327,8 +325,7 @@
     "dialog": {
       "title": "פרטי אימון",
       "membersTitle": "משתתפות רשומות ({{count}})",
-          "sendNotification": "שליחת התראה"
-,
+      "sendNotification": "שליחת התראה",
       "status": {
         "booked": "שמורה",
         "cancelled": "בוטלה"
@@ -338,15 +335,15 @@
       "activate": "הפעלת אימון",
       "deactivate": "חסימת אימון"
     },
-  "notify": {
-    "title": "שליחת התראה למשתתפות",
-    "notificationTitle": "כותרת ההתראה",
-    "notificationBody": "תוכן ההתראה",
-    "cancel": "ביטול",
-    "send": "שליחה",
-    "sent": "ההתראה נשלחה בהצלחה",
-    "emptyFields": "אנא מלאי את כל השדות"
-  },
+    "notify": {
+      "title": "שליחת התראה למשתתפות",
+      "notificationTitle": "כותרת ההתראה",
+      "notificationBody": "תוכן ההתראה",
+      "cancel": "ביטול",
+      "send": "שליחה",
+      "sent": "ההתראה נשלחה בהצלחה",
+      "emptyFields": "אנא מלאי את כל השדות"
+    },
     "common": {
       "unknownUser": "משתמשת לא ידועה",
       "noPhone": "אין מספר טלפון"
@@ -449,9 +446,8 @@
       "age": "גיל",
       "gender": "מין",
       "role": "תפקיד",
-          "subscriptionEnd": "תאריך סיום המנוי",
-          "subscriptionStart": "תאריך התחלת מנוי"
-
+      "subscriptionEnd": "תאריך סיום המנוי",
+      "subscriptionStart": "תאריך התחלת מנוי"
     },
 
     "gender": {
@@ -494,7 +490,8 @@
 
   "common": {
     "cancel": "ביטול",
-    "save": "שמירה"
+    "save": "שמירה",
+    "developedBy": "פותח על ידי A.Shaalan Tech"
   },
   "login": {
     "title": "Fatinness Studio",
@@ -544,8 +541,7 @@
       "height": "גובה (ס\"מ)",
       "weight": "משקל (ק\"ג)",
       "age": "גיל",
-        "subscriptionEnd": "תאריך סיום מנוי"
-
+      "subscriptionEnd": "תאריך סיום מנוי"
     }
   },
 
@@ -604,9 +600,9 @@
       "healthyRange": "טווח בריא",
       "idealWeight": "משקל אידיאלי"
     },
-      "language": {
-    "title": "שפת המערכת"
-  }
+    "language": {
+      "title": "שפת המערכת"
+    }
   },
 
   "myBookings": {
@@ -774,25 +770,23 @@
     "active": "פעיל",
     "empty": "אין נתונים",
     "endDate": "תאריך סיום"
-  }
-  ,
-    "fcm": {
+  },
+  "fcm": {
     "not_supported": "⚠️ המכשיר או הדפדפן שלך לא תומכים בהתראות.",
     "permission_denied": "⚠️ ההתראות לא הופעלו (אופציונלי).",
     "missing_vapid": "מפתח ה-VAPID לא מוגדר.",
     "success": "ההתראות הופעלו בהצלחה 🎉",
     "error": "⚠️ ההתראות לא הופעלו (אופציונלי)."
   },
-"about": {
-  "title": "אודות אפליקציית Fatinness",
-  "description1": "Fatinness הוא מערכת מלאה לניהול סטודיו כושר, המיועדת לעזור לחברות, למאמנות ולהנהלה לעבוד בצורה יעילה וחלקה.",
-  "description2": "האפליקציה כוללת מערכת שיעורים, מערכת הזמנות, התראות, תזכורות, מעקב משקל, ניהול מנויים ועוד.",
-  "developedBy": "פותח על ידי A.Shaalan Tech",
-  "email": "alaa.t.shaalan@gmail.com",
-  "version": "גרסה 1.0.0"
-}
+  "about": {
+    "title": "אודות אפליקציית Fatinness",
+    "description1": "Fatinness הוא מערכת מלאה לניהול סטודיו כושר, המיועדת לעזור לחברות, למאמנות ולהנהלה לעבוד בצורה יעילה וחלקה.",
+    "description2": "האפליקציה כוללת מערכת שיעורים, מערכת הזמנות, התראות, תזכורות, מעקב משקל, ניהול מנויים ועוד.",
+    "developedBy": "פותח על ידי A.Shaalan Tech",
+    "email": "alaa.t.shaalan@gmail.com",
+    "version": "גרסה 1.0.0"
+  },
 
-  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "נדרש שם תבנית ורשימת שיעורים.",

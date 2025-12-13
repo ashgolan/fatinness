@@ -12,10 +12,8 @@
     "login": "تسجيل الدخول",
     "reminder_system_on": "🔔 نظام التذكيرات يعمل الآن",
     "reminder_system_off": "⚠️ نظام التذكيرات غير فعّال حالياً",
-      "language": "اللغة",
-        "about": "حول التطبيق"
-
-
+    "language": "اللغة",
+    "about": "حول التطبيق"
   },
 
   "dashboard": {
@@ -281,8 +279,7 @@
       "notifications": "الإشعارات",
       "settings": "الإعدادات العامة",
       "systemReset": "إعادة ضبط النظام",
-          "subscriptionsReport": "اشتراكات قرب انتهاءها"
-
+      "subscriptionsReport": "اشتراكات قرب انتهاءها"
     },
 
     "footerTitle": "لوحة تحكم متكاملة لإدارة Fatinness Studio",
@@ -328,7 +325,7 @@
     "dialog": {
       "title": "تفاصيل الحصة",
       "membersTitle": "المشتركات المسجلات ({{count}})",
-          "sendNotification": "إرسال إشعار",
+      "sendNotification": "إرسال إشعار",
 
       "status": {
         "booked": "محجوزة",
@@ -339,15 +336,15 @@
       "activate": "تفعيل الحصة",
       "deactivate": "تعطيل الحصة"
     },
-  "notify": {
-    "title": "إرسال إشعار للمشتركات",
-    "notificationTitle": "عنوان الإشعار",
-    "notificationBody": "محتوى الإشعار",
-    "cancel": "إلغاء",
-    "send": "إرسال",
-    "sent": "تم إرسال الإشعار بنجاح",
-    "emptyFields": "الرجاء تعبئة جميع الحقول"
-  },
+    "notify": {
+      "title": "إرسال إشعار للمشتركات",
+      "notificationTitle": "عنوان الإشعار",
+      "notificationBody": "محتوى الإشعار",
+      "cancel": "إلغاء",
+      "send": "إرسال",
+      "sent": "تم إرسال الإشعار بنجاح",
+      "emptyFields": "الرجاء تعبئة جميع الحقول"
+    },
     "common": {
       "unknownUser": "غير معروف",
       "noPhone": "لا يوجد رقم"
@@ -450,10 +447,8 @@
       "age": "العمر",
       "gender": "الجنس",
       "role": "الدور",
-          "subscriptionEnd": "تاريخ نهاية الاشتراك",
-          "subscriptionStart": "تاريخ بداية الاشتراك"
-
-
+      "subscriptionEnd": "تاريخ نهاية الاشتراك",
+      "subscriptionStart": "تاريخ بداية الاشتراك"
     },
 
     "gender": {
@@ -496,7 +491,8 @@
 
   "common": {
     "cancel": "إلغاء",
-    "save": "حفظ"
+    "save": "حفظ",
+    "developedBy": "تم التطوير بواسطة A.Shaalan Tech"
   },
   "login": {
     "title": "Fatinness Studio",
@@ -546,8 +542,7 @@
       "height": "الطول (سم)",
       "weight": "الوزن (كغ)",
       "age": "العمر",
-        "subscriptionEnd": "تاريخ نهاية الاشتراك"
-
+      "subscriptionEnd": "تاريخ نهاية الاشتراك"
     }
   },
 
@@ -606,9 +601,9 @@
       "healthyRange": "النطاق الصحي",
       "idealWeight": "الوزن المثالي"
     },
-      "language": {
-    "title": "لغة التطبيق"
-  }
+    "language": {
+      "title": "لغة التطبيق"
+    }
   },
 
   "myBookings": {
@@ -769,7 +764,7 @@
     "success": "تم إنشاء السوبر أدمن بنجاح!",
     "error": "حدث خطأ أثناء إنشاء السوبر أدمن"
   },
-    "subscriptions": {
+  "subscriptions": {
     "title": "تقارير الاشتراكات",
     "activeSoon": "تنتهي خلال 5 أيام",
     "expired": "منتهية الاشتراك",
@@ -783,17 +778,15 @@
     "missing_vapid": "مفتاح VAPID غير مضبوط في الواجهة.",
     "success": "تم تفعيل الإشعارات بنجاح 🎉",
     "error": "⚠️ لم يتم تفعيل الإشعارات (اختياري)."
-  }
-  ,
-"about": {
-  "title": "حول تطبيق Fatinness",
-  "description1": "فاتيـنس هو نظام متكامل لإدارة مركز اللياقة، يساعد الأعضاء والمدربات والإدارة على العمل بشكل منظم وسلس.",
-  "description2": "يشمل التطبيق: جدول الحصص، نظام الحجز، الإشعارات، التذكيرات، تتبع الوزن، إدارة الاشتراكات والمزيد.",
-  "developedBy": "تم التطوير بواسطة A.Shaalan Tech",
-  "email": "alaa.t.shaalan@gmail.com",
-  "version": "الإصدار 1.0.0"
-}
-  ,
+  },
+  "about": {
+    "title": "حول تطبيق Fatinness",
+    "description1": "فاتيـنس هو نظام متكامل لإدارة مركز اللياقة، يساعد الأعضاء والمدربات والإدارة على العمل بشكل منظم وسلس.",
+    "description2": "يشمل التطبيق: جدول الحصص، نظام الحجز، الإشعارات، التذكيرات، تتبع الوزن، إدارة الاشتراكات والمزيد.",
+    "developedBy": "تم التطوير بواسطة A.Shaalan Tech",
+    "email": "alaa.t.shaalan@gmail.com",
+    "version": "الإصدار 1.0.0"
+  },
   "server": {
     "NETWORK_ERROR": "لا يوجد اتصال بالسيرفر.",
     "UNKNOWN_ERROR": "حدث خطأ غير متوقع.",
@@ -855,7 +848,7 @@
     "AUTH_LOGIN_MAINTENANCE": "النظام تحت الصيانة. يرجى المحاولة لاحقًا.",
     "AUTH_LOGIN_INCORRECT": "بيانات الدخول غير صحيحة.",
     "AUTH_LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح.",
-"AUTH_LOGIN_SERVER_ERROR": "حدث خطأ في الخادم.",
+    "AUTH_LOGIN_SERVER_ERROR": "حدث خطأ في الخادم.",
 
     "BOOKING_SLOT_NOT_AVAILABLE": "هذه الحصة غير متاحة.",
     "BOOKING_SLOT_PAST": "هذه الحصة قد انتهت أو بدأت بالفعل.",

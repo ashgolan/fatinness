@@ -93,8 +93,8 @@ export default function Login() {
             toast.info(t("login.success.fcmOptional"));
           });
         }
-const lang = localStorage.getItem("appLanguage") || "ar";
-await Api.put("/auth/language", { preferredLanguage: lang });
+        const lang = localStorage.getItem("appLanguage") || "ar";
+        await Api.put("/auth/language", { preferredLanguage: lang });
         navigate(me.data.role === "admin" ? "/admin/control" : from, {
           replace: true,
         });
@@ -127,7 +127,7 @@ await Api.put("/auth/language", { preferredLanguage: lang });
         transition: "all 0.4s ease",
       }}
     >
-    <style>
+      <style>
         {`
           @keyframes float {
             0%, 100% { transform: translateY(0px); }
@@ -150,7 +150,7 @@ await Api.put("/auth/language", { preferredLanguage: lang });
     border-color: transparent !important;
   }
 `}
-</style>
+      </style>
       {/* خلفيات ضبابية */}
       <Box
         sx={{
@@ -178,7 +178,6 @@ await Api.put("/auth/language", { preferredLanguage: lang });
           animation: "float 10s ease-in-out infinite reverse",
         }}
       />
-
 
       {/* البطاقة */}
       <Paper
@@ -382,7 +381,7 @@ await Api.put("/auth/language", { preferredLanguage: lang });
             </Link>
           </Typography>
         </Box>
-                {/* توقيع المطوّر A.Shaalan Tech */}
+        {/* توقيع المطوّر A.Shaalan Tech */}
         <Box
           sx={{
             mt: 4,
@@ -419,7 +418,7 @@ await Api.put("/auth/language", { preferredLanguage: lang });
               fontSize: "0.7rem",
             }}
           >
-            Developed by A.Shaalan Tech
+            {t("common.developedBy")}
           </Typography>
 
           <Typography
@@ -433,7 +432,6 @@ await Api.put("/auth/language", { preferredLanguage: lang });
             alaa.t.shaalan@gmail.com
           </Typography>
         </Box>
-
       </Paper>
     </Box>
   );

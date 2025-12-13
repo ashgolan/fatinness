@@ -12,9 +12,8 @@
     "login": "Login",
     "reminder_system_on": "🔔 Reminder system is running",
     "reminder_system_off": "⚠️ Reminder system is currently inactive",
-      "language": "Language",
-        "about": "About"
-
+    "language": "Language",
+    "about": "About"
   },
 
   "dashboard": {
@@ -280,8 +279,7 @@
       "notifications": "Notifications",
       "settings": "General Settings",
       "systemReset": "System Reset",
-          "subscriptionsReport": "Expiring Subscriptions"
-
+      "subscriptionsReport": "Expiring Subscriptions"
     },
 
     "footerTitle": "A Complete Dashboard to Manage Fateness Studio",
@@ -323,20 +321,19 @@
       "title": "No sessions available this week",
       "range": "From {{start}} to {{end}}"
     },
-  "notify": {
-    "title": "Send Notification to Session Members",
-    "notificationTitle": "Notification Title",
-    "notificationBody": "Notification Body",
-    "cancel": "Cancel",
-    "send": "Send",
-    "sent": "Notification sent successfully",
-    "emptyFields": "Please fill in all fields"
-  },
+    "notify": {
+      "title": "Send Notification to Session Members",
+      "notificationTitle": "Notification Title",
+      "notificationBody": "Notification Body",
+      "cancel": "Cancel",
+      "send": "Send",
+      "sent": "Notification sent successfully",
+      "emptyFields": "Please fill in all fields"
+    },
     "dialog": {
       "title": "Session Details",
       "membersTitle": "Registered Members ({{count}})",
-          "sendNotification": "Send Notification"
-,
+      "sendNotification": "Send Notification",
       "status": {
         "booked": "Booked",
         "cancelled": "Cancelled"
@@ -449,10 +446,8 @@
       "age": "Age",
       "gender": "Gender",
       "role": "Role",
-          "subscriptionEnd": "Subscription End Date",
-          "subscriptionStart": "Subscription Start Date"
-
-
+      "subscriptionEnd": "Subscription End Date",
+      "subscriptionStart": "Subscription Start Date"
     },
 
     "gender": {
@@ -495,7 +490,8 @@
 
   "common": {
     "cancel": "Cancel",
-    "save": "Save"
+    "save": "Save",
+    "developedBy": "Developed by A.Shaalan Tech"
   },
   "login": {
     "title": "Fatinness Studio",
@@ -545,8 +541,7 @@
       "height": "Height (cm)",
       "weight": "Weight (kg)",
       "age": "Age",
-        "subscriptionEnd": "Subscription End Date"
-
+      "subscriptionEnd": "Subscription End Date"
     }
   },
 
@@ -605,9 +600,9 @@
       "healthyRange": "Healthy Range",
       "idealWeight": "Ideal Weight"
     },
-      "language": {
-    "title": "App Language"
-  }
+    "language": {
+      "title": "App Language"
+    }
   },
 
   "myBookings": {
@@ -776,7 +771,7 @@
     "empty": "No users here",
     "endDate": "End Date"
   },
-    "fcm": {
+  "fcm": {
     "not_supported": "⚠️ Your device/browser does not support notifications.",
     "permission_denied": "⚠️ Notifications were not enabled (optional).",
     "missing_vapid": "VAPID key is missing.",
@@ -784,15 +779,14 @@
     "error": "⚠️ Notifications were not enabled (optional)."
   },
   "about": {
-  "title": "About Fatinness App",
-  "description1": "Fatinness is a complete fitness studio management system designed to help members, trainers, and administration work efficiently and smoothly.",
-  "description2": "The app includes class schedules, booking system, notifications, reminders, weight tracking, subscription management, and more.",
-  "developedBy": "Developed by A.Shaalan Tech",
-  "email": "alaa.t.shaalan@gmail.com",
-  "version": "Version 1.0.0"
-}
+    "title": "About Fatinness App",
+    "description1": "Fatinness is a complete fitness studio management system designed to help members, trainers, and administration work efficiently and smoothly.",
+    "description2": "The app includes class schedules, booking system, notifications, reminders, weight tracking, subscription management, and more.",
+    "developedBy": "Developed by A.Shaalan Tech",
+    "email": "alaa.t.shaalan@gmail.com",
+    "version": "Version 1.0.0"
+  },
 
-  ,
   "server": {
     "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and slots are required.",
