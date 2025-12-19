@@ -61,16 +61,21 @@ export default function BookingsHub() {
       const grouped = slotsRes.data?.slots || {};
       const now = new Date();
       const filtered = {};
-
       Object.keys(grouped).forEach((dateKey) => {
+        const normalizedKey = toLocalKey(new Date(dateKey)); // ⭐ السطر المهم
+
         const validSlots = grouped[dateKey].filter((slot) => {
           const slotEnd = new Date(slot.date);
           const [h, m] = slot.endTime.split(":");
           slotEnd.setHours(h, m, 0, 0);
           return slotEnd > now;
         });
-        if (validSlots.length > 0) filtered[dateKey] = validSlots;
+
+        if (validSlots.length > 0) {
+          filtered[normalizedKey] = validSlots; // ⭐ هنا
+        }
       });
+
       console.log("SLOTS FROM SERVER:", slotsRes.data);
 
       setSlotsByDay(filtered);
