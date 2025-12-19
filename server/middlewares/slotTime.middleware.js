@@ -1,60 +1,73 @@
 import Slot from "../models/Slot.js";
-import { toLocal } from "../utils/date.js";
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
 
 export const checkSlotTimeValidity = async (req, res, next) => {
   try {
     const { slotId } = req.body;
 
     if (!slotId) {
-      return res.status(400).json({ message: "رقم الحصة غير موجود." });
+      return res.status(400).json({
+        code: "SLOT_ID_REQUIRED",
+      });
     }
 
     const slot = await Slot.findById(slotId);
     if (!slot) {
-      return res.status(404).json({ message: "لم يتم العثور على الحصة." });
-    }
-
-    // 🟣 تحويل تاريخ Mongo إلى Local Time
-    const dateOnly = toLocal(slot.date);
-
-    // 🕑 دمج وقت بداية الجلسة
-    const [h, m] = slot.startTime.split(":").map(Number);
-    dateOnly.setHours(h, m, 0, 0);
-
-    const now = new Date();
-
-    // =============================================
-    // 🔍 LOGS لنعرف أين المشكلة بالضبط
-    // =============================================
-    console.log("\n=============================================");
-    console.log("🔍 فحص صلاحية وقت الحصة");
-    console.log("⏱️ الآن:", now.toLocaleString("ar-EG"));
-    console.log("📅 تاريخ الحصة (Mongo):", slot.date.toISOString());
-    console.log("📅 تاريخ الحصة (محلي فقط):", toLocal(slot.date).toLocaleString("ar-EG"));
-    console.log("⏰ وقت بداية الحصة:", slot.startTime);
-    console.log("🕒 الوقت الكامل للحصة:", dateOnly.toLocaleString("ar-EG"));
-    console.log(
-      "📌 النتيجة:",
-      dateOnly.getTime() <= now.getTime()
-        ? "❌ الحصة انتهت أو بدأت"
-        : "✅ الحصة مستقبلية ويمكن الحجز"
-    );
-    console.log("=============================================\n");
-
-    // 🔥 الفحص الحقيقي
-    if (dateOnly.getTime() <= now.getTime()) {
-      return res.status(400).json({
-        message: "لا يمكن حجز هذه الحصة لأنها بدأت أو انتهى موعدها.",
+      return res.status(404).json({
+        code: "SLOT_NOT_FOUND",
       });
     }
 
-    req.slot = slot; // تمرير الحصة للعمليات التالية
+    // =============================================
+    // 🧠 المعيار الذهبي
+    // =============================================
+    // slot.startAt مخزن UTC
+    // nowUTC محسوب بطريقة موحدة
+    // =============================================
+
+    const slotStartUTC = DateTime.fromJSDate(slot.startAt, { zone: "utc" });
+    const nowUTC = DateTime.now().toUTC();
+
+    // =============================================
+    // 🔍 LOGS (مفيدة جدًا أثناء الاختبار)
+    // =============================================
+    console.log("\n=============================================");
+    console.log("🔍 SLOT TIME VALIDITY CHECK");
+    console.log("🕒 Now (UTC):", nowUTC.toISO());
+    console.log(
+      "🕒 Now (Local):",
+      nowUTC.setZone(ZONE).toFormat("yyyy-MM-dd HH:mm")
+    );
+    console.log("📅 Slot start (UTC):", slotStartUTC.toISO());
+    console.log(
+      "📅 Slot start (Local):",
+      slotStartUTC.setZone(ZONE).toFormat("yyyy-MM-dd HH:mm")
+    );
+    console.log(
+      "📌 RESULT:",
+      slotStartUTC <= nowUTC
+        ? "❌ SLOT STARTED / PASSED"
+        : "✅ SLOT IS FUTURE"
+    );
+    console.log("=============================================\n");
+
+    // =============================================
+    // 🔥 الفحص الحقيقي
+    // =============================================
+    if (slotStartUTC <= nowUTC) {
+      return res.status(400).json({
+        code: "SLOT_ALREADY_STARTED",
+      });
+    }
+
+    // تمرير الحصة للمرحلة التالية
+    req.slot = slot;
     next();
-    
   } catch (error) {
-    console.error("❌ خطأ في التحقق من وقت الحصة:", error);
+    console.error("❌ checkSlotTimeValidity error:", error);
     res.status(500).json({
-      message: "حدث خطأ أثناء التحقق من صلاحية موعد الحصة.",
+      code: "SLOT_TIME_CHECK_ERROR",
     });
   }
 };

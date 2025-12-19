@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Booking from "../models/Booking.js";
-
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
 /**
  * 🔹 الحصول على الملف الشخصي للمستخدم
  */
@@ -10,8 +11,7 @@ export const getUserProfile = async (req, res) => {
       .select("-password -__v")
       .lean();
 
-    if (!user)
-      return res.status(404).json({ code: "USER_PROFILE_NOT_FOUND" });
+    if (!user) return res.status(404).json({ code: "USER_PROFILE_NOT_FOUND" });
 
     const completedBookings = await Booking.countDocuments({
       user: user._id,
@@ -44,8 +44,8 @@ export const getUserProfile = async (req, res) => {
       age: user.age,
 
       // 🔥 أهم نقطة:
-      role: user.role,                  
-      isSuperAdmin: user.isSuperAdmin || false,  
+      role: user.role,
+      isSuperAdmin: user.isSuperAdmin || false,
       allowExtraBookings: user.allowExtraBookings || false,
 
       stats: {
@@ -91,6 +91,7 @@ export const updateUserProfile = async (req, res) => {
 /**
  * 🔹 إضافة نقطة وزن جديدة
  */
+
 export const addWeightPoint = async (req, res) => {
   try {
     const { weight, note } = req.body;
@@ -100,11 +101,19 @@ export const addWeightPoint = async (req, res) => {
     }
 
     const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ code: "USER_WEIGHT_NOT_FOUND" });
+    if (!user) {
+      return res.status(404).json({ code: "USER_WEIGHT_NOT_FOUND" });
+    }
 
-    user.weightHistory.push({ weight, note, date: new Date() });
+    const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
+
+    user.weightHistory.push({
+      weight,
+      note,
+      date: nowUTC,
+    });
+
     user.weight = weight;
-
     await user.save();
 
     res.json({
@@ -147,8 +156,7 @@ export const updateFcmToken = async (req, res) => {
   try {
     const { fcmToken } = req.body;
 
-    if (!fcmToken)
-      return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
+    if (!fcmToken) return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
 
     const user = await User.findById(req.user._id);
     if (!user)
@@ -172,24 +180,31 @@ export const updateFcmToken = async (req, res) => {
 export const renewSubscription = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    if (!user)
+    if (!user) {
       return res.status(404).json({ code: "USER_SUBSCRIPTION_NOT_FOUND" });
+    }
 
-    const now = new Date();
-    const newEnd = new Date();
-    newEnd.setMonth(now.getMonth() + 1);
+    const nowLocal = DateTime.now().setZone(ZONE);
+
+    const startUTC = nowLocal.toUTC().toJSDate();
+    const endUTC = nowLocal.plus({ months: 1 }).endOf("day").toUTC().toJSDate();
 
     user.subscription = {
       ...user.subscription,
       active: true,
-      currentPeriodStart: now,
-      currentPeriodEnd: newEnd,
+      currentPeriodStart: startUTC,
+      currentPeriodEnd: endUTC,
     };
 
+    // ⭐ تحديث subscriptionEnd الرئيسي (مهم جدًا)
+    user.subscriptionEnd = endUTC;
+    user.isBlocked = false;
+
     await user.save();
+
     res.json({ code: "USER_SUBSCRIPTION_RENEWED" });
   } catch (err) {
-    console.error(err);
+    console.error("❌ renewSubscription error:", err);
     res.status(500).json({ code: "USER_SUBSCRIPTION_ERROR" });
   }
 };

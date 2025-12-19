@@ -2,12 +2,18 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { maintenanceMode } from "./maintenance.controller.js";
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
 
 // 🔹 توليد التوكن
 function generateToken(user) {
-  return jwt.sign({ id: user._id, role: user.role ,isSuperAdmin: user.isSuperAdmin}, process.env.JWT_SECRET, {
-    expiresIn: "12h",
-  });
+  return jwt.sign(
+    { id: user._id, role: user.role, isSuperAdmin: user.isSuperAdmin },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "12h",
+    }
+  );
 }
 
 // =====================================================
@@ -65,11 +71,11 @@ export const registerUser = async (req, res) => {
       weight: weight || null,
       age: age || null,
       role,
-        // ⭐ بداية الاشتراك: اليوم تلقائيًا
-  subscriptionStart: new Date(),
+      // ⭐ بداية الاشتراك: اليوم تلقائيًا
+      subscriptionStart: new Date(),
 
-  // ⭐ نهاية الاشتراك: من الفورم (لازم يكون تاريخ)
-  subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null,
+      // ⭐ نهاية الاشتراك: من الفورم (لازم يكون تاريخ)
+      subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null,
 
       subscription: {
         active: false,
@@ -172,7 +178,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
 // =====================================================
 // 🔹 تعديل دور مستخدم
 // =====================================================
@@ -192,7 +197,9 @@ export const updateUserRole = async (req, res) => {
     // 🔒 لا يمكن تعديل السوبر أدمن نفسه
     const target = await User.findById(userId);
     if (target?.isSuperAdmin) {
-      return res.status(400).json({ code: "ADMIN_ROLE_CANNOT_EDIT_SUPERADMIN" });
+      return res
+        .status(400)
+        .json({ code: "ADMIN_ROLE_CANNOT_EDIT_SUPERADMIN" });
     }
 
     const user = await User.findByIdAndUpdate(userId, { role }, { new: true });

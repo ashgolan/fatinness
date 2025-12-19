@@ -4,41 +4,21 @@
 
 import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
-import { fmtLocal } from "../utils/date.js";
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
+/**
+ * Checks if a slot overlaps with existing ones
+ * @param {Date} startAtUTC
+ * @param {Date} endAtUTC
+ * @returns {Promise<boolean>}
+ */
 
-//
-// 🧮 دوال مساعدة لتاريخ الأسبوع (الأحد كبداية ثابتة دائمًا)
-//
-function startOfWeek(date = new Date()) {
-  const d = new Date(date);
-  const local = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-  const day = local.getDay(); // 0 = الأحد
-  local.setDate(local.getDate() - day);
-  local.setHours(0, 0, 0, 0);
-  return local;
-}
-
-function addDays(date, days) {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-}
-
-//
-// ✅ دالة مساعدة للتحقق من التداخل الزمني في نفس اليوم
-//
-async function hasOverlap(date, startTime, endTime) {
+export async function hasOverlap(startAtUTC, endAtUTC) {
   const overlap = await Slot.findOne({
-    date: new Date(date),
-    $or: [
-      {
-        $and: [
-          { startTime: { $lt: endTime } },
-          { endTime: { $gt: startTime } },
-        ],
-      },
-    ],
-  });
+    startAt: { $lt: endAtUTC },
+    endAt: { $gt: startAtUTC },
+  }).select("_id");
+
   return !!overlap;
 }
 
@@ -46,37 +26,34 @@ async function hasOverlap(date, startTime, endTime) {
 // =====================================================
 // 🔹 GET /admin/slots/week?start=YYYY-MM-DD
 // =====================================================
+
 export const adminGetWeekSlots = async (req, res) => {
   try {
     const { start } = req.query;
 
-    let inputDate;
-    if (start && !isNaN(Date.parse(start))) {
-      inputDate = new Date(`${start}T00:00:00`);
-    } else {
-      inputDate = new Date();
+    const baseDate = start
+      ? DateTime.fromISO(start, { zone: ZONE })
+      : DateTime.now().setZone(ZONE);
+
+    if (!baseDate.isValid) {
+      return res.status(400).json({ error: "Invalid start date" });
     }
 
-    const weekStart = startOfWeek(inputDate);
-    const weekEnd = addDays(weekStart, 6);
+    // ⬅️ الأسبوع يبدأ الأحد
+    const weekStartLocal = baseDate.startOf("week").minus({ days: 1 });
+    const weekEndLocal = weekStartLocal.plus({ days: 6 }).endOf("day");
 
-    console.log("======================================");
-    console.log("🗓️ طلب جلب الأسبوع:");
-    console.log("start param:", start);
-    console.log("inputDate:", inputDate.toISOString());
-    console.log("weekStart:", weekStart.toISOString());
-    console.log("weekEnd:", weekEnd.toISOString());
-    console.log("======================================");
+    const weekStartUTC = weekStartLocal.toUTC().toJSDate();
+    const weekEndUTC = weekEndLocal.toUTC().toJSDate();
 
     const slots = await Slot.find({
-      date: { $gte: weekStart, $lt: addDays(weekEnd, 1) },
-    }).sort({ date: 1, startTime: 1 });
+      startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
+    }).sort({ startAt: 1 });
 
-    console.log("📦 عدد الحصص المسترجعة من Mongo:", slots.length);
-
-    // 🧮 حساب عدد الحجوزات المؤكدة
+    // 🔢 الحجوزات
     const slotIds = slots.map((s) => s._id);
     let bookedBySlot = [];
+
     if (slotIds.length) {
       bookedBySlot = await Booking.aggregate([
         { $match: { slot: { $in: slotIds }, status: "booked" } },
@@ -91,62 +68,69 @@ export const adminGetWeekSlots = async (req, res) => {
 
     const enhancedSlots = slots.map((s) => {
       const bookedCount = bookedMap[s._id.toString()] || 0;
-      const available = Math.max((s.capacity || 0) - bookedCount, 0);
       return {
         ...s.toObject(),
         bookedCount,
-        available,
+        available: Math.max((s.capacity || 0) - bookedCount, 0),
       };
     });
 
     const days = {};
     for (let i = 0; i < 7; i++) {
-      const key = fmtLocal(addDays(weekStart, i));
+      const key = weekStartLocal.plus({ days: i }).toFormat("yyyy-MM-dd");
+
       days[key] = [];
     }
 
     enhancedSlots.forEach((s) => {
-      const key = fmtLocal(new Date(s.date));
+      const key = DateTime.fromJSDate(s.startAt)
+        .setZone(ZONE)
+        .toFormat("yyyy-MM-dd");
       if (!days[key]) days[key] = [];
       days[key].push(s);
     });
 
     res.json({
-      weekStart: fmtLocal(weekStart),
-      weekEnd: fmtLocal(weekEnd),
+      weekStart: weekStartLocal.toFormat("yyyy-MM-dd"),
+      weekEnd: weekEndLocal.toFormat("yyyy-MM-dd"),
       days,
     });
   } catch (e) {
-    console.error("❌ adminGetWeekSlots error details:", e);
+    console.error("❌ adminGetWeekSlots error:", e);
     res.status(500).json({
       code: "ADMIN_SLOTS_WEEK_FETCH_ERROR",
       error: e.message,
-      stack: e.stack,
     });
   }
 };
 
-//
-// =====================================================
-// 🔹 POST /admin/slots
-// =====================================================
 export const adminCreateSlot = async (req, res) => {
   try {
     const { date, startTime, endTime, capacity = 20 } = req.body;
-    if (!date || !startTime || !endTime)
+    if (!date || !startTime || !endTime) {
       return res.status(400).json({ code: "ADMIN_SLOT_MISSING_FIELDS" });
+    }
 
-    const d = new Date(`${date}T00:00:00`);
-    d.setHours(0, 0, 0, 0);
+    const startAtUTC = DateTime.fromISO(`${date}T${startTime}`, {
+      zone: ZONE,
+    }).toUTC();
 
-    if (await hasOverlap(d, startTime, endTime)) {
+    const endAtUTC = DateTime.fromISO(`${date}T${endTime}`, {
+      zone: ZONE,
+    }).toUTC();
+
+    if (!startAtUTC.isValid || !endAtUTC.isValid || endAtUTC <= startAtUTC) {
+      return res.status(400).json({ code: "ADMIN_SLOT_INVALID_TIME" });
+    }
+
+    if (await hasOverlap(startAtUTC.toJSDate(), endAtUTC.toJSDate())) {
       return res.status(409).json({ code: "ADMIN_SLOT_OVERLAP" });
     }
 
     const slot = await Slot.create({
-      date: d,
-      startTime,
-      endTime,
+      date: startAtUTC.startOf("day").toJSDate(),
+      startAt: startAtUTC.toJSDate(),
+      endAt: endAtUTC.toJSDate(),
       capacity: Number(capacity) || 20,
     });
 
@@ -159,87 +143,6 @@ export const adminCreateSlot = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SLOT_CREATE_ERROR" });
   }
 };
-
-//
-// =====================================================
-// 🔹 DELETE /admin/slots/:id
-// =====================================================
-export const adminDeleteSlot = async (req, res) => {
-  try {
-    await Slot.findByIdAndDelete(req.params.id);
-    res.json({ code: "ADMIN_SLOT_DELETE_SUCCESS" });
-  } catch (e) {
-    console.error("❌ adminDeleteSlot error:", e);
-    res.status(500).json({ code: "ADMIN_SLOT_DELETE_ERROR" });
-  }
-};
-
-//
-// =====================================================
-// 🔹 POST /admin/slots/next-week/bulk
-// =====================================================
-export const adminCreateNextWeekBulk = async (req, res) => {
-  try {
-    const { items } = req.body;
-    if (!Array.isArray(items) || !items.length)
-      return res.status(400).json({ code: "ADMIN_SLOT_BULK_EMPTY" });
-
-    const base = startOfWeek(new Date());
-    const nextSunday = addDays(base, 7);
-    nextSunday.setHours(0, 0, 0, 0);
-
-    console.log("📆 إنشاء الأسبوع القادم يبدأ من:", nextSunday.toLocaleDateString("ar-EG"));
-
-    const created = [];
-    let skippedOverlap = 0;
-    let skippedDuplicate = 0;
-
-    for (const it of items) {
-      const d = addDays(nextSunday, it.dayOffset || 0);
-      d.setHours(0, 0, 0, 0);
-
-      if (await hasOverlap(d, it.startTime, it.endTime)) {
-        skippedOverlap++;
-        continue;
-      }
-
-      const exists = await Slot.findOne({
-        date: d,
-        startTime: it.startTime,
-        endTime: it.endTime,
-      });
-
-      if (exists) {
-        skippedDuplicate++;
-        continue;
-      }
-
-      try {
-        const s = await Slot.create({
-          date: d,
-          startTime: it.startTime,
-          endTime: it.endTime,
-          capacity: Number(it.capacity) || 20,
-        });
-        created.push(s._id);
-      } catch (e) {
-        if (e.code === 11000) skippedDuplicate++;
-        else throw e;
-      }
-    }
-
-    res.status(201).json({
-      created: created.length,
-      skippedOverlap,
-      skippedDuplicate,
-      code: "ADMIN_SLOT_BULK_CREATED",
-    });
-  } catch (e) {
-    console.error("❌ adminCreateNextWeekBulk error:", e);
-    res.status(500).json({ code: "ADMIN_SLOT_BULK_ERROR" });
-  }
-};
-
 //
 // =====================================================
 // 🔹 PUT /admin/slots/:id/block
@@ -247,8 +150,7 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 export const adminToggleBlock = async (req, res) => {
   try {
     const slot = await Slot.findById(req.params.id);
-    if (!slot)
-      return res.status(404).json({ code: "ADMIN_SLOT_NOT_FOUND" });
+    if (!slot) return res.status(404).json({ code: "ADMIN_SLOT_NOT_FOUND" });
 
     slot.isBlocked = !slot.isBlocked;
     await slot.save();
@@ -264,5 +166,68 @@ export const adminToggleBlock = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SLOT_BLOCK_ERROR" });
   }
 };
+export const adminCreateNextWeekBulk = async (req, res) => {
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items) || !items.length) {
+      return res.status(400).json({ code: "ADMIN_SLOT_BULK_EMPTY" });
+    }
 
+    const baseLocal = DateTime.now().setZone(ZONE).startOf("week");
+    const nextWeekStart = baseLocal.plus({ weeks: 1 });
 
+    const created = [];
+    let skippedOverlap = 0;
+    let skippedDuplicate = 0;
+
+    for (const it of items) {
+      const dayLocal = nextWeekStart.plus({ days: it.dayOffset || 0 });
+
+      const startAtUTC = DateTime.fromISO(
+        `${dayLocal.toISODate()}T${it.startTime}`,
+        { zone: ZONE }
+      ).toUTC();
+
+      const endAtUTC = DateTime.fromISO(
+        `${dayLocal.toISODate()}T${it.endTime}`,
+        { zone: ZONE }
+      ).toUTC();
+
+      const dayUTC = startAtUTC.startOf("day").toJSDate();
+
+      if (await hasOverlap(startAtUTC.toJSDate(), endAtUTC.toJSDate())) {
+        skippedOverlap++;
+        continue;
+      }
+
+      const exists = await Slot.findOne({
+        startAt: startAtUTC.toJSDate(),
+        endAt: endAtUTC.toJSDate(),
+      });
+
+      if (exists) {
+        skippedDuplicate++;
+        continue;
+      }
+
+      const s = await Slot.create({
+        date: dayUTC,
+        startAt: startAtUTC.toJSDate(),
+        endAt: endAtUTC.toJSDate(),
+        capacity: Number(it.capacity) || 20,
+      });
+
+      created.push(s._id);
+    }
+
+    res.status(201).json({
+      created: created.length,
+      skippedOverlap,
+      skippedDuplicate,
+      code: "ADMIN_SLOT_BULK_CREATED",
+    });
+  } catch (e) {
+    console.error("❌ adminCreateNextWeekBulk error:", e);
+    res.status(500).json({ code: "ADMIN_SLOT_BULK_ERROR" });
+  }
+};

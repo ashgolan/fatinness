@@ -5,11 +5,11 @@ import {
   createGoogleEvent,
   deleteGoogleEvent,
 } from "../utils/googleCalendar.js";
-import { toLocal } from "../utils/date.js";
-import { parseLocalDate, fmtLocal } from "../utils/date.js";
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
 
 /**
- * 🔹 إنشاء حجز جديد
+ * 🔹 إنشاء حجز جديد (UTC-safe)
  */
 export const createBooking = async (req, res) => {
   try {
@@ -17,52 +17,65 @@ export const createBooking = async (req, res) => {
     const { slotId, paymentRef } = req.body;
 
     const slot = await Slot.findById(slotId);
-    if (!slot || slot.isBlocked)
+    if (!slot || slot.isBlocked) {
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
-
-    const now = new Date();
-    const sessionStart = toLocal(slot.date);
-
-    if (slot.startTime) {
-      const [sh, sm] = slot.startTime.split(":").map(Number);
-      sessionStart.setHours(sh, sm, 0, 0);
     }
 
-    if (sessionStart <= now) {
+    // ⏱️ الآن
+    const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
+
+    // ⛔ لا يمكن حجز حصة ماضية
+    if (!slot.startAt || slot.startAt <= nowUTC) {
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_PAST" });
     }
 
-    const startOfWeek = new Date(slot.date);
-    startOfWeek.setDate(slot.date.getDate() - slot.date.getDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    // ============================
+    // 📅 حد الحجوزات الأسبوعية (الأحد)
+    // ============================
+    const slotLocal = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
+    const weekStartLocal = slotLocal.startOf("week").minus({ days: 1 });
+    const weekEndLocal = weekStartLocal.plus({ days: 6 }).endOf("day");
 
     const userBookingsThisWeek = await Booking.countDocuments({
       user: user._id,
       status: "booked",
-      createdAt: { $gte: startOfWeek, $lte: endOfWeek },
+      createdAt: {
+        $gte: weekStartLocal.toUTC().toJSDate(),
+        $lte: weekEndLocal.toUTC().toJSDate(),
+      },
     });
 
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
 
-    if (userBookingsThisWeek >= allowed)
+    if (userBookingsThisWeek >= allowed) {
       return res.status(403).json({ code: "ADMIN_BOOKING_WEEKLY_LIMIT" });
+    }
 
+    // ============================
+    // 🪑 سعة الحصة
+    // ============================
     const slotBookingsCount = await Booking.countDocuments({
       slot: slot._id,
       status: "booked",
     });
 
-    if (slotBookingsCount >= (slot.capacity || 9999))
+    if (slotBookingsCount >= (slot.capacity || 9999)) {
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_FULL" });
+    }
 
+    // ============================
+    // ✅ إنشاء الحجز
+    // ============================
     const booking = await Booking.create({
       user: user._id,
       slot: slot._id,
       paymentRef,
     });
 
+    // ============================
+    // 📅 Google Calendar
+    // ============================
     if (user.google?.accessToken) {
       try {
         await createGoogleEvent(user, booking);
@@ -71,17 +84,13 @@ export const createBooking = async (req, res) => {
       }
     }
 
-    if (slot?.date) {
-      try {
-        await scheduleReminder(
-          booking._id,
-          slot.date,
-          slot.startTime,
-          slot.endTime
-        );
-      } catch (err) {
-        console.warn("⚠️ Reminder scheduling failed:", err.message);
-      }
+    // ============================
+    // 🔔 Reminder (يعتمد على startAt)
+    // ============================
+    try {
+      await scheduleReminder(booking._id, slot.startAt);
+    } catch (err) {
+      console.warn("⚠️ Reminder scheduling failed:", err.message);
     }
 
     res.status(201).json({
@@ -95,60 +104,40 @@ export const createBooking = async (req, res) => {
 };
 
 /**
- * 🔹 إلغاء الحجز
+ * 🔹 إلغاء الحجز (UTC-safe)
  */
-
-
 export const cancelBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.id).populate("slot user");
-    if (!booking)
+    if (!booking) {
       return res.status(404).json({ code: "ADMIN_BOOKING_NOT_FOUND" });
+    }
 
-    if (!booking.user._id.equals(req.user._id) && req.user.role !== "admin")
+    if (
+      !booking.user._id.equals(req.user._id) &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({ code: "ADMIN_BOOKING_FORBIDDEN" });
+    }
 
-    // ============================================================
-    // 🕒 1) الحصول على التاريخ المحلي من slot.date
-    // ============================================================
-    const slotLocalDate = parseLocalDate(fmtLocal(booking.slot.date));
-    // الآن عندنا: Date محلي بدون أي انزلاق UTC
+    if (!booking.slot?.startAt) {
+      return res.status(400).json({ code: "ADMIN_BOOKING_INVALID_SLOT" });
+    }
 
-    // ============================================================
-    // 🕒 2) تحليل وقت بداية الحصة "HH:MM"
-    // ============================================================
-    const [hh, mm] = booking.slot.startTime.split(":").map(Number);
+    // ⏱️ الآن
+    const nowUTC = DateTime.now().setZone(ZONE).toUTC();
 
-    // إنشاء وقت الحصة كتاريخ محلي بالكامل بدون UTC shift
-    const slotStartLocal = new Date(
-      slotLocalDate.getFullYear(),
-      slotLocalDate.getMonth(),
-      slotLocalDate.getDate(),
-      hh,
-      mm,
-      0,
-      0
-    );
+    // 🕒 مهلة الإلغاء: 12 ساعة قبل البداية
+    const cancelDeadlineUTC = DateTime
+      .fromJSDate(booking.slot.startAt)
+      .minus({ hours: 12 })
+      .toUTC();
 
-    // ============================================================
-    // 🕒 3) حساب وقت آخر مهلة مسموحة للإلغاء (12 ساعة قبل الحصة)
-    // ============================================================
-    const twelveHoursBefore = new Date(
-      slotStartLocal.getTime() - 12 * 60 * 60 * 1000
-    );
-
-    // ============================================================
-    // 🕒 4) مقارنة الآن بالتوقيت المحلي أيضًا
-    // ============================================================
-    const nowLocal = toLocal(new Date());
-
-    if (req.user.role !== "admin" && nowLocal > twelveHoursBefore) {
+    if (req.user.role !== "admin" && nowUTC > cancelDeadlineUTC) {
       return res.status(403).json({ code: "BOOKING_CANCEL_TOO_LATE" });
     }
 
-    // ============================================================
-    // 🟢 5) تنفيذ الإلغاء
-    // ============================================================
+    // 🟢 تنفيذ الإلغاء
     booking.status = "cancelled";
     await booking.save();
 
@@ -178,7 +167,7 @@ export const getAllBookings = async (req, res) => {
 
     const bookings = await Booking.find()
       .populate("user", "username email role")
-      .populate("slot", "date startTime capacity")
+      .populate("slot", "startAt endAt capacity isBlocked")
       .sort({ createdAt: -1 });
 
     res.json(bookings);
@@ -194,7 +183,7 @@ export const getAllBookings = async (req, res) => {
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
-      .populate("slot", "date startTime endTime capacity")
+      .populate("slot", "startAt endAt capacity isBlocked")
       .sort({ createdAt: -1 });
 
     res.json(bookings);

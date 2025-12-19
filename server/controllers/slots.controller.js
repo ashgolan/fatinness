@@ -1,61 +1,73 @@
 import Slot from "../models/Slot.js";
 import Booking from "../models/Booking.js";
+import { DateTime } from "luxon";
+import { ZONE, getWeekRangeLocal } from "../utils/time.js";
 
-// 🔹 تجميع النتائج حسب اليوم
-import { fmtLocal } from "../utils/date.js";
-
-// 🔹 دالة تجميع حسب التاريخ
-function groupByDate(slots) {
+// =====================================================
+// 🔹 تجميع النتائج حسب اليوم (محلي)
+// =====================================================
+function groupByLocalDate(slots) {
   const grouped = {};
   slots.forEach((slot) => {
-    const dateKey = fmtLocal(slot.date);
-    if (!grouped[dateKey]) grouped[dateKey] = [];
-    grouped[dateKey].push(slot);
+    const key = DateTime.fromJSDate(slot.startAt)
+      .setZone(ZONE)
+      .toFormat("yyyy-MM-dd");
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(slot);
   });
   return grouped;
 }
 
 // =====================================================
-// 🔹 إرجاع الأيام والساعات المتاحة للأسبوع الحالي أو المحدد
+// 🔹 إرجاع الأيام والساعات المتاحة لأسبوع (الأحد → السبت)
 // =====================================================
 export const getWeekSlots = async (req, res) => {
   try {
     const { startDate } = req.query;
-    const start = startDate ? new Date(startDate) : new Date();
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
+
+    // 🧮 حساب الأسبوع (محلي → UTC)
+    const { weekStartUTC, weekEndUTC, weekStartLocal, weekEndLocal } =
+      getWeekRangeLocal(startDate);
 
     const slots = await Slot.find({
-      date: { $gte: start, $lte: end },
+      startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
       isBlocked: false,
-    }).sort({ date: 1, startTime: 1 });
+    }).sort({ startAt: 1 });
 
-    const groupedSlots = groupByDate(slots);
+    const groupedSlots = groupByLocalDate(slots);
 
-    res.json({ weekStart: start, weekEnd: end, slots: groupedSlots });
+    res.json({
+      weekStart: weekStartLocal.toFormat("yyyy-MM-dd"),
+      weekEnd: weekEndLocal.toFormat("yyyy-MM-dd"),
+      slots: groupedSlots,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("❌ getWeekSlots:", error);
     res.status(500).json({ code: "ADMIN_SLOTS_WEEK_FETCH_ERROR" });
   }
 };
 
 // =====================================================
-// 🔹 إرجاع الساعات المتاحة ليوم معين
+// 🔹 إرجاع الساعات المتاحة ليوم معيّن (YYYY-MM-DD)
 // =====================================================
 export const getDaySlots = async (req, res) => {
   try {
     const { date } = req.params;
-    const day = new Date(date);
 
-    const nextDay = new Date(day);
-    nextDay.setDate(day.getDate() + 1);
+    const dayLocal = DateTime.fromISO(date, { zone: ZONE });
+    if (!dayLocal.isValid) {
+      return res.status(400).json({ code: "INVALID_DATE" });
+    }
+
+    const startUTC = dayLocal.startOf("day").toUTC().toJSDate();
+    const endUTC = dayLocal.endOf("day").toUTC().toJSDate();
 
     const slots = await Slot.find({
-      date: { $gte: day, $lt: nextDay },
+      startAt: { $gte: startUTC, $lte: endUTC },
       isBlocked: false,
-    }).sort({ startTime: 1 });
+    }).sort({ startAt: 1 });
 
-    const now = new Date();
+    const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
 
     const enrichedSlots = await Promise.all(
       slots.map(async (slot) => {
@@ -64,27 +76,22 @@ export const getDaySlots = async (req, res) => {
           status: "booked",
         });
 
-        const slotDate = new Date(slot.date);
-        const [hour, minute] = slot.startTime.split(":").map(Number);
-        slotDate.setHours(hour, minute, 0, 0);
-
-        const isPast =
-          slotDate.toDateString() === now.toDateString() &&
-          slotDate.getTime() <= now.getTime();
-
         return {
           ...slot.toObject(),
           available: Math.max((slot.capacity || 0) - bookedCount, 0),
           isBooked: bookedCount > 0,
-          time: slot.startTime,
-          isPast,
+          time: `${DateTime.fromJSDate(slot.startAt)
+            .setZone(ZONE)
+            .toFormat("HH:mm")}
+ - ${DateTime.fromJSDate(slot.endAt).setZone(ZONE).toFormat("HH:mm")}`,
+          isPast: slot.startAt <= nowUTC,
         };
       })
     );
 
     res.json(enrichedSlots);
   } catch (error) {
-    console.error(error);
+    console.error("❌ getDaySlots:", error);
     res.status(500).json({ code: "ADMIN_SLOTS_DAY_FETCH_ERROR" });
   }
 };
@@ -92,32 +99,29 @@ export const getDaySlots = async (req, res) => {
 // =====================================================
 // 🔹 جلب الحصص القادمة للأسبوعين القادمين
 // =====================================================
-
 export const getUpcomingSlots = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const nowLocal = DateTime.now().setZone(ZONE);
+    const startUTC = nowLocal.startOf("day").toUTC().toJSDate();
+    const endUTC = nowLocal.plus({ days: 14 }).endOf("day").toUTC().toJSDate();
 
-    const end = new Date(today);
-    end.setDate(today.getDate() + 14);
-
-    // 1) جلب كل الحصص القادمة
+    // 1️⃣ جلب الحصص
     const slots = await Slot.find({
-      date: { $gte: today, $lte: end },
+      startAt: { $gte: startUTC, $lte: endUTC },
       isBlocked: false,
     })
-      .sort({ date: 1, startTime: 1 })
+      .sort({ startAt: 1 })
       .lean();
 
     if (!slots.length) {
       return res.json({
-        start: today,
-        end,
+        start: nowLocal.toFormat("yyyy-MM-dd"),
+        end: nowLocal.plus({ days: 14 }).toFormat("yyyy-MM-dd"),
         slots: {},
       });
     }
 
-    // 2) جلب عدد الحجوزات لكل Slot مرة واحدة فقط
+    // 2️⃣ جلب عدد الحجوزات لكل Slot
     const bookingCounts = await Booking.aggregate([
       {
         $match: {
@@ -133,26 +137,27 @@ export const getUpcomingSlots = async (req, res) => {
       },
     ]);
 
-    // 3) تحويل نتائج الـ aggregate إلى Map لسهولة القراءة
     const countsMap = new Map();
     bookingCounts.forEach((b) => countsMap.set(b._id.toString(), b.count));
 
-    // 4) دمج bookedCount داخل كل Slot
     const slotsWithCount = slots.map((slot) => ({
       ...slot,
       bookedCount: countsMap.get(slot._id.toString()) || 0,
+      time: `${DateTime.fromJSDate(slot.startAt)
+        .setZone(ZONE)
+        .toFormat("HH:mm")}
+ - ${DateTime.fromJSDate(slot.endAt).setZone(ZONE).toFormat("HH:mm")}`,
     }));
 
-    // 5) تجميعهم حسب التاريخ
-    const grouped = groupByDate(slotsWithCount);
+    const grouped = groupByLocalDate(slotsWithCount);
 
     res.json({
-      start: today,
-      end,
+      start: nowLocal.toFormat("yyyy-MM-dd"),
+      end: nowLocal.plus({ days: 14 }).toFormat("yyyy-MM-dd"),
       slots: grouped,
     });
   } catch (error) {
-    console.error("❌ Error in getUpcomingSlots:", error);
+    console.error("❌ getUpcomingSlots:", error);
     res.status(500).json({ code: "ADMIN_SLOTS_UPCOMING_FETCH_ERROR" });
   }
 };

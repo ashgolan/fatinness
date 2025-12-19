@@ -40,42 +40,34 @@ if (!admin.apps.length) {
 }
 
 // ======================================================
-// 🔥 إرسال إشعار إلى عدة أجهزة — Notification Message
+// 🔥 إرسال إشعار إلى عدة أجهزة
 // ======================================================
 export async function sendFcmToTokens(tokens = [], message = {}) {
   if (!tokens.length) {
-    return { successCount: 0, failureCount: 1 };
+    return { successCount: 0, failureCount: 0 };
   }
 
   try {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
 
-      // ✨ إشعار رسمي يظهر حتى الشاشة مغلقة
       notification: {
         title: message.title || "Fatinness Studio",
         body: message.body || "",
       },
 
-      // 📌 Data فقط للضغط وفتح رابط
       data: {
-        url: message.url || "https://fateness.onrender.com",
+        url: message.url || process.env.CLIENT_URL || "",
         ...message.data,
       },
 
       android: {
         priority: "high",
-        notification: {
-          sound: "default",
-        },
+        notification: { sound: "default" },
       },
 
       apns: {
-        payload: {
-          aps: {
-            sound: "default",
-          },
-        },
+        payload: { aps: { sound: "default" } },
       },
     });
 
@@ -90,40 +82,36 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
     };
   } catch (error) {
     console.error("❌ FCM send error:", error.message);
-    return { successCount: 0, failureCount: tokens.length };
+    return {
+      successCount: 0,
+      failureCount: tokens.length,
+    };
   }
 }
 
 // ======================================================
-// 🔥 إرسال إشعار لجهاز واحد — Notification Message
+// 🔥 إرسال إشعار لجهاز واحد
 // ======================================================
 export async function sendPushNotification(token, title, body, data = {}) {
   try {
-    const messageObj = {
+    return await admin.messaging().send({
       token,
-
-      // ✨ إشعار رسمي يظهر حتى والشاشة مغلقة
       notification: {
-        title: "",
+        title: title || "Fatinness Studio",
         body: body || "",
       },
-
       data: {
-        url: data.url || "https://fateness.onrender.com",
+        url: data.url || process.env.CLIENT_URL || "",
         ...data,
       },
-
       android: {
         priority: "high",
         notification: { sound: "default" },
       },
-
       apns: {
         payload: { aps: { sound: "default" } },
       },
-    };
-
-    return await admin.messaging().send(messageObj);
+    });
   } catch (err) {
     console.error("❌ Single push error:", err.message);
   }

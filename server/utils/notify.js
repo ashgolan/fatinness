@@ -2,40 +2,38 @@
 import { sendFcmToTokens } from "./fcm.js";
 
 /**
- * 🔹 إرسال إشعار عبر FCM فقط (لا يوجد واتساب ولا fallback)
- * @param {object} user - كائن المستخدم من قاعدة البيانات
- * @param {string} title - عنوان الإشعار
- * @param {string} body - نص الإشعار
- * @returns {Promise<{via: string, successCount: number, failureCount: number}>}
+ * 🔹 إرسال إشعار عبر FCM فقط
  */
-export async function sendSmartNotification({ user, title, body }) {
+export async function sendSmartNotification({ user, title, body, url }) {
   try {
-    // التأكد من وجود توكنات
     const tokens = Array.isArray(user.fcmTokens)
       ? user.fcmTokens.filter(Boolean)
       : [];
 
     if (!tokens.length) {
       console.log(
-        `⚠️ لا توجد FCM Tokens لدى المستخدم (${user.username || user._id}).`
+        `⚠️ No FCM tokens for user (${user.username || user._id})`
       );
-      return { via: "none", successCount: 0, failureCount: 1 };
+      return {
+        via: "none",
+        successCount: 0,
+        failureCount: 0,
+      };
     }
 
-    // 🔸 عنوان ثابت للنادي
     const fixedTitle = title || "Fatinness Studio";
 
-    // 🔥 إرسال الإشعار عبر FCM فقط
     const result = await sendFcmToTokens(tokens, {
       title: fixedTitle,
       body: body || "",
+      url: url || process.env.CLIENT_URL,
     });
 
     const successCount = result?.successCount || 0;
     const failureCount = result?.failureCount || 0;
 
     console.log(
-      `📨 [FCM] ${fixedTitle} -> ${user.username}: نجاح ${successCount} | فشل ${failureCount}`
+      `📨 [FCM] ${fixedTitle} -> ${user.username}: success=${successCount}, fail=${failureCount}`
     );
 
     return {
@@ -44,7 +42,11 @@ export async function sendSmartNotification({ user, title, body }) {
       failureCount,
     };
   } catch (err) {
-    console.error("❌ Error in sendSmartNotification:", err.message);
-    return { via: "error", successCount: 0, failureCount: 1 };
+    console.error("❌ sendSmartNotification error:", err.message);
+    return {
+      via: "error",
+      successCount: 0,
+      failureCount: 0,
+    };
   }
 }

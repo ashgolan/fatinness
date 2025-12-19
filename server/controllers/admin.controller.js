@@ -9,12 +9,12 @@ import { createObjectCsvStringifier } from "csv-writer";
 import Setting from "../models/Setting.js";
 import multer from "multer";
 import path from "path";
-import { fmtLocal } from "../utils/date.js";
 import mongoose from "mongoose";
 import { sendSmartNotification } from "../utils/notify.js";
-import { sendFcmToTokens as sendFCMNotification } from "../utils/fcm.js";
-import { parseLocalDate } from "../utils/date.js";
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
 import fs from "fs";
+import { hasOverlap } from "./adminSlots.Controller.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -34,7 +34,21 @@ export const upload = multer({
     else cb(new Error("الملف يجب أن يكون صورة"));
   },
 });
+export const adminGetSlotBookings = async (req, res) => {
+  try {
+    const slotId = new mongoose.Types.ObjectId(req.params.id);
 
+    const bookings = await Booking.find({ slot: slotId }).populate(
+      "user",
+      "username phone name email"
+    );
+
+    res.json({ bookings });
+  } catch (err) {
+    console.error("❌ Error loading slot bookings:", err);
+    res.status(500).json({ code: "ADMIN_SLOT_BOOKINGS_ERROR" });
+  }
+};
 // =======================
 // 🟦 إنشاء قالب أسبوعي
 // =======================
@@ -59,46 +73,96 @@ export const createWeekTemplate = async (req, res) => {
 // =======================
 // 🟦 تطبيق القالب
 // =======================
+// =======================
+// 🟦 تطبيق قالب أسبوعي (UTC-safe)
+// =======================
+
 export const applyTemplate = async (req, res) => {
   try {
     const { templateId, startDate } = req.body;
 
+    if (!templateId || !startDate) {
+      return res.status(400).json({ code: "ADMIN_TEMPLATE_REQUIRED" });
+    }
+
+    // 1️⃣ تحميل القالب
     const template = await WeekTemplate.findById(templateId);
     if (!template) {
       return res.status(404).json({ code: "ADMIN_TEMPLATE_NOT_FOUND" });
     }
 
-    const start = parseLocalDate(startDate);
-    const createdSlots = [];
-
-    for (const slot of template.slots) {
-      const slotDate = new Date(start);
-      slotDate.setDate(start.getDate() + slot.dateOffset);
-
-      const exists = await Slot.findOne({
-        date: slotDate,
-        startTime: slot.startTime,
-      });
-
-      if (!exists) {
-        const newSlot = await Slot.create({
-          date: slotDate,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          capacity: slot.capacity,
-          templateId: template._id,
-        });
-        createdSlots.push(newSlot);
-      }
+    // 2️⃣ تاريخ البداية (محلي – الأحد)
+    const startLocal = DateTime.fromISO(startDate, { zone: ZONE });
+    if (!startLocal.isValid) {
+      return res
+        .status(400)
+        .json({ code: "ADMIN_TEMPLATE_INVALID_START_DATE" });
     }
 
-    res.json({
+    const createdSlots = [];
+    let skippedOverlap = 0;
+    let skippedDuplicate = 0;
+
+    // 3️⃣ إنشاء الحصص من القالب
+    for (const tpl of template.slots) {
+      // اليوم المحلي للحصة
+      const dayLocal = startLocal.plus({ days: tpl.dateOffset || 0 });
+
+      // وقت البداية والنهاية (محلي → UTC)
+      const startAtUTC = DateTime.fromISO(
+        `${dayLocal.toISODate()}T${tpl.startTime}`,
+        { zone: ZONE }
+      ).toUTC();
+
+      const endAtUTC = DateTime.fromISO(
+        `${dayLocal.toISODate()}T${tpl.endTime}`,
+        { zone: ZONE }
+      ).toUTC();
+
+      if (!startAtUTC.isValid || !endAtUTC.isValid || endAtUTC <= startAtUTC) {
+        skippedDuplicate++;
+        continue;
+      }
+
+      // 4️⃣ فحص التداخل (UTC)
+      if (await hasOverlap(startAtUTC.toJSDate(), endAtUTC.toJSDate())) {
+        skippedOverlap++;
+        continue;
+      }
+
+      // 5️⃣ منع التكرار
+      const exists = await Slot.findOne({
+        startAt: startAtUTC.toJSDate(),
+        endAt: endAtUTC.toJSDate(),
+      });
+
+      if (exists) {
+        skippedDuplicate++;
+        continue;
+      }
+
+      // 6️⃣ إنشاء الحصة
+      const slot = await Slot.create({
+        date: startAtUTC.startOf("day").toJSDate(),
+        startAt: startAtUTC.toJSDate(),
+        endAt: endAtUTC.toJSDate(),
+        capacity: tpl.capacity,
+        templateId: template._id,
+      });
+
+      createdSlots.push(slot._id);
+    }
+
+    // 7️⃣ الرد
+    return res.json({
       code: "ADMIN_TEMPLATE_APPLIED",
       created: createdSlots.length,
+      skippedOverlap,
+      skippedDuplicate,
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ code: "ADMIN_TEMPLATE_APPLY_ERROR" });
+    console.error("❌ applyTemplate error:", error);
+    return res.status(500).json({ code: "ADMIN_TEMPLATE_APPLY_ERROR" });
   }
 };
 
@@ -130,18 +194,36 @@ export const setUserExtraBooking = async (req, res) => {
 // =======================
 // 📤 تصدير CSV
 // =======================
+// =======================
+// 📤 تصدير CSV (UTC-safe)
+// =======================
+
 export const exportAttendanceReport = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
 
     const filter = {};
+
+    // 🧮 فلترة المدى الزمني (محلي → UTC)
     if (startDate && endDate) {
-      filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+      const startLocal = DateTime.fromISO(startDate, { zone: ZONE }).startOf(
+        "day"
+      );
+      const endLocal = DateTime.fromISO(endDate, { zone: ZONE }).endOf("day");
+
+      if (!startLocal.isValid || !endLocal.isValid) {
+        return res.status(400).json({ code: "ADMIN_REPORT_INVALID_DATES" });
+      }
+
+      filter.createdAt = {
+        $gte: startLocal.toUTC().toJSDate(),
+        $lte: endLocal.toUTC().toJSDate(),
+      };
     }
 
     const bookings = await Booking.find(filter)
       .populate("user", "username email phone")
-      .populate("slot", "date startTime endTime isBlocked")
+      .populate("slot", "startAt endAt isBlocked")
       .sort({ createdAt: -1 });
 
     if (!bookings.length) {
@@ -161,10 +243,15 @@ export const exportAttendanceReport = async (req, res) => {
     });
 
     const records = bookings.map((b) => {
-      const timeStr =
-        b.slot?.startTime && b.slot?.endTime
-          ? `${b.slot.startTime} - ${b.slot.endTime}`
-          : b.slot?.startTime || "—";
+      const hasSlot = !!b.slot?.startAt && !!b.slot?.endAt;
+
+      const timeStr = hasSlot
+        ? `${DateTime.fromJSDate(b.slot.startAt)
+            .setZone(ZONE)
+            .toFormat("HH:mm")} - ${DateTime.fromJSDate(b.slot.endAt)
+            .setZone(ZONE)
+            .toFormat("HH:mm")}`
+        : "—";
 
       let statusStr = "—";
       if (b.status === "booked") statusStr = "نشط ✅";
@@ -175,12 +262,16 @@ export const exportAttendanceReport = async (req, res) => {
         username: b.user?.username || "—",
         email: b.user?.email || "—",
         phone: b.user?.phone || "—",
-        date: b.slot?.date
-          ? new Date(b.slot.date).toLocaleDateString("ar-EG")
+        date: hasSlot
+          ? DateTime.fromJSDate(b.slot.startAt)
+              .setZone(ZONE)
+              .toFormat("yyyy-MM-dd")
           : "—",
         time: timeStr,
         status: statusStr,
-        createdAt: new Date(b.createdAt).toLocaleString("ar-EG"),
+        createdAt: DateTime.fromJSDate(b.createdAt)
+          .setZone(ZONE)
+          .toFormat("yyyy-MM-dd HH:mm"),
       };
     });
 
@@ -192,9 +283,10 @@ export const exportAttendanceReport = async (req, res) => {
       "attachment; filename=bookings-report.csv"
     );
 
+    // BOM لدعم العربية في Excel
     res.status(200).end("\uFEFF" + csvData);
   } catch (error) {
-    console.error("خطأ أثناء تصدير التقرير:", error);
+    console.error("❌ exportAttendanceReport error:", error);
     res.status(500).json({ code: "ADMIN_REPORT_EXPORT_ERROR" });
   }
 };
@@ -202,20 +294,34 @@ export const exportAttendanceReport = async (req, res) => {
 // =======================
 // 📊 Dashboard
 // =======================
+// =======================
+// 📊 Dashboard (UTC-safe, Sunday-based)
+// =======================
+
 export const getDashboardStats = async (req, res) => {
   try {
-    const now = new Date();
+    // ⏱️ الآن (محلي)
+    const nowLocal = DateTime.now().setZone(ZONE);
+    const nowUTC = nowLocal.toUTC().toJSDate();
 
-    // 📅 آخر 7 أيام
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - 6);
+    // =======================
+    // 📅 آخر 7 أيام (محلي)
+    // =======================
+    const start7Local = nowLocal.minus({ days: 6 }).startOf("day");
+    const start7UTC = start7Local.toUTC().toJSDate();
 
     const last7 = await Booking.aggregate([
-      { $match: { createdAt: { $gte: startOfWeek } } },
+      { $match: { createdAt: { $gte: start7UTC } } },
       {
         $group: {
           _id: {
-            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            date: {
+              $dateToString: {
+                format: "%Y-%m-%d",
+                date: "$createdAt",
+                timezone: "Asia/Jerusalem",
+              },
+            },
             status: "$status",
           },
           count: { $sum: 1 },
@@ -225,9 +331,8 @@ export const getDashboardStats = async (req, res) => {
 
     const dailyBookings = [];
     for (let i = 0; i < 7; i++) {
-      const day = new Date(startOfWeek);
-      day.setDate(startOfWeek.getDate() + i);
-      const dateStr = fmtLocal(day);
+      const dayLocal = start7Local.plus({ days: i });
+      const dateStr = dayLocal.toFormat("yyyy-MM-dd");
 
       const getCount = (status) =>
         last7.find((d) => d._id.date === dateStr && d._id.status === status)
@@ -241,47 +346,47 @@ export const getDashboardStats = async (req, res) => {
       });
     }
 
+    // =======================
     // ☀️ جلسات اليوم
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
+    // =======================
+    const startOfDayUTC = nowLocal.startOf("day").toUTC().toJSDate();
+    const endOfDayUTC = nowLocal.endOf("day").toUTC().toJSDate();
 
     const todaySessions = await Slot.countDocuments({
-      date: { $gte: startOfDay, $lte: endOfDay },
+      startAt: { $gte: startOfDayUTC, $lte: endOfDayUTC },
     });
 
-    // 🔥 الحجوزات النشطة (غير منتهية)
-    const booked = await Booking.find({ status: "booked" }).populate("slot");
+    // =======================
+    // 🔥 الحجوزات النشطة
+    // =======================
+    const activeBookings = await Booking.countDocuments({
+      status: "booked",
+    }).then(async (count) => {
+      const bookings = await Booking.find({ status: "booked" }).populate(
+        "slot"
+      );
+      return bookings.filter(
+        (b) => b.slot && b.slot.endAt && b.slot.endAt >= nowUTC
+      ).length;
+    });
 
-    const activeBookings = booked.filter((b) => {
-      if (!b.slot || !b.slot.endTime) return false;
-      const [h, m] = b.slot.endTime.split(":").map(Number);
-      const end = new Date(b.slot.date);
-      end.setHours(h, m, 0, 0);
-      return end >= now;
-    }).length;
+    // =======================
+    // 🌈 الأسبوع القادم (الأحد → السبت)
+    // =======================
+    const weekStartLocal = nowLocal.startOf("week").minus({ days: 1 });
+    const nextWeekStartLocal = weekStartLocal.plus({ weeks: 1 });
+    const nextWeekEndLocal = nextWeekStartLocal.plus({ days: 6 }).endOf("day");
 
-    // 🌈 حساب الأسبوع القادم الصحيح (الأحد → السبت)
-    const today = new Date();
-    const dow = today.getDay(); // 0 = Sunday
-
-    const startOfThisWeek = new Date(today);
-    startOfThisWeek.setDate(today.getDate() - dow);
-    startOfThisWeek.setHours(0, 0, 0, 0);
-
-    const startOfNextWeek = new Date(startOfThisWeek);
-    startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
-
-    const endOfNextWeek = new Date(startOfNextWeek);
-    endOfNextWeek.setDate(endOfNextWeek.getDate() + 6);
-    endOfNextWeek.setHours(23, 59, 59, 999);
+    const nextWeekStartUTC = nextWeekStartLocal.toUTC().toJSDate();
+    const nextWeekEndUTC = nextWeekEndLocal.toUTC().toJSDate();
 
     const upcomingWeekSessions = await Slot.countDocuments({
-      date: { $gte: startOfNextWeek, $lte: endOfNextWeek },
+      startAt: { $gte: nextWeekStartUTC, $lte: nextWeekEndUTC },
     });
 
+    // =======================
+    // 🔢 أرقام عامة
+    // =======================
     const [
       totalUsers,
       blockedUsers,
@@ -298,6 +403,9 @@ export const getDashboardStats = async (req, res) => {
       Slot.countDocuments(),
     ]);
 
+    // =======================
+    // 📤 Response
+    // =======================
     res.json({
       totalUsers,
       activeUsers: totalUsers - blockedUsers,
@@ -511,21 +619,12 @@ export const sendCustomNotification = async (req, res) => {
       body,
 
       targetType:
-        target === "all"
-          ? "all"
-          : target.startsWith("slot:")
-          ? "slot"
-          : "user",
+        target === "all" ? "all" : target.startsWith("slot:") ? "slot" : "user",
 
       targetUser:
-        target === "all" || target.startsWith("slot:")
-          ? null
-          : target,
+        target === "all" || target.startsWith("slot:") ? null : target,
 
-      targetSlot:
-        target.startsWith("slot:")
-          ? target.split(":")[1]
-          : null,
+      targetSlot: target.startsWith("slot:") ? target.split(":")[1] : null,
 
       sentBy: adminUser,
       successCount: totalSuccess,
@@ -549,7 +648,6 @@ export const sendCustomNotification = async (req, res) => {
     });
   }
 };
-
 
 // =======================
 // 🗂️ جلب سجل الإشعارات
@@ -725,45 +823,50 @@ export const updateUserByAdmin = async (req, res) => {
   }
 };
 
-
 // =======================
 // 📌 تلخيص الحجوزات
 // =======================
+// =======================
+// 📌 تلخيص الحجوزات (UTC-safe)
+// =======================
+
 export const getBookingsSummary = async (req, res) => {
   try {
-    const users = await User.find({ role: "user" }).select("username email");
+    const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
 
-    const now = new Date();
+    const users = await User.find({ role: "user" }).select("username email");
 
     const data = await Promise.all(
       users.map(async (u) => {
         const bookings = await Booking.find({ user: u._id }).populate("slot");
-
-        const getStatus = (b) => {
-          if (!b.slot) return "unknown";
-          if (b.slot.isBlocked) return "blocked";
-
-          const end = new Date(b.slot.date);
-          if (b.slot.endTime) {
-            const [h, m] = b.slot.endTime.split(":");
-            end.setHours(Number(h), Number(m), 0, 0);
-          }
-
-          if (b.status === "booked" && now > end) return "completed";
-
-          return b.status;
-        };
 
         let active = 0;
         let cancelled = 0;
         let completed = 0;
 
         bookings.forEach((b) => {
-          const st = getStatus(b);
+          // ملغى
+          if (b.status === "cancelled") {
+            cancelled++;
+            return;
+          }
 
-          if (st === "booked") active++;
-          else if (st === "cancelled") cancelled++;
-          else if (st === "completed") completed++;
+          // بدون حصة
+          if (!b.slot || !b.slot.endAt) {
+            return;
+          }
+
+          // محجوب
+          if (b.slot.isBlocked) {
+            completed++;
+            return;
+          }
+
+          // نشط / منتهٍ
+          if (b.status === "booked") {
+            if (b.slot.endAt >= nowUTC) active++;
+            else completed++;
+          }
         });
 
         return {
@@ -787,37 +890,49 @@ export const getBookingsSummary = async (req, res) => {
 // =======================
 // 📌 حجوزات مستخدمة محددة
 // =======================
+// =======================
+// 📌 حجوزات مستخدم محدد (UTC-safe)
+// =======================
+
 export const getUserBookings = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const bookings = await Booking.find({ user: id })
-      .populate("slot", "date startTime endTime isBlocked")
-      .sort({ "slot.date": -1 });
+    const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
 
-    res.json(bookings);
+    const bookings = await Booking.find({ user: id })
+      .populate("slot", "startAt endAt isBlocked")
+      .sort({ "slot.startAt": -1 });
+
+    const result = bookings.map((b) => {
+      let status = b.status;
+
+      if (b.status === "booked" && b.slot?.endAt) {
+        if (b.slot.isBlocked) {
+          status = "blocked";
+        } else if (b.slot.endAt < nowUTC) {
+          status = "completed";
+        }
+      }
+
+      return {
+        _id: b._id,
+        status,
+        createdAt: b.createdAt,
+        slot: b.slot
+          ? {
+              startAt: b.slot.startAt,
+              endAt: b.slot.endAt,
+              isBlocked: b.slot.isBlocked,
+            }
+          : null,
+      };
+    });
+
+    res.json(result);
   } catch (err) {
     console.error("❌ Error in getUserBookings:", err);
     res.status(500).json({ code: "ADMIN_USER_BOOKINGS_ERROR" });
-  }
-};
-
-// =======================
-// 📌 حجوزات حصة واحدة
-// =======================
-export const adminGetSlotBookings = async (req, res) => {
-  try {
-    const slotId = new mongoose.Types.ObjectId(req.params.id);
-
-    const bookings = await Booking.find({ slot: slotId }).populate(
-      "user",
-      "username phone name email"
-    );
-
-    res.json({ bookings });
-  } catch (err) {
-    console.error("❌ Error loading slot bookings:", err);
-    res.status(500).json({ code: "ADMIN_SLOT_BOOKINGS_ERROR" });
   }
 };
 
@@ -871,7 +986,9 @@ export const deleteUserCompletely = async (req, res) => {
 
     // 🔐 2) ممنوع حذف المدير الرئيسي نهائيًا
     if (targetUser.isSuperAdmin) {
-      return res.status(403).json({ code: "ADMIN_DELETE_SUPERADMIN_FORBIDDEN" });
+      return res
+        .status(403)
+        .json({ code: "ADMIN_DELETE_SUPERADMIN_FORBIDDEN" });
     }
 
     // 🔐 3) ممنوع أن يحذف المدير الرئيسي نفسه
@@ -906,7 +1023,6 @@ export const deleteUserCompletely = async (req, res) => {
     await User.findByIdAndDelete(userId);
 
     return res.json({ code: "ADMIN_DELETE_SUCCESS" });
-
   } catch (error) {
     console.error("❌ Error in deleteUserCompletely:", error);
     return res.status(500).json({ code: "ADMIN_DELETE_ERROR" });
@@ -923,7 +1039,7 @@ export const resetLight = async (req, res) => {
       Booking.deleteMany({}),
       Notification.deleteMany({}),
       Slot.deleteMany({}),
-      WeekTemplate.deleteMany({})
+      WeekTemplate.deleteMany({}),
     ]);
 
     res.json({ code: "ADMIN_RESET_LIGHT_SUCCESS" });
@@ -932,7 +1048,6 @@ export const resetLight = async (req, res) => {
     res.status(500).json({ code: "ADMIN_RESET_LIGHT_ERROR" });
   }
 };
-
 
 export const resetMedium = async (req, res) => {
   try {
@@ -948,7 +1063,7 @@ export const resetMedium = async (req, res) => {
       Slot.deleteMany({}),
       WeekTemplate.deleteMany({}),
       User.deleteMany({ _id: { $ne: superAdminId } }),
-      Setting.deleteMany({})
+      Setting.deleteMany({}),
     ]);
 
     res.json({ code: "ADMIN_RESET_MEDIUM_SUCCESS" });
@@ -957,9 +1072,6 @@ export const resetMedium = async (req, res) => {
     res.status(500).json({ code: "ADMIN_RESET_MEDIUM_ERROR" });
   }
 };
-
-
-
 
 export const resetHard = async (req, res) => {
   try {
@@ -975,7 +1087,7 @@ export const resetHard = async (req, res) => {
       Slot.deleteMany({}),
       WeekTemplate.deleteMany({}),
       Setting.deleteMany({}),
-      User.deleteMany({ _id: { $ne: superAdminId } })
+      User.deleteMany({ _id: { $ne: superAdminId } }),
     ]);
 
     // حذف الملفات من مجلد uploads
@@ -993,8 +1105,6 @@ export const resetHard = async (req, res) => {
     res.status(500).json({ code: "ADMIN_RESET_HARD_ERROR" });
   }
 };
-
-
 
 export const resetFactory = async (req, res) => {
   try {

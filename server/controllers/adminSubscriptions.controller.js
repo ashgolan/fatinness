@@ -1,32 +1,43 @@
+// =======================
+// 📊 Subscription Report (UTC-safe)
+// =======================
+
+import { DateTime } from "luxon";
+import { ZONE } from "../utils/time.js";
 import User from "../models/User.js";
 
 export const getSubscriptionReport = async (req, res) => {
   try {
-    const now = new Date();
-    const fiveDaysAhead = new Date();
-    fiveDaysAhead.setDate(now.getDate() + 5); // 🔥 تغيير 7 أيام → 5 أيام
+    // ⏱️ الآن (محلي → UTC)
+    const nowLocal = DateTime.now().setZone(ZONE);
+    const nowUTC = nowLocal.toUTC();
 
-    // جلب فقط من لديه تاريخ نهاية اشتراك
+    // ⏳ بعد 5 أيام (محلي → UTC)
+    const fiveDaysAheadUTC = nowLocal
+      .plus({ days: 5 })
+      .endOf("day")
+      .toUTC();
+
+    // فقط من لديه تاريخ نهاية
     const users = await User.find({
-      subscriptionEnd: { $exists: true, $ne: null }
+      subscriptionEnd: { $exists: true, $ne: null },
     }).select("username phone subscriptionEnd isBlocked");
 
-    // الأقسام
     const activeSoon = [];
     const expired = [];
     const active = [];
 
     for (const u of users) {
-      const end = new Date(u.subscriptionEnd);
+      if (!u.subscriptionEnd) continue;
 
-      if (end < now) {
-        expired.push(u);                        // منتهٍ
-      } 
-      else if (end >= now && end <= fiveDaysAhead) {
-        activeSoon.push(u);                    // ينتهي خلال 5 أيام
-      } 
-      else {
-        active.push(u);                        // نشط
+      const endUTC = DateTime.fromJSDate(u.subscriptionEnd);
+
+      if (endUTC < nowUTC) {
+        expired.push(u);                 // منتهٍ
+      } else if (endUTC <= fiveDaysAheadUTC) {
+        activeSoon.push(u);              // ينتهي خلال 5 أيام
+      } else {
+        active.push(u);                  // نشط
       }
     }
 
@@ -36,7 +47,7 @@ export const getSubscriptionReport = async (req, res) => {
       active,
     });
   } catch (err) {
-    console.error("Subscription report error:", err);
+    console.error("❌ Subscription report error:", err);
     res.status(500).json({ error: "SERVER_ERROR" });
   }
 };
