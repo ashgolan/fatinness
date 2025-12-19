@@ -264,3 +264,5 @@ export const adminToggleBlock = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SLOT_BLOCK_ERROR" });
   }
 };
+
+
