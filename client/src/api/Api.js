@@ -1,8 +1,11 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+const baseURL =
+  process.env.REACT_APP_API_URL || "http://localhost:4000";
+
 const Api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL,
 });
 
 Api.interceptors.request.use((config) => {
