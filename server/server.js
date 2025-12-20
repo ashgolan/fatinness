@@ -25,8 +25,11 @@ const app = express();
 // ============================
 // ⚠️ Stripe Webhook (raw body)
 // ============================
-app.use("/webhook", express.raw({ type: "application/json" }));
-app.use("/webhook", webhookRoutes);
+app.post(
+  "/webhook/stripe",
+  express.raw({ type: "application/json" }),
+  webhookRoutes
+);
 
 // ============================
 // 🛡 Helmet Security
@@ -89,9 +92,6 @@ app.use("/gallery", galleryRoutes);
 // ============================
 app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
-
-
-import { exec } from "child_process";
 
 app.post("/deploy", (req, res) => {
   const secret = req.headers["x-deploy-secret"];
