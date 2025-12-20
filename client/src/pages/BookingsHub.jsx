@@ -13,6 +13,14 @@ import useServerError from "../hooks/useServerError";
 import { formatTimeRange } from "../utils/timeFormatting";
 import { DateTime } from "luxon";
 
+const toLocalKey = (dateOrISO) =>
+  DateTime.fromJSDate(
+    typeof dateOrISO === "string" ? new Date(dateOrISO) : dateOrISO,
+    { zone: "utc" }
+  )
+    .setZone("local")
+    .toFormat("yyyy-MM-dd");
+
 export default function BookingsHub() {
   const handleServerError = useServerError();
 
@@ -65,7 +73,16 @@ export default function BookingsHub() {
       ]);
       console.log("RAW SLOTS RESPONSE:", slotsRes.data);
 
-      const grouped = slotsRes.data?.slots || {};
+      const rawGrouped = slotsRes.data?.slots || {};
+      const grouped = {};
+
+      Object.keys(rawGrouped).forEach((utcKey) => {
+        const localKey = DateTime.fromISO(utcKey, { zone: "utc" })
+          .setZone("local")
+          .toFormat("yyyy-MM-dd");
+
+        grouped[localKey] = rawGrouped[utcKey];
+      });
       const filtered = {}; // ✅ هذا السطر كان ناقصًا
 
       const now = DateTime.utc();
@@ -584,7 +601,10 @@ function AvailableView({
                   fontSize: "clamp(18px, 4vw, 22px)",
                 }}
               >
-                {dayNames[new Date(selectedDate).getDay()]} - {selectedDate}
+                {DateTime.fromISO(selectedDate, { zone: "local" })
+                  .setLocale("ar")
+                  .toFormat("cccc")}{" "}
+                - {selectedDate}
               </h3>
             </div>
 
