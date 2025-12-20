@@ -11,6 +11,7 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
 import { formatTimeRange } from "../utils/timeFormatting";
+import { DateTime } from "luxon";
 
 export default function BookingsHub() {
   const handleServerError = useServerError();
@@ -47,10 +48,13 @@ export default function BookingsHub() {
     t("weekdays.saturday"),
   ];
 
-  const toLocalKey = (d) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-      d.getDate()
-    ).padStart(2, "0")}`;
+  const toLocalKey = (dateOrISO) =>
+    DateTime.fromJSDate(
+      typeof dateOrISO === "string" ? new Date(dateOrISO) : dateOrISO,
+      { zone: "utc" }
+    )
+      .setZone("local")
+      .toFormat("yyyy-MM-dd");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -62,11 +66,13 @@ export default function BookingsHub() {
       console.log("RAW SLOTS RESPONSE:", slotsRes.data);
 
       const grouped = slotsRes.data?.slots || {};
-      const now = new Date();
-      const filtered = {};
+      const filtered = {}; // ✅ هذا السطر كان ناقصًا
+
+      const now = DateTime.utc();
+
       Object.keys(grouped).forEach((dateKey) => {
         const validSlots = grouped[dateKey].filter((slot) => {
-          const slotEnd = new Date(slot.endAt); // ✅ الصحيح
+          const slotEnd = DateTime.fromISO(slot.endAt, { zone: "utc" });
           return slotEnd > now;
         });
 
@@ -74,6 +80,8 @@ export default function BookingsHub() {
           filtered[dateKey] = validSlots;
         }
       });
+
+      setSlotsByDay(filtered);
 
       console.log("SLOTS FROM SERVER:", slotsRes.data);
 
@@ -164,22 +172,32 @@ export default function BookingsHub() {
     }
   };
 
-  const now = new Date();
-  const todayKey = toLocalKey(now);
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const monthDates = [...Array(daysInMonth)].map(
-    (_, i) => new Date(year, month, i + 1)
-  );
+  const now = DateTime.utc();
+  const localNow = now.setZone("local");
 
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  const weekDates = [...Array(7)].map((_, i) => {
-    const d = new Date(startOfWeek);
-    d.setDate(startOfWeek.getDate() + i);
-    return d;
-  });
+  const todayKey = localNow.toFormat("yyyy-MM-dd");
+
+  const year = localNow.year;
+  const month = localNow.month; // ⚠️ من 1 إلى 12
+  const daysInMonth = localNow.daysInMonth;
+
+  const monthDates = [...Array(daysInMonth)].map(
+    (_, i) => new Date(year, month - 1, i + 1)
+  );
+  // now سبق أن عرّفناه
+  // const now = DateTime.utc();
+
+  // 🟢 بداية الأسبوع (الأحد)
+  const startOfWeek = localNow.startOf("week");
+  // Luxon يعتبر الاثنين بداية الأسبوع افتراضيًا
+  // لذلك نعدّل لو أردنا الأحد:
+
+  const startOfSundayWeek = startOfWeek.minus({ days: 1 });
+
+  // 🟢 تواريخ الأسبوع (Date عادي للعرض)
+  const weekDates = [...Array(7)].map((_, i) =>
+    startOfSundayWeek.plus({ days: i }).toJSDate()
+  );
 
   const gridDates = view === "week" ? weekDates : monthDates;
 
