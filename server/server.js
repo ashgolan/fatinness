@@ -110,15 +110,23 @@ app.post("/deploy", (req, res) => {
 
   const expected = `sha256=${hmac}`;
 
-  if (signature !== expected) {
+  const sigBuffer = Buffer.from(signature);
+  const expBuffer = Buffer.from(expected);
+
+  if (
+    sigBuffer.length !== expBuffer.length ||
+    !crypto.timingSafeEqual(sigBuffer, expBuffer)
+  ) {
     return res.status(401).send("Invalid signature");
   }
 
   exec("bash /var/www/fateness-server/deploy.sh", (err, stdout, stderr) => {
     if (err) {
-      console.error(err);
+      console.error("Deploy error:", err);
+      console.error(stderr);
       return res.status(500).send("Deploy failed");
     }
+
     console.log(stdout);
     res.send("Deploy OK");
   });
@@ -129,16 +137,17 @@ app.post("/deploy", (req, res) => {
 // ============================
 const PORT = process.env.PORT || 4000;
 
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+// init async stuff بعد التشغيل
 (async () => {
   try {
     await connectDB();
     await startScheduler();
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-    });
+    console.log("🟢 DB & Scheduler ready");
   } catch (err) {
-    console.error("❌ Server startup failed:", err);
-    process.exit(1);
+    console.error("❌ Init failed:", err);
   }
 })();
