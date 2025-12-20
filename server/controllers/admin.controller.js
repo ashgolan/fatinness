@@ -14,7 +14,7 @@ import { sendSmartNotification } from "../utils/notify.js";
 import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
 import fs from "fs";
-import { hasOverlap } from "./adminSlots.controller.js";
+import { hasOverlap } from "./adminSlots.controller2.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
