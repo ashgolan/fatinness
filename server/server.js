@@ -16,11 +16,15 @@ import authRoutes from "./routes/auth.routes.js";
 import maintenanceRoutes from "./routes/maintenance.routes.js";
 import galleryRoutes from "./routes/gallery.routes.js";
 import webhookRoutes from "./routes/webhook.routes.js";
+import crypto from "crypto";
 
 // 🕒 Scheduler
 import { startScheduler } from "./utils/scheduler.js";
 import { exec } from "child_process";
 const app = express();
+
+// GitHub webhook raw body
+app.use("/deploy", express.raw({ type: "application/json" }));
 
 // ============================
 // ⚠️ Stripe Webhook (raw body)
@@ -94,30 +98,30 @@ app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
 
 app.post("/deploy", (req, res) => {
-  const secret = req.headers["x-deploy-secret"];
-
-  if (!secret || secret !== process.env.DEPLOY_SECRET) {
-    return res.status(401).send("Unauthorized");
+  const signature = req.headers["x-hub-signature-256"];
+  if (!signature) {
+    return res.status(401).send("No signature");
   }
 
-  console.log("🚀 Deploy request received");
+  const hmac = crypto
+    .createHmac("sha256", process.env.DEPLOY_SECRET)
+    .update(req.body)
+    .digest("hex");
 
-  exec(
-    "bash /var/www/fateness-server/deploy.sh",
-    { timeout: 5 * 60 * 1000 }, // 5 minutes
-    (error, stdout, stderr) => {
-      if (error) {
-        console.error("❌ DEPLOY ERROR:", error);
-        console.error(stderr);
-        return res.status(500).send("Deploy failed");
-      }
+  const expected = `sha256=${hmac}`;
 
-      console.log("✅ DEPLOY OUTPUT:");
-      console.log(stdout);
+  if (signature !== expected) {
+    return res.status(401).send("Invalid signature");
+  }
 
-      res.send("Deployment completed successfully");
+  exec("bash /var/www/fateness-server/deploy.sh", (err, stdout, stderr) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Deploy failed");
     }
-  );
+    console.log(stdout);
+    res.send("Deploy OK");
+  });
 });
 
 // ============================
