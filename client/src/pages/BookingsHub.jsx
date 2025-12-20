@@ -56,14 +56,6 @@ export default function BookingsHub() {
     t("weekdays.saturday"),
   ];
 
-  const toLocalKey = (dateOrISO) =>
-    DateTime.fromJSDate(
-      typeof dateOrISO === "string" ? new Date(dateOrISO) : dateOrISO,
-      { zone: "utc" }
-    )
-      .setZone("local")
-      .toFormat("yyyy-MM-dd");
-
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -71,7 +63,7 @@ export default function BookingsHub() {
         Api.get("/slots/upcoming"),
         Api.get("/bookings/me"),
       ]);
-      console.log("RAW SLOTS RESPONSE:", slotsRes.data);
+      console.log("RAW SLOTS RESPONSE :", slotsRes.data);
 
       const rawGrouped = slotsRes.data?.slots || {};
       const grouped = {};
