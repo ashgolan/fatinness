@@ -13,12 +13,23 @@ if (window.location.hostname === "localhost") {
 
 const Api = axios.create({
   baseURL,
+  withCredentials: true, // ⭐ مهم جدًا لإرسال الكوكي تلقائيًا
 });
 
-Api.interceptors.request.use((config) => {
-  const token = Cookies.get("JWT");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// Interceptor: يعمل في الحالتين (لوكال + إنتاج)
+Api.interceptors.request.use(
+  (config) => {
+    const token = Cookies.get("JWT");
+
+    // إذا أمكن قراءة التوكن (غالبًا في اللوكال)
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // إذا لم يمكن (الإنتاج) → الكوكي تُرسل تلقائيًا
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 export { Api };
