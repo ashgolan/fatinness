@@ -79,6 +79,8 @@ const DAY_KEYS = [
 
 export default function AdminSchedule() {
   const handleServerError = useServerError();
+  const [serverWeekStart, setServerWeekStart] = useState(null);
+  const [serverNextWeekStart, setServerNextWeekStart] = useState(null);
 
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
@@ -93,7 +95,7 @@ export default function AdminSchedule() {
 
   // ===================== الحالة =====================
   const [tab, setTab] = useState(0);
-  const weekStart = useMemo(() => startOfWeek(new Date()), []);
+  // const weekStart = useMemo(() => startOfWeek(new Date()), []);
   const [weekData, setWeekData] = useState(null);
   const [nextWeekData, setNextWeekData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -105,10 +107,9 @@ export default function AdminSchedule() {
   const fetchCurrentWeek = async () => {
     setLoading(true);
     try {
-      const { data } = await Api.get("/admin/slots/week", {
-        params: { start: fmt(weekStart) },
-      });
+      const { data } = await Api.get("/admin/slots/week");
       setWeekData(data);
+      setServerWeekStart(new Date(data.weekStart));
     } catch (err) {
       handleServerError(err);
     } finally {
@@ -118,31 +119,37 @@ export default function AdminSchedule() {
 
   const fetchNextWeek = async () => {
     try {
-      const nextStart = addDays(weekStart, 7);
       const { data } = await Api.get("/admin/slots/week", {
-        params: { start: fmt(nextStart) },
+        params: { start: fmt(addDays(serverWeekStart, 7)) },
       });
       setNextWeekData(data);
+      setServerNextWeekStart(new Date(data.weekStart));
     } catch (err) {
       handleServerError(err);
     }
   };
 
-  useEffect(() => {
-    fetchCurrentWeek();
-    fetchNextWeek();
+useEffect(() => {
+  fetchCurrentWeek();
 
-    setNextWeek(
-      Array.from({ length: 7 }, (_, i) => ({
-        dayOffset: i,
-        items: [],
-      }))
-    );
-  }, []);
+  setNextWeek(
+    Array.from({ length: 7 }, (_, i) => ({
+      dayOffset: i,
+      items: [],
+    }))
+  );
+}, []);
+useEffect(() => {
+  if (!serverWeekStart) return;
+  fetchNextWeek();
+}, [serverWeekStart]);
 
-  // ===================== إدارة الأسبوع الحالي =====================
+
   const addSlot = (dayIndex) => {
-    const key = fmt(addDays(weekStart, dayIndex));
+    if (!serverWeekStart) return;
+
+    const key = fmt(addDays(serverWeekStart, dayIndex));
+
     setCurrentEdits((prev) => ({
       ...prev,
       [key]: [
@@ -549,7 +556,8 @@ export default function AdminSchedule() {
                   }}
                 >
                   {Array.from({ length: 7 }, (_, i) => {
-                    const d = addDays(weekStart, i);
+                    if (!serverWeekStart) return null;
+                    const d = addDays(serverWeekStart, i);
                     const key = fmt(d);
 
                     return (
@@ -685,7 +693,9 @@ export default function AdminSchedule() {
             {/* أيام الأسبوع القادم */}
             <Grid container spacing={3}>
               {Array.from({ length: 7 }, (_, i) => {
-                const date = fmt(addDays(addDays(weekStart, 7), i));
+                if (!serverNextWeekStart) return null;
+
+                const date = fmt(addDays(serverNextWeekStart, i));
 
                 return (
                   <Grid

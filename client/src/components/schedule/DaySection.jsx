@@ -27,6 +27,15 @@ export default function DaySection({
   onRemoveNew,
   onDeleteExisting,
 }) {
+  function fmtTime(date) {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toLocaleTimeString("he-IL", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
   const { t } = useTranslation();
@@ -44,16 +53,11 @@ export default function DaySection({
   };
 
   // 🔥 تحديد انتهاء الحصة بناءً على تاريخ ووقت النهاية
-function isSlotPast(slot) {
-  if (!slot?.endTime) return false;
-
-  // نستخدم تاريخ اليوم من props وليس من بيانات السيرفر
-  const slotEnd = new Date(`${date}T${slot.endTime}:00`);
-  const now = new Date();
-
-  return slotEnd < now;
-}
-
+  function isSlotPast(slot) {
+    if (!slot?.endAt) return false;
+    return new Date(slot.endAt) < new Date();
+  }
+console.log("existingSlots:", existingSlots);
 
   return (
     <Paper
@@ -148,7 +152,7 @@ function isSlotPast(slot) {
                     fontSize: 15,
                   }}
                 >
-                  {slot.startTime} - {slot.endTime}
+                  {fmtTime(slot.startAt)} - {fmtTime(slot.endAt)}
                 </Typography>
 
                 {/* 🔥 زر الحذف فقط إذا لم تنتهِ الحصة */}

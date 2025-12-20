@@ -39,18 +39,19 @@ export const adminGetWeekSlots = async (req, res) => {
       return res.status(400).json({ error: "Invalid start date" });
     }
 
-    // ⬅️ الأسبوع يبدأ الأحد
+    // ⬅️ الأحد كبداية أسبوع
     const weekStartLocal = baseDate.startOf("week").minus({ days: 1 });
     const weekEndLocal = weekStartLocal.plus({ days: 6 }).endOf("day");
 
     const weekStartUTC = weekStartLocal.toUTC().toJSDate();
     const weekEndUTC = weekEndLocal.toUTC().toJSDate();
 
+    // 1️⃣ جلب الحصص
     const slots = await Slot.find({
       startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
     }).sort({ startAt: 1 });
 
-    // 🔢 الحجوزات
+    // 2️⃣ حساب الحجوزات
     const slotIds = slots.map((s) => s._id);
     let bookedBySlot = [];
 
@@ -66,19 +67,25 @@ export const adminGetWeekSlots = async (req, res) => {
       return acc;
     }, {});
 
+    // 3️⃣ تجهيز الحصص للفرونت (⬅️ هنا المهم)
     const enhancedSlots = slots.map((s) => {
       const bookedCount = bookedMap[s._id.toString()] || 0;
+
       return {
         ...s.toObject(),
+        startTime: DateTime.fromJSDate(s.startAt)
+          .setZone(ZONE)
+          .toFormat("HH:mm"),
+        endTime: DateTime.fromJSDate(s.endAt).setZone(ZONE).toFormat("HH:mm"),
         bookedCount,
         available: Math.max((s.capacity || 0) - bookedCount, 0),
       };
     });
 
+    // 4️⃣ تقسيم الأيام
     const days = {};
     for (let i = 0; i < 7; i++) {
       const key = weekStartLocal.plus({ days: i }).toFormat("yyyy-MM-dd");
-
       days[key] = [];
     }
 
@@ -89,6 +96,16 @@ export const adminGetWeekSlots = async (req, res) => {
       if (!days[key]) days[key] = [];
       days[key].push(s);
     });
+console.log("🧪 WEEK RESPONSE DEBUG");
+console.log("weekStart:", weekStartLocal.toFormat("yyyy-MM-dd"));
+console.log("weekEnd:", weekEndLocal.toFormat("yyyy-MM-dd"));
+console.log("days keys:", Object.keys(days));
+console.log(
+  "slots per day:",
+  Object.fromEntries(
+    Object.entries(days).map(([k, v]) => [k, v.length])
+  )
+);
 
     res.json({
       weekStart: weekStartLocal.toFormat("yyyy-MM-dd"),
