@@ -10,12 +10,14 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
+import { formatTimeRange } from "../utils/timeFormatting";
 
 export default function BookingsHub() {
   const handleServerError = useServerError();
 
   const { mode, BRAND } = useThemeMode();
   const { t } = useTranslation();
+  const lang = t.language; // ar | he | en
 
   // ⬇️ المرجع الخاص بالسكرول
   const slotsRef = useRef(null);
@@ -57,28 +59,27 @@ export default function BookingsHub() {
         Api.get("/slots/upcoming"),
         Api.get("/bookings/me"),
       ]);
+      console.log("RAW SLOTS RESPONSE:", slotsRes.data);
 
       const grouped = slotsRes.data?.slots || {};
       const now = new Date();
       const filtered = {};
       Object.keys(grouped).forEach((dateKey) => {
-        const normalizedKey = toLocalKey(new Date(dateKey)); // ⭐ السطر المهم
-
         const validSlots = grouped[dateKey].filter((slot) => {
-          const slotEnd = new Date(slot.date);
-          const [h, m] = slot.endTime.split(":");
-          slotEnd.setHours(h, m, 0, 0);
+          const slotEnd = new Date(slot.endAt); // ✅ الصحيح
           return slotEnd > now;
         });
 
         if (validSlots.length > 0) {
-          filtered[normalizedKey] = validSlots; // ⭐ هنا
+          filtered[dateKey] = validSlots;
         }
       });
 
       console.log("SLOTS FROM SERVER:", slotsRes.data);
 
       setSlotsByDay(filtered);
+      console.log("FILTERED SLOTS:", filtered);
+
       const myActive = bookingsRes.data
         .filter((b) => b.status === "booked")
         .map((b) => b.slot._id);
@@ -104,7 +105,7 @@ export default function BookingsHub() {
       try {
         const res = await Api.post("/bookings", { slotId });
         console.log("BOOK RESPONSE:", res.data); // <<<<<< أريد هذا
-        toast.success("تم الحجز بنجاح");
+        toast.success(t("toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
         handleServerError(err); // ⬅️ الآن سيظهر التوست الصحيح
@@ -184,11 +185,13 @@ export default function BookingsHub() {
 
   const upcomingBookings = allBookings.filter(
     (b) =>
-      new Date(b.slot.date) >= now && b.status === "booked" && !b.slot.isBlocked
+      new Date(b.slot.startAt) >= now &&
+      b.status === "booked" &&
+      !b.slot.isBlocked
   );
   const pastBookings = allBookings.filter(
     (b) =>
-      new Date(b.slot.date) < now &&
+      new Date(b.slot.startAt) < now &&
       b.status !== "cancelled" &&
       !b.slot.isBlocked
   );
@@ -426,6 +429,8 @@ function AvailableView({
             myBookings.includes(s._id)
           );
 
+          console.log("LOOKING FOR DATE:", key, slotsByDay[key]);
+
           return (
             <div
               key={key}
@@ -607,7 +612,7 @@ function AvailableView({
                         marginBottom: 8,
                       }}
                     >
-                      🕒 {slot.startTime} - {slot.endTime}
+                      🕒 {formatTimeRange(slot.startAt, slot.endAt, t)}
                     </div>
 
                     <div
@@ -743,7 +748,7 @@ function MyBookingsView({
         >
           {filteredBookings.map((b) => {
             const isCancelled = b.status === "cancelled" || b.slot.isBlocked;
-            const isPast = new Date(b.slot.date) < now;
+            const isPast = new Date(b.slot.startAt) < now;
 
             return (
               <div
@@ -761,7 +766,7 @@ function MyBookingsView({
               >
                 <div style={{ fontWeight: 700, marginBottom: 8 }}>
                   📅{" "}
-                  {new Date(b.slot.date).toLocaleDateString("ar-EG", {
+                  {new Date(b.slot.startAt).toLocaleDateString("ar-EG", {
                     year: "numeric",
                     month: "2-digit",
                     day: "2-digit",
