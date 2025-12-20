@@ -9,7 +9,7 @@ import {
   adminCreateSlot,
   adminGetWeekSlots,
   adminToggleBlock,
-} from "../controllers/adminSlots.Controller.js";
+} from "../controllers/adminSlots.controller.js";
 
 const router = express.Router();
 
