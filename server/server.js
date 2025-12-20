@@ -98,10 +98,10 @@ app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
 
 app.post("/deploy", (req, res) => {
+  console.log("🔔 Deploy webhook received");
+
   const signature = req.headers["x-hub-signature-256"];
-  if (!signature) {
-    return res.status(401).send("No signature");
-  }
+  console.log("GitHub signature:", signature);
 
   const hmac = crypto
     .createHmac("sha256", process.env.DEPLOY_SECRET)
@@ -109,28 +109,20 @@ app.post("/deploy", (req, res) => {
     .digest("hex");
 
   const expected = `sha256=${hmac}`;
+  console.log("Expected signature:", expected);
 
-  const sigBuffer = Buffer.from(signature);
-  const expBuffer = Buffer.from(expected);
-
-  if (
-    sigBuffer.length !== expBuffer.length ||
-    !crypto.timingSafeEqual(sigBuffer, expBuffer)
-  ) {
+  if (!signature || signature !== expected) {
+    console.log("❌ Signature mismatch");
     return res.status(401).send("Invalid signature");
   }
 
-  exec("bash /var/www/fateness-server/deploy.sh", (err, stdout, stderr) => {
-    if (err) {
-      console.error("Deploy error:", err);
-      console.error(stderr);
-      return res.status(500).send("Deploy failed");
-    }
+  console.log("✅ Signature OK");
 
-    console.log(stdout);
+  exec("bash /var/www/fateness-server/deploy.sh", () => {
     res.send("Deploy OK");
   });
 });
+;
 
 // ============================
 // 🚀 Start Server
