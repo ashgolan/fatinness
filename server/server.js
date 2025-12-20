@@ -91,20 +91,35 @@ app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
 
 
+import { exec } from "child_process";
+
 app.post("/deploy", (req, res) => {
-  if (req.query.secret !== process.env.DEPLOY_SECRET) {
+  const secret = req.headers["x-deploy-secret"];
+
+  if (!secret || secret !== process.env.DEPLOY_SECRET) {
     return res.status(401).send("Unauthorized");
   }
 
-  exec("bash /var/www/fateness-server/deploy.sh", (error, stdout, stderr) => {
-    if (error) {
-      console.error("DEPLOY ERROR:", error);
-      return res.status(500).send("Deploy failed");
+  console.log("🚀 Deploy request received");
+
+  exec(
+    "bash /var/www/fateness-server/deploy.sh",
+    { timeout: 5 * 60 * 1000 }, // 5 minutes
+    (error, stdout, stderr) => {
+      if (error) {
+        console.error("❌ DEPLOY ERROR:", error);
+        console.error(stderr);
+        return res.status(500).send("Deploy failed");
+      }
+
+      console.log("✅ DEPLOY OUTPUT:");
+      console.log(stdout);
+
+      res.send("Deployment completed successfully");
     }
-    console.log(stdout);
-    res.send("Deployment completed");
-  });
+  );
 });
+
 // ============================
 // 🚀 Start Server
 // ============================
