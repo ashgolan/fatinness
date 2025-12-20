@@ -40,7 +40,13 @@ export const adminGetWeekSlots = async (req, res) => {
     }
 
     // ⬅️ الأحد كبداية أسبوع
-    const weekStartLocal = baseDate.startOf("week").minus({ days: 1 });
+    // Luxon: weekday (1=Mon ... 7=Sun)
+    const daysFromSunday = baseDate.weekday % 7;
+
+    const weekStartLocal = baseDate
+      .minus({ days: daysFromSunday })
+      .startOf("day");
+
     const weekEndLocal = weekStartLocal.plus({ days: 6 }).endOf("day");
 
     const weekStartUTC = weekStartLocal.toUTC().toJSDate();
@@ -96,16 +102,6 @@ export const adminGetWeekSlots = async (req, res) => {
       if (!days[key]) days[key] = [];
       days[key].push(s);
     });
-console.log("🧪 WEEK RESPONSE DEBUG");
-console.log("weekStart:", weekStartLocal.toFormat("yyyy-MM-dd"));
-console.log("weekEnd:", weekEndLocal.toFormat("yyyy-MM-dd"));
-console.log("days keys:", Object.keys(days));
-console.log(
-  "slots per day:",
-  Object.fromEntries(
-    Object.entries(days).map(([k, v]) => [k, v.length])
-  )
-);
 
     res.json({
       weekStart: weekStartLocal.toFormat("yyyy-MM-dd"),

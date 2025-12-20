@@ -117,17 +117,23 @@ export default function AdminSchedule() {
     }
   };
 
-  const fetchNextWeek = async () => {
-    try {
-      const { data } = await Api.get("/admin/slots/week", {
-        params: { start: fmt(addDays(serverWeekStart, 7)) },
-      });
-      setNextWeekData(data);
-      setServerNextWeekStart(new Date(data.weekStart));
-    } catch (err) {
-      handleServerError(err);
-    }
-  };
+const fetchNextWeek = async () => {
+  try {
+    const { data } = await Api.get("/admin/slots/week", {
+      params: {
+        start: fmt(addDays(serverWeekStart, 7)), // ✅ هذا الصحيح
+      },
+    });
+
+    console.log("NEXT WEEK DATA:", data);
+
+    setNextWeekData(data);
+    setServerNextWeekStart(new Date(data.weekStart));
+  } catch (err) {
+    handleServerError(err);
+  }
+};
+
 
 useEffect(() => {
   fetchCurrentWeek();

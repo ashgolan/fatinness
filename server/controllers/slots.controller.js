@@ -23,11 +23,18 @@ function groupByLocalDate(slots) {
 // =====================================================
 export const getWeekSlots = async (req, res) => {
   try {
-    const { startDate } = req.query;
+    const { startDate, start } = req.query;
+
+    // ✅ نحدد التاريخ الأساسي بوضوح
+    const baseDate = startDate || start || null;
 
     // 🧮 حساب الأسبوع (محلي → UTC)
-    const { weekStartUTC, weekEndUTC, weekStartLocal, weekEndLocal } =
-      getWeekRangeLocal(startDate);
+    const {
+      weekStartUTC,
+      weekEndUTC,
+      weekStartLocal,
+      weekEndLocal,
+    } = getWeekRangeLocal(baseDate);
 
     const slots = await Slot.find({
       startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
