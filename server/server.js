@@ -130,7 +130,7 @@ app.post("/deploy", (req, res) => {
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+console.log("🚀 AUTO DEPLOY TEST – Server running on port", PORT);
 });
 
 // init async stuff بعد التشغيل
