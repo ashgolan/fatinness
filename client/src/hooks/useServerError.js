@@ -5,32 +5,26 @@ export default function useServerError() {
   const { t } = useTranslation();
 
   const handleServerError = (error) => {
-    console.log("SERVER ERROR:", error);
+    console.log("SERVER ERROR:", error?.response?.data);
 
-    // 🔥 أهم شيء: التحقق من Network Error (فصل السيرفر)
+    // 🌐 Network Error (السيرفر غير متصل)
     if (error?.message === "Network Error") {
-      return toast.error(t("server:NETWORK_ERROR"));
+      return toast.error(t("server.errors.NETWORK_ERROR"));
     }
 
-    // إذا السيرفر رجّع code
+    // ✅ الحالة الأساسية: السيرفر يرجّع code
     const code = error?.response?.data?.code;
     if (code) {
-      return toast.error(t(`server:${code}`));
+      return toast.error(t(`server.errors.${code}`));
     }
 
-    // إذا السيرفر رجّع message فقط
-    const message = error?.response?.data?.message;
-    if (message) {
-      return toast.error(message);
-    }
-
-    // إذا السيرفر لم يرجع رد (مثل timeout)
+    // ⛔ request بدون response (timeout / no response)
     if (error?.request) {
-      return toast.error(t("server:NETWORK_ERROR"));
+      return toast.error(t("server.errors.NETWORK_ERROR"));
     }
 
     // fallback أخير
-    return toast.error(t("server:UNKNOWN_ERROR"));
+    return toast.error(t("server.errors.UNKNOWN_ERROR"));
   };
 
   return handleServerError;

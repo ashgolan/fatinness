@@ -882,11 +882,13 @@
     "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "לא ניתן למחוק את המנהל הראשי.",
     "ADMIN_DELETE_SELF_FORBIDDEN": "אינך יכול למחוק את עצמך.",
     "ADMIN_DELETE_SUCCESS": "המשתמש נמחק בהצלחה.",
-    "ADMIN_DELETE_ERROR": "שגיאה במהלך המחיקה."
-  },
-
-  "errors": {
-    "network": "אין חיבור לשרת. נסו שוב מאוחר יותר.",
-    "unknown": "אירעה שגיאה לא צפויה."
+    "ADMIN_DELETE_ERROR": "שגיאה במהלך המחיקה.",
+    "errors": {
+      "ADMIN_SLOT_OVERLAP": "קיים חפיפה בין השיעורים ⛔",
+      "ADMIN_SLOT_INVALID_TIME": "זמן השיעור אינו תקין",
+      "ADMIN_SLOT_DUPLICATE": "השיעור כבר קיים",
+      "NETWORK_ERROR": "שגיאת תקשורת עם השרת 🌐",
+      "UNKNOWN_ERROR": "אירעה שגיאה לא צפויה"
+    }
   }
 }

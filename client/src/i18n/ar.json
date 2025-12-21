@@ -788,9 +788,13 @@
     "version": "الإصدار 1.0.0"
   },
   "server": {
-    "NETWORK_ERROR": "لا يوجد اتصال بالسيرفر.",
-    "UNKNOWN_ERROR": "حدث خطأ غير متوقع.",
-
+    "errors": {
+      "ADMIN_SLOT_OVERLAP": "يوجد تعارض بين المواعيد ⛔",
+      "ADMIN_SLOT_INVALID_TIME": "وقت الحصة غير صالح",
+      "ADMIN_SLOT_DUPLICATE": "الحصة موجودة مسبقًا",
+      "NETWORK_ERROR": "خطأ في الاتصال بالخادم",
+      "UNKNOWN_ERROR": "حدث خطأ غير متوقع"
+    },
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",
     "WEEK_TEMPLATE_CREATE_SUCCESS": "تم إنشاء قالب الأسبوع بنجاح.",

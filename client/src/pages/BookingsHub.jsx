@@ -122,7 +122,7 @@ export default function BookingsHub() {
       try {
         const res = await Api.post("/bookings", { slotId });
         console.log("BOOK RESPONSE:", res.data); // <<<<<< أريد هذا
-        toast.success(t("toasts.bookSuccess"));
+        toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
         handleServerError(err); // ⬅️ الآن سيظهر التوست الصحيح
@@ -184,7 +184,7 @@ export default function BookingsHub() {
   const now = DateTime.utc();
   const localNow = now.setZone("local");
 
-  const todayKey = localNow.toFormat("yyyy-MM-dd");
+  const todayKey = toLocalKey(new Date());
 
   const year = localNow.year;
   const month = localNow.month; // ⚠️ من 1 إلى 12
@@ -466,7 +466,6 @@ function AvailableView({
 
                 setSelectedDate(isSelected ? null : key);
 
-                // ⬇️ السكرووووول بعد الضغط
                 setTimeout(() => {
                   slotsRef.current?.scrollIntoView({
                     behavior: "smooth",
@@ -477,20 +476,36 @@ function AvailableView({
               style={{
                 aspectRatio: "1",
                 borderRadius: 18,
-                border: `2px solid ${
-                  isSelected
-                    ? BRAND.gold
-                    : isAvailable
-                    ? `${BRAND.purple}CC`
-                    : mode === "dark"
-                    ? "rgba(255,255,255,0.08)"
-                    : "#ddd"
-                }`,
-                background:
-                  mode === "dark"
-                    ? "rgba(255,255,255,0.03)"
-                    : "rgba(255,255,255,0.8)",
-                color: isAvailable ? BRAND.purple : "#999",
+
+                /* 🔴 أولوية اليوم الحالي */
+                border: isToday
+                  ? "2.8px solid #0f766e" // 🔷 لون اليوم الجديد (تركوازي داكن)
+                  : isSelected
+                  ? `2px solid ${BRAND.gold}`
+                  : isAvailable
+                  ? `2px solid ${BRAND.purple}CC`
+                  : mode === "dark"
+                  ? "2px solid rgba(255,255,255,0.08)"
+                  : "2px solid #ddd",
+
+                boxShadow: isToday
+                  ? "0 0 6px rgba(15,118,110,0.35), inset 0 0 3px rgba(15,118,110,0.15)"
+                  : isSelected
+                  ? `0 0 8px ${BRAND.gold}44`
+                  : "none",
+
+                background: isToday
+                  ? "rgba(84, 126, 122, 0.05)"
+                  : mode === "dark"
+                  ? "rgba(255,255,255,0.03)"
+                  : "rgba(255,255,255,0.8)",
+
+                color: isToday
+                  ? "#0f766e"
+                  : isAvailable
+                  ? BRAND.purple
+                  : "#999",
+
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -527,18 +542,6 @@ function AvailableView({
                 >
                   {slotsCount} {t("bookingsHub.slotsLabel")}
                 </span>
-              )}
-
-              {isToday && (
-                <div
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: "50%",
-                    background: "#ef4444",
-                    marginTop: 3,
-                  }}
-                />
               )}
 
               {hasMyBooking && (
@@ -804,7 +807,7 @@ function MyBookingsView({
                 </div>
 
                 <div style={{ opacity: 0.8, marginBottom: 12 }}>
-                  🕒 {b.slot.startTime}
+                  🕒 {formatTimeRange(b.slot.startAt, b.slot.endAt, t)}
                 </div>
 
                 {!isPast && !isCancelled && (

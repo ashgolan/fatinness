@@ -883,10 +883,13 @@
     "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "Cannot delete the Super Admin.",
     "ADMIN_DELETE_SELF_FORBIDDEN": "You cannot delete yourself.",
     "ADMIN_DELETE_SUCCESS": "User deleted successfully.",
-    "ADMIN_DELETE_ERROR": "Unexpected error during deletion."
-  },
-  "errors": {
-    "network": "Cannot reach the server. Please try again later.",
-    "unknown": "An unexpected error occurred."
+    "ADMIN_DELETE_ERROR": "Unexpected error during deletion.",
+    "errors": {
+      "ADMIN_SLOT_OVERLAP": "There is an overlap between the slots ⛔",
+      "ADMIN_SLOT_INVALID_TIME": "Invalid slot time",
+      "ADMIN_SLOT_DUPLICATE": "The slot already exists",
+      "NETWORK_ERROR": "Network error",
+      "UNKNOWN_ERROR": "An unexpected error occurred"
+    }
   }
 }
