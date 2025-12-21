@@ -1,25 +1,29 @@
 // server/config/firebase.js
 import admin from "firebase-admin";
+import fs from "fs";
+import path from "path";
 
-const projectId = process.env.FIREBASE_PROJECT_ID;
-const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
 
-if (!projectId || !clientEmail || !privateKey) {
-  console.error("❌ Missing Firebase environment variables");
+if (!serviceAccountPath) {
+  console.error("❌ FIREBASE_SERVICE_ACCOUNT_PATH is missing in .env");
 } else {
-  // استبدال \n النصية بأسطر حقيقية
-  privateKey = privateKey.replace(/\\n/g, "\n");
+  const absolutePath = path.resolve(serviceAccountPath);
 
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId,
-        clientEmail,
-        privateKey,
-      }),
-    });
-    console.log("✅ Firebase Admin initialized successfully");
+  if (!fs.existsSync(absolutePath)) {
+    console.error("❌ Firebase service account file not found:", absolutePath);
+  } else {
+    if (!admin.apps.length) {
+      const serviceAccount = JSON.parse(
+        fs.readFileSync(absolutePath, "utf8")
+      );
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+
+      console.log("✅ Firebase Admin initialized successfully (JSON)");
+    }
   }
 }
 
