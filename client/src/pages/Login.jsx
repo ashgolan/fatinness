@@ -18,7 +18,6 @@ import LoginIcon from "@mui/icons-material/Login";
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Api } from "../api/Api";
-import { setToken } from "../utils/tokensStorage";
 import { UserContext } from "../context/UserContext";
 import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
@@ -30,7 +29,7 @@ import useServerError from "../hooks/useServerError";
 
 export default function Login() {
   const handleServerError = useServerError();
-  const fallbackLogo = "/brand/fatiness_logo.png";
+  const fallbackLogo = "/brand/DEFAULT_LOGO.png";
 
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
@@ -80,26 +79,27 @@ export default function Login() {
         password,
       });
 
-      if (data?.token) {
-        setToken(data.token);
-
-        const me = await Api.get("/users/me");
-        setUser(me.data);
+      // ✅ السيرفر يعيد user جاهز
+      if (data?.user) {
+        setUser(data.user);
 
         toast.success(t("login.success.login"));
 
-        if (me.data.role !== "admin") {
+        // 🔔 تسجيل FCM فقط للمستخدم العادي
+        if (data.user.role !== "admin") {
           await registerFcmToken().catch(() => {
             toast.info(t("login.success.fcmOptional"));
           });
         }
+
         const lang = localStorage.getItem("appLanguage") || "ar";
-        await Api.put("/auth/language", { preferredLanguage: lang });
-        navigate(me.data.role === "admin" ? "/admin/control" : from, {
+        Api.put("/auth/language", { preferredLanguage: lang }).catch(() => {});
+
+        navigate(data.user.role === "admin" ? "/admin/control" : from, {
           replace: true,
         });
       } else {
-        toast.error(data?.message || t("login.errors.loginFailed"));
+        toast.error(t("login.errors.loginFailed"));
       }
     } catch (err) {
       handleServerError(err);

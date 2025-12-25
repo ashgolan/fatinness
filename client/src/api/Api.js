@@ -17,19 +17,22 @@ const Api = axios.create({
 });
 
 // Interceptor: يعمل في الحالتين (لوكال + إنتاج)
-Api.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("JWT");
-
-    // إذا أمكن قراءة التوكن (غالبًا في اللوكال)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    // إذا لم يمكن (الإنتاج) → الكوكي تُرسل تلقائيًا
+Api.interceptors.request.use((config) => {
+  // ❌ لا نضيف Authorization عند تسجيل الدخول
+  if (
+    config.url.includes("/auth/login") ||
+    config.url.includes("/auth/register-superadmin")
+  ) {
     return config;
-  },
-  (error) => Promise.reject(error)
-);
+  }
+
+  const token = Cookies.get("JWT");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
 
 export { Api };

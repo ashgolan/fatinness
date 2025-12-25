@@ -14,10 +14,12 @@ import {
 import { Api } from "../../api/Api";
 import { UserContext } from "../../context/UserContext";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const AdminSystemReset = () => {
   const { user } = useContext(UserContext);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [resetType, setResetType] = useState(null);
@@ -26,12 +28,7 @@ const AdminSystemReset = () => {
   if (!user?.isSuperAdmin) {
     return (
       <Box p={3}>
-        <Typography
-          color="error"
-          variant="h6"
-          align="center"
-          fontWeight={600}
-        >
+        <Typography color="error" variant="h6" align="center" fontWeight={600}>
           {t("systemReset.noPermission")}
         </Typography>
       </Box>
@@ -66,27 +63,44 @@ const AdminSystemReset = () => {
     },
   ];
 
-  const handleConfirm = async () => {
-    try {
-      const option = resetOptions.find((o) => o.key === resetType);
-      await Api.post(option.endpoint);
-      alert(t("systemReset.success"));
-    } catch (err) {
-      console.error(err);
-      alert(t("systemReset.error"));
-    }
+const handleConfirm = async () => {
+  if (!resetType) {
+    console.error("RESET TYPE IS NULL");
+    alert(t("systemReset.error"));
+    return;
+  }
+
+  const option = resetOptions.find((o) => o.key === resetType);
+
+  if (!option) {
+    console.error("INVALID RESET TYPE:", resetType);
+    alert(t("systemReset.error"));
+    return;
+  }
+
+  try {
+    await Api.post(option.endpoint);
+
+    alert(t("systemReset.success"));
+
     setConfirmOpen(false);
-  };
+
+    if (option.key === "factory") {
+      navigate("/login", { replace: true });
+    }
+  } catch (err) {
+    console.error("RESET ERROR:", err);
+    alert(t("systemReset.error"));
+    setConfirmOpen(false);
+  }
+};
+
+
 
   return (
     <Box p={3}>
       {/* عنوان الصفحة */}
-      <Typography
-        variant="h4"
-        mb={4}
-        textAlign="center"
-        fontWeight={700}
-      >
+      <Typography variant="h4" mb={4} textAlign="center" fontWeight={700}>
         {t("systemReset.pageTitle")}
       </Typography>
 
@@ -102,11 +116,7 @@ const AdminSystemReset = () => {
               }}
             >
               <CardContent>
-                <Typography
-                  variant="h6"
-                  fontWeight={700}
-                  gutterBottom
-                >
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   {opt.title}
                 </Typography>
 
@@ -135,9 +145,7 @@ const AdminSystemReset = () => {
 
       {/* نافذة التأكيد */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>
-          {t("systemReset.confirmTitle")}
-        </DialogTitle>
+        <DialogTitle>{t("systemReset.confirmTitle")}</DialogTitle>
 
         <DialogContent>
           <Typography>
@@ -151,11 +159,7 @@ const AdminSystemReset = () => {
             {t("systemReset.cancel")}
           </Button>
 
-          <Button
-            color="error"
-            variant="contained"
-            onClick={handleConfirm}
-          >
+          <Button color="error" variant="contained" onClick={handleConfirm}>
             {t("systemReset.confirmButton")}
           </Button>
         </DialogActions>

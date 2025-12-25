@@ -39,7 +39,7 @@ import useServerError from "../hooks/useServerError";
 
 export default function Register() {
   const handleServerError = useServerError();
-  const fallbackLogo = "/brand/fatiness_logo.png";
+  const fallbackLogo = "/brand/DEFAULT_LOGO.png";
 
   const [pendingRoleChange, setPendingRoleChange] = useState(false);
 

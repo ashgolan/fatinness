@@ -53,7 +53,7 @@ export default function RegisterSuperAdmin() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const fallbackLogo = "/uploads/fatiness_logo.png";
+  const fallbackLogo = "/uploads/DEFAULT_LOGO.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
   useEffect(() => {

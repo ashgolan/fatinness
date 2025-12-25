@@ -1,10 +1,10 @@
 // App.jsx
-import React from "react";
 import "./i18n/i18n";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useThemeMode } from "./context/ThemeContext"; // 👈 تأكد أنها موجودة
+import React, { useEffect, useState } from "react";
 
 // 🔹 MUI
 import { CssBaseline, GlobalStyles } from "@mui/material";
@@ -55,6 +55,7 @@ import RegisterSuperAdmin from "./pages/RegisterSuperAdmin";
 import { useSystemSetupCheck } from "./hooks/useSystemSetupCheck";
 import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
 import About from "./pages/About";
+import { Api } from "./api/Api";
 // ======================================================
 // ⚙️ مكوّن Wrapper خاص لضبط الـ RTL/LTR بحسب اللغة
 // ======================================================
@@ -91,6 +92,12 @@ export default function App() {
   const location = useLocation();
   // ✔️ First Run Protection
   const { loading } = useSystemSetupCheck();
+  const [needsSetup, setNeedsSetup] = useState(null);
+  useEffect(() => {
+    Api.get("/auth/check-first-run")
+      .then((res) => setNeedsSetup(res.data.needsSetup))
+      .catch(() => setNeedsSetup(false));
+  }, []);
 
   if (loading) return null;
 

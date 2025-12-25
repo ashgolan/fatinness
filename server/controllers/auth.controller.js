@@ -160,6 +160,12 @@ export const loginUser = async (req, res) => {
 
     // 🟩 3) نجاح
     const token = generateToken(user);
+    res.cookie("JWT", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 أيام
+    });
 
     res.json({
       code: "AUTH_LOGIN_SUCCESS",

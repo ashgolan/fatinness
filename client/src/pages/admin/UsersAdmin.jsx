@@ -29,6 +29,9 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import EditIcon from "@mui/icons-material/Edit";
 import BlockIcon from "@mui/icons-material/Block";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import IconButton from "@mui/material/IconButton";
 
 import { useTranslation } from "react-i18next";
 import useServerError from "../../hooks/useServerError";
@@ -36,6 +39,7 @@ import { UserContext } from "../../context/UserContext";
 
 export default function UsersAdmin() {
   const handleServerError = useServerError();
+  const [showPassword, setShowPassword] = useState(false);
 
   const theme = useTheme();
   const { t } = useTranslation();
@@ -45,8 +49,7 @@ export default function UsersAdmin() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-const [newRoleValue, setNewRoleValue] = useState(null);
-
+  const [newRoleValue, setNewRoleValue] = useState(null);
 
   const [editOpen, setEditOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
@@ -58,39 +61,41 @@ const [newRoleValue, setNewRoleValue] = useState(null);
     weight: "",
     age: "",
     gender: "female",
+    role: "user",
+    password: "", // ⭐ جديد
   });
 
   const [pendingRoleChange, setPendingRoleChange] = useState(false);
-const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-const [deleteUser, setDeleteUser] = useState(null);
-const { user: currentUser } = useContext(UserContext);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteUser, setDeleteUser] = useState(null);
+  const { user: currentUser } = useContext(UserContext);
 
-const openDeleteConfirm = (user) => {
-  // منع حذف المدير الرئيسي
-  if (user.isSuperAdmin) {
-    toast.error(t("usersAdmin.errors.cannotDeleteSuperAdmin"));
-    return;
-  }
+  const openDeleteConfirm = (user) => {
+    // منع حذف المدير الرئيسي
+    if (user.isSuperAdmin) {
+      toast.error(t("usersAdmin.errors.cannotDeleteSuperAdmin"));
+      return;
+    }
 
-  setDeleteUser(user);
-  setDeleteConfirmOpen(true);
-};
-const confirmDeleteUser = async () => {
-  try {
-    await Api.delete(`/admin/users/${deleteUser._id}`);
+    setDeleteUser(user);
+    setDeleteConfirmOpen(true);
+  };
+  const confirmDeleteUser = async () => {
+    try {
+      await Api.delete(`/admin/users/${deleteUser._id}`);
 
-    toast.success(t("usersAdmin.messages.deleted"));
+      toast.success(t("usersAdmin.messages.deleted"));
 
-    // إغلاق النافذة
-    setDeleteConfirmOpen(false);
+      // إغلاق النافذة
+      setDeleteConfirmOpen(false);
 
-    // تحديث القائمة
-    setUsers((prev) => prev.filter((u) => u._id !== deleteUser._id));
-    setFiltered((prev) => prev.filter((u) => u._id !== deleteUser._id));
-  } catch (err) {
-    handleServerError(err);
-  }
-};
+      // تحديث القائمة
+      setUsers((prev) => prev.filter((u) => u._id !== deleteUser._id));
+      setFiltered((prev) => prev.filter((u) => u._id !== deleteUser._id));
+    } catch (err) {
+      handleServerError(err);
+    }
+  };
 
   // ---------------------------
   // 🔹 جلب المشتركات
@@ -99,7 +104,7 @@ const confirmDeleteUser = async () => {
     setLoading(true);
     try {
       const { data } = await Api.get("/admin/users");
-      console.warn(data)
+      console.warn(data);
       setUsers(data);
       setFiltered(data);
     } catch (err) {
@@ -142,9 +147,7 @@ const confirmDeleteUser = async () => {
         allow: !user.allowExtraBookings,
       });
 
-      toast.success(
-        data.message || t("usersAdmin.extraBooking.updated")
-      );
+      toast.success(data.message || t("usersAdmin.extraBooking.updated"));
 
       setUsers((prev) =>
         prev.map((u) =>
@@ -192,60 +195,61 @@ const confirmDeleteUser = async () => {
   // ---------------------------
   // ✏️ تعديل بيانات
   // ---------------------------
-const handleEdit = (user) => {
-  setEditUser(user);
-  setEditData({
-    username: user.username || "",
-    email: user.email || "",
-    phone: user.phone || "",
-    height: user.height || "",
-    weight: user.weight || "",
-    age: user.age || "",
-    gender: user.gender || "female",
-    role: user.role || "user",
+  const handleEdit = (user) => {
+    setEditUser(user);
+    setEditData({
+      username: user.username || "",
+      email: user.email || "",
+      phone: user.phone || "",
+      height: user.height || "",
+      weight: user.weight || "",
+      age: user.age || "",
+      gender: user.gender || "female",
+      role: user.role || "user",
+      password: "", // ⭐ لا نملأها
+      subscriptionStart: user.subscriptionStart || "",
+      subscriptionEnd: user.subscriptionEnd || "",
+    });
 
-    // ⭐ جديد
-    subscriptionStart: user.subscriptionStart || "",
-    subscriptionEnd: user.subscriptionEnd || "",
-  });
-
-  setEditOpen(true);
-};
+    setEditOpen(true);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
- const handleSave = async () => {
-  try {
-    const payload = {
-      ...editData,
-      height: editData.height ? Number(editData.height) : null,
-      weight: editData.weight ? Number(editData.weight) : null,
-      age: editData.age ? Number(editData.age) : null,
+  const handleSave = async () => {
+    try {
+      const payload = {
+        ...editData,
+        height: editData.height ? Number(editData.height) : null,
+        weight: editData.weight ? Number(editData.weight) : null,
+        age: editData.age ? Number(editData.age) : null,
+        subscriptionStart: editData.subscriptionStart || null,
+        subscriptionEnd: editData.subscriptionEnd || null,
+      };
 
-      // ⭐ مهم جدًا
-      subscriptionStart: editData.subscriptionStart || null,
-      subscriptionEnd: editData.subscriptionEnd || null,
-    };
+      // ⭐ إذا لم تُكتب كلمة مرور → لا نرسلها
+      if (!payload.password) {
+        delete payload.password;
+      }
 
-    const { data } = await Api.put(`/admin/users/${editUser._id}`, payload);
+      const { data } = await Api.put(`/admin/users/${editUser._id}`, payload);
 
-    toast.success(t("usersAdmin.messages.updated"));
-    setEditOpen(false);
+      toast.success(t("usersAdmin.messages.updated"));
+      setEditOpen(false);
 
-    setUsers((prev) =>
-      prev.map((u) => (u._id === editUser._id ? data.user : u))
-    );
-    setFiltered((prev) =>
-      prev.map((u) => (u._id === editUser._id ? data.user : u))
-    );
-  } catch (err) {
-    handleServerError(err);
-  }
-};
-
+      setUsers((prev) =>
+        prev.map((u) => (u._id === editUser._id ? data.user : u))
+      );
+      setFiltered((prev) =>
+        prev.map((u) => (u._id === editUser._id ? data.user : u))
+      );
+    } catch (err) {
+      handleServerError(err);
+    }
+  };
 
   // ---------------------------
   // 🎨 أنماط الحقول
@@ -264,35 +268,35 @@ const handleEdit = (user) => {
     },
     "& .MuiInputLabel-root.Mui-focused": { color: "#1976d2" },
   };
-// ---------------------------
-// 🗑️ حذف مشتركة
-// ---------------------------
-const handleDeleteUser = async () => {
-  if (!editUser) return;
+  // ---------------------------
+  // 🗑️ حذف مشتركة
+  // ---------------------------
+  const handleDeleteUser = async () => {
+    if (!editUser) return;
 
-  // منع حذف المدير الرئيسي
-  if (editUser.isSuperAdmin) {
-    toast.error(t("usersAdmin.errors.cannotDeleteSuperAdmin"));
-    return;
-  }
+    // منع حذف المدير الرئيسي
+    if (editUser.isSuperAdmin) {
+      toast.error(t("usersAdmin.errors.cannotDeleteSuperAdmin"));
+      return;
+    }
 
-  // نافذة تأكيد
-  if (!window.confirm(t("usersAdmin.confirm.deleteUser"))) return;
+    // نافذة تأكيد
+    if (!window.confirm(t("usersAdmin.confirm.deleteUser"))) return;
 
-  try {
-    await Api.delete(`/admin/users/${editUser._id}`);
+    try {
+      await Api.delete(`/admin/users/${editUser._id}`);
 
-    toast.success(t("usersAdmin.messages.deleted"));
+      toast.success(t("usersAdmin.messages.deleted"));
 
-    setEditOpen(false);
+      setEditOpen(false);
 
-    // تحديث القائمة
-    setUsers((prev) => prev.filter((u) => u._id !== editUser._id));
-    setFiltered((prev) => prev.filter((u) => u._id !== editUser._id));
-  } catch (err) {
-    handleServerError(err);
-  }
-};
+      // تحديث القائمة
+      setUsers((prev) => prev.filter((u) => u._id !== editUser._id));
+      setFiltered((prev) => prev.filter((u) => u._id !== editUser._id));
+    } catch (err) {
+      handleServerError(err);
+    }
+  };
 
   return (
     <Box
@@ -397,24 +401,24 @@ const handleDeleteUser = async () => {
                   }}
                 >
                   {/* 👑 تاج المديرة */}
-        {user.role === "admin" && (
-  <Box
-    sx={{
-      position: "absolute",
-      top: -10,
-      right: -13,
-      backgroundColor: "#fff",
-      borderRadius: "50%",
-      border: "2px solid #ffeb3b",
-      padding: "5px 5px",
-      boxShadow: "0 0 12px rgba(255, 215, 0, 0.8)",
-      fontSize: "20px",
-      zIndex: 3,
-    }}
-  >
-    {user.isSuperAdmin ? "🛡️" : "👑"}
-  </Box>
-)}
+                  {user.role === "admin" && (
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: -10,
+                        right: -13,
+                        backgroundColor: "#fff",
+                        borderRadius: "50%",
+                        border: "2px solid #ffeb3b",
+                        padding: "5px 5px",
+                        boxShadow: "0 0 12px rgba(255, 215, 0, 0.8)",
+                        fontSize: "20px",
+                        zIndex: 3,
+                      }}
+                    >
+                      {user.isSuperAdmin ? "🛡️" : "👑"}
+                    </Box>
+                  )}
                   {/* --------------------------- */}
                   {/* 👤 رأس البطاقة */}
                   {/* --------------------------- */}
@@ -541,78 +545,84 @@ const handleDeleteUser = async () => {
                     }
                     sx={{ mb: 2 }}
                   />
-                  
+
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
                   {/* --------------------------- */}
-         {/* إخفاء كل الأزرار إذا كان هذا المستخدم هو السوبر أدمن */}
-  <Box sx={{ display: "grid", gap: 1.5 }}>
-    
-    {/* زر التعديل */}
-    <Button
-      fullWidth
-      variant="outlined"
-      onClick={() => handleEdit(user)}
-disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdmin }
+                  {/* إخفاء كل الأزرار إذا كان هذا المستخدم هو السوبر أدمن */}
+                  <Box sx={{ display: "grid", gap: 1.5 }}>
+                    {/* زر التعديل */}
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      onClick={() => handleEdit(user)}
+                      disabled={
+                        (user.isSuperAdmin || user.role === "admin") &&
+                        !currentUser.isSuperAdmin
+                      }
+                      sx={{
+                        borderColor: "#1976d2",
+                        color: "#1976d2",
+                        fontWeight: 600,
+                        borderRadius: "8px",
+                        textTransform: "none",
+                        gap: 0.6,
+                      }}
+                    >
+                      <EditIcon sx={{ fontSize: 18 }} />
+                      {t("usersAdmin.buttons.edit")}
+                    </Button>
 
-      sx={{
-        borderColor: "#1976d2",
-        color: "#1976d2",
-        fontWeight: 600,
-        borderRadius: "8px",
-        textTransform: "none",
-        gap: 0.6,
-      }}
-    >
-      <EditIcon sx={{ fontSize: 18 }} />
-      {t("usersAdmin.buttons.edit")}
-    </Button>
+                    {/* زر الحظر */}
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      onClick={() => toggleUserBlock(user)}
+                      disabled={
+                        (user.isSuperAdmin || user.role === "admin") &&
+                        !currentUser.isSuperAdmin
+                      }
+                      sx={{
+                        fontWeight: 600,
+                        gap: 0.6,
+                        borderRadius: "8px",
+                        textTransform: "none",
+                        backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
+                        "&:hover": {
+                          backgroundColor: user.isBlocked
+                            ? "#57a95b"
+                            : "#d32f2f",
+                        },
+                      }}
+                    >
+                      <BlockIcon sx={{ fontSize: 18 }} />
+                      {user.isBlocked
+                        ? t("usersAdmin.buttons.unblock")
+                        : t("usersAdmin.buttons.block")}
+                    </Button>
 
-    {/* زر الحظر */}
-    <Button
-      fullWidth
-      variant="contained"
-      onClick={() => toggleUserBlock(user)}
-disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdmin }
-
-      sx={{
-        fontWeight: 600,
-        gap: 0.6,
-        borderRadius: "8px",
-        textTransform: "none",
-        backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
-        "&:hover": {
-          backgroundColor: user.isBlocked ? "#57a95b" : "#d32f2f",
-        },
-      }}
-    >
-      <BlockIcon sx={{ fontSize: 18 }} />
-      {user.isBlocked
-        ? t("usersAdmin.buttons.unblock")
-        : t("usersAdmin.buttons.block")}
-    </Button>
-
-    {/* زر الحذف — ممنوع حذف السوبر أدمن */}
-    <Button
-      fullWidth
-      variant="contained"
-      color="error"
-      onClick={() => openDeleteConfirm(user)}
-disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdmin }
-      sx={{
-        fontWeight: 600,
-        gap: 0.6,
-        borderRadius: "8px",
-        textTransform: "none",
-        backgroundColor: "#d32f2f",
-        "&:hover": { backgroundColor: "#b71c1c" },
-      }}
-    >
-      🗑️ {t("usersAdmin.buttons.delete")}
-    </Button>
-
-  </Box>
-
+                    {/* زر الحذف — ممنوع حذف السوبر أدمن */}
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="error"
+                      onClick={() => openDeleteConfirm(user)}
+                      disabled={
+                        (user.isSuperAdmin || user.role === "admin") &&
+                        !currentUser.isSuperAdmin
+                      }
+                      sx={{
+                        fontWeight: 600,
+                        gap: 0.6,
+                        borderRadius: "8px",
+                        textTransform: "none",
+                        backgroundColor: "#d32f2f",
+                        "&:hover": { backgroundColor: "#b71c1c" },
+                      }}
+                    >
+                      🗑️ {t("usersAdmin.buttons.delete")}
+                    </Button>
+                  </Box>
                 </Paper>
               </Grid>
             ))}
@@ -652,8 +662,6 @@ disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdm
           </DialogTitle>
 
           <DialogContent sx={{ display: "grid", gap: 2, mt: 1 }}>
-      
-
             <TextField
               label={t("usersAdmin.fields.name")}
               name="username"
@@ -677,6 +685,29 @@ disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdm
               onChange={handleChange}
               sx={textFieldStyle}
             />
+            {currentUser?.isSuperAdmin && (
+              <TextField
+                label={t("usersAdmin.fields.newPassword")}
+                name="password"
+                type={showPassword ? "text" : "password"}
+                value={editData.password}
+                onChange={handleChange}
+                placeholder={t("usersAdmin.placeholders.newPassword")}
+                sx={textFieldStyle}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword((p) => !p)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
 
             <TextField
               label={t("usersAdmin.fields.height")}
@@ -722,60 +753,65 @@ disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdm
             {/* --------------------------- */}
             {/* 🟣 حقل الدور + نافذة تأكيد */}
             {/* --------------------------- */}
-           <TextField
-  select
-  label={t("usersAdmin.fields.role")}
-  name="role"
-  value={editData.role || "user"}
-  onChange={(e) => {
-  const newRole = e.target.value;
+            <TextField
+              select
+              label={t("usersAdmin.fields.role")}
+              name="role"
+              value={editData.role || "user"}
+              onChange={(e) => {
+                const newRole = e.target.value;
 
-  // منع المديرات من ترقية أحد
-  if (newRole === "admin" && !currentUser?.isSuperAdmin) {
-    toast.error(t("usersAdmin.errors.onlySuperAdminCanPromote"));
-    return;
-  }
+                // منع المديرات من ترقية أحد
+                if (newRole === "admin" && !currentUser?.isSuperAdmin) {
+                  toast.error(t("usersAdmin.errors.onlySuperAdminCanPromote"));
+                  return;
+                }
 
-  setNewRoleValue(newRole);  // 👈 خزّنت الدور مؤقتًا
-  setPendingRoleChange(true); // 👈 افتح النافذة
-}}
+                setNewRoleValue(newRole); // 👈 خزّنت الدور مؤقتًا
+                setPendingRoleChange(true); // 👈 افتح النافذة
+              }}
+              sx={textFieldStyle}
+            >
+              <MenuItem value="user">{t("usersAdmin.roles.user")}</MenuItem>
 
-  sx={textFieldStyle}
->
-  <MenuItem value="user">{t("usersAdmin.roles.user")}</MenuItem>
+              {/* ✨ خيار المدير يظهر فقط للسوبر أدمن */}
+              {currentUser?.isSuperAdmin && (
+                <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
+              )}
+            </TextField>
+            {/* 🗓️ تواريخ الاشتراك — تظهر فقط للأدمن العادي */}
+            {!currentUser?.isSuperAdmin && (
+              <>
+                <TextField
+                  label={t("usersAdmin.fields.subscriptionStart")}
+                  name="subscriptionStart"
+                  type="date"
+                  value={
+                    editData.subscriptionStart
+                      ? editData.subscriptionStart.substring(0, 10)
+                      : ""
+                  }
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  sx={textFieldStyle}
+                />
 
-  {/* ✨ خيار المدير يظهر فقط للسوبر أدمن */}
-  {currentUser?.isSuperAdmin && (
-    <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
-  )}
-</TextField>
-    <TextField
-  label={t("usersAdmin.fields.subscriptionStart")}
-  name="subscriptionStart"
-  type="date"
-  value={
-    editData.subscriptionStart
-      ? editData.subscriptionStart.substring(0, 10)
-      : ""
-  }
-  onChange={handleChange}
-  InputLabelProps={{ shrink: true }}
-  sx={textFieldStyle}
-/>
+                <TextField
+                  label={t("usersAdmin.fields.subscriptionEnd")}
+                  name="subscriptionEnd"
+                  type="date"
+                  value={
+                    editData.subscriptionEnd
+                      ? editData.subscriptionEnd.substring(0, 10)
+                      : ""
+                  }
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  sx={textFieldStyle}
+                />
+              </>
+            )}
 
-<TextField
-  label={t("usersAdmin.fields.subscriptionEnd")}
-  name="subscriptionEnd"
-  type="date"
-  value={
-    editData.subscriptionEnd
-      ? editData.subscriptionEnd.substring(0, 10)
-      : ""
-  }
-  onChange={handleChange}
-  InputLabelProps={{ shrink: true }}
-  sx={textFieldStyle}
-/>
             {/* نافذة تأكيد ترقية المديرة */}
             <Dialog
               open={pendingRoleChange}
@@ -797,130 +833,125 @@ disabled={ (user.isSuperAdmin || user.role==="admin") && !currentUser.isSuperAdm
                 </Typography>
               </DialogContent>
 
-             <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-  
-  {/* ❌ إلغاء – نغلق النافذة ولا نغيّر الدور */}
-  <Button
-    variant="outlined"
-    onClick={() => {
-      setPendingRoleChange(false);
-      setNewRoleValue(null); // نلغي التغيير
-    }}
-    sx={{ color: "#666", borderColor: "#ccc" }}
-  >
-    {t("common.cancel")}
-  </Button>
+              <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+                {/* ❌ إلغاء – نغلق النافذة ولا نغيّر الدور */}
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setPendingRoleChange(false);
+                    setNewRoleValue(null); // نلغي التغيير
+                  }}
+                  sx={{ color: "#666", borderColor: "#ccc" }}
+                >
+                  {t("common.cancel")}
+                </Button>
 
-  {/* ✔ موافقة – نطبق الدور الجديد */}
-  <Button
-    variant="contained"
-    color="primary"
-    onClick={() => {
-      setPendingRoleChange(false);
+                {/* ✔ موافقة – نطبق الدور الجديد */}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    setPendingRoleChange(false);
 
-      // هنا يتم التغيير الفعلي
-      setEditData((prev) => ({
-        ...prev,
-        role: newRoleValue,
-      }));
+                    // هنا يتم التغيير الفعلي
+                    setEditData((prev) => ({
+                      ...prev,
+                      role: newRoleValue,
+                    }));
 
-      setNewRoleValue(null);
+                    setNewRoleValue(null);
 
-      toast.info(t("usersAdmin.messages.tempAdmin"));
-    }}
-    sx={{
-      fontWeight: 600,
-      backgroundColor: "#1976d2",
-      "&:hover": { backgroundColor: "#1565c0" },
-    }}
-  >
-    {t("usersAdmin.confirmRole.confirm")}
-  </Button>
-
-</DialogActions>
-
+                    toast.info(t("usersAdmin.messages.tempAdmin"));
+                  }}
+                  sx={{
+                    fontWeight: 600,
+                    backgroundColor: "#1976d2",
+                    "&:hover": { backgroundColor: "#1565c0" },
+                  }}
+                >
+                  {t("usersAdmin.confirmRole.confirm")}
+                </Button>
+              </DialogActions>
             </Dialog>
           </DialogContent>
 
-    <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-  
-  {/* ❌ زر حذف المشتركة */}
-  <Button
-    color="error"
-    onClick={handleDeleteUser}
-    sx={{ fontWeight: 600 }}
-  >
-    {t("usersAdmin.buttons.delete")}
-  </Button>
+          <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
+            {/* ❌ زر حذف المشتركة */}
+            <Button
+              color="error"
+              onClick={handleDeleteUser}
+              sx={{ fontWeight: 600 }}
+            >
+              {t("usersAdmin.buttons.delete")}
+            </Button>
 
-  {/* ❌ زر إلغاء */}
-  <Button
-    onClick={() => setEditOpen(false)}
-    sx={{ color: "#777", fontWeight: 600 }}
-  >
-    {t("common.cancel")}
-  </Button>
+            {/* ❌ زر إلغاء */}
+            <Button
+              onClick={() => setEditOpen(false)}
+              sx={{ color: "#777", fontWeight: 600 }}
+            >
+              {t("common.cancel")}
+            </Button>
 
-  {/* ✔️ زر حفظ */}
-  <Button
-    variant="contained"
-    onClick={handleSave}
-    sx={{
-      backgroundColor: "#1976d2",
-      "&:hover": { backgroundColor: "#1565c0" },
-      fontWeight: 600,
-    }}
-  >
-    {t("common.save")}
-  </Button>
-
-</DialogActions>
-
+            {/* ✔️ زر حفظ */}
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              sx={{
+                backgroundColor: "#1976d2",
+                "&:hover": { backgroundColor: "#1565c0" },
+                fontWeight: 600,
+              }}
+            >
+              {t("common.save")}
+            </Button>
+          </DialogActions>
         </Dialog>
         <Dialog
-  open={deleteConfirmOpen}
-  onClose={() => setDeleteConfirmOpen(false)}
-  fullWidth
-  maxWidth="xs"
-  PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
->
-  <DialogTitle sx={{ color: "#d32f2f", fontWeight: 700, textAlign: "center" }}>
-    {t("usersAdmin.confirm.deleteTitle")}
-  </DialogTitle>
+          open={deleteConfirmOpen}
+          onClose={() => setDeleteConfirmOpen(false)}
+          fullWidth
+          maxWidth="xs"
+          PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+        >
+          <DialogTitle
+            sx={{ color: "#d32f2f", fontWeight: 700, textAlign: "center" }}
+          >
+            {t("usersAdmin.confirm.deleteTitle")}
+          </DialogTitle>
 
-  <DialogContent>
-    <Typography align="center" sx={{ mb: 1.5 }}>
-      {t("usersAdmin.confirm.deleteUser")}
-    </Typography>
-    <Typography
-      align="center"
-      variant="body2"
-      sx={{ color: "text.secondary" }}
-    >
-      {deleteUser?.username}
-    </Typography>
-  </DialogContent>
+          <DialogContent>
+            <Typography align="center" sx={{ mb: 1.5 }}>
+              {t("usersAdmin.confirm.deleteUser")}
+            </Typography>
+            <Typography
+              align="center"
+              variant="body2"
+              sx={{ color: "text.secondary" }}
+            >
+              {deleteUser?.username}
+            </Typography>
+          </DialogContent>
 
-  <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-    <Button
-      variant="outlined"
-      onClick={() => setDeleteConfirmOpen(false)}
-      sx={{ color: "#555", borderColor: "#bbb", textTransform: "none" }}
-    >
-      {t("common.cancel")}
-    </Button>
+          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setDeleteConfirmOpen(false)}
+              sx={{ color: "#555", borderColor: "#bbb", textTransform: "none" }}
+            >
+              {t("common.cancel")}
+            </Button>
 
-    <Button
-      variant="contained"
-      color="error"
-      onClick={confirmDeleteUser}
-      sx={{ textTransform: "none", fontWeight: 600 }}
-    >
-      {t("usersAdmin.buttons.delete")}
-    </Button>
-  </DialogActions>
-</Dialog>
-
+            <Button
+              variant="contained"
+              color="error"
+              onClick={confirmDeleteUser}
+              sx={{ textTransform: "none", fontWeight: 600 }}
+            >
+              {t("usersAdmin.buttons.delete")}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );

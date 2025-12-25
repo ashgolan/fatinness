@@ -36,7 +36,7 @@ export default function Dashboard() {
   const isDark = mode === "dark";
   const { cardUrl, loading: loadingBrand } = useBrand();
 
-  const fallbackCard = "/uploads/gym-cover.jpg";
+  const fallbackCard = "/uploads/DEFAULT_CARD.jpg";
   const imgSrc = loadingBrand ? null : cardUrl || fallbackCard;
 
   // 🔹 الاختصارات مع الترجمة

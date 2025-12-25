@@ -1,5 +1,6 @@
 import "dotenv/config";
 process.env.TZ = process.env.TZ || "Asia/Jerusalem";
+import cookieParser from "cookie-parser";
 
 import express from "express";
 import cors from "cors";
@@ -61,6 +62,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 
 // ============================
 // 🚦 Rate Limit

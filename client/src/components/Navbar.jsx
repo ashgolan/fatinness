@@ -64,7 +64,7 @@ export default function Navbar() {
     setLangMenuAnchor(null); // ⬅️ مهم لإغلاق القائمة
   };
 
-  const fallbackLogo = "/brand/fatiness_logo.png";
+  const fallbackLogo = "/brand/DEFAULT_LOGO.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const location = useLocation();
 

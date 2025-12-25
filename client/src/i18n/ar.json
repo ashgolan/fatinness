@@ -350,16 +350,15 @@
       "unknownUser": "غير معروف",
       "noPhone": "لا يوجد رقم"
     },
-"time": {
-  "days": "{{count}} يوم",
-  "hours": "{{count}} ساعة",
-  "minutes": "{{count}} دقيقة",
+    "time": {
+      "days": "{{count}} يوم",
+      "hours": "{{count}} ساعة",
+      "minutes": "{{count}} دقيقة",
 
-  "startsInSmart": "تبدأ بعد {{time}}",
-  "startedAgoSmart": "بدأت منذ {{time}}",
-  "endedAgoSmart": "انتهت منذ {{time}}"
-}
-,
+      "startsInSmart": "تبدأ بعد {{time}}",
+      "startedAgoSmart": "بدأت منذ {{time}}",
+      "endedAgoSmart": "انتهت منذ {{time}}"
+    },
     "status": {
       "upcoming": "قادمة",
       "running": "جارية",
@@ -458,9 +457,12 @@
       "gender": "الجنس",
       "role": "الدور",
       "subscriptionEnd": "تاريخ نهاية الاشتراك",
-      "subscriptionStart": "تاريخ بداية الاشتراك"
+      "subscriptionStart": "تاريخ بداية الاشتراك",
+      "newPassword": "كلمة مرور جديدة"
     },
-
+    "placeholders": {
+      "newPassword": "اتركها فارغة إن لم ترد التغيير"
+    },
     "gender": {
       "female": "أنثى",
       "male": "ذكر"
@@ -495,7 +497,8 @@
 
     "errors": {
       "cannotBlockAdmin": "لا يمكن حظر مديرة النظام",
-      "cannotDeleteSuperAdmin": "لا يمكن حذف المدير الرئيسي."
+      "cannotDeleteSuperAdmin": "لا يمكن حذف المدير الرئيسي.",
+      "onlySuperAdminCanChangePassword": "فقط السوبر أدمن يمكنه تغيير كلمة المرور"
     }
   },
 
@@ -857,13 +860,18 @@
     "AUTH_REGISTER_SERVER_ERROR": "حدث خطأ في إنشاء الحساب.",
 
     "AUTH_LOGIN_INVALID_FIELDS": "اسم المستخدم أو الهاتف وكلمة المرور مطلوبة.",
-    "AUTH_LOGIN_NOT_FOUND": "المستخدم غير موجود.",
-    "AUTH_LOGIN_BLOCKED": "حسابك محظور مؤقتًا. الرجاء التواصل مع الإدارة.",
     "AUTH_LOGIN_MAINTENANCE": "النظام تحت الصيانة. يرجى المحاولة لاحقًا.",
-    "AUTH_LOGIN_INCORRECT": "بيانات الدخول غير صحيحة.",
     "AUTH_LOGIN_SUCCESS": "تم تسجيل الدخول بنجاح.",
     "AUTH_LOGIN_SERVER_ERROR": "حدث خطأ في الخادم.",
 
+    "NETWORK_ERROR": "خطأ في الاتصال بالخادم",
+    "UNKNOWN_ERROR": "حدث خطأ غير متوقع",
+
+    "AUTH_TOO_MANY_REQUESTS": "تم إيقاف تسجيل الدخول مؤقتًا بسبب عدد كبير من المحاولات. ⏳ الرجاء الانتظار قليلًا ثم المحاولة مجددًا.",
+
+    "AUTH_LOGIN_INCORRECT": "اسم المستخدم أو كلمة المرور غير صحيحة",
+    "AUTH_LOGIN_NOT_FOUND": "المستخدم غير موجود",
+    "AUTH_LOGIN_BLOCKED": "تم حظر هذا الحساب مؤقتًا 🚫",
     "BOOKING_SLOT_NOT_AVAILABLE": "هذه الحصة غير متاحة.",
     "BOOKING_SLOT_PAST": "هذه الحصة قد انتهت أو بدأت بالفعل.",
     "BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأسبوعي للحجوزات.",

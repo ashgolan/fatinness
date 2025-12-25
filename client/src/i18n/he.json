@@ -350,16 +350,15 @@
       "unknownUser": "משתמשת לא ידועה",
       "noPhone": "אין מספר טלפון"
     },
-"time": {
-  "days": "{{count}} ימים",
-  "hours": "{{count}} שעות",
-  "minutes": "{{count}} דקות",
+    "time": {
+      "days": "{{count}} ימים",
+      "hours": "{{count}} שעות",
+      "minutes": "{{count}} דקות",
 
-  "startsInSmart": "מתחיל בעוד {{time}}",
-  "startedAgoSmart": "התחיל לפני {{time}}",
-  "endedAgoSmart": "הסתיים לפני {{time}}"
-}
-,
+      "startsInSmart": "מתחיל בעוד {{time}}",
+      "startedAgoSmart": "התחיל לפני {{time}}",
+      "endedAgoSmart": "הסתיים לפני {{time}}"
+    },
     "status": {
       "upcoming": "קרוב",
       "running": "מתבצע",
@@ -458,9 +457,12 @@
       "gender": "מין",
       "role": "תפקיד",
       "subscriptionEnd": "תאריך סיום המנוי",
-      "subscriptionStart": "תאריך התחלת מנוי"
+      "subscriptionStart": "תאריך התחלת מנוי",
+      "newPassword": "סיסמה חדשה"
     },
-
+    "placeholders": {
+      "newPassword": "השאר ריק אם אינך רוצה לשנות"
+    },
     "gender": {
       "female": "נקבה",
       "male": "זכר"
@@ -495,7 +497,8 @@
 
     "errors": {
       "cannotBlockAdmin": "לא ניתן לחסום מנהלת מערכת",
-      "deleted": "המתאמנת נמחקה בהצלחה."
+      "deleted": "המתאמנת נמחקה בהצלחה.",
+      "onlySuperAdminCanChangePassword": "רק סופר אדמין רשאי לשנות סיסמה"
     }
   },
 
@@ -846,6 +849,8 @@
     "AUTH_LOGIN_MAINTENANCE": "המערכת נמצאת בתחזוקה.",
     "AUTH_LOGIN_INCORRECT": "פרטי ההתחברות שגויים.",
     "AUTH_LOGIN_SUCCESS": "התחברת בהצלחה.",
+    "AUTH_TOO_MANY_REQUESTS": "בוצעו יותר מדי ניסיונות התחברות ⏳. ההתחברות הושהתה זמנית, אנא המתן מספר דקות ונסה שוב.",
+
     "BOOKING_SLOT_NOT_AVAILABLE": "השיעור לא זמין.",
     "BOOKING_SLOT_PAST": "השיעור כבר התחיל או הסתיים.",
     "BOOKING_WEEKLY_LIMIT": "הגעת למכסת ההזמנות השבועית.",

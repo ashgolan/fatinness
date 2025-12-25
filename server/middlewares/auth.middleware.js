@@ -1,33 +1,54 @@
-import jwt from 'jsonwebtoken';
-import User from '../models/User.js';
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 export async function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Unauthorized: No token provided' });
-  }
-
-  const token = authHeader.split(' ')[1];
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
+    let token = null;
 
-    if (!user) {
-      return res.status(401).json({ message: 'Unauthorized: User not found' });
+    // 1️⃣ Bearer Token (لوكال / قديم)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
     }
 
-    // 🚫 تحقق إن كان المستخدم محظورًا
+    // 2️⃣ Cookie Token (Production / httpOnly)
+    if (!token && req.cookies?.JWT) {
+      token = req.cookies.JWT;
+    }
+
+    // ❌ لا يوجد توكن
+    if (!token) {
+      return res
+        .status(401)
+        .json({ code: "UNAUTHORIZED_NO_TOKEN" });
+    }
+
+    // 🔐 فك التوكن
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // ⚠️ ملاحظة: أحيانًا تكون id أو _id
+    const userId = decoded.id || decoded._id;
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ code: "UNAUTHORIZED_USER_NOT_FOUND" });
+    }
+
+    // 🚫 حساب محظور
     if (user.isBlocked) {
       return res.status(403).json({
-        message: 'تم حظر حسابك مؤقتًا 🚫، الرجاء التواصل مع الإدارة.',
+        code: "AUTH_LOGIN_BLOCKED",
       });
     }
 
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+    return res
+      .status(401)
+      .json({ code: "UNAUTHORIZED_INVALID_TOKEN" });
   }
 }

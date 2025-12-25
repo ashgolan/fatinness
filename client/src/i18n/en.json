@@ -462,9 +462,12 @@
       "gender": "Gender",
       "role": "Role",
       "subscriptionEnd": "Subscription End Date",
-      "subscriptionStart": "Subscription Start Date"
+      "subscriptionStart": "Subscription Start Date",
+      "newPassword": "New Password"
     },
-
+    "placeholders": {
+      "newPassword": "Leave empty if you don't want to change it"
+    },
     "gender": {
       "female": "Female",
       "male": "Male"
@@ -499,7 +502,8 @@
 
     "errors": {
       "cannotBlockAdmin": "You cannot block a system administrator",
-      "cannotDeleteSuperAdmin": "You cannot delete the Super Admin."
+      "cannotDeleteSuperAdmin": "You cannot delete the Super Admin.",
+      "onlySuperAdminCanChangePassword": "Only the super admin can change the password"
     }
   },
 
@@ -847,6 +851,8 @@
     "AUTH_REGISTER_SUCCESS": "Account created successfully.",
     "AUTH_REGISTER_SERVER_ERROR": "Failed to create account.",
     "AUTH_LOGIN_INVALID_FIELDS": "Username/phone and password are required.",
+    "AUTH_TOO_MANY_REQUESTS": "Too many login attempts ⏳. Login has been temporarily blocked, please wait a few minutes and try again.",
+
     "AUTH_LOGIN_NOT_FOUND": "User not found.",
     "AUTH_LOGIN_BLOCKED": "Your account is temporarily blocked.",
     "AUTH_LOGIN_MAINTENANCE": "System is under maintenance.",
