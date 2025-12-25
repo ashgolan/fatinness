@@ -39,10 +39,10 @@ export default function SlotsAdmin() {
   const theme = useTheme();
   const mode = theme.palette.mode;
   const { t, i18n } = useTranslation();
-const [notifyOpen, setNotifyOpen] = useState(false);
-const [notifyTitle, setNotifyTitle] = useState("");
-const [notifyBody, setNotifyBody] = useState("");
-const [sendingNotification, setSendingNotification] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyTitle, setNotifyTitle] = useState("");
+  const [notifyBody, setNotifyBody] = useState("");
+  const [sendingNotification, setSendingNotification] = useState(false);
   const dir = i18n.dir(); // RTL / LTR
 
   // 🎨 Colors
@@ -141,7 +141,7 @@ const [sendingNotification, setSendingNotification] = useState(false);
       setSlots(allSlots);
       setWeekRange({ start: data.weekStart || "", end: data.weekEnd || "" });
     } catch (err) {
-    handleServerError(err); 
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -202,30 +202,37 @@ const [sendingNotification, setSendingNotification] = useState(false);
   const getTimeDiff = (slot) => {
     const start = new Date(slot.date);
     const [sh, sm] = slot.startTime.split(":");
-    start.setHours(sh, sm, 0, 0);
+    start.setHours(Number(sh), Number(sm), 0, 0);
 
     const diffMs = start - now;
-    const diffMin = Math.floor(diffMs / 60000);
+    const diffSec = Math.floor(diffMs / 1000);
+    const absSec = Math.abs(diffSec);
 
-    if (diffMin > 0) {
-      const h = Math.floor(diffMin / 60);
-      const m = diffMin % 60;
-      return t("slotsAdmin.status.after", {
-        hours: h,
-        minutes: m,
-      });
-    } else if (diffMin > -60) {
-      return t("slotsAdmin.status.startedAgo", {
-        minutes: Math.abs(diffMin),
-      });
-    } else {
-      const h = Math.floor(Math.abs(diffMin) / 60);
-      const m = Math.abs(diffMin) % 60;
-      return t("slotsAdmin.status.endedAgo", {
-        hours: h,
-        minutes: m,
-      });
+    const days = Math.floor(absSec / 86400);
+    const hours = Math.floor((absSec % 86400) / 3600);
+    const minutes = Math.floor((absSec % 3600) / 60);
+
+    // 🧩 نبني أجزاء الزمن فقط إذا كانت > 0
+    const parts = [];
+    if (days > 0) parts.push(t("slotsAdmin.time.days", { count: days }));
+    if (hours > 0) parts.push(t("slotsAdmin.time.hours", { count: hours }));
+    if (minutes > 0 || parts.length === 0)
+      parts.push(t("slotsAdmin.time.minutes", { count: minutes }));
+
+    const timeText = parts.join(" ");
+
+    // 🟢 لم تبدأ بعد
+    if (diffSec > 0) {
+      return t("slotsAdmin.time.startsInSmart", { time: timeText });
     }
+
+    // 🟡 بدأت منذ أقل من ساعة
+    if (absSec < 3600) {
+      return t("slotsAdmin.time.startedAgoSmart", { time: timeText });
+    }
+
+    // 🔴 انتهت
+    return t("slotsAdmin.time.endedAgoSmart", { time: timeText });
   };
 
   // 📊 Quick Stats
@@ -311,7 +318,7 @@ const [sendingNotification, setSendingNotification] = useState(false);
       setOpen(false);
       fetchSlots();
     } catch (err) {
-    handleServerError(err); 
+      handleServerError(err);
     }
   };
   // 🌌 Dynamic background
@@ -1292,22 +1299,22 @@ const [sendingNotification, setSendingNotification] = useState(false);
               flexDirection: dir === "rtl" ? "row-reverse" : "row",
             }}
           >
-          <Button
-  onClick={() => setNotifyOpen(true)}
-  sx={{
-    textTransform: "none",
-    background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
-    color: "#fff",
-    fontWeight: 900,
-    px: 3,
-    py: 1,
-    borderRadius: 2,
-    boxShadow: `0 6px 18px ${BRAND.purple}55`,
-    "&:hover": { filter: "brightness(.95)" },
-  }}
->
-  📩 {t("slotsAdmin.dialog.sendNotification")}
-</Button>
+            <Button
+              onClick={() => setNotifyOpen(true)}
+              sx={{
+                textTransform: "none",
+                background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
+                color: "#fff",
+                fontWeight: 900,
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                boxShadow: `0 6px 18px ${BRAND.purple}55`,
+                "&:hover": { filter: "brightness(.95)" },
+              }}
+            >
+              📩 {t("slotsAdmin.dialog.sendNotification")}
+            </Button>
 
             <Button
               onClick={() => setOpen(false)}
@@ -1351,117 +1358,116 @@ const [sendingNotification, setSendingNotification] = useState(false);
           </DialogActions>
         </Dialog>
         <Dialog
-  open={notifyOpen}
-  onClose={() => setNotifyOpen(false)}
-  fullWidth
-  maxWidth="sm"
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-      border: `1px solid ${BRAND.line}`,
-      background: BRAND.card,
-    },
-  }}
->
-  <DialogTitle
-    sx={{
-      textAlign: dir === "rtl" ? "right" : "left",
-      fontWeight: 900,
-      color: BRAND.text,
-      borderBottom: `1px solid ${BRAND.line}`,
-    }}
-  >
-    {t("slotsAdmin.notify.title")}
-  </DialogTitle>
+          open={notifyOpen}
+          onClose={() => setNotifyOpen(false)}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              border: `1px solid ${BRAND.line}`,
+              background: BRAND.card,
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              textAlign: dir === "rtl" ? "right" : "left",
+              fontWeight: 900,
+              color: BRAND.text,
+              borderBottom: `1px solid ${BRAND.line}`,
+            }}
+          >
+            {t("slotsAdmin.notify.title")}
+          </DialogTitle>
 
-  <DialogContent sx={{ mt: 2 }}>
-    <TextField
-      fullWidth
-      label={t("slotsAdmin.notify.notificationTitle")}
-      value={notifyTitle}
-      onChange={(e) => setNotifyTitle(e.target.value)}
-      sx={{ mb: 2 }}
-    />
+          <DialogContent sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label={t("slotsAdmin.notify.notificationTitle")}
+              value={notifyTitle}
+              onChange={(e) => setNotifyTitle(e.target.value)}
+              sx={{ mb: 2 }}
+            />
 
-    <TextField
-      fullWidth
-      multiline
-      minRows={3}
-      label={t("slotsAdmin.notify.notificationBody")}
-      value={notifyBody}
-      onChange={(e) => setNotifyBody(e.target.value)}
-      sx={{ mb: 1 }}
-    />
-  </DialogContent>
+            <TextField
+              fullWidth
+              multiline
+              minRows={3}
+              label={t("slotsAdmin.notify.notificationBody")}
+              value={notifyBody}
+              onChange={(e) => setNotifyBody(e.target.value)}
+              sx={{ mb: 1 }}
+            />
+          </DialogContent>
 
-  <DialogActions
-    sx={{
-      px: 3,
-      pb: 2,
-      justifyContent: dir === "rtl" ? "flex-start" : "flex-end",
-    }}
-  >
-    <Button
-      onClick={() => setNotifyOpen(false)}
-      sx={{
-        textTransform: "none",
-        px: 3,
-        py: 1,
-        borderRadius: 2,
-        border: `1px solid ${BRAND.line}`,
-        color: BRAND.sub,
-      }}
-    >
-      {t("slotsAdmin.notify.cancel")}
-    </Button>
+          <DialogActions
+            sx={{
+              px: 3,
+              pb: 2,
+              justifyContent: dir === "rtl" ? "flex-start" : "flex-end",
+            }}
+          >
+            <Button
+              onClick={() => setNotifyOpen(false)}
+              sx={{
+                textTransform: "none",
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                border: `1px solid ${BRAND.line}`,
+                color: BRAND.sub,
+              }}
+            >
+              {t("slotsAdmin.notify.cancel")}
+            </Button>
 
-    <Button
-      onClick={async () => {
-        if (!notifyTitle.trim() || !notifyBody.trim()) {
-          toast.error(t("slotsAdmin.notify.emptyFields"));
-          return;
-        }
+            <Button
+              onClick={async () => {
+                if (!notifyTitle.trim() || !notifyBody.trim()) {
+                  toast.error(t("slotsAdmin.notify.emptyFields"));
+                  return;
+                }
 
-        setSendingNotification(true);
+                setSendingNotification(true);
 
-        try {
-          const { data } = await Api.post("/admin/notify", {
-            title: notifyTitle,
-            body: notifyBody,
-            target: "slot:" + selectedSlot._id,
-          });
+                try {
+                  const { data } = await Api.post("/admin/notify", {
+                    title: notifyTitle,
+                    body: notifyBody,
+                    target: "slot:" + selectedSlot._id,
+                  });
 
-          toast.success(t("slotsAdmin.notify.sent"));
-          setNotifyOpen(false);
-          setNotifyTitle("");
-          setNotifyBody("");
-        } catch (err) {
-          handleServerError(err);
-        } finally {
-          setSendingNotification(false);
-        }
-      }}
-      disabled={sendingNotification}
-      sx={{
-        textTransform: "none",
-        px: 3,
-        py: 1,
-        borderRadius: 2,
-        fontWeight: 900,
-        background: `linear-gradient(135deg, ${BRAND.fuchsia}, ${BRAND.gold})`,
-        color: "#fff",
-        "&:hover": { filter: "brightness(.95)" },
-      }}
-    >
-      {sendingNotification ? (
-        <CircularProgress size={22} sx={{ color: "#fff" }} />
-      ) : (
-        t("slotsAdmin.notify.send")
-      )}
-    </Button>
-  </DialogActions>
-</Dialog>
-
+                  toast.success(t("slotsAdmin.notify.sent"));
+                  setNotifyOpen(false);
+                  setNotifyTitle("");
+                  setNotifyBody("");
+                } catch (err) {
+                  handleServerError(err);
+                } finally {
+                  setSendingNotification(false);
+                }
+              }}
+              disabled={sendingNotification}
+              sx={{
+                textTransform: "none",
+                px: 3,
+                py: 1,
+                borderRadius: 2,
+                fontWeight: 900,
+                background: `linear-gradient(135deg, ${BRAND.fuchsia}, ${BRAND.gold})`,
+                color: "#fff",
+                "&:hover": { filter: "brightness(.95)" },
+              }}
+            >
+              {sendingNotification ? (
+                <CircularProgress size={22} sx={{ color: "#fff" }} />
+              ) : (
+                t("slotsAdmin.notify.send")
+              )}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Paper>
     </Box>
   );

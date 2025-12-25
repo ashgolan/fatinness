@@ -39,6 +39,8 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 import { useTranslation } from "react-i18next";
 
+
+
 export default function Navbar() {
   const { t, i18n } = useTranslation();
 
@@ -52,16 +54,17 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const [langMenuAnchor, setLangMenuAnchor] = useState(null);
-
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("appLanguage", lang);
 
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    document.documentElement.dir = i18n.language === "ar" ? "rtl" : "ltr";
+    const selected = LANGUAGES.find((l) => l.code === lang);
+    document.documentElement.dir = selected?.dir || "ltr";
+
+    setLangMenuAnchor(null); // ⬅️ مهم لإغلاق القائمة
   };
 
-  const fallbackLogo = "/uploads/fatiness_logo.png";
+  const fallbackLogo = "/brand/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const location = useLocation();
 
@@ -154,6 +157,11 @@ export default function Navbar() {
       </AppBar>
     );
   }
+  const LANGUAGES = [
+    { code: "ar", label: "العربية", flag: "🇸🇦", dir: "rtl" },
+    { code: "he", label: "עברית", flag: "🇮🇱", dir: "rtl" },
+    { code: "en", label: "English", flag: "🇺🇸", dir: "ltr" },
+  ];
 
   return (
     <>
@@ -296,14 +304,41 @@ export default function Navbar() {
               anchorEl={langMenuAnchor}
               open={Boolean(langMenuAnchor)}
               onClose={() => setLangMenuAnchor(null)}
+              PaperProps={{
+                sx: {
+                  borderRadius: "14px",
+                  minWidth: 180,
+                  mt: 1,
+                },
+              }}
             >
-              <MenuItem onClick={() => changeLanguage("ar")}>
-                🇸🇦 العربية
-              </MenuItem>
-              <MenuItem onClick={() => changeLanguage("he")}>🇮🇱 עברית</MenuItem>
-              <MenuItem onClick={() => changeLanguage("en")}>
-                🇺🇸 English
-              </MenuItem>
+              {LANGUAGES.map((lang) => (
+                <MenuItem
+                  key={lang.code}
+                  onClick={() => changeLanguage(lang.code)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    fontWeight: 600,
+                    backgroundColor:
+                      i18n.language === lang.code
+                        ? mode === "dark"
+                          ? "rgba(255,255,255,0.08)"
+                          : "rgba(0,0,0,0.05)"
+                        : "transparent",
+                    "&:hover": {
+                      backgroundColor:
+                        mode === "dark"
+                          ? "rgba(255,255,255,0.12)"
+                          : "rgba(0,0,0,0.08)",
+                    },
+                  }}
+                >
+                  <span style={{ fontSize: "1.25rem" }}>{lang.flag}</span>
+                  {lang.label}
+                </MenuItem>
+              ))}
             </Menu>
           </Box>
 

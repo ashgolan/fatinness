@@ -202,6 +202,8 @@
   },
 
   "bookingsAdmin": {
+    "noData": "There are no bookings to show",
+
     "title": "Bookings Management",
 
     "ratesTitle": "Overall Booking Rates",
@@ -348,7 +350,20 @@
       "unknownUser": "Unknown User",
       "noPhone": "No phone number"
     },
+    "time": {
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
 
+      "hours_one": "{{count}} hour",
+      "hours_other": "{{count}} hours",
+
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes",
+
+      "startsInSmart": "Starts in {{time}}",
+      "startedAgoSmart": "Started {{time}} ago",
+      "endedAgoSmart": "Ended {{time}} ago"
+    },
     "status": {
       "upcoming": "Upcoming",
       "running": "In Progress",

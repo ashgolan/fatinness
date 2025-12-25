@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import DeleteIcon from "@mui/icons-material/Delete";
 import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { uploadBrandImage } from "../../firebase/uploadImage";
@@ -29,6 +28,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import useServerError from "../../hooks/useServerError";
 
 export default function AdminSettings() {
+  const DEFAULT_LOGO = "/brand/fatiness_logo.png";
+  const DEFAULT_CARD = "/brand/gym-cover.jpg";
+
   const handleServerError = useServerError();
 
   const { t } = useTranslation();
@@ -56,8 +58,9 @@ export default function AdminSettings() {
 
       const normalized = {
         ...settingsData,
-        logoUrl: settingsData.logoUrl || settingsData.LogoUrl,
-        cardUrl: settingsData.cardUrl || settingsData.CardUrl,
+        logoUrl: settingsData.logoUrl || settingsData.LogoUrl || DEFAULT_LOGO,
+
+        cardUrl: settingsData.cardUrl || settingsData.CardUrl || DEFAULT_CARD,
       };
 
       const gallery = await Api.get("/gallery");
@@ -476,7 +479,7 @@ export default function AdminSettings() {
             )}
           </Button>
         </Box>
-                {/* ⭐ توقيع المطوّر A.Shaalan Tech */}
+        {/* ⭐ توقيع المطوّر A.Shaalan Tech */}
         <Box
           sx={{
             mt: 5,
@@ -491,8 +494,7 @@ export default function AdminSettings() {
               height: 60,
               objectFit: "contain",
               marginBottom: 6,
-              filter:
-                "drop-shadow(0 0 3px rgba(0,0,0,0.3))",
+              filter: "drop-shadow(0 0 3px rgba(0,0,0,0.3))",
             }}
           />
 
@@ -505,7 +507,7 @@ export default function AdminSettings() {
               mt: 0.5,
             }}
           >
-{t("common.developedBy")}
+            {t("common.developedBy")}
           </Typography>
 
           <Typography
@@ -519,7 +521,6 @@ export default function AdminSettings() {
             alaa.t.shaalan@gmail.com
           </Typography>
         </Box>
-
       </Paper>
 
       {/* Lightbox */}

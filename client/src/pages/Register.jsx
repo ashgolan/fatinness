@@ -36,6 +36,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // 👑
 import useServerError from "../hooks/useServerError";
+  const fallbackLogo = "/brand/fatiness_logo.png";
 
 export default function Register() {
   const handleServerError = useServerError();
@@ -56,14 +57,12 @@ export default function Register() {
     age: "",
     role: "user",
     subscriptionEnd: "",
-
   });
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const isDark = mode === "dark";
   const { logoUrl, loading: loadingBrand } = useBrand();
@@ -84,7 +83,7 @@ export default function Register() {
         height: form.height ? Number(form.height) : null,
         weight: form.weight ? Number(form.weight) : null,
         age: form.age ? Number(form.age) : null,
-          subscriptionEnd: form.subscriptionEnd, // ⭐ جديد
+        subscriptionEnd: form.subscriptionEnd, // ⭐ جديد
       };
       await Api.post("/auth/register", cleanForm);
       toast.success(t("register.success"));
@@ -476,16 +475,16 @@ export default function Register() {
                 </Grid>
               ))}
             </Grid>
-<TextField
-                                label={t("register.fields.subscriptionEnd")}
-  type="date"
-  name="subscriptionEnd"
-  value={form.subscriptionEnd}
-  onChange={handleChange}
-  InputLabelProps={{ shrink: true }}
-  required
-  sx={textFieldStyle}
-/>
+            <TextField
+              label={t("register.fields.subscriptionEnd")}
+              type="date"
+              name="subscriptionEnd"
+              value={form.subscriptionEnd}
+              onChange={handleChange}
+              InputLabelProps={{ shrink: true }}
+              required
+              sx={textFieldStyle}
+            />
             <Button
               type="submit"
               fullWidth

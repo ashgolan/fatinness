@@ -3,6 +3,8 @@ import { Api } from "../api/Api";
 import useServerError from "../hooks/useServerError";
 
 const BrandContext = createContext();
+const DEFAULT_LOGO = "/brand/fatiness_logo.png";
+const DEFAULT_CARD = "/brand/gym-cover.jpg";
 
 export function BrandProvider({ children }) {
   const handleServerError = useServerError();
@@ -10,22 +12,17 @@ export function BrandProvider({ children }) {
   const [brand, setBrand] = useState({
     logoUrl: "",
     cardUrl: "",
-    loading: true, // ✅ مهم جدًا
+    loading: true,
   });
 
   // 📦 جلب الإعدادات من السيرفر عند تشغيل التطبيق
   useEffect(() => {
     const fetchBrand = async () => {
       try {
-        console.log(
-          "🚀 جاري جلب إعدادات البراند من:",
-          Api.defaults.baseURL + "/admin/settings"
-        );
-
         const { data } = await Api.get("/admin/settings");
         setBrand({
-          logoUrl: data.logoUrl || "",
-          cardUrl: data.cardUrl || "",
+          logoUrl: data.logoUrl || data.LogoUrl || DEFAULT_LOGO,
+          cardUrl: data.cardUrl || data.CardUrl || DEFAULT_CARD,
           loading: false,
         });
       } catch (error) {
@@ -41,7 +38,8 @@ export function BrandProvider({ children }) {
   const updateBrand = (newData) => {
     setBrand((prev) => ({
       ...prev,
-      ...newData,
+      logoUrl: newData.logoUrl || prev.logoUrl || DEFAULT_LOGO,
+      cardUrl: newData.cardUrl || prev.cardUrl || DEFAULT_CARD,
     }));
   };
 

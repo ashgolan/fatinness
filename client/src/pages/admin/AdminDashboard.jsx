@@ -53,7 +53,7 @@ export default function AdminDashboard() {
   const { logoUrl, loading: loadingBrand } = useBrand(); // ✅ الشعار من السياق
   const isDark = mode === "dark";
 
-  const fallbackLogo = "/uploads/fatiness_logo.png";
+  const fallbackLogo = "/brand/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
   const { t, i18n } = useTranslation(); // ✅ الترجمة

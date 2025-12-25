@@ -202,6 +202,8 @@
   },
 
   "bookingsAdmin": {
+    "noData": "אין הזמנות להצגה",
+
     "title": "ניהול הזמנות",
 
     "ratesTitle": "שיעורי הזמנות כלליים",
@@ -348,7 +350,16 @@
       "unknownUser": "משתמשת לא ידועה",
       "noPhone": "אין מספר טלפון"
     },
+"time": {
+  "days": "{{count}} ימים",
+  "hours": "{{count}} שעות",
+  "minutes": "{{count}} דקות",
 
+  "startsInSmart": "מתחיל בעוד {{time}}",
+  "startedAgoSmart": "התחיל לפני {{time}}",
+  "endedAgoSmart": "הסתיים לפני {{time}}"
+}
+,
     "status": {
       "upcoming": "קרוב",
       "running": "מתבצע",

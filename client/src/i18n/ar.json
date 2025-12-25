@@ -202,6 +202,7 @@
   },
 
   "bookingsAdmin": {
+    "noData": "لا توجد حجوزات للعرض",
     "title": "إدارة الحجوزات",
 
     "ratesTitle": "معدلات الحجوزات العامة",
@@ -349,7 +350,16 @@
       "unknownUser": "غير معروف",
       "noPhone": "لا يوجد رقم"
     },
+"time": {
+  "days": "{{count}} يوم",
+  "hours": "{{count}} ساعة",
+  "minutes": "{{count}} دقيقة",
 
+  "startsInSmart": "تبدأ بعد {{time}}",
+  "startedAgoSmart": "بدأت منذ {{time}}",
+  "endedAgoSmart": "انتهت منذ {{time}}"
+}
+,
     "status": {
       "upcoming": "قادمة",
       "running": "جارية",

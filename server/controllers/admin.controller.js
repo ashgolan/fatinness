@@ -395,8 +395,15 @@ export const getDashboardStats = async (req, res) => {
       completedBookings,
       totalSlots,
     ] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ isBlocked: true }),
+      // 👤 كل المستخدمين ما عدا السوبر أدمن
+      User.countDocuments({ isSuperAdmin: { $ne: true } }),
+
+      // 🚫 المحظورون (بدون سوبر أدمن)
+      User.countDocuments({
+        isBlocked: true,
+        isSuperAdmin: { $ne: true },
+      }),
+
       Booking.countDocuments(),
       Booking.countDocuments({ status: "cancelled" }),
       Booking.countDocuments({ status: "completed" }),
