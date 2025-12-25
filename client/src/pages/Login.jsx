@@ -30,6 +30,7 @@ import useServerError from "../hooks/useServerError";
 
 export default function Login() {
   const handleServerError = useServerError();
+  const fallbackLogo = "/brand/fatiness_logo.png";
 
   const { mode, BRAND } = useThemeMode();
   const isDark = mode === "dark";
@@ -47,7 +48,6 @@ export default function Login() {
   const [identifier, setIdentifier] = useState("");
 
   // شعار افتراضي
-  const fallbackLogo = "/uploads/fatiness_logo.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
 
   useEffect(() => {

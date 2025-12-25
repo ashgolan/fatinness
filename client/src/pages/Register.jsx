@@ -36,10 +36,10 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium"; // 👑
 import useServerError from "../hooks/useServerError";
-  const fallbackLogo = "/brand/fatiness_logo.png";
 
 export default function Register() {
   const handleServerError = useServerError();
+  const fallbackLogo = "/brand/fatiness_logo.png";
 
   const [pendingRoleChange, setPendingRoleChange] = useState(false);
 
