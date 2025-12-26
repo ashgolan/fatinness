@@ -1,5 +1,9 @@
 import express from "express";
-import { registerUser, loginUser, updatePreferredLanguage } from "../controllers/auth.controller.js";
+import {
+  registerUser,
+  loginUser,
+  updatePreferredLanguage,
+} from "../controllers/auth.controller.js";
 import { validateRegistration } from "../middlewares/validate.middleware.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import {
@@ -7,8 +11,8 @@ import {
   loginLimiter,
 } from "../middlewares/rateLimit.middleware.js";
 
-import User from "../models/User.js";   // ✅ مفقودة ومهمة جداً
-import bcrypt from "bcrypt";            // ✅ كان مفقود
+import User from "../models/User.js"; // ✅ مفقودة ومهمة جداً
+import bcrypt from "bcrypt"; // ✅ كان مفقود
 import jwt from "jsonwebtoken";
 
 const router = express.Router();
@@ -51,8 +55,8 @@ router.post("/register-superadmin", async (req, res) => {
       height,
       weight,
       age,
-      role: "admin",        // 👑 أدمن
-      isSuperAdmin: true,   // 👑 سوبر أدمن
+      role: "admin", // 👑 أدمن
+      isSuperAdmin: true, // 👑 سوبر أدمن
     });
 
     // إنشاء JWT
@@ -68,8 +72,8 @@ router.post("/register-superadmin", async (req, res) => {
 
     res.cookie("JWT", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: "none",
     });
 
     return res.json({
@@ -86,7 +90,6 @@ router.post("/register-superadmin", async (req, res) => {
     res.status(500).json({ code: "SETUP_ERROR" });
   }
 });
-
 
 // 🔍 فحص هل النظام يحتاج إعداد أول مرة
 router.get("/check-first-run", async (req, res) => {
