@@ -10,15 +10,15 @@ const router = express.Router();
 // =====================================================
 // 🔐 Google OAuth Config
 // =====================================================
-const {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  BASE_URL,
-} = process.env;
+// const {
+//   GOOGLE_CLIENT_ID,
+//   GOOGLE_CLIENT_SECRET,
+//   BASE_URL,
+// } = process.env;
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BASE_URL) {
-  throw new Error("❌ Missing Google OAuth environment variables");
-}
+// if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BASE_URL) {
+//   throw new Error("❌ Missing Google OAuth environment variables");
+// }
 
 const redirectUri = `${BASE_URL}/google/callback`;
 
@@ -33,15 +33,13 @@ const oauth2Client = new google.auth.OAuth2(
 // =====================================================
 router.get("/connect", authMiddleware, (req, res) => {
   try {
-    const scopes = [
-      "https://www.googleapis.com/auth/calendar.events",
-    ];
+    const scopes = ["https://www.googleapis.com/auth/calendar.events"];
 
     const url = oauth2Client.generateAuthUrl({
       access_type: "offline",
-      prompt: "consent",          // 🔴 مهم للحصول على refreshToken
+      prompt: "consent", // 🔴 مهم للحصول على refreshToken
       scope: scopes,
-      state: req.user.id,         // 🔐 ربط العملية بالمستخدم
+      state: req.user.id, // 🔐 ربط العملية بالمستخدم
     });
 
     res.json({ url });
