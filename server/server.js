@@ -125,7 +125,15 @@ app.post("/deploy", (req, res) => {
   });
 });
 ;
+app.post("/logout", (req, res) => {
+  res.clearCookie("JWT", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
 
+  return res.json({ code: "LOGOUT_SUCCESS" });
+});
 // ============================
 // 🚀 Start Server
 // ============================

@@ -1,36 +1,37 @@
 import React, { createContext, useEffect, useState, useMemo } from "react";
 import { Api } from "../api/Api";
-import { getToken, clearToken } from "../utils/tokensStorage";
-
 
 export const UserContext = createContext();
 
-
 export function UserProvider({ children }) {
-const [user, setUser] = useState(null);
-const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true);
 
+  useEffect(() => {
+    const init = async () => {
+      try {
+        // 🔐 السيرفر يقرر إن كنت مسجّل دخول
+        const { data } = await Api.get("/users/me");
+        setUser(data);
+      } catch (err) {
+        // ❌ غير مسجّل أو التوكن منتهي
+        setUser(null);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
 
-useEffect(() => {
-const init = async () => {
-try {
-if (getToken()) {
-const { data } = await Api.get("/users/me"); // عدّل المسار إذا كان مختلفًا في السيرفر
-setUser(data);
-}
-} catch (e) {
-clearToken();
-setUser(null);
-} finally {
-setLoading(false);
-}
-};
-init();
-}, []);
+    init();
+  }, []);
 
+  const value = useMemo(
+    () => ({ user, setUser, loadingUser }),
+    [user, loadingUser]
+  );
 
-const value = useMemo(() => ({ user, setUser, loading }), [user, loading]);
-
-
-return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={value}>
+      {children}
+    </UserContext.Provider>
+  );
 }

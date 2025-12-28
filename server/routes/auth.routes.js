@@ -101,6 +101,9 @@ router.get("/check-first-run", async (req, res) => {
     res.status(500).json({ code: "SERVER_ERROR" });
   }
 });
+
+
+
 router.put("/language", authMiddleware, updatePreferredLanguage);
 
 export default router;

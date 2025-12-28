@@ -95,8 +95,8 @@ export default function App() {
 
   // ✅ check-first-run فقط إذا يوجد Token
   useEffect(() => {
-    const hasToken = document.cookie.includes("JWT=");
-    if (!hasToken) return;
+    // const hasToken = document.cookie.includes("JWT=");
+    // if (!hasToken) return;
 
     Api.get("/auth/check-first-run")
       .then((res) => setNeedsSetup(res.data.needsSetup))

@@ -33,13 +33,10 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import { Link, useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
-import { clearToken } from "../utils/tokensStorage";
 import { Api } from "../api/Api";
 import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 import { useTranslation } from "react-i18next";
-
-
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -87,10 +84,15 @@ export default function Navbar() {
     if (user?.role === "admin") fetchStatus();
   }, [user]);
 
-  const logout = () => {
-    clearToken();
-    setUser(null);
-    navigate("/login");
+  const logout = async () => {
+    try {
+      await Api.post("/logout");
+    } catch (err) {
+      // حتى لو فشل، نكمل الخروج
+    } finally {
+      setUser(null);
+      navigate("/login");
+    }
   };
 
   const isAdmin = user?.role === "admin";
