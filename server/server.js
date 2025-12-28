@@ -45,23 +45,29 @@ app.set("trust proxy", 1);
 // ============================
 // 🔐 CORS
 // ============================
-const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "https://fateness.onrender.com",
-  "https://api.fatinness.cloud",
-];
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://fateness.onrender.com",
+      ];
+
+      // السماح للطلبات بدون origin (مثل Postman, server-to-server)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, origin); // ⬅️ مهم جدًا
+      }
+
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
 );
+
 app.use(cookieParser());
 
 // ============================
@@ -124,7 +130,6 @@ app.post("/deploy", (req, res) => {
     res.send("Deploy OK");
   });
 });
-;
 app.post("/logout", (req, res) => {
   res.clearCookie("JWT", {
     httpOnly: true,
@@ -140,7 +145,7 @@ app.post("/logout", (req, res) => {
 const PORT = process.env.PORT || 4000;
 
 app.listen(PORT, "0.0.0.0", () => {
-console.log("🚀 AUTO DEPLOY TEST – Server running on port", PORT);
+  console.log("🚀 AUTO DEPLOY TEST – Server running on port", PORT);
 });
 
 // init async stuff بعد التشغيل
