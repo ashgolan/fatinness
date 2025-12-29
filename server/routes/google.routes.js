@@ -7,18 +7,14 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 dotenv.config();
 const router = express.Router();
 
-// =====================================================
-// 🔐 Google OAuth Config
-// =====================================================
-// const {
-//   GOOGLE_CLIENT_ID,
-//   GOOGLE_CLIENT_SECRET,
-//   BASE_URL,
-// } = process.env;
+//=====================================================
+// Google OAuth Config
+//=====================================================
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } = process.env;
 
-// if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BASE_URL) {
-//   throw new Error("❌ Missing Google OAuth environment variables");
-// }
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BASE_URL) {
+  throw new Error("❌ Missing Google OAuth environment variables");
+}
 
 const redirectUri = `${BASE_URL}/google/callback`;
 
