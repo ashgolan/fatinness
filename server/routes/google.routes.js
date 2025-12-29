@@ -10,19 +10,19 @@ const router = express.Router();
 //=====================================================
 // Google OAuth Config
 //=====================================================
-// const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } = process.env;
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, BASE_URL } = process.env;
 
-// if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BASE_URL) {
-//   throw new Error("❌ Missing Google OAuth environment variables");
-// }
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !BASE_URL) {
+  throw new Error("❌ Missing Google OAuth environment variables");
+}
 
-// const redirectUri = `${BASE_URL}/google/callback`;
+const redirectUri = `${BASE_URL}/google/callback`;
 
-// const oauth2Client = new google.auth.OAuth2(
-//   GOOGLE_CLIENT_ID,
-//   GOOGLE_CLIENT_SECRET,
-//   redirectUri
-// );
+const oauth2Client = new google.auth.OAuth2(
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  redirectUri
+);
 
 // =====================================================
 // 🔹 Step 1: Generate Google Auth URL (User must be logged in)
