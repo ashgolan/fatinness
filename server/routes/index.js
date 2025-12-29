@@ -6,7 +6,7 @@ import adminRoutes from "./admin.routes.js";
 import slotsRoutes from "./slots.routes.js";
 import paymentsRoutes from "./payments.routes.js";
 import bookingsRoutes from "./bookings.routes.js";
-import googleRoutes from "./google.routes.js";
+// import googleRoutes from "./google.routes.js";
 
 const router = express.Router();
 
@@ -17,6 +17,6 @@ router.use("/admin/slots", adminSlotsRoutes);
 router.use("/slots", slotsRoutes);
 router.use("/bookings", bookingsRoutes);
 router.use("/payments", paymentsRoutes);
-router.use("/google", googleRoutes);
+// router.use("/google", googleRoutes);
 
 export default router;
