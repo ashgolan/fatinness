@@ -48,25 +48,23 @@ export default function Login() {
 
   // شعار افتراضي
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
+useEffect(() => {
+  Api.get("/auth/check-first-run")
+    .then((res) => {
+      if (res.data?.needsSetup) {
+        navigate("/register-superadmin", { replace: true });
+      }
+    })
+    .catch(() => {
+      // تجاهل الخطأ (مثلاً لو السيرفر غير متاح)
+    });
+}, [navigate]);
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
   }, [logoUrl, loadingBrand]);
 
-  const getErrorMessage = (err) => {
-    if (err?.response?.data) {
-      return (
-        err.response.data.message ||
-        err.response.data.error ||
-        err.response.data.msg ||
-        t("login.errors.status", {
-          status: err.response.status || "",
-        }).trim()
-      );
-    }
-    if (err?.request) return t("login.errors.network");
-    return err?.message || t("login.errors.unexpected");
-  };
+  
 
   const onSubmit = async (e) => {
     e.preventDefault();

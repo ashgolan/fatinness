@@ -31,21 +31,30 @@ router.post("/login", loginLimiter, loginUser);
 
 // 🌟 إنشاء السوبر أدمن لأول مرة
 // 🌟 إنشاء السوبر أدمن لأول مرة
+// 🌟 إنشاء السوبر أدمن لأول مرة فقط
 router.post("/register-superadmin", async (req, res) => {
   try {
+    // 🔒 شرط وحيد وقاطع
+    const userCount = await User.countDocuments();
+    if (userCount !== 0) {
+      return res.status(403).json({
+        code: "SUPERADMIN_SETUP_NOT_ALLOWED",
+      });
+    }
+
     const { username, email, phone, password, gender, height, weight, age } =
       req.body;
 
-    // هل يوجد مستخدم واحد على الأقل؟
-    const userCount = await User.countDocuments();
-    if (userCount > 0) {
-      return res.status(400).json({ code: "SETUP_ALREADY_DONE" });
+    if (!username || !password) {
+      return res.status(400).json({
+        code: "SETUP_MISSING_FIELDS",
+      });
     }
 
-    // تشفير الباسوورد
+    // 🔐 تشفير كلمة المرور
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // إنشاء السوبر أدمن
+    // 👑 إنشاء السوبر أدمن
     const superAdmin = await User.create({
       username,
       email,
@@ -55,14 +64,14 @@ router.post("/register-superadmin", async (req, res) => {
       height,
       weight,
       age,
-      role: "admin", // 👑 أدمن
-      isSuperAdmin: true, // 👑 سوبر أدمن
+      role: "admin",
+      isSuperAdmin: true,
     });
 
-    // إنشاء JWT
+    // 🔑 JWT
     const token = jwt.sign(
       {
-        _id: superAdmin._id,
+        id: superAdmin._id,
         role: "admin",
         isSuperAdmin: true,
       },
@@ -70,6 +79,7 @@ router.post("/register-superadmin", async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // 🍪 Cookie آمن
     res.cookie("JWT", token, {
       httpOnly: true,
       secure: true,
@@ -81,8 +91,8 @@ router.post("/register-superadmin", async (req, res) => {
       user: {
         id: superAdmin._id,
         username: superAdmin.username,
-        isSuperAdmin: true,
         role: "admin",
+        isSuperAdmin: true,
       },
     });
   } catch (err) {
@@ -101,8 +111,6 @@ router.get("/check-first-run", async (req, res) => {
     res.status(500).json({ code: "SERVER_ERROR" });
   }
 });
-
-
 
 router.put("/language", authMiddleware, updatePreferredLanguage);
 
