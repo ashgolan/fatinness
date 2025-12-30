@@ -1,21 +1,9 @@
-// 📁 server/scheduler/scheduler.js
-import Agenda from "agenda";
 import { DateTime } from "luxon";
+import { agenda } from "./agenda.js";
 import Booking from "../models/Booking.js";
 import User from "../models/User.js";
 import { sendSmartNotification } from "../utils/notify.js";
 import { ZONE } from "../utils/time.js";
-
-// ======================================================
-// 🔧 إنشاء المجدول
-// ======================================================
-export const agenda = new Agenda({
-  db: { address: process.env.MONGO_URI, collection: "agendaJobs" },
-  processEvery: "1 minute",
-});
-
-// 🟣 عنوان ثابت
-const NOTIFICATION_TITLE = "Fatinness Studio";
 
 // ======================================================
 // 🌍 لغة المستخدم
@@ -27,15 +15,9 @@ function getLocale(lang) {
 }
 
 // ======================================================
-// 🧹 تنظيف عند الإقلاع
+// 🟣 عنوان الإشعارات
 // ======================================================
-agenda.on("ready", async () => {
-  console.log("🧹 Cleaning old agenda jobs...");
-  await agenda.cancel({});
-  console.log("✨ Agenda ready");
-
-  await agenda.every("0 2 * * *", "check-subscriptions-daily");
-});
+const NOTIFICATION_TITLE = "Fatinness Studio";
 
 // ======================================================
 // 🔔 تذكير قبل ساعتين
@@ -45,6 +27,7 @@ agenda.define("send-reminder", async (job) => {
 
   const booking = await Booking.findById(bookingId).populate("user slot");
   if (!booking || booking.status !== "booked") return;
+  if (booking.reminderSent) return;
 
   const lang = booking.user.preferredLanguage || "ar";
   const locale = getLocale(lang);
@@ -55,9 +38,7 @@ agenda.define("send-reminder", async (job) => {
     .setZone(ZONE)
     .toLocaleString(DateTime.DATE_FULL, { locale });
 
-  const timeStr = startUTC
-    .setZone(ZONE)
-    .toFormat("HH:mm");
+  const timeStr = startUTC.setZone(ZONE).toFormat("HH:mm");
 
   await sendSmartNotification({
     user: booking.user,
@@ -110,7 +91,7 @@ agenda.define("mark-completed", async (job) => {
 });
 
 // ======================================================
-// ⭐ تذكير الاشتراكات
+// ⭐ فحص الاشتراكات (مرة يوميًا)
 // ======================================================
 agenda.define("check-subscriptions-daily", async () => {
   const users = await User.find({ subscriptionEnd: { $ne: null } });
@@ -127,7 +108,15 @@ agenda.define("check-subscriptions-daily", async () => {
         user: u,
         title: NOTIFICATION_TITLE,
         body:
-          diffDays === 5
+          lang === "en"
+            ? diffDays === 5
+              ? "5 days left until your subscription ends"
+              : "2 days left until your subscription ends"
+            : lang === "he"
+            ? diffDays === 5
+              ? "נותרו 5 ימים לסיום המנוי שלך"
+              : "נותרו יומיים לסיום המנוי שלך"
+            : diffDays === 5
             ? "تبقّى 5 أيام على انتهاء اشتراكك"
             : "تبقّى يومان على انتهاء اشتراكك",
       });
@@ -140,45 +129,44 @@ agenda.define("check-subscriptions-daily", async () => {
       await sendSmartNotification({
         user: u,
         title: NOTIFICATION_TITLE,
-        body: "انتهى اشتراكك وتم إيقاف الحجز",
+        body:
+          lang === "en"
+            ? "Your subscription has ended and booking is disabled"
+            : lang === "he"
+            ? "המנוי שלך הסתיים והאפשרות להזמנה הושבתה"
+            : "انتهى اشتراكك وتم إيقاف الحجز",
       });
     }
   }
 });
 
 // ======================================================
-// 🕒 جدولة الحصص
+// 🕒 جدولة الحجز
 // ======================================================
 export const scheduleReminder = async (bookingId, startAt, endAt) => {
-  try {
-    await agenda.cancel({ "data.bookingId": bookingId });
+  await agenda.cancel({ "data.bookingId": bookingId });
 
-    const startUTC = DateTime.fromJSDate(startAt, { zone: "utc" });
-    const endUTC = DateTime.fromJSDate(endAt, { zone: "utc" });
+  const startUTC = DateTime.fromJSDate(startAt, { zone: "utc" });
+  const endUTC = DateTime.fromJSDate(endAt, { zone: "utc" });
 
-    const reminderAt = startUTC.minus({ hours: 2 });
-    if (reminderAt > DateTime.utc()) {
-      await agenda.schedule(reminderAt.toJSDate(), "send-reminder", {
-        bookingId,
-      });
-    }
+  const reminderAt = startUTC.minus({ hours: 2 });
+  const now = DateTime.utc();
 
-    await agenda.schedule(
-      endUTC.plus({ minutes: 1 }).toJSDate(),
-      "mark-completed",
-      { bookingId }
-    );
-
-    console.log("⏱ Scheduler set for booking:", bookingId);
-  } catch (err) {
-    console.error("❌ Scheduler error:", err.message);
+  // 🔔 إذا فات وقت التذكير → أرسل الآن
+  if (reminderAt <= now) {
+    await agenda.now("send-reminder", { bookingId });
+  } else {
+    await agenda.schedule(reminderAt.toJSDate(), "send-reminder", {
+      bookingId,
+    });
   }
-};
 
-// ======================================================
-// 🚀 بدء المجدول
-// ======================================================
-export const startScheduler = async () => {
-  await agenda.start();
-  console.log("🚀 Scheduler started");
+  // 🏁 إنهاء الحصة
+  await agenda.schedule(
+    endUTC.plus({ minutes: 1 }).toJSDate(),
+    "mark-completed",
+    { bookingId }
+  );
+
+  console.log("⏱ Scheduler set for booking:", bookingId);
 };

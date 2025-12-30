@@ -1036,11 +1036,66 @@ export const deleteUserCompletely = async (req, res) => {
   }
 };
 
+import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
+
+import Booking from "../models/Booking.js";
+import Notification from "../models/Notification.js";
+import Slot from "../models/Slot.js";
+import WeekTemplate from "../models/WeekTemplate.js";
+import User from "../models/User.js";
+import Setting from "../models/Setting.js";
+
+import { agenda } from "../scheduler/agenda.js";
+
+// ======================================================
+// 🛡️ تحقق سوبر أدمن
+// ======================================================
+function assertSuperAdmin(req, res) {
+  if (!req.user?.isSuperAdmin) {
+    res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
+    return false;
+  }
+  return true;
+}
+
+// ======================================================
+// 🛑 إيقاف وتنظيف Agenda
+// ======================================================
+async function stopAndCleanAgenda() {
+  if (agenda) {
+    await agenda.stop();
+  }
+
+  // حذف كل jobs المخزنة
+  const collections = await mongoose.connection.db.listCollections().toArray();
+  const agendaCollectionExists = collections.some(
+    (c) => c.name === "agendaJobs"
+  );
+
+  if (agendaCollectionExists) {
+    await mongoose.connection.collection("agendaJobs").deleteMany({});
+  }
+}
+
+// ======================================================
+// 🚀 إعادة تشغيل Agenda
+// ======================================================
+async function restartAgenda() {
+  if (agenda) {
+    await agenda.start();
+  }
+}
+
+// ======================================================
+// 🔹 Reset Light
+// ======================================================
 export const resetLight = async (req, res) => {
   try {
-    if (!req.user.isSuperAdmin) {
-      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
-    }
+    if (!assertSuperAdmin(req, res)) return;
+
+    await stopAndCleanAgenda();
 
     await Promise.all([
       Booking.deleteMany({}),
@@ -1048,6 +1103,8 @@ export const resetLight = async (req, res) => {
       Slot.deleteMany({}),
       WeekTemplate.deleteMany({}),
     ]);
+
+    await restartAgenda();
 
     res.json({ code: "ADMIN_RESET_LIGHT_SUCCESS" });
   } catch (error) {
@@ -1056,22 +1113,27 @@ export const resetLight = async (req, res) => {
   }
 };
 
+// ======================================================
+// 🔸 Reset Medium
+// ======================================================
 export const resetMedium = async (req, res) => {
   try {
-    if (!req.user.isSuperAdmin) {
-      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
-    }
+    if (!assertSuperAdmin(req, res)) return;
 
     const superAdminId = req.user._id;
+
+    await stopAndCleanAgenda();
 
     await Promise.all([
       Booking.deleteMany({}),
       Notification.deleteMany({}),
       Slot.deleteMany({}),
       WeekTemplate.deleteMany({}),
-      User.deleteMany({ _id: { $ne: superAdminId } }),
       Setting.deleteMany({}),
+      User.deleteMany({ _id: { $ne: superAdminId } }),
     ]);
+
+    await restartAgenda();
 
     res.json({ code: "ADMIN_RESET_MEDIUM_SUCCESS" });
   } catch (error) {
@@ -1080,13 +1142,16 @@ export const resetMedium = async (req, res) => {
   }
 };
 
+// ======================================================
+// 🔴 Reset Hard
+// ======================================================
 export const resetHard = async (req, res) => {
   try {
-    if (!req.user.isSuperAdmin) {
-      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
-    }
+    if (!assertSuperAdmin(req, res)) return;
 
     const superAdminId = req.user._id;
+
+    await stopAndCleanAgenda();
 
     await Promise.all([
       Booking.deleteMany({}),
@@ -1097,7 +1162,7 @@ export const resetHard = async (req, res) => {
       User.deleteMany({ _id: { $ne: superAdminId } }),
     ]);
 
-    // حذف الملفات من مجلد uploads
+    // 🗑️ حذف الملفات من uploads
     const uploadsPath = path.join(process.cwd(), "uploads");
     if (fs.existsSync(uploadsPath)) {
       const files = fs.readdirSync(uploadsPath);
@@ -1106,6 +1171,8 @@ export const resetHard = async (req, res) => {
       }
     }
 
+    await restartAgenda();
+
     res.json({ code: "ADMIN_RESET_HARD_SUCCESS" });
   } catch (error) {
     console.error("❌ resetHard:", error);
@@ -1113,13 +1180,23 @@ export const resetHard = async (req, res) => {
   }
 };
 
+// ======================================================
+// 🏭 Reset Factory (أقوى Reset)
+// ======================================================
 export const resetFactory = async (req, res) => {
   try {
-    if (!req.user.isSuperAdmin) {
-      return res.status(403).json({ code: "ADMIN_RESET_NOT_ALLOWED" });
+    if (!assertSuperAdmin(req, res)) return;
+
+    if (agenda) {
+      await agenda.stop();
     }
 
+    // 🔥 حذف كامل قاعدة البيانات
     await mongoose.connection.dropDatabase();
+
+    if (agenda) {
+      await agenda.start();
+    }
 
     res.json({ code: "ADMIN_RESET_FACTORY_SUCCESS" });
   } catch (error) {
