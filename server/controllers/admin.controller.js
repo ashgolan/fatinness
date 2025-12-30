@@ -15,6 +15,7 @@ import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
 import fs from "fs";
 import { hasOverlap } from "./adminSlots.controller.js";
+import { agenda } from "../config/agenda.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -1036,18 +1037,6 @@ export const deleteUserCompletely = async (req, res) => {
   }
 };
 
-import mongoose from "mongoose";
-import fs from "fs";
-import path from "path";
-
-import Booking from "../models/Booking.js";
-import Notification from "../models/Notification.js";
-import Slot from "../models/Slot.js";
-import WeekTemplate from "../models/WeekTemplate.js";
-import User from "../models/User.js";
-import Setting from "../models/Setting.js";
-
-import { agenda } from "../scheduler/agenda.js";
 
 // ======================================================
 // 🛡️ تحقق سوبر أدمن
