@@ -25,12 +25,8 @@ import { exec } from "child_process";
 const app = express();
 
 // GitHub webhook raw body
-// app.use("/deploy", express.raw({ type: "application/json" }));
-app.post(
-  "/deploy",
-  express.raw({ type: "application/json" }),
-  deployController
-);
+app.use("/deploy", express.raw({ type: "application/json" }));
+
 
 // ============================
 // ⚠️ Stripe Webhook (raw body)

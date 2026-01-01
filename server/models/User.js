@@ -1,3 +1,19 @@
+import mongoose from "mongoose";
+
+const weightHistorySchema = new mongoose.Schema({
+  weight: Number,
+  note: String,
+  date: { type: Date, default: Date.now },
+});
+
+const subscriptionSchema = new mongoose.Schema({
+  provider: String,
+  providerCustomerId: String,
+  planId: String,
+  active: { type: Boolean, default: false },
+  currentPeriodStart: Date,
+});
+
 const userSchema = new mongoose.Schema(
   {
     username: { type: String },
@@ -66,3 +82,6 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+
+export default mongoose.model("User", userSchema);
