@@ -911,6 +911,7 @@
     "ADMIN_RESET_HARD_ERROR": "حدث خطأ أثناء إعادة الضبط القوية.",
     "ADMIN_RESET_FACTORY_ERROR": "حدث خطأ أثناء إعادة ضبط المصنع.",
 
+    "SUBSCRIPTION_EXPIRED": "انتهى اشتراكك، يرجى تجديد الاشتراك للاستمرار 💳",
     "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "يجب إدخال عنوان الإشعار والنص.",
     "ADMIN_NOTIFICATION_SENT": "تم إرسال الإشعار بنجاح.",
     "ADMIN_NOTIFICATION_ERROR": "حدث خطأ أثناء إرسال الإشعار.",

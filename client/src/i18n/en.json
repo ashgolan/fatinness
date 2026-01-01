@@ -852,7 +852,7 @@
     "AUTH_REGISTER_SERVER_ERROR": "Failed to create account.",
     "AUTH_LOGIN_INVALID_FIELDS": "Username/phone and password are required.",
     "AUTH_TOO_MANY_REQUESTS": "Too many login attempts ⏳. Login has been temporarily blocked, please wait a few minutes and try again.",
-
+    "SUBSCRIPTION_EXPIRED": "Your subscription has expired. Please renew to continue 💳",
     "AUTH_LOGIN_NOT_FOUND": "User not found.",
     "AUTH_LOGIN_BLOCKED": "Your account is temporarily blocked.",
     "AUTH_LOGIN_MAINTENANCE": "System is under maintenance.",

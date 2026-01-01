@@ -850,7 +850,7 @@
     "AUTH_LOGIN_INCORRECT": "פרטי ההתחברות שגויים.",
     "AUTH_LOGIN_SUCCESS": "התחברת בהצלחה.",
     "AUTH_TOO_MANY_REQUESTS": "בוצעו יותר מדי ניסיונות התחברות ⏳. ההתחברות הושהתה זמנית, אנא המתן מספר דקות ונסה שוב.",
-
+    "SUBSCRIPTION_EXPIRED": "המנוי שלך הסתיים. יש לחדש את המנוי כדי להמשיך 💳",
     "BOOKING_SLOT_NOT_AVAILABLE": "השיעור לא זמין.",
     "BOOKING_SLOT_PAST": "השיעור כבר התחיל או הסתיים.",
     "BOOKING_WEEKLY_LIMIT": "הגעת למכסת ההזמנות השבועית.",

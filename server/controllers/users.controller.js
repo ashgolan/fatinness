@@ -104,6 +104,11 @@ export const addWeightPoint = async (req, res) => {
     if (!user) {
       return res.status(404).json({ code: "USER_WEIGHT_NOT_FOUND" });
     }
+    if (user.subscriptionStatus === "expired") {
+      return res.status(403).json({
+        code: "SUBSCRIPTION_EXPIRED",
+      });
+    }
 
     const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
 

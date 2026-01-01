@@ -15,7 +15,11 @@ export const createBooking = async (req, res) => {
   try {
     const user = req.user;
     const { slotId, paymentRef } = req.body;
-
+    if (user.subscriptionStatus === "expired") {
+      return res.status(403).json({
+        code: "SUBSCRIPTION_EXPIRED",
+      });
+    }
     const slot = await Slot.findById(slotId);
     if (!slot || slot.isBlocked) {
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
@@ -113,10 +117,7 @@ export const cancelBooking = async (req, res) => {
       return res.status(404).json({ code: "ADMIN_BOOKING_NOT_FOUND" });
     }
 
-    if (
-      !booking.user._id.equals(req.user._id) &&
-      req.user.role !== "admin"
-    ) {
+    if (!booking.user._id.equals(req.user._id) && req.user.role !== "admin") {
       return res.status(403).json({ code: "ADMIN_BOOKING_FORBIDDEN" });
     }
 
@@ -128,8 +129,7 @@ export const cancelBooking = async (req, res) => {
     const nowUTC = DateTime.now().setZone(ZONE).toUTC();
 
     // 🕒 مهلة الإلغاء: 12 ساعة قبل البداية
-    const cancelDeadlineUTC = DateTime
-      .fromJSDate(booking.slot.startAt)
+    const cancelDeadlineUTC = DateTime.fromJSDate(booking.slot.startAt)
       .minus({ hours: 12 })
       .toUTC();
 

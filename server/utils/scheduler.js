@@ -107,36 +107,79 @@ agenda.define("mark-completed", async (job) => {
 // ⭐ فحص الاشتراكات
 // ======================================================
 agenda.define("check-subscriptions-daily", async () => {
-  const users = await User.find({ subscriptionEnd: { $ne: null } });
-  const nowUTC = DateTime.utc();
+  const users = await User.find({
+    subscriptionEnd: { $ne: null },
+  });
+
+  const now = DateTime.utc();
 
   for (const u of users) {
     const endUTC = DateTime.fromJSDate(u.subscriptionEnd, { zone: "utc" });
-    const diffDays = Math.ceil(endUTC.diff(nowUTC, "days").days);
 
-    if ([5, 2].includes(diffDays)) {
+    // الفرق بالأيام (تقريبي لليوم)
+    const diffDays = Math.floor(endUTC.diff(now, "days").days);
+
+    // ======================================================
+    // 🔔 تذكير قبل 5 أيام
+    // ======================================================
+    if (diffDays === 5 && !u.notified5Days) {
       await sendSmartNotification({
         user: u,
         title: NOTIFICATION_TITLE,
         body:
-          diffDays === 5
-            ? "تبقّى 5 أيام على انتهاء اشتراكك"
-            : "تبقّى يومان على انتهاء اشتراكك",
+          u.preferredLanguage === "en"
+            ? "Your subscription will expire in 5 days"
+            : u.preferredLanguage === "he"
+            ? "המנוי שלך יסתיים בעוד 5 ימים"
+            : "يتبقى 5 أيام على انتهاء اشتراكك",
       });
+
+      u.notified5Days = true;
+      await u.save();
     }
 
-    if (diffDays <= 0 && !u.isBlocked) {
-      u.isBlocked = true;
+    // ======================================================
+    // 🔔 تذكير قبل يومين
+    // ======================================================
+    if (diffDays === 2 && !u.notified2Days) {
+      await sendSmartNotification({
+        user: u,
+        title: NOTIFICATION_TITLE,
+        body:
+          u.preferredLanguage === "en"
+            ? "Your subscription will expire in 2 days"
+            : u.preferredLanguage === "he"
+            ? "המנוי שלך יסתיים בעוד יומיים"
+            : "يتبقى يومان على انتهاء اشتراكك",
+      });
+
+      u.notified2Days = true;
+      await u.save();
+    }
+
+    // ======================================================
+    // ⛔ إنهاء الاشتراك (بعد 02:00 ليلًا)
+    // ======================================================
+    const afterTwoAM = now.hour >= 2;
+
+    if (now >= endUTC && afterTwoAM && u.subscriptionStatus !== "expired") {
+      u.subscriptionStatus = "expired";
       await u.save();
 
       await sendSmartNotification({
         user: u,
         title: NOTIFICATION_TITLE,
-        body: "انتهى اشتراكك وتم إيقاف الحجز",
+        body:
+          u.preferredLanguage === "en"
+            ? "Your subscription has expired. Booking is disabled."
+            : u.preferredLanguage === "he"
+            ? "המנוי שלך הסתיים. לא ניתן להזמין אימונים."
+            : "انتهى اشتراكك وتم إيقاف الحجز",
       });
     }
   }
 });
+
 
 // ======================================================
 // 🕒 جدولة الحجز (✨ التحسين الوحيد ✨)
