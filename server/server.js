@@ -25,7 +25,12 @@ import { exec } from "child_process";
 const app = express();
 
 // GitHub webhook raw body
-app.use("/deploy", express.raw({ type: "application/json" }));
+// app.use("/deploy", express.raw({ type: "application/json" }));
+app.post(
+  "/deploy",
+  express.raw({ type: "application/json" }),
+  deployController
+);
 
 // ============================
 // ⚠️ Stripe Webhook (raw body)
@@ -126,7 +131,7 @@ app.post("/deploy", (req, res) => {
 
   console.log("✅ Signature OK");
 
-  exec("bash /var/www/fateness-server/deploy.sh", () => {
+exec("bash /var/www/fatinness/deploy.sh", () => {
     res.send("Deploy OK");
   });
 });
