@@ -11,7 +11,10 @@ if (!serviceAccountPath) {
   const absolutePath = path.resolve(serviceAccountPath);
 
   if (!fs.existsSync(absolutePath)) {
-    console.error("❌ Firebase service account file not found:", absolutePath);
+    console.error(
+      "❌ Firebase service account file not found:",
+      absolutePath
+    );
   } else {
     if (!admin.apps.length) {
       const serviceAccount = JSON.parse(
@@ -22,7 +25,7 @@ if (!serviceAccountPath) {
         credential: admin.credential.cert(serviceAccount),
       });
 
-      console.log("✅ Firebase Admin initialized successfully (JSON)");
+      console.log("✅ Firebase Admin initialized successfully (file)");
     }
   }
 }
