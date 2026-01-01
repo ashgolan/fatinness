@@ -104,7 +104,10 @@ export const addWeightPoint = async (req, res) => {
     if (!user) {
       return res.status(404).json({ code: "USER_WEIGHT_NOT_FOUND" });
     }
-    if (user.subscriptionStatus === "expired") {
+    if (
+      user.subscriptionStatus === "expired" ||
+      (user.subscriptionEnd && user.subscriptionEnd < new Date())
+    ) {
       return res.status(403).json({
         code: "SUBSCRIPTION_EXPIRED",
       });
@@ -179,12 +182,16 @@ export const updateFcmToken = async (req, res) => {
   }
 };
 
-/**
- * 🔹 تجديد الاشتراك يدويًا
- */
 export const renewSubscription = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    // ⛔ السوبر أدمن فقط
+    if (!req.user.isSuperAdmin) {
+      return res.status(403).json({
+        code: "ONLY_SUPERADMIN_CAN_RENEW_SUBSCRIPTION",
+      });
+    }
+
+    const user = await User.findById(req.body.userId);
     if (!user) {
       return res.status(404).json({ code: "USER_SUBSCRIPTION_NOT_FOUND" });
     }
@@ -194,16 +201,22 @@ export const renewSubscription = async (req, res) => {
     const startUTC = nowLocal.toUTC().toJSDate();
     const endUTC = nowLocal.plus({ months: 1 }).endOf("day").toUTC().toJSDate();
 
+    // 🔁 تحديث الاشتراك
+    user.subscriptionEnd = endUTC;
+    user.subscriptionStatus = "active";
+    user.isBlocked = false;
+
+    // 🔔 إعادة ضبط الإشعارات
+    user.notified5Days = false;
+    user.notified2Days = false;
+
+    // (اختياري) مزامنة مع subscription object
     user.subscription = {
       ...user.subscription,
       active: true,
       currentPeriodStart: startUTC,
       currentPeriodEnd: endUTC,
     };
-
-    // ⭐ تحديث subscriptionEnd الرئيسي (مهم جدًا)
-    user.subscriptionEnd = endUTC;
-    user.isBlocked = false;
 
     await user.save();
 

@@ -780,7 +780,8 @@ export default function UsersAdmin() {
               )}
             </TextField>
             {/* 🗓️ تواريخ الاشتراك — تظهر فقط للأدمن العادي */}
-            {!currentUser?.isSuperAdmin && (
+            {/* 🗓️ تواريخ الاشتراك — للسوبر أدمن فقط */}
+            {currentUser?.isSuperAdmin && (
               <>
                 <TextField
                   label={t("usersAdmin.fields.subscriptionStart")}
