@@ -268,14 +268,18 @@ function generateToken(user) {
   );
 }
 
+const isProd = process.env.NODE_ENV === "production";
+
 function setAuthCookie(res, token) {
-  res.cookie("JWT", token, {
-    httpOnly: true,
-    secure: true, // 🔴 HTTPS فقط
-    sameSite: "none", // 🔴 Cross-domain
-    maxAge: COOKIE_MAX_AGE,
-  });
+res.cookie("JWT", token, {
+  httpOnly: true,
+  secure: true,        // HTTPS
+  sameSite: "none",    // 🔥 Cross-Domain
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+});
+
 }
+
 
 // =====================================================
 // 🔹 Register user (admin or first user)

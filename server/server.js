@@ -53,14 +53,14 @@ app.use(
       const allowedOrigins = [
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://fateness.onrender.com",
+        "https://fateness.onrender.com", // ✅ الفرونت الحقيقي
       ];
 
-      // السماح للطلبات بدون origin (مثل Postman, server-to-server)
+      // السماح للطلبات بدون origin (Postman / server-to-server)
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
-        return callback(null, origin); // ⬅️ مهم جدًا
+        return callback(null, true); // 🔥 هذا السطر الحاسم
       }
 
       return callback(new Error("Not allowed by CORS"));
@@ -68,6 +68,7 @@ app.use(
     credentials: true,
   })
 );
+
 
 app.use(cookieParser());
 
