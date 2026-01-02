@@ -71,10 +71,26 @@ const userSchema = new mongoose.Schema(
     },
 
     allowExtraBookings: { type: Boolean, default: false },
-    fcmTokens: [String],
     weightHistory: [weightHistorySchema],
     subscription: subscriptionSchema,
 
+    fcmTokens: [
+      {
+        token: { type: String, required: true },
+
+        // أول مستخدم سجّل هذا التوكن = مالك الجهاز
+        ownerUserId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     google: {
       accessToken: String,
       refreshToken: String,
@@ -82,6 +98,5 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 export default mongoose.model("User", userSchema);

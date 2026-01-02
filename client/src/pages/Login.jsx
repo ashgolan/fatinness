@@ -87,15 +87,6 @@ export default function Login() {
         });
 
         // 🔄 تحديث بيانات المستخدم بدون await
-        Api.get("/auth/me")
-          .then((me) => {
-            if (me.data?.user) {
-              setUser(me.data.user);
-            }
-          })
-          .catch(() => {
-            // ❌ لا نفعل شيئًا لو فشل
-          });
 
         const lang = localStorage.getItem("appLanguage") || "ar";
         Api.put("/auth/language", { preferredLanguage: lang }).catch(() => {});

@@ -40,11 +40,11 @@ if (!admin.apps.length) {
 }
 
 // ======================================================
-// 🔥 إرسال إشعار إلى عدة أجهزة
+// 🔥 إرسال إشعار إلى عدة أجهزة + كشف التوكنات الميتة
 // ======================================================
 export async function sendFcmToTokens(tokens = [], message = {}) {
   if (!tokens.length) {
-    return { successCount: 0, failureCount: 0 };
+    return { successCount: 0, failureCount: 0, invalidTokens: [] };
   }
 
   try {
@@ -71,23 +71,40 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
       },
     });
 
+    const invalidTokens = [];
+
+    response.responses.forEach((res, index) => {
+      if (!res.success) {
+        const code = res.error?.code || "";
+
+        if (
+          code === "messaging/registration-token-not-registered" ||
+          code === "messaging/invalid-registration-token"
+        ) {
+          invalidTokens.push(tokens[index]);
+        }
+      }
+    });
+
     console.log(
-      `📢 FCM: success=${response.successCount}, failed=${response.failureCount}`
+      `📢 FCM: success=${response.successCount}, failed=${response.failureCount}, invalid=${invalidTokens.length}`
     );
 
     return {
       successCount: response.successCount,
       failureCount: response.failureCount,
-      success: response.successCount > 0,
+      invalidTokens,
     };
   } catch (error) {
     console.error("❌ FCM send error:", error.message);
     return {
       successCount: 0,
       failureCount: tokens.length,
+      invalidTokens: tokens,
     };
   }
 }
+
 
 // ======================================================
 // 🔥 إرسال إشعار لجهاز واحد

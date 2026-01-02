@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
+import { transferFcmToThisDevice } from "../firebase/registerFcmToken";
 
 ChartJS.register(
   LineElement,
@@ -356,6 +357,51 @@ export default function Profile() {
               <h3 style={{ color: textMain }}>{stat.value}</h3>
             </div>
           ))}
+        </div>
+
+        {/* ===============================
+    TRANSFER NOTIFICATIONS
+=============================== */}
+        <div
+          style={{
+            background: cardBg,
+            borderRadius: "20px",
+            padding: "20px",
+            marginBottom: "32px",
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(0,0,0,0.05)",
+            textAlign: "center",
+          }}
+        >
+          <h3 style={{ color: textMain, marginBottom: "8px" }}>
+            🔔 {t("profile.notifications.title")}
+          </h3>
+
+          <p style={{ color: textSub, fontSize: "14px", marginBottom: "16px" }}>
+            {t("profile.notifications.description")}
+          </p>
+
+          <button
+            onClick={() => {
+              if (window.confirm(t("profile.notifications.confirmTransfer"))) {
+                transferFcmToThisDevice();
+              }
+            }}
+            style={{
+              padding: "12px 20px",
+              borderRadius: "10px",
+              background: isDark
+                ? "linear-gradient(135deg,#f59e0b,#facc15)"
+                : "linear-gradient(135deg,#6366f1,#a855f7)",
+              color: "#fff",
+              border: "none",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            🔁 {t("profile.notifications.transferButton")}
+          </button>
         </div>
 
         {/* ===============================
