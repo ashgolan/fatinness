@@ -20,7 +20,7 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 export default function ControlCenter() {
   const navigate = useNavigate();
   const { mode, BRAND } = useThemeMode();
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
 
   const isDark = mode === "dark";
 
@@ -109,7 +109,7 @@ export default function ControlCenter() {
 
   return (
     <Box
-      dir={t("dir")}
+      dir={i18n.dir()}
       sx={{
         minHeight: "100vh",
         background: isDark

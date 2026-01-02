@@ -38,7 +38,7 @@ export default function AdminNotifications() {
 
   const theme = useTheme();
   const mode = theme.palette.mode;
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // 🎨 ألوان الهوية
   const BRAND = {
@@ -79,8 +79,9 @@ export default function AdminNotifications() {
       ]);
       setHistory(historyData);
       setUsers(usersData);
-    } catch(err) {
-handleServerError(err);     }
+    } catch (err) {
+      handleServerError(err);
+    }
   };
 
   useEffect(() => {
@@ -100,12 +101,12 @@ handleServerError(err);     }
         target,
       });
 
-      toast.success(data.message);
+      toast.success(t("server.ADMIN_NOTIFICATION_SENT") || data.message);
       setTitle("");
       setBody("");
       fetchHistory();
     } catch (err) {
- handleServerError(err); 
+      handleServerError(err);
     } finally {
       setLoading(false);
     }
@@ -127,19 +128,22 @@ handleServerError(err);     }
 
     setResending(true);
     try {
+      const target =
+        notificationToResend.targetType === "all"
+          ? "all"
+          : notificationToResend.targetUser?._id || "all";
+
       const { data } = await Api.post("/admin/notify", {
         title: editTitle,
         body: editBody,
-        target:
-          notificationToResend.targetType === "all"
-            ? "all"
-            : notificationToResend.targetUser?._id,
+        target: target,
       });
 
-      toast.success(data.message);
+      toast.success(t("server.ADMIN_NOTIFICATION_SENT") || data.message);
       fetchHistory();
     } catch (err) {
-handleServerError(err);     } finally {
+      handleServerError(err);
+    } finally {
       setResending(false);
       setConfirmOpen(false);
       setNotificationToResend(null);
@@ -154,8 +158,9 @@ handleServerError(err);     } finally {
       await Api.delete(`/admin/notifications/${id}`);
       toast.success(t("adminNotifications.deletedOne"));
       setHistory((prev) => prev.filter((h) => h._id !== id));
-    } catch(err) {
-handleServerError(err);     }
+    } catch (err) {
+      handleServerError(err);
+    }
   };
 
   // 🧹 مسح السجل بالكامل
@@ -164,15 +169,16 @@ handleServerError(err);     }
 
     try {
       await Api.delete("/admin/notifications");
-      toast.success(t("adminNotifications.allDeleted"));
+      toast.success(t("adminNotifications.deletedAll"));
       setHistory([]);
-    } catch(err) {
-handleServerError(err);     }
+    } catch (err) {
+      handleServerError(err);
+    }
   };
 
   return (
     <Box
-      dir="rtl"
+      dir={i18n.dir()}
       sx={{
         minHeight: "100vh",
         py: 4,
@@ -301,10 +307,7 @@ handleServerError(err);     }
             alignItems: "center",
           }}
         >
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: 900, color: BRAND.text }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 900, color: BRAND.text }}>
             {t("adminNotifications.history")}
           </Typography>
 
@@ -357,13 +360,16 @@ handleServerError(err);     }
                         {n.body}
                       </Typography>
 
-                      <Typography
-                        variant="caption"
-                        sx={{ color: BRAND.sub }}
-                      >
+                      <Typography variant="caption" sx={{ color: BRAND.sub }}>
                         📅{" "}
                         {fixDigits(
-                          new Date(n.createdAt).toLocaleString("ar-EG")
+                          new Date(n.createdAt).toLocaleString(
+                            i18n.language === "he"
+                              ? "he-IL"
+                              : i18n.language === "en"
+                              ? "en-US"
+                              : "ar-EG"
+                          )
                         )}
                         {" — "}
                         👑 {n.sentBy?.username}
@@ -496,7 +502,11 @@ handleServerError(err);     }
               px: 3,
             }}
           >
-            {resending ? <CircularProgress size={22} /> : t("adminNotifications.confirmSend")}
+            {resending ? (
+              <CircularProgress size={22} />
+            ) : (
+              t("adminNotifications.confirmSend")
+            )}
           </Button>
         </DialogActions>
       </Dialog>

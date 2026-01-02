@@ -331,19 +331,43 @@ export const getDashboardStats = async (req, res) => {
     ]);
 
     const dailyBookings = [];
+
     for (let i = 0; i < 7; i++) {
       const dayLocal = start7Local.plus({ days: i });
-      const dateStr = dayLocal.toFormat("yyyy-MM-dd");
+      const dayStartUTC = dayLocal.startOf("day").toUTC().toJSDate();
+      const dayEndUTC = dayLocal.endOf("day").toUTC().toJSDate();
+
+      const completedForDay = await Booking.aggregate([
+        { $match: { status: "booked" } },
+        {
+          $lookup: {
+            from: "slots",
+            localField: "slot",
+            foreignField: "_id",
+            as: "slot",
+          },
+        },
+        { $unwind: "$slot" },
+        {
+          $match: {
+            "slot.endAt": { $gte: dayStartUTC, $lte: dayEndUTC },
+          },
+        },
+        { $count: "count" },
+      ]);
 
       const getCount = (status) =>
-        last7.find((d) => d._id.date === dateStr && d._id.status === status)
-          ?.count || 0;
+        last7.find(
+          (d) =>
+            d._id.date === dayLocal.toFormat("yyyy-MM-dd") &&
+            d._id.status === status
+        )?.count || 0;
 
       dailyBookings.push({
-        date: dateStr,
+        date: dayLocal.toFormat("yyyy-MM-dd"),
         active: getCount("booked"),
         cancelled: getCount("cancelled"),
-        completed: getCount("completed"),
+        completed: completedForDay[0]?.count || 0,
       });
     }
 
@@ -388,28 +412,37 @@ export const getDashboardStats = async (req, res) => {
     // =======================
     // 🔢 أرقام عامة
     // =======================
-    const [
-      totalUsers,
-      blockedUsers,
-      totalBookings,
-      cancelled,
-      completedBookings,
-      totalSlots,
-    ] = await Promise.all([
-      // 👤 كل المستخدمين ما عدا السوبر أدمن
-      User.countDocuments({ isSuperAdmin: { $ne: true } }),
-
-      // 🚫 المحظورون (بدون سوبر أدمن)
-      User.countDocuments({
-        isBlocked: true,
-        isSuperAdmin: { $ne: true },
-      }),
-
-      Booking.countDocuments(),
-      Booking.countDocuments({ status: "cancelled" }),
-      Booking.countDocuments({ status: "completed" }),
-      Slot.countDocuments(),
+    const completedAgg = await Booking.aggregate([
+      { $match: { status: "booked" } },
+      {
+        $lookup: {
+          from: "slots",
+          localField: "slot",
+          foreignField: "_id",
+          as: "slot",
+        },
+      },
+      { $unwind: "$slot" },
+      { $match: { "slot.endAt": { $lt: nowUTC } } },
+      { $count: "count" },
     ]);
+
+    const completedBookings = completedAgg[0]?.count || 0;
+    const [totalUsers, blockedUsers, totalBookings, cancelled, totalSlots] =
+      await Promise.all([
+        // 👤 كل المستخدمين ما عدا السوبر أدمن
+        User.countDocuments({ isSuperAdmin: { $ne: true } }),
+
+        // 🚫 المحظورون (بدون سوبر أدمن)
+        User.countDocuments({
+          isBlocked: true,
+          isSuperAdmin: { $ne: true },
+        }),
+
+        Booking.countDocuments(),
+        Booking.countDocuments({ status: "cancelled" }),
+        Slot.countDocuments(),
+      ]);
 
     // =======================
     // 📤 Response
@@ -1036,7 +1069,6 @@ export const deleteUserCompletely = async (req, res) => {
     return res.status(500).json({ code: "ADMIN_DELETE_ERROR" });
   }
 };
-
 
 // ======================================================
 // 🛡️ تحقق سوبر أدمن

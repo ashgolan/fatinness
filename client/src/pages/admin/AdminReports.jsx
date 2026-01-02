@@ -14,8 +14,8 @@ import useServerError from "../../hooks/useServerError";
 
 export default function AdminReports() {
   const handleServerError = useServerError();
+  const {t, i18n } = useTranslation();
 
-  const { t } = useTranslation();
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -24,10 +24,8 @@ export default function AdminReports() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (startDate && endDate) {
-        params.append("startDate", startDate);
-        params.append("endDate", endDate);
-      }
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
 
       const response = await Api.get(`/admin/reports/attendance?${params}`, {
         responseType: "blob",
@@ -50,7 +48,7 @@ export default function AdminReports() {
   };
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto", mt: 4 }}>
+<Box dir={i18n.dir()} sx={{ maxWidth: 800, mx: "auto", mt: 4 }}>
       <Typography variant="h5" gutterBottom>
         {t("adminReports.title")}
       </Typography>

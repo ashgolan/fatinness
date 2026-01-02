@@ -6,17 +6,26 @@ import {
   ImageListItem,
   CircularProgress,
 } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { uploadBrandImage } from "../../firebase/uploadImage";
 import { Api } from "../../api/Api";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useTranslation } from "react-i18next";
+import useServerError from "../../hooks/useServerError";
 
 export default function AdminGallery() {
+  const { t } = useTranslation();
+  const handleServerError = useServerError();
+
   const [images, setImages] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   const load = async () => {
-    const { data } = await Api.get("/gallery");
-    setImages(data);
+    try {
+      const { data } = await Api.get("/gallery");
+      setImages(data);
+    } catch (err) {
+      handleServerError(err);
+    }
   };
 
   useEffect(() => {
@@ -27,27 +36,46 @@ export default function AdminGallery() {
     const file = e.target.files[0];
     if (!file) return;
 
+    if (images.length >= 10) {
+      handleServerError({
+        response: {
+          data: { code: "MAX_GALLERY_IMAGES" },
+        },
+      });
+      return;
+    }
+
     setUploading(true);
 
-    // رفع الصورة لفirebase
-    const url = await uploadBrandImage(file, "gallery");
-
-    // حفظها في السيرفر
-    await Api.post("/gallery", { url });
-
-    setUploading(false);
-    load();
+    try {
+      const url = await uploadBrandImage(file, "gallery");
+      await Api.post("/gallery", { url });
+      load();
+    } catch (err) {
+      handleServerError(err);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const deleteImg = async (id) => {
-    await Api.delete(`/gallery/${id}`);
-    load();
+    const confirmed = window.confirm(
+      t("adminSettings.gallery.confirmDelete")
+    );
+    if (!confirmed) return;
+
+    try {
+      await Api.delete(`/gallery/${id}`);
+      load();
+    } catch (err) {
+      handleServerError(err);
+    }
   };
 
   return (
     <Box sx={{ p: 2 }}>
       <Button variant="contained" component="label">
-        رفع صورة جديدة
+        {t("adminSettings.gallery.addImage")}
         <input hidden type="file" accept="image/*" onChange={handleUpload} />
       </Button>
 
@@ -56,7 +84,11 @@ export default function AdminGallery() {
       <ImageList variant="masonry" cols={3} gap={10} sx={{ mt: 3 }}>
         {images.map((img) => (
           <ImageListItem key={img._id}>
-            <img src={img.url} alt="" style={{ borderRadius: 8 }} />
+            <img
+              src={img.url}
+              alt=""
+              style={{ borderRadius: 8, width: "100%" }}
+            />
 
             <Button
               color="error"
@@ -65,7 +97,7 @@ export default function AdminGallery() {
               onClick={() => deleteImg(img._id)}
               sx={{ mt: 1 }}
             >
-              حذف
+              {t("adminNotifications.delete")}
             </Button>
           </ImageListItem>
         ))}

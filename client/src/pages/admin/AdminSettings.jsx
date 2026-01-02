@@ -28,12 +28,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import useServerError from "../../hooks/useServerError";
 
 export default function AdminSettings() {
-  const DEFAULT_LOGO = "/brand/fatiness_logo.png";
-  const DEFAULT_CARD = "/brand/gym-cover.jpg";
+  const DEFAULT_LOGO = "/brand/DEFAULT_LOGO.png";
+  const DEFAULT_CARD = "/brand/DEFAULT_CARD.jpg";
 
   const handleServerError = useServerError();
 
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { updateBrand } = useBrand();
 
   const [settings, setSettings] = useState(null);
@@ -63,8 +63,8 @@ export default function AdminSettings() {
         cardUrl: settingsData.cardUrl || settingsData.CardUrl || DEFAULT_CARD,
       };
 
-      const gallery = await Api.get("/gallery");
-      normalized.galleryImages = gallery.data;
+      const [{ data: settingsData2 }, { data: galleryData }] =
+        await Promise.all([Api.get("/admin/settings"), Api.get("/gallery")]);
 
       setSettings(normalized);
     } catch (err) {
@@ -179,6 +179,7 @@ export default function AdminSettings() {
           ...prev,
           [`${type}Url`]: downloadURL,
         }));
+        URL.revokeObjectURL(preview);
 
         toast.success(t("adminSettings.success.imageUpdated"));
       } catch (err) {
@@ -208,7 +209,11 @@ export default function AdminSettings() {
     try {
       const { data } = await Api.put("/maintenance/toggle");
       setMaintenance(data.maintenanceMode);
-      toast.success(data.message);
+      toast.success(
+        maintenance
+          ? t("adminSettings.maintenance.disabled")
+          : t("adminSettings.maintenance.enabled")
+      );
     } catch (err) {
       handleServerError(err);
     } finally {
@@ -224,7 +229,7 @@ export default function AdminSettings() {
     );
 
   return (
-    <Box sx={{ maxWidth: 850, mx: "auto", mt: 4 }}>
+    <Box dir={i18n.dir()} sx={{ maxWidth: 850, mx: "auto", mt: 4 }}>
       <Typography variant="h5" sx={{ fontWeight: 700, mb: 3 }}>
         {t("adminSettings.title")}
       </Typography>
@@ -556,15 +561,17 @@ export default function AdminSettings() {
             <CloseIcon sx={{ fontSize: 32 }} />
           </IconButton>
 
-          <img
-            src={previewImage}
-            alt="preview"
-            style={{
-              maxWidth: "900px",
-              maxHeight: "90vh",
-              borderRadius: "8px",
-            }}
-          />
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="preview"
+              style={{
+                maxWidth: "900px",
+                maxHeight: "90vh",
+                borderRadius: "8px",
+              }}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </Box>

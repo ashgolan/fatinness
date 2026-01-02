@@ -51,6 +51,13 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const [langMenuAnchor, setLangMenuAnchor] = useState(null);
+  const LANGUAGES = [
+    { code: "ar", label: "العربية", flag: "🇸🇦", dir: "rtl" },
+    { code: "he", label: "עברית", flag: "🇮🇱", dir: "rtl" },
+    { code: "en", label: "English", flag: "🇺🇸", dir: "ltr" },
+  ];
+  const drawerAnchor = i18n.dir() === "rtl" ? "right" : "left";
+
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("appLanguage", lang);
@@ -159,11 +166,6 @@ export default function Navbar() {
       </AppBar>
     );
   }
-  const LANGUAGES = [
-    { code: "ar", label: "العربية", flag: "🇸🇦", dir: "rtl" },
-    { code: "he", label: "עברית", flag: "🇮🇱", dir: "rtl" },
-    { code: "en", label: "English", flag: "🇺🇸", dir: "ltr" },
-  ];
 
   return (
     <>
@@ -247,7 +249,7 @@ export default function Navbar() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              Fatiness Studio
+              Fatinness Studio
             </Typography>
           </Box>
 
@@ -413,7 +415,7 @@ export default function Navbar() {
 
       {/* Drawer Menu (Mobile) */}
       <Drawer
-        anchor="right"
+        anchor={drawerAnchor}
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         PaperProps={{
@@ -440,6 +442,7 @@ export default function Navbar() {
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <img
                 src={imgSrc}
+                alt="appLogo"
                 onError={() => setImgSrc(fallbackLogo)}
                 style={{
                   width: 40,
@@ -459,7 +462,7 @@ export default function Navbar() {
                   WebkitTextFillColor: "transparent",
                 }}
               >
-                Fatinness
+                Fatinness Studio
               </Typography>
             </Box>
 

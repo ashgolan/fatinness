@@ -10,24 +10,30 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  CircularProgress,
 } from "@mui/material";
+
 import { Api } from "../../api/Api";
 import { UserContext } from "../../context/UserContext";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import useServerError from "../../hooks/useServerError";
 
 const AdminSystemReset = () => {
   const { user } = useContext(UserContext);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const handleServerError = useServerError();
 
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [resetType, setResetType] = useState(null);
+  const [processing, setProcessing] = useState(false);
 
-  // ❌ إذا لم يكن SuperAdmin
+  // ❌ ليس SuperAdmin
   if (!user?.isSuperAdmin) {
     return (
-      <Box p={3}>
+      <Box dir={i18n.dir()} p={3}>
         <Typography color="error" variant="h6" align="center" fontWeight={600}>
           {t("systemReset.noPermission")}
         </Typography>
@@ -35,70 +41,65 @@ const AdminSystemReset = () => {
     );
   }
 
-  // 🔧 خيارات النظام
+  // 🔧 خيارات إعادة الضبط
   const resetOptions = [
     {
       key: "light",
       title: t("systemReset.light.title"),
       description: t("systemReset.light.desc"),
       endpoint: "/admin/reset/light",
+      color: "#ed6c02",
     },
     {
       key: "medium",
       title: t("systemReset.medium.title"),
       description: t("systemReset.medium.desc"),
       endpoint: "/admin/reset/medium",
+      color: "#d32f2f",
     },
     {
       key: "hard",
       title: t("systemReset.hard.title"),
       description: t("systemReset.hard.desc"),
       endpoint: "/admin/reset/hard",
+      color: "#b71c1c",
     },
     {
       key: "factory",
       title: t("systemReset.factory.title"),
       description: t("systemReset.factory.desc"),
       endpoint: "/admin/reset/factory",
+      color: "#7f0000",
     },
   ];
 
-const handleConfirm = async () => {
-  if (!resetType) {
-    console.error("RESET TYPE IS NULL");
-    alert(t("systemReset.error"));
-    return;
-  }
+  const selectedOption = resetOptions.find((o) => o.key === resetType);
 
-  const option = resetOptions.find((o) => o.key === resetType);
+  const handleConfirm = async () => {
+    if (!selectedOption) return;
 
-  if (!option) {
-    console.error("INVALID RESET TYPE:", resetType);
-    alert(t("systemReset.error"));
-    return;
-  }
+    setProcessing(true);
+    try {
+      await Api.post(selectedOption.endpoint);
 
-  try {
-    await Api.post(option.endpoint);
+      toast.success(t("systemReset.success"));
 
-    alert(t("systemReset.success"));
+      setConfirmOpen(false);
+      setResetType(null);
 
-    setConfirmOpen(false);
-
-    if (option.key === "factory") {
-      navigate("/login", { replace: true });
+      if (selectedOption.key === "factory") {
+        navigate("/login", { replace: true });
+      }
+    } catch (err) {
+      handleServerError(err);
+      setConfirmOpen(false);
+    } finally {
+      setProcessing(false);
     }
-  } catch (err) {
-    console.error("RESET ERROR:", err);
-    alert(t("systemReset.error"));
-    setConfirmOpen(false);
-  }
-};
-
-
+  };
 
   return (
-    <Box p={3}>
+    <Box dir={i18n.dir()} p={3}>
       {/* عنوان الصفحة */}
       <Typography variant="h4" mb={4} textAlign="center" fontWeight={700}>
         {t("systemReset.pageTitle")}
@@ -110,7 +111,7 @@ const handleConfirm = async () => {
           <Grid item xs={12} md={6} key={opt.key}>
             <Card
               sx={{
-                borderLeft: "5px solid #d32f2f",
+                borderLeft: `5px solid ${opt.color}`,
                 boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
                 p: 1,
               }}
@@ -144,23 +145,35 @@ const handleConfirm = async () => {
       </Grid>
 
       {/* نافذة التأكيد */}
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+      <Dialog open={confirmOpen} onClose={() => !processing && setConfirmOpen(false)}>
         <DialogTitle>{t("systemReset.confirmTitle")}</DialogTitle>
 
         <DialogContent>
           <Typography>
             {t("systemReset.confirmMessage")}{" "}
-            <strong>{resetType?.toUpperCase()}</strong>
+            <strong>{selectedOption?.title}</strong>
           </Typography>
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>
+          <Button
+            onClick={() => setConfirmOpen(false)}
+            disabled={processing}
+          >
             {t("systemReset.cancel")}
           </Button>
 
-          <Button color="error" variant="contained" onClick={handleConfirm}>
-            {t("systemReset.confirmButton")}
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleConfirm}
+            disabled={processing}
+          >
+            {processing ? (
+              <CircularProgress size={22} color="inherit" />
+            ) : (
+              t("systemReset.confirmButton")
+            )}
           </Button>
         </DialogActions>
       </Dialog>

@@ -42,7 +42,7 @@ export default function UsersAdmin() {
   const [showPassword, setShowPassword] = useState(false);
 
   const theme = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [users, setUsers] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -300,7 +300,7 @@ export default function UsersAdmin() {
 
   return (
     <Box
-      dir="rtl"
+      dir={i18n.dir()}
       sx={{
         minHeight: "100vh",
         backgroundColor: theme.palette.background.default,

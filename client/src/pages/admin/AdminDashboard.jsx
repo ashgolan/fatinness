@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Paper, Typography, CircularProgress } from "@mui/material";
 import { Line } from "react-chartjs-2";
-import { toast } from "react-toastify";
 import { Api } from "../../api/Api";
 import { useThemeMode } from "../../context/ThemeContext";
 import { useBrand } from "../../context/BrandContext"; // ✅ شعار النادي
@@ -72,13 +71,14 @@ export default function AdminDashboard() {
       try {
         const { data } = await Api.get("/admin/dashboard");
         setStats(data);
-      } catch(err) {
- handleServerError(err);       } finally {
+      } catch (err) {
+        handleServerError(err);
+      } finally {
         setLoading(false);
       }
     };
     fetchStats();
-  }, [t]);
+  }, []); // ✅ مرة واحدة فقط
 
   // 🌀 التحريك
   useEffect(() => {
@@ -453,9 +453,7 @@ export default function AdminDashboard() {
           )}
         </>
       ) : (
-        <Typography sx={{ mt: 3 }}>
-          {t("adminDashboard.noData")}
-        </Typography>
+        <Typography sx={{ mt: 3 }}>{t("adminDashboard.noData")}</Typography>
       )}
     </Box>
   );

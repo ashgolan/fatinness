@@ -110,7 +110,10 @@ export default function SlotsAdmin() {
       weekEnd.setDate(weekStart.getDate() + 6);
 
       list.push({
-        label: `${fmtShort(weekStart)} - ${fmtShort(weekEnd)}`,
+        label: t("slotsAdmin.weekRange", {
+          start: fmtShort(weekStart),
+          end: fmtShort(weekEnd),
+        }),
         start: toLocalISO(weekStart),
         end: toLocalISO(weekEnd),
       });
@@ -269,7 +272,7 @@ export default function SlotsAdmin() {
   // Group by day
   const groupedByDay = useMemo(() => {
     return filteredSlots.reduce((acc, slot) => {
-      const dayKey = new Date(slot.date).toLocaleDateString(i18n.language, {
+      const dayKey = new Date(slot.date).toLocaleDateString(t("locale"), {
         weekday: "long",
         month: "short",
         day: "numeric",

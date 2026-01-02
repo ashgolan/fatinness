@@ -29,7 +29,7 @@ export default function BookingsAdmin() {
 
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [summary, setSummary] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,21 +46,20 @@ export default function BookingsAdmin() {
   });
 
   const [showAllCols, setShowAllCols] = useState(false);
+  const locale =
+    i18n.language === "ar"
+      ? "ar-EG"
+      : i18n.language === "he"
+      ? "he-IL"
+      : "en-US";
 
   const getDisplayStatus = (b) => {
     if (!b.slot) return "unknown";
     if (b.slot.isBlocked) return "blocked";
 
-    const now = new Date();
-    const end = new Date(b.slot.date);
+    const end = b.slot.endAt ? new Date(b.slot.endAt) : null;
 
-    if (b.slot.endTime) {
-      const [h, m] = b.slot.endTime.split(":");
-      end.setHours(Number(h), Number(m), 0, 0);
-    }
-
-    if (b.status === "booked" && now > end) return "completed";
-    return b.status;
+    if (b.status === "booked" && end && new Date() > end) return "completed";
   };
 
   const fetchSummary = async () => {
@@ -75,8 +74,9 @@ export default function BookingsAdmin() {
         return nameA.localeCompare(nameB, "ar");
       });
       setSummary(sorted);
-    } catch(err) {
-handleServerError(err);     } finally {
+    } catch (err) {
+      handleServerError(err);
+    } finally {
       setLoading(false);
     }
   };
@@ -94,12 +94,16 @@ handleServerError(err);     } finally {
           cancelled: 3,
           blocked: 4,
         };
-        return order[getDisplayStatus(a)] - order[getDisplayStatus(b)];
+
+        return (
+          (order[getDisplayStatus(a)] ?? 99) -
+          (order[getDisplayStatus(b)] ?? 99)
+        );
       });
 
       setBookings(sorted);
     } catch (err) {
-    handleServerError(err); 
+      handleServerError(err);
     } finally {
       setLoadingDetails(false);
     }
@@ -140,7 +144,7 @@ handleServerError(err);     } finally {
   const totalActive = summary.reduce((acc, s) => acc + s.active, 0);
   const totalCompleted = summary.reduce((acc, s) => acc + s.completed, 0);
   const totalCancelled = summary.reduce((acc, s) => acc + s.cancelled, 0);
-  const totalBlocked = 0;
+  const totalBlocked = summary.reduce((acc, s) => acc + (s.blocked || 0), 0);
 
   const activePercent = totalAll ? (totalActive / totalAll) * 100 : 0;
   const completedPercent = totalAll ? (totalCompleted / totalAll) * 100 : 0;
@@ -191,7 +195,7 @@ handleServerError(err);     } finally {
 
   return (
     <Box
-      dir={t("dir")}
+      dir={i18n.dir()}
       sx={{
         minHeight: "100vh",
         background: isDark
@@ -472,7 +476,7 @@ handleServerError(err);     } finally {
             }}
           >
             <Box
-              dir={t("dir")}
+              dir={i18n.dir()}
               sx={{
                 width: "100%",
                 overflowX: showAllCols ? "auto" : "hidden",
@@ -765,7 +769,7 @@ handleServerError(err);     } finally {
                 }}
               >
                 <Box
-                  dir={t("dir")}
+                  dir={i18n.dir()}
                   sx={{
                     width: "100%",
                     overflowX: "hidden",
@@ -815,9 +819,9 @@ handleServerError(err);     } finally {
                           }}
                         >
                           <TableCell sx={{ fontSize: 14 }}>
-                            {b.slot?.date
-                              ? new Date(b.slot.date).toLocaleDateString(
-                                  t("locale")
+                            {b.slot?.startAt
+                              ? new Date(b.slot.startAt).toLocaleDateString(
+                                  locale
                                 )
                               : "—"}
                           </TableCell>
@@ -829,9 +833,22 @@ handleServerError(err);     } finally {
                               fontWeight: 600,
                             }}
                           >
-                            {b.slot
-                              ? `${b.slot.startTime || "—"}${
-                                  b.slot.endTime ? ` - ${b.slot.endTime}` : ""
+                            {b.slot?.startAt
+                              ? `${new Date(b.slot.startAt).toLocaleTimeString(
+                                  locale,
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}${
+                                  b.slot?.endAt
+                                    ? ` - ${new Date(
+                                        b.slot.endAt
+                                      ).toLocaleTimeString(locale, {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}`
+                                    : ""
                                 }`
                               : "—"}
                           </TableCell>

@@ -28,12 +28,6 @@ import useServerError from "../../hooks/useServerError";
 import { useTranslation } from "react-i18next";
 
 // ===================== أدوات التاريخ =====================
-function startOfWeek(date = new Date()) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - d.getDay());
-  return d;
-}
 
 function addDays(date, days) {
   const d = new Date(date);
@@ -76,6 +70,22 @@ const DAY_KEYS = [
   "friday",
   "saturday",
 ];
+function formatDateRange(start, end, i18n) {
+  if (!start || !end) return "";
+
+  const locale =
+    i18n.language === "he"
+      ? "he-IL"
+      : i18n.language === "en"
+      ? "en-US"
+      : "ar-EG";
+
+  const opts = { day: "2-digit", month: "short", year: "numeric" };
+
+  return `${new Date(start).toLocaleDateString(locale, opts)} ← ${new Date(
+    end
+  ).toLocaleDateString(locale, opts)}`;
+}
 
 export default function AdminSchedule() {
   const handleServerError = useServerError();
@@ -84,7 +94,7 @@ export default function AdminSchedule() {
 
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // ألوان وهوية فاخرة
   const BRAND = {
@@ -117,39 +127,37 @@ export default function AdminSchedule() {
     }
   };
 
-const fetchNextWeek = async () => {
-  try {
-    const { data } = await Api.get("/admin/slots/week", {
-      params: {
-        start: fmt(addDays(serverWeekStart, 7)), // ✅ هذا الصحيح
-      },
-    });
+  const fetchNextWeek = async () => {
+    try {
+      const { data } = await Api.get("/admin/slots/week", {
+        params: {
+          start: fmt(addDays(serverWeekStart, 7)), // ✅ هذا الصحيح
+        },
+      });
 
-    console.log("NEXT WEEK DATA:", data);
+      console.log("NEXT WEEK DATA:", data);
 
-    setNextWeekData(data);
-    setServerNextWeekStart(new Date(data.weekStart));
-  } catch (err) {
-    handleServerError(err);
-  }
-};
+      setNextWeekData(data);
+      setServerNextWeekStart(new Date(data.weekStart));
+    } catch (err) {
+      handleServerError(err);
+    }
+  };
 
+  useEffect(() => {
+    fetchCurrentWeek();
 
-useEffect(() => {
-  fetchCurrentWeek();
-
-  setNextWeek(
-    Array.from({ length: 7 }, (_, i) => ({
-      dayOffset: i,
-      items: [],
-    }))
-  );
-}, []);
-useEffect(() => {
-  if (!serverWeekStart) return;
-  fetchNextWeek();
-}, [serverWeekStart]);
-
+    setNextWeek(
+      Array.from({ length: 7 }, (_, i) => ({
+        dayOffset: i,
+        items: [],
+      }))
+    );
+  }, []);
+  useEffect(() => {
+    if (!serverWeekStart) return;
+    fetchNextWeek();
+  }, [serverWeekStart]);
 
   const addSlot = (dayIndex) => {
     if (!serverWeekStart) return;
@@ -301,7 +309,7 @@ useEffect(() => {
   // ===================== واجهة الصفحة =====================
   return (
     <Box
-      dir="rtl"
+      dir={i18n.dir()}
       sx={{
         minHeight: "100vh",
         py: 4,
@@ -445,7 +453,11 @@ useEffect(() => {
                     color: isDark ? "#e5e7eb" : "#111827",
                   }}
                 >
-                  {weekData?.weekStart} ← {weekData?.weekEnd}
+                  {formatDateRange(
+                    weekData?.weekStart,
+                    weekData?.weekEnd,
+                    i18n
+                  )}
                 </Typography>
               </Stack>
             </Box>
@@ -535,7 +547,11 @@ useEffect(() => {
                         fontSize: 15,
                       }}
                     >
-                      {weekData?.weekStart} ← {weekData?.weekEnd}
+                      {formatDateRange(
+                        weekData?.weekStart,
+                        weekData?.weekEnd,
+                        i18n
+                      )}
                     </Typography>
                   </Box>
                   <Chip
@@ -680,7 +696,11 @@ useEffect(() => {
                     fontSize: 15,
                   }}
                 >
-                  {nextWeekData?.weekStart} ← {nextWeekData?.weekEnd}
+                  {formatDateRange(
+                    weekData?.weekStart,
+                    weekData?.weekEnd,
+                    i18n
+                  )}
                 </Typography>
               </Box>
 
