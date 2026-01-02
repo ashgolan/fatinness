@@ -1069,7 +1069,7 @@ export default function SlotsAdmin() {
               {t("slotsAdmin.empty.title")}
             </Typography>
             <Typography sx={{ fontSize: 13, color: BRAND.sub, mt: 1 }}>
-              {t("slotsAdmin.empty.range", {
+              {t("slotsAdmin.empty.weekRange", {
                 start: weekRange.start,
                 end: weekRange.end,
               })}

@@ -48,23 +48,21 @@ export default function Login() {
 
   // شعار افتراضي
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
-useEffect(() => {
-  Api.get("/auth/check-first-run")
-    .then((res) => {
-      if (res.data?.needsSetup) {
-        navigate("/register-superadmin", { replace: true });
-      }
-    })
-    .catch(() => {
-      // تجاهل الخطأ (مثلاً لو السيرفر غير متاح)
-    });
-}, [navigate]);
+  useEffect(() => {
+    Api.get("/auth/check-first-run")
+      .then((res) => {
+        if (res.data?.needsSetup) {
+          navigate("/register-superadmin", { replace: true });
+        }
+      })
+      .catch(() => {
+        // تجاهل الخطأ (مثلاً لو السيرفر غير متاح)
+      });
+  }, [navigate]);
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
   }, [logoUrl, loadingBrand]);
-
-  
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -84,10 +82,14 @@ useEffect(() => {
         toast.success(t("login.success.login"));
 
         // 🔔 تسجيل FCM فقط للمستخدم العادي
-        if (data.user.role !== "admin") {
-          await registerFcmToken().catch(() => {
-            toast.info(t("login.success.fcmOptional"));
-          });
+        await registerFcmToken().catch(() => {
+          toast.info(t("login.success.fcmOptional"));
+        });
+
+        // 🔄 إعادة تحميل المستخدم بعد FCM
+        const me = await Api.get("/auth/me");
+        if (me.data?.user) {
+          setUser(me.data.user);
         }
 
         const lang = localStorage.getItem("appLanguage") || "ar";

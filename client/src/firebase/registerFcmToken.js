@@ -24,7 +24,7 @@ export async function registerFcmToken() {
       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
 
     const messaging = getMessaging(app);
-    const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+    const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
 
     if (!vapidKey) {
       toast.error(t("fcm.missing_vapid"));

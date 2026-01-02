@@ -54,12 +54,31 @@ export default function BookingsAdmin() {
       : "en-US";
 
   const getDisplayStatus = (b) => {
-    if (!b.slot) return "unknown";
+    if (!b?.slot) return "unknown";
+
     if (b.slot.isBlocked) return "blocked";
 
-    const end = b.slot.endAt ? new Date(b.slot.endAt) : null;
+    // ملغاة صراحة
+    if (b.status === "cancelled") return "cancelled";
 
-    if (b.status === "booked" && end && new Date() > end) return "completed";
+    // نحسب وقت النهاية
+    let end = null;
+
+    if (b.slot.endAt) {
+      end = new Date(b.slot.endAt);
+    } else if (b.slot.startAt && b.slot.duration) {
+      end = new Date(
+        new Date(b.slot.startAt).getTime() + b.slot.duration * 60000
+      );
+    }
+
+    // منتهية
+    if (end && new Date() > end) return "completed";
+
+    // نشطة / محجوزة
+    if (b.status === "booked") return "booked";
+
+    return "unknown";
   };
 
   const fetchSummary = async () => {
