@@ -81,11 +81,6 @@ export default function Login() {
 
         toast.success(t("login.success.login"));
 
-        // 🔔 تفعيل الإشعارات (اختياري – لا يكسر تسجيل الدخول)
-        registerFcmToken().catch(() => {
-          toast.info(t("login.success.fcmOptional"));
-        });
-
         // 🔄 تحديث بيانات المستخدم بدون await
 
         const lang = localStorage.getItem("appLanguage") || "ar";
