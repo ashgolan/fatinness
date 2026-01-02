@@ -81,16 +81,21 @@ export default function Login() {
 
         toast.success(t("login.success.login"));
 
-        // 🔔 تسجيل FCM فقط للمستخدم العادي
-        await registerFcmToken().catch(() => {
+        // 🔔 تفعيل الإشعارات (اختياري – لا يكسر تسجيل الدخول)
+        registerFcmToken().catch(() => {
           toast.info(t("login.success.fcmOptional"));
         });
 
-        // 🔄 إعادة تحميل المستخدم بعد FCM
-        const me = await Api.get("/auth/me");
-        if (me.data?.user) {
-          setUser(me.data.user);
-        }
+        // 🔄 تحديث بيانات المستخدم بدون await
+        Api.get("/auth/me")
+          .then((me) => {
+            if (me.data?.user) {
+              setUser(me.data.user);
+            }
+          })
+          .catch(() => {
+            // ❌ لا نفعل شيئًا لو فشل
+          });
 
         const lang = localStorage.getItem("appLanguage") || "ar";
         Api.put("/auth/language", { preferredLanguage: lang }).catch(() => {});
