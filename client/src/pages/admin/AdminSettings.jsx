@@ -59,12 +59,12 @@ export default function AdminSettings() {
       const normalized = {
         ...settingsData,
         logoUrl: settingsData.logoUrl || settingsData.LogoUrl || DEFAULT_LOGO,
-
         cardUrl: settingsData.cardUrl || settingsData.CardUrl || DEFAULT_CARD,
+        galleryImages: settingsData.galleryImages || [], // ✅ مهم جدًا
       };
 
-      const [{ data: settingsData2 }, { data: galleryData }] =
-        await Promise.all([Api.get("/admin/settings"), Api.get("/gallery")]);
+      // const [{ data: settingsData2 }, { data: galleryData }] =
+        // await Promise.all([Api.get("/admin/settings"), Api.get("/gallery")]);
 
       setSettings(normalized);
     } catch (err) {
@@ -112,7 +112,7 @@ export default function AdminSettings() {
   //   رفع صورة للألبوم
   // =============================
   const uploadGalleryImage = () => {
-    if ((settings.galleryImages?.length || 0) >= 10)
+    if ((settings?.galleryImages?.length || 0) >= 10)
       return toast.error(t("adminSettings.gallery.maxImages"));
 
     const input = document.createElement("input");
@@ -130,7 +130,7 @@ export default function AdminSettings() {
 
         setSettings((prev) => ({
           ...prev,
-          galleryImages: [...prev.galleryImages, data],
+galleryImages: [...(prev.galleryImages || []), data],
         }));
 
         toast.success(t("adminSettings.gallery.uploadSuccess"));
@@ -221,7 +221,7 @@ export default function AdminSettings() {
     }
   };
 
-  if (loading)
+if (loading || !settings)
     return (
       <Box sx={{ textAlign: "center", mt: 5 }}>
         <CircularProgress />
