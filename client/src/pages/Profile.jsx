@@ -157,6 +157,70 @@ export default function Profile() {
   // ===============================
   // ▶ PAGE LAYOUT
   // ===============================
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      mode: "nearest",
+      intersect: true,
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        enabled: true,
+        callbacks: {
+          // العنوان (التاريخ)
+          title: (items) => {
+            const index = items[0].dataIndex;
+            const w = weightHistory[index];
+            return new Date(w.date).toLocaleDateString(
+              i18n.language === "ar"
+                ? "ar-EG"
+                : i18n.language === "he"
+                ? "he-IL"
+                : "en-US",
+              {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }
+            );
+          },
+
+          // السطر الرئيسي (الوزن)
+          label: (item) => {
+            const w = weightHistory[item.dataIndex];
+            return `${t("profile.chart.weight")}: ${w.weight} ${t(
+              "profile.units.kg"
+            )}`;
+          },
+
+          // سطر إضافي: السبب / الملاحظة
+          afterLabel: (item) => {
+            const w = weightHistory[item.dataIndex];
+            return w.note
+              ? `${t("profile.chart.note")}: ${w.note}`
+              : t("profile.chart.noNote");
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          color: isDark ? "#ccc" : "#444",
+        },
+      },
+      y: {
+        ticks: {
+          color: isDark ? "#ccc" : "#444",
+        },
+      },
+    },
+  };
 
   return (
     <div
@@ -315,7 +379,7 @@ export default function Profile() {
                 position: "relative",
               }}
             >
-              <Line data={chartData} options={{ maintainAspectRatio: false }} />
+              <Line data={chartData} options={chartOptions} />
             </div>
           ) : (
             <p
