@@ -25,17 +25,12 @@ import { exec } from "child_process";
 const app = express();
 
 // GitHub webhook raw body
-app.use("/deploy", express.raw({ type: "application/json" }));
-
+// app.use("/deploy", express.raw({ type: "application/json" }));
 
 // ============================
 // ⚠️ Stripe Webhook (raw body)
 // ============================
-app.post(
-  "/webhook/stripe",
-  express.raw({ type: "application/json" }),
-  webhookRoutes
-);
+app.use("/webhook", webhookRoutes);
 
 // ============================
 // 🛡 Helmet Security
@@ -68,7 +63,6 @@ app.use(
     credentials: true,
   })
 );
-
 
 app.use(cookieParser());
 
@@ -107,31 +101,37 @@ app.use("/gallery", galleryRoutes);
 app.use("/", mainRoutes);
 app.use("/maintenance", maintenanceRoutes);
 
-app.post("/deploy", (req, res) => {
+app.post("/deploy", express.json(), (req, res) => {
   console.log("🔔 Deploy webhook received");
 
   const signature = req.headers["x-hub-signature-256"];
-  console.log("GitHub signature:", signature);
+  if (!signature) {
+    return res.status(401).send("No signature");
+  }
 
   const hmac = crypto
     .createHmac("sha256", process.env.DEPLOY_SECRET)
-    .update(req.body)
+    .update(JSON.stringify(req.body))
     .digest("hex");
 
   const expected = `sha256=${hmac}`;
-  console.log("Expected signature:", expected);
 
-  if (!signature || signature !== expected) {
+  if (signature !== expected) {
     console.log("❌ Signature mismatch");
     return res.status(401).send("Invalid signature");
   }
 
   console.log("✅ Signature OK");
 
-exec("bash /var/www/fatinness/deploy.sh", () => {
+  exec("bash /var/www/fatinness/deploy.sh", (err) => {
+    if (err) {
+      console.error("❌ Deploy error", err);
+      return res.status(500).send("Deploy failed");
+    }
     res.send("Deploy OK");
   });
 });
+
 app.post("/logout", (req, res) => {
   res.clearCookie("JWT", {
     httpOnly: true,
