@@ -17,7 +17,8 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
 import { registerFcmToken } from "../firebase/registerFcmToken";
-
+import { Button, CircularProgress } from "@mui/material";
+import SyncIcon from "@mui/icons-material/Sync";
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -42,32 +43,32 @@ export default function Profile() {
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
 
-async function transferFcmToThisDevice() {
-  try {
-    setTransferring(true);
+  async function transferFcmToThisDevice() {
+    try {
+      setTransferring(true);
 
-    // ✅ نستخدم نفس الدالة الموجودة
-    const token = await registerFcmToken();
+      // ✅ نستخدم نفس الدالة الموجودة
+      const token = await registerFcmToken();
 
-    if (!token) {
-      toast.error("لم يتم الحصول على رمز الإشعارات");
-      return;
+      if (!token) {
+        toast.error("لم يتم الحصول على رمز الإشعارات");
+        return;
+      }
+
+      const res = await Api.post("/users/fcm/transfer", {
+        fcmToken: token,
+      });
+
+      if (res.data?.code === "FCM_TRANSFERRED") {
+        toast.success("تم نقل الإشعارات إلى هذا الجهاز");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("تعذّر نقل الإشعارات");
+    } finally {
+      setTransferring(false);
     }
-
-    const res = await Api.post("/users/fcm/transfer", {
-      fcmToken: token,
-    });
-
-    if (res.data?.code === "FCM_TRANSFERRED") {
-      toast.success("تم نقل الإشعارات إلى هذا الجهاز");
-    }
-  } catch (err) {
-    console.error(err);
-    toast.error("تعذّر نقل الإشعارات");
-  } finally {
-    setTransferring(false);
   }
-}
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -407,14 +408,16 @@ async function transferFcmToThisDevice() {
             <h3 style={{ color: textMain, marginBottom: "8px" }}>
               🔔 {t("profile.notifications.title")}
             </h3>
-
             <p
               style={{ color: textSub, fontSize: "14px", marginBottom: "16px" }}
             >
               {t("profile.notifications.description")}
             </p>
 
-            <button
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={!transferring && <SyncIcon />}
               disabled={transferring}
               onClick={async () => {
                 if (!window.confirm(t("profile.notifications.confirmTransfer")))
@@ -423,7 +426,7 @@ async function transferFcmToThisDevice() {
                 setTransferring(true);
                 try {
                   await transferFcmToThisDevice();
-                  await fetchProfile(); // 🔄 تحديث البيانات
+                  await fetchProfile();
                   toast.success(t("profile.notifications.transferredSuccess"));
                 } catch {
                   toast.error(t("profile.notifications.transferFailed"));
@@ -431,11 +434,25 @@ async function transferFcmToThisDevice() {
                   setTransferring(false);
                 }
               }}
+              sx={{
+                borderRadius: "14px",
+                px: 3,
+                py: 1.3,
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+              }}
             >
-              {transferring
-                ? t("profile.notifications.transferring")
-                : `🔁 ${t("profile.notifications.transferButton")}`}
-            </button>
+              {transferring ? (
+                <>
+                  <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                  {t("profile.notifications.transferring")}
+                </>
+              ) : (
+                t("profile.notifications.transferButton")
+              )}
+            </Button>
           </div>
         )}
         {/* ===============================
