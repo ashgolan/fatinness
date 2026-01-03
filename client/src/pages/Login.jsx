@@ -78,6 +78,16 @@ export default function Login() {
       // ✅ السيرفر يعيد user جاهز
       if (data?.user) {
         setUser(data.user);
+        // 🔔 محاولة تسجيل الإشعارات (غير إجباري)
+        registerFcmToken()
+          .then((result) => {
+            if (result === "OWNED_BY_ANOTHER") {
+              toast.info(t("fcm.deviceOwnedByAnother"), { autoClose: 6000 });
+            }
+          })
+          .catch(() => {
+            // نتجاهل الخطأ تمامًا
+          });
 
         toast.success(t("login.success.login"));
 

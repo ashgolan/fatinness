@@ -37,6 +37,7 @@ export default function Profile() {
   const [newWeight, setNewWeight] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const [transferring, setTransferring] = useState(false);
 
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
@@ -362,48 +363,54 @@ export default function Profile() {
         {/* ===============================
     TRANSFER NOTIFICATIONS
 =============================== */}
-        <div
-          style={{
-            background: cardBg,
-            borderRadius: "20px",
-            padding: "20px",
-            marginBottom: "32px",
-            border: isDark
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "1px solid rgba(0,0,0,0.05)",
-            textAlign: "center",
-          }}
-        >
-          <h3 style={{ color: textMain, marginBottom: "8px" }}>
-            🔔 {t("profile.notifications.title")}
-          </h3>
 
-          <p style={{ color: textSub, fontSize: "14px", marginBottom: "16px" }}>
-            {t("profile.notifications.description")}
-          </p>
-
-          <button
-            onClick={() => {
-              if (window.confirm(t("profile.notifications.confirmTransfer"))) {
-                transferFcmToThisDevice();
-              }
-            }}
+        {!user?.notificationsOwned && (
+          <div
             style={{
-              padding: "12px 20px",
-              borderRadius: "10px",
-              background: isDark
-                ? "linear-gradient(135deg,#f59e0b,#facc15)"
-                : "linear-gradient(135deg,#6366f1,#a855f7)",
-              color: "#fff",
-              border: "none",
-              fontWeight: 700,
-              cursor: "pointer",
+              background: cardBg,
+              borderRadius: "20px",
+              padding: "20px",
+              marginBottom: "32px",
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "1px solid rgba(0,0,0,0.05)",
+              textAlign: "center",
             }}
           >
-            🔁 {t("profile.notifications.transferButton")}
-          </button>
-        </div>
+            <h3 style={{ color: textMain, marginBottom: "8px" }}>
+              🔔 {t("profile.notifications.title")}
+            </h3>
 
+            <p
+              style={{ color: textSub, fontSize: "14px", marginBottom: "16px" }}
+            >
+              {t("profile.notifications.description")}
+            </p>
+
+            <button
+              disabled={transferring}
+              onClick={async () => {
+                if (!window.confirm(t("profile.notifications.confirmTransfer")))
+                  return;
+
+                setTransferring(true);
+                try {
+                  await transferFcmToThisDevice();
+                  await fetchProfile(); // 🔄 تحديث البيانات
+                  toast.success(t("profile.notifications.transferredSuccess"));
+                } catch {
+                  toast.error(t("profile.notifications.transferFailed"));
+                } finally {
+                  setTransferring(false);
+                }
+              }}
+            >
+              {transferring
+                ? t("profile.notifications.transferring")
+                : `🔁 ${t("profile.notifications.transferButton")}`}
+            </button>
+          </div>
+        )}
         {/* ===============================
             CHART
         =============================== */}

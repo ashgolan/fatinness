@@ -162,7 +162,8 @@ export const getWeightHistory = async (req, res) => {
  */
 export const updateFcmToken = async (req, res) => {
   try {
-    const { fcmToken } = req.body;
+    const { fcmToken, forceTransfer } = req.body;
+
     if (!fcmToken) {
       return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
     }
@@ -172,9 +173,13 @@ export const updateFcmToken = async (req, res) => {
       return res.status(404).json({ code: "FCM_TOKEN_USER_NOT_FOUND" });
     }
 
-    // 🟢 أول مرة → هذا المستخدم هو مالك الجهاز
-    if (!user.deviceOwnerId) {
-      user.deviceOwnerId = user._id;
+    // 🔍 هل هذا التوكن مرتبط بمستخدم آخر؟
+    const ownerUser = await User.findOne({
+      fcmTokens: fcmToken,
+    });
+
+    // 🟢 لا يوجد مالك → هذا أول مستخدم على الجهاز
+    if (!ownerUser) {
       user.fcmTokens = [fcmToken];
       await user.save();
 
@@ -184,83 +189,47 @@ export const updateFcmToken = async (req, res) => {
       });
     }
 
-    // 🔴 جهاز مملوك لمستخدم آخر
-    if (!user.deviceOwnerId.equals(user._id)) {
+    // 🟡 نفس المستخدم (إعادة تسجيل)
+    if (ownerUser._id.equals(user._id)) {
       return res.json({
-        code: "FCM_TOKEN_IGNORED_DEVICE_OWNED",
-        isOwner: false,
-      });
-    }
-
-    // 🟡 نفس المستخدم لكن جهاز جديد → ننقل الملكية
-    if (!user.fcmTokens.includes(fcmToken)) {
-      user.fcmTokens = [fcmToken];
-      await user.save();
-
-      return res.json({
-        code: "FCM_TOKEN_TRANSFERRED_NEW_DEVICE",
+        code: "FCM_TOKEN_ALREADY_REGISTERED",
         isOwner: true,
       });
     }
 
+    // 🔴 يوجد مالك آخر + لم يطلب نقل
+    if (!forceTransfer) {
+      return res.json({
+        code: "FCM_TOKEN_OWNED_BY_ANOTHER_USER",
+        isOwner: false,
+        ownerUserId: ownerUser._id,
+      });
+    }
+
+    // 🔁 نقل الإشعارات (زر "نقل الإشعارات")
+    await User.updateOne(
+      { _id: ownerUser._id },
+      { $pull: { fcmTokens: fcmToken } }
+    );
+
+    user.fcmTokens = [fcmToken];
+    await user.save();
+
     return res.json({
-      code: "FCM_TOKEN_ALREADY_REGISTERED",
+      code: "FCM_TOKEN_TRANSFERRED",
       isOwner: true,
     });
   } catch (err) {
-    console.error(err);
+    console.error("❌ updateFcmToken error:", err);
     res.status(500).json({ code: "FCM_TOKEN_ERROR" });
   }
 };
 
-export const renewSubscription = async (req, res) => {
-  try {
-    // ⛔ السوبر أدمن فقط
-    if (!req.user.isSuperAdmin) {
-      return res.status(403).json({
-        code: "ONLY_SUPERADMIN_CAN_RENEW_SUBSCRIPTION",
-      });
-    }
-
-    const user = await User.findById(req.body.userId);
-    if (!user) {
-      return res.status(404).json({ code: "USER_SUBSCRIPTION_NOT_FOUND" });
-    }
-
-    const nowLocal = DateTime.now().setZone(ZONE);
-
-    const startUTC = nowLocal.toUTC().toJSDate();
-    const endUTC = nowLocal.plus({ months: 1 }).endOf("day").toUTC().toJSDate();
-
-    // 🔁 تحديث الاشتراك
-    user.subscriptionEnd = endUTC;
-    user.subscriptionStatus = "active";
-    user.isBlocked = false;
-
-    // 🔔 إعادة ضبط الإشعارات
-    user.notified5Days = false;
-    user.notified2Days = false;
-
-    // (اختياري) مزامنة مع subscription object
-    user.subscription = {
-      ...user.subscription,
-      active: true,
-      currentPeriodStart: startUTC,
-      currentPeriodEnd: endUTC,
-    };
-
-    await user.save();
-
-    res.json({ code: "USER_SUBSCRIPTION_RENEWED" });
-  } catch (err) {
-    console.error("❌ renewSubscription error:", err);
-    res.status(500).json({ code: "USER_SUBSCRIPTION_ERROR" });
-  }
-};
 // 🔁 نقل الإشعارات إلى هذا الجهاز
 export const transferFcmToThisDevice = async (req, res) => {
   try {
     const { fcmToken } = req.body;
+
     if (!fcmToken) {
       return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
     }
@@ -270,7 +239,7 @@ export const transferFcmToThisDevice = async (req, res) => {
       return res.status(404).json({ code: "USER_NOT_FOUND" });
     }
 
-    // 🧹 حذف كل التوكنات القديمة
+    // 🧹 حذف جميع التوكنات القديمة (أي جهاز سابق)
     user.fcmTokens = [
       {
         token: fcmToken,
@@ -279,16 +248,17 @@ export const transferFcmToThisDevice = async (req, res) => {
       },
     ];
 
-    // 🟢 هذا المستخدم هو مالك الجهاز
+    // ✅ هذا المستخدم هو مالك الإشعارات الآن
     user.deviceOwnerId = user._id;
 
     await user.save();
 
     return res.json({
       code: "FCM_TRANSFERRED",
+      notificationsOwned: true,
     });
   } catch (err) {
     console.error("❌ transferFcmToThisDevice error:", err);
-    res.status(500).json({ code: "FCM_TRANSFER_ERROR" });
+    return res.status(500).json({ code: "FCM_TRANSFER_ERROR" });
   }
 };
