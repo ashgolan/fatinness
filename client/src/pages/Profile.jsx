@@ -47,24 +47,16 @@ export default function Profile() {
     try {
       setTransferring(true);
 
-      // ✅ نستخدم نفس الدالة الموجودة
-      const token = await registerFcmToken();
+      const token = await registerFcmToken({ silent: true });
+      if (!token) throw new Error("NO_TOKEN");
 
-      if (!token) {
-        toast.error("لم يتم الحصول على رمز الإشعارات");
-        return;
-      }
+      await Api.post("/users/fcm/transfer", { fcmToken: token });
 
-      const res = await Api.post("/users/fcm/transfer", {
-        fcmToken: token,
-      });
-
-      if (res.data?.code === "FCM_TRANSFERRED") {
-        toast.success("تم نقل الإشعارات إلى هذا الجهاز");
-      }
+      toast.success(t("profile.notifications.transferredSuccess"));
+      await fetchProfile();
     } catch (err) {
       console.error(err);
-      toast.error("تعذّر نقل الإشعارات");
+      toast.error(t("profile.notifications.transferFailed"));
     } finally {
       setTransferring(false);
     }

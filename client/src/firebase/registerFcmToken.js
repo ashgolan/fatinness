@@ -6,26 +6,37 @@ import i18n from "i18next";
 
 export async function registerFcmToken({ silent = false } = {}) {
   try {
-    const supported = await isSupported();
-    if (!supported || !("Notification" in window) || !navigator.serviceWorker) {
-      return null;
-    }
+    // 1️⃣ دعم المتصفح
+    if (!(await isSupported())) return null;
+    if (!("Notification" in window)) return null;
+    if (!navigator.serviceWorker) return null;
 
-    const perm = await Notification.requestPermission();
-    if (perm !== "granted") {
+    // 2️⃣ طلب الإذن (لو مرفوض لا نكرر)
+    if (Notification.permission === "denied") {
       if (!silent) toast.info(i18n.t("fcm.permission_denied"));
       return null;
     }
 
+    if (Notification.permission !== "granted") {
+      const perm = await Notification.requestPermission();
+      if (perm !== "granted") {
+        if (!silent) toast.info(i18n.t("fcm.permission_denied"));
+        return null;
+      }
+    }
+
+    // 3️⃣ تسجيل SW (مرة واحدة)
     const registration =
-      (await navigator.serviceWorker.getRegistration(
-        "/firebase-messaging-sw.js"
-      )) ||
+      (await navigator.serviceWorker.getRegistration("/")) ||
       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
 
+    // 4️⃣ FCM Token
     const messaging = getMessaging(app);
     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
-    if (!vapidKey) return null;
+    if (!vapidKey) {
+      console.error("❌ Missing VAPID key");
+      return null;
+    }
 
     const token = await getToken(messaging, {
       vapidKey,
@@ -34,12 +45,18 @@ export async function registerFcmToken({ silent = false } = {}) {
 
     if (!token) return null;
 
-    const res = await Api.post("/users/fcm", { fcmToken: token });
+    // 5️⃣ إرسال للسيرفر
+    await Api.post("/users/fcm", { fcmToken: token });
 
-    if (!silent) toast.success(i18n.t("fcm.success"));
+    if (!silent) {
+      setTimeout(() => {
+        toast.success(i18n.t("fcm.success"));
+      }, 300);
+    }
+
     return token;
   } catch (err) {
-    console.error("FCM error:", err);
+    console.error("❌ FCM error:", err);
     if (!silent) toast.error(i18n.t("fcm.error"));
     return null;
   }
