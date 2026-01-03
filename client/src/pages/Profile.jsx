@@ -52,11 +52,10 @@ export default function Profile() {
 
       await Api.post("/users/fcm/transfer", { fcmToken: token });
 
-      toast.success(t("profile.notifications.transferredSuccess"));
-      await fetchProfile();
+      // ❌ لا toast هنا
     } catch (err) {
       console.error(err);
-      toast.error(t("profile.notifications.transferFailed"));
+      throw err;
     } finally {
       setTransferring(false);
     }
