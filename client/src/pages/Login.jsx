@@ -81,7 +81,7 @@ export default function Login() {
         // 🔔 محاولة تسجيل الإشعارات (غير إجباري)
         // 🔔 تفعيل الإشعارات (اختياري + ذكي)
         // 🔔 محاولة تفعيل الإشعارات (بدون إزعاج)
-        registerFcmToken({ silent: false });
+        await registerFcmToken({ silent: false });
 
         // 🔄 تحديث بيانات المستخدم بدون await
 
