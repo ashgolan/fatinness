@@ -80,33 +80,8 @@ export default function Login() {
         setUser(data.user);
         // 🔔 محاولة تسجيل الإشعارات (غير إجباري)
         // 🔔 تفعيل الإشعارات (اختياري + ذكي)
-        registerFcmToken({ silent: false }).then((res) => {
-          if (!res) return;
-
-          switch (res.status) {
-            case "SUCCESS":
-              // ✅ النجاح الحقيقي (الرسالة تُعرض من داخل الدالة نفسها)
-              break;
-
-            case "OWNED_BY_ANOTHER":
-              toast.info(t("fcm.deviceOwnedByAnother"), {
-                autoClose: 6000,
-              });
-              break;
-
-            case "PERMISSION_DENIED":
-              toast.info(t("fcm.permission_denied"));
-              break;
-
-            case "NOT_SUPPORTED":
-              // لا نعرض شيئًا (كمبيوتر / متصفح لا يدعم)
-              break;
-
-            default:
-              // أي حالة أخرى → لا نزعج المستخدم
-              break;
-          }
-        });
+        // 🔔 محاولة تفعيل الإشعارات (بدون إزعاج)
+        registerFcmToken({ silent: false });
 
         // 🔄 تحديث بيانات المستخدم بدون await
 
