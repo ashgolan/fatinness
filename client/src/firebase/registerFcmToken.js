@@ -1,63 +1,55 @@
-// src/firebase/registerFcmToken.js
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 import { app } from "./config";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { t } from "i18next";
 
-export async function registerFcmToken({ silent = false } = {}) {
+export async function registerFcmToken() {
   try {
+    // 1️⃣ هل الجهاز يدعم الإشعارات؟
     const supported = await isSupported();
     if (!supported || !("Notification" in window) || !navigator.serviceWorker) {
-      return { status: "SKIPPED" };
+      return null; // صامت
     }
 
-    const perm = await Notification.requestPermission();
-    if (perm !== "granted") {
-      return { status: "PERMISSION_DENIED" };
+    // 2️⃣ طلب الإذن
+    const permission = await Notification.requestPermission();
+    if (permission !== "granted") {
+      return null; // المستخدم رفض – لا خطأ
     }
 
+    // 3️⃣ service worker
     const registration =
-      (await navigator.serviceWorker.getRegistration("/")) ||
+      (await navigator.serviceWorker.getRegistration()) ||
       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
 
+    // 4️⃣ Firebase messaging
     const messaging = getMessaging(app);
     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
+
     if (!vapidKey) {
-      return { status: "SKIPPED" };
+      console.warn("Missing VAPID key");
+      return null;
     }
 
+    // 5️⃣ الحصول على التوكن
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: registration,
     });
 
-    if (!token) {
-      return { status: "SKIPPED" };
-    }
+    if (!token) return null;
 
-    const res = await Api.post("/users/fcm", { fcmToken: token });
+    // 6️⃣ حفظ التوكن في السيرفر
+    await Api.post("/users/fcm", { fcmToken: token });
 
-    if (
-      res.data?.code === "FCM_TOKEN_SAVED" ||
-      res.data?.code === "FCM_TOKEN_SAVED_AS_OWNER" ||
-      res.data?.code === "FCM_TRANSFERRED"
-    ) {
-      if (!silent) toast.success(t("fcm.success"));
-      return { status: "SUCCESS" };
-    }
-
-    if (res.data?.code === "FCM_TOKEN_IGNORED_DEVICE_OWNED") {
-      if (!silent)
-        toast.info(t("fcm.deviceOwnedByAnother"), { autoClose: 6000 });
-      return { status: "OWNED_BY_ANOTHER" };
-    }
-
-    // حالات طبيعية تمامًا
-    return { status: "NO_CHANGE" };
+    // ✅ نجاح حقيقي
+    toast.success(t("fcm.success"));
+    return token;
   } catch (err) {
-    console.warn("FCM silently skipped:", err?.message);
-    return { status: "SKIPPED" };
+    // ❗ مهم جدًا: لا نُظهر خطأ
+    console.warn("FCM skipped:", err?.message);
+    return null;
   }
 }
 
