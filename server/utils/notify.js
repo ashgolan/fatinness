@@ -2,11 +2,19 @@
 import { sendFcmToTokens } from "./fcm.js";
 
 /**
- * 🔹 إرسال إشعار عبر FCM فقط لمالك الجهاز
- * 🔹 مع تنظيف التوكنات الميتة
+ * 🔔 إرسال إشعار ذكي عبر FCM
+ * - يرسل فقط إذا وُجدت توكنات
+ * - ينظف التوكنات الميتة فقط
+ * - لا يحذف توكنات صالحة بالخطأ
  */
-export async function sendSmartNotification({ user, title, body, url }) {
+export async function sendSmartNotification({
+  user,
+  title,
+  body,
+  url,
+}) {
   try {
+    // 🛑 تحقق أساسي
     if (!user || !Array.isArray(user.fcmTokens)) {
       return {
         via: "none",
@@ -15,24 +23,14 @@ export async function sendSmartNotification({ user, title, body, url }) {
       };
     }
 
-    // ✅ نأخذ فقط التوكنات التي هذا المستخدم هو مالكها
-    // const ownedTokens = user.fcmTokens.filter(
-    //   (t) =>
-    //     t &&
-    //     t.token &&
-    //     t.ownerUserId &&
-    //     t.ownerUserId.equals(user._id)
-    // );
-
-    // const tokens = ownedTokens.map((t) => t.token);
-// ✅ نأخذ كل التوكنات (مؤقتًا)
-const tokens = user.fcmTokens
-  .map((t) => (typeof t === "string" ? t : t.token))
-  .filter(Boolean);
+    // ✅ نستخدم شكلًا واحدًا فقط للتوكنات (objects)
+    const tokens = user.fcmTokens
+      .map((t) => t?.token)
+      .filter(Boolean);
 
     if (!tokens.length) {
       console.log(
-        `🔕 No owned FCM tokens for user (${user.username || user._id})`
+        `🔕 No FCM tokens for user (${user.username || user._id})`
       );
       return {
         via: "none",
@@ -43,6 +41,7 @@ const tokens = user.fcmTokens
 
     const fixedTitle = title || "Fatinness Studio";
 
+    // 🚀 إرسال الإشعار
     const result = await sendFcmToTokens(tokens, {
       title: fixedTitle,
       body: body || "",
@@ -51,11 +50,12 @@ const tokens = user.fcmTokens
 
     const invalidTokens = result?.invalidTokens || [];
 
-    // 🧹 حذف التوكنات الميتة فقط من هذا المستخدم
+    // 🧹 تنظيف التوكنات الميتة فقط
     if (invalidTokens.length) {
       user.fcmTokens = user.fcmTokens.filter(
-        (t) => !invalidTokens.includes(t.token)
+        (t) => t?.token && !invalidTokens.includes(t.token)
       );
+
       await user.save();
 
       console.log(
