@@ -45,18 +45,17 @@ app.set("trust proxy", 1);
 app.use(
   cors({
     origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
       const allowedOrigins = [
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://fateness.onrender.com", // ✅ الفرونت الحقيقي
-        "https://api.fatinness.cloud", // ✅ مهم
+        "https://fateness.onrender.com",
+        "https://api.fatinness.cloud",
       ];
 
-      // السماح للطلبات بدون origin (Postman / server-to-server)
-      if (!origin) return callback(null, true);
-
       if (allowedOrigins.includes(origin)) {
-        return callback(null, true); // 🔥 هذا السطر الحاسم
+        return callback(null, true);
       }
 
       return callback(new Error("Not allowed by CORS"));

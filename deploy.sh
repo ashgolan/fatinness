@@ -1,18 +1,21 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Auto deploy started..."
-
+echo "📂 cd to project"
 cd /var/www/fatinness
 
-echo "📥 Pulling latest code..."
-git pull origin main
+echo "📥 git fetch"
+git fetch origin
 
-echo "📦 Installing backend dependencies..."
+echo "🔁 git reset --hard origin/main"
+git reset --hard origin/main
+
+echo "📦 install deps"
 cd server
-npm install --omit=dev
+npm install --production
+cd ..
 
-echo "🔁 Restarting PM2..."
+echo "♻️ restart pm2"
 pm2 restart fateness
 
-echo "✅ Deploy finished successfully"
+echo "✅ deploy finished"
