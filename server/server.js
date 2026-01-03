@@ -49,6 +49,7 @@ app.use(
         "http://localhost:3000",
         "http://localhost:5173",
         "https://fateness.onrender.com", // ✅ الفرونت الحقيقي
+        "https://api.fatinness.cloud", // ✅ مهم
       ];
 
       // السماح للطلبات بدون origin (Postman / server-to-server)
