@@ -58,6 +58,7 @@ export default function DaySection({
     return new Date(slot.endAt) < new Date();
   }
 console.log("existingSlots:", existingSlots);
+console.log("existingSlots:", existingSlots);
 
   return (
     <Paper
