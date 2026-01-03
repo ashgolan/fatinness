@@ -226,7 +226,7 @@ export const updateFcmToken = async (req, res) => {
 };
 
 // 🔁 نقل الإشعارات إلى هذا الجهاز
-export const transferFcmToThisDevice = async (req, res) => {
+export const transferFcmOwnership = async (req, res) => {
   try {
     const { fcmToken } = req.body;
 

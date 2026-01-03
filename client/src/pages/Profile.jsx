@@ -16,7 +16,7 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
-import { transferFcmToThisDevice } from "../firebase/registerFcmToken";
+import { registerFcmToken } from "../firebase/registerFcmToken";
 
 ChartJS.register(
   LineElement,
@@ -41,6 +41,33 @@ export default function Profile() {
 
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
+
+async function transferFcmToThisDevice() {
+  try {
+    setTransferring(true);
+
+    // ✅ نستخدم نفس الدالة الموجودة
+    const token = await registerFcmToken();
+
+    if (!token) {
+      toast.error("لم يتم الحصول على رمز الإشعارات");
+      return;
+    }
+
+    const res = await Api.post("/users/fcm/transfer", {
+      fcmToken: token,
+    });
+
+    if (res.data?.code === "FCM_TRANSFERRED") {
+      toast.success("تم نقل الإشعارات إلى هذا الجهاز");
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error("تعذّر نقل الإشعارات");
+  } finally {
+    setTransferring(false);
+  }
+}
 
   const fetchProfile = async () => {
     setLoading(true);
