@@ -1,8 +1,9 @@
+// src/firebase/registerFcmToken.js
 import { getMessaging, getToken, isSupported } from "firebase/messaging";
 import { app } from "./config";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
-import { t, i18n } from "i18next";
+import { t } from "i18next";
 
 export async function registerFcmToken({ silent = false } = {}) {
   try {
@@ -11,18 +12,23 @@ export async function registerFcmToken({ silent = false } = {}) {
       return null;
     }
 
-    const permission = await Notification.requestPermission();
-    if (permission !== "granted") return null;
+    const perm = await Notification.requestPermission();
+    if (perm !== "granted") {
+      if (!silent) toast.info(t("fcm.permission_denied"));
+      return null;
+    }
 
     const registration =
-      (await navigator.serviceWorker.getRegistration(
-        "/firebase-messaging-sw.js"
-      )) ||
+      (await navigator.serviceWorker.getRegistration("/")) ||
       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
 
     const messaging = getMessaging(app);
     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
-    if (!vapidKey) return null;
+
+    if (!vapidKey) {
+      if (!silent) toast.error(t("fcm.missing_vapid"));
+      return null;
+    }
 
     const token = await getToken(messaging, {
       vapidKey,
@@ -31,12 +37,30 @@ export async function registerFcmToken({ silent = false } = {}) {
 
     if (!token) return null;
 
-    await Api.post("/users/fcm", { fcmToken: token });
+    const res = await Api.post("/users/fcm", { fcmToken: token });
 
-    if (!silent) toast.success(i18n.t("fcm.success"));
+    // 🟢 نجاح حقيقي
+    if (
+      res.data?.code === "FCM_TOKEN_SAVED" ||
+      res.data?.code === "FCM_TOKEN_SAVED_AS_OWNER"
+    ) {
+      if (!silent) toast.success(t("fcm.success"));
+      return token;
+    }
+
+    // 🔵 جهاز مملوك لمستخدم آخر
+    if (res.data?.code === "FCM_TOKEN_IGNORED_DEVICE_OWNED") {
+      if (!silent)
+        toast.info(t("fcm.deviceOwnedByAnother"), { autoClose: 6000 });
+      return null;
+    }
+
+    // fallback
+    if (!silent) toast.success(t("fcm.success"));
     return token;
   } catch (err) {
-    console.warn("FCM skipped:", err);
+    console.error("FCM register error:", err);
+    if (!silent) toast.info(t("fcm.error"));
     return null;
   }
 }
