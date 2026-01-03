@@ -79,17 +79,34 @@ export default function Login() {
       if (data?.user) {
         setUser(data.user);
         // 🔔 محاولة تسجيل الإشعارات (غير إجباري)
-        registerFcmToken()
-          .then((result) => {
-            if (result === "OWNED_BY_ANOTHER") {
-              toast.info(t("fcm.deviceOwnedByAnother"), { autoClose: 6000 });
-            }
-          })
-          .catch(() => {
-            // نتجاهل الخطأ تمامًا
-          });
+        // 🔔 تفعيل الإشعارات (اختياري + ذكي)
+        registerFcmToken({ silent: false }).then((res) => {
+          if (!res) return;
 
-        toast.success(t("login.success.login"));
+          switch (res.status) {
+            case "SUCCESS":
+              // ✅ النجاح الحقيقي (الرسالة تُعرض من داخل الدالة نفسها)
+              break;
+
+            case "OWNED_BY_ANOTHER":
+              toast.info(t("fcm.deviceOwnedByAnother"), {
+                autoClose: 6000,
+              });
+              break;
+
+            case "PERMISSION_DENIED":
+              toast.info(t("fcm.permission_denied"));
+              break;
+
+            case "NOT_SUPPORTED":
+              // لا نعرض شيئًا (كمبيوتر / متصفح لا يدعم)
+              break;
+
+            default:
+              // أي حالة أخرى → لا نزعج المستخدم
+              break;
+          }
+        });
 
         // 🔄 تحديث بيانات المستخدم بدون await
 

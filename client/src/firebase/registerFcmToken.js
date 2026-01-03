@@ -5,17 +5,18 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import { t } from "i18next";
 
+
 export async function registerFcmToken({ silent = false } = {}) {
   try {
     const supported = await isSupported();
     if (!supported || !("Notification" in window) || !navigator.serviceWorker) {
-      return null;
+      return { status: "NOT_SUPPORTED" };
     }
 
     const perm = await Notification.requestPermission();
     if (perm !== "granted") {
       if (!silent) toast.info(t("fcm.permission_denied"));
-      return null;
+      return { status: "PERMISSION_DENIED" };
     }
 
     const registration =
@@ -27,7 +28,7 @@ export async function registerFcmToken({ silent = false } = {}) {
 
     if (!vapidKey) {
       if (!silent) toast.error(t("fcm.missing_vapid"));
-      return null;
+      return { status: "MISSING_VAPID" };
     }
 
     const token = await getToken(messaging, {
@@ -35,35 +36,46 @@ export async function registerFcmToken({ silent = false } = {}) {
       serviceWorkerRegistration: registration,
     });
 
-    if (!token) return null;
+    if (!token) {
+      if (!silent) toast.info(t("fcm.error"));
+      return { status: "NO_TOKEN" };
+    }
 
     const res = await Api.post("/users/fcm", { fcmToken: token });
+    const code = res?.data?.code;
 
-    // 🟢 نجاح حقيقي
+    // ✅ نجاح فعلي (تخزين/تسجيل)
+    if (code === "FCM_TOKEN_SAVED" || code === "FCM_TOKEN_SAVED_AS_OWNER") {
+      if (!silent) toast.success(t("fcm.success"));
+      return { status: "SUCCESS", token, code };
+    }
+
+    // ✅ جهاز مملوك لمستخدم آخر
+    if (code === "FCM_TOKEN_IGNORED_DEVICE_OWNED") {
+      if (!silent) toast.info(t("fcm.deviceOwnedByAnother"), { autoClose: 6000 });
+      return { status: "OWNED_BY_ANOTHER", code };
+    }
+
+    // ✅ حالات تعتبر نجاح (مثلاً موجود مسبقاً أو تم نقلها)
     if (
-      res.data?.code === "FCM_TOKEN_SAVED" ||
-      res.data?.code === "FCM_TOKEN_SAVED_AS_OWNER"
+      code === "FCM_TOKEN_ALREADY_REGISTERED" ||
+      code === "FCM_TOKEN_TRANSFERRED_NEW_DEVICE" ||
+      code === "FCM_TRANSFERRED"
     ) {
       if (!silent) toast.success(t("fcm.success"));
-      return token;
+      return { status: "SUCCESS", token, code };
     }
 
-    // 🔵 جهاز مملوك لمستخدم آخر
-    if (res.data?.code === "FCM_TOKEN_IGNORED_DEVICE_OWNED") {
-      if (!silent)
-        toast.info(t("fcm.deviceOwnedByAnother"), { autoClose: 6000 });
-      return null;
-    }
-
-    // fallback
-    if (!silent) toast.success(t("fcm.success"));
-    return token;
-  } catch (err) {
-    console.error("FCM register error:", err);
+    // ⚠️ أي رد غير معروف: لا نعرض نجاح كاذب
     if (!silent) toast.info(t("fcm.error"));
-    return null;
+    return { status: "UNKNOWN_RESPONSE", code };
+  } catch (err) {
+    console.warn("FCM register error:", err?.code || err?.message);
+    if (!silent) toast.info(t("fcm.error"));
+    return { status: "ERROR", error: err?.message };
   }
 }
+
 
 export async function transferFcmToThisDevice() {
   try {
