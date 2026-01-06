@@ -297,6 +297,9 @@ export default function UsersAdmin() {
       handleServerError(err);
     }
   };
+  const isPromoting = editUser?.role === "user" && newRoleValue === "admin";
+
+  const isDemoting = editUser?.role === "admin" && newRoleValue === "user";
 
   return (
     <Box
@@ -821,17 +824,29 @@ export default function UsersAdmin() {
                 sx: { borderRadius: 3, p: 1, textAlign: "center" },
               }}
             >
-              <DialogTitle sx={{ fontWeight: 700, color: "#d32f2f" }}>
-                {t("usersAdmin.confirmRole.title")}
+              <DialogTitle
+                sx={{
+                  fontWeight: 700,
+                  color: isDemoting ? "#d32f2f" : "#1976d2",
+                }}
+              >
+                {isPromoting
+                  ? t("usersAdmin.confirmRole.promoteTitle")
+                  : t("usersAdmin.confirmRole.demoteTitle")}
               </DialogTitle>
 
               <DialogContent>
                 <Typography sx={{ fontSize: "1rem", mb: 1 }}>
-                  {t("usersAdmin.confirmRole.text")}
+                  {isPromoting
+                    ? t("usersAdmin.confirmRole.promoteText")
+                    : t("usersAdmin.confirmRole.demoteText")}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                  {t("usersAdmin.confirmRole.note")}
-                </Typography>
+
+                {isDemoting && (
+                  <Typography variant="body2" sx={{ color: "error.main" }}>
+                    {t("usersAdmin.confirmRole.demoteWarning")}
+                  </Typography>
+                )}
               </DialogContent>
 
               <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
