@@ -87,8 +87,11 @@ export default function SlotsAdmin() {
     const today = new Date();
 
     const pad = (n) => String(n).padStart(2, "0");
+
     const fmtShort = (d) =>
-      `${d.getDate()}/${d.getMonth() + 1}/${String(d.getFullYear()).slice(-2)}`;
+      `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${String(
+        d.getFullYear()
+      ).slice(-2)}`;
     const toLocalISO = (d) =>
       `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
@@ -328,16 +331,18 @@ export default function SlotsAdmin() {
   const pageBackground =
     mode === "dark"
       ? `
-        radial-gradient(1100px 520px at 110% -10%, rgba(255,217,61,.12) 0%, transparent 60%),
-        radial-gradient(1000px 500px at -10% 110%, rgba(155,29,111,.15) 0%, transparent 60%),
-        linear-gradient(180deg, #0b0d12 0%, #12151c 100%)
-      `
+  radial-gradient(1100px 520px at 110% -10%, rgba(255,217,61,.12) 0%, transparent 60%),
+  radial-gradient(1000px 500px at -10% 110%, rgba(155,29,111,.15) 0%, transparent 60%),
+  linear-gradient(180deg, #0b0d12 0%, #12151c 100%)
+  `
       : `
-        radial-gradient(1200px 600px at 110% -10%, rgba(255,217,61,.25) 0%, transparent 60%),
-        radial-gradient(1000px 500px at -10% 110%, rgba(194,24,91,.15) 0%, transparent 60%),
-        linear-gradient(180deg, #FFF9E6 0%, #FCE4EC 100%)
-      `;
+  radial-gradient(1200px 600px at 110% -10%, rgba(255,217,61,.25) 0%, transparent 60%),
+  radial-gradient(1000px 500px at -10% 110%, rgba(194,24,91,.15) 0%, transparent 60%),
+  linear-gradient(180deg, #FFF9E6 0%, #FCE4EC 100%)
 
+        `;
+  const isSlotEnded = (slot) =>
+    getSlotStatus(slot).type === "ended";
   return (
     <Box
       dir={dir}
@@ -1198,8 +1203,8 @@ export default function SlotsAdmin() {
                             index % 2 === 0
                               ? BRAND.card
                               : mode === "dark"
-                              ? "rgba(255,217,61,0.03)"
-                              : BRAND.bgSoft,
+                                ? "rgba(255,217,61,0.03)"
+                                : BRAND.bgSoft,
                           borderBottom:
                             index < bookings.length - 1
                               ? `1px solid ${BRAND.line}`
@@ -1260,9 +1265,8 @@ export default function SlotsAdmin() {
                               fontSize: 11,
                               fontWeight: 900,
                               height: 22,
-                              border: `1px solid ${
-                                b.status === "booked" ? BRAND.green : BRAND.red
-                              }66`,
+                              border: `1px solid ${b.status === "booked" ? BRAND.green : BRAND.red
+                                }66`,
                             }}
                           />
                         </Box>
@@ -1302,22 +1306,27 @@ export default function SlotsAdmin() {
               flexDirection: dir === "rtl" ? "row-reverse" : "row",
             }}
           >
-            <Button
-              onClick={() => setNotifyOpen(true)}
-              sx={{
-                textTransform: "none",
-                background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
-                color: "#fff",
-                fontWeight: 900,
-                px: 3,
-                py: 1,
-                borderRadius: 2,
-                boxShadow: `0 6px 18px ${BRAND.purple}55`,
-                "&:hover": { filter: "brightness(.95)" },
-              }}
-            >
-              📩 {t("slotsAdmin.dialog.sendNotification")}
-            </Button>
+            {selectedSlot &&
+              bookings.length > 0 &&
+              !isSlotEnded(selectedSlot) && (
+                <Button
+                  onClick={() => setNotifyOpen(true)}
+                  sx={{
+                    textTransform: "none",
+                    background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
+                    color: "#fff",
+                    fontWeight: 900,
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    boxShadow: `0 6px 18px ${BRAND.purple}55`,
+                    "&:hover": { filter: "brightness(.95)" },
+                  }}
+                >
+                  📩 {t("slotsAdmin.dialog.sendNotification")}
+                </Button>
+              )}
+
 
             <Button
               onClick={() => setOpen(false)}
@@ -1334,30 +1343,34 @@ export default function SlotsAdmin() {
             >
               {t("slotsAdmin.dialog.close")}
             </Button>
-            {selectedSlot && !isNaN(new Date(selectedSlot.date)) && (
-              <Button
-                onClick={handleToggleBlock}
-                sx={{
-                  textTransform: "none",
-                  background: selectedSlot.isBlocked
-                    ? `linear-gradient(135deg, ${BRAND.green}, #66bb6a)`
-                    : `linear-gradient(135deg, ${BRAND.red}, #ef5350)`,
-                  color: "#fff",
-                  fontWeight: 900,
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  boxShadow: selectedSlot.isBlocked
-                    ? `0 6px 18px ${BRAND.green}44`
-                    : `0 6px 18px ${BRAND.red}44`,
-                  "&:hover": { filter: "brightness(.95)" },
-                }}
-              >
-                {selectedSlot.isBlocked
-                  ? t("slotsAdmin.dialog.activate")
-                  : t("slotsAdmin.dialog.deactivate")}
-              </Button>
-            )}
+            {selectedSlot &&
+              !isSlotEnded(selectedSlot) &&
+              !isNaN(new Date(selectedSlot.date)) && (
+                <Button
+                  onClick={handleToggleBlock}
+                  sx={{
+                    textTransform: "none",
+                    background: selectedSlot.isBlocked
+                      ? `linear-gradient(135deg, ${BRAND.green}, #66bb6a)`
+                      : `linear-gradient(135deg, ${BRAND.red}, #ef5350)`,
+                    color: "#fff",
+                    fontWeight: 900,
+                    px: 3,
+                    py: 1,
+                    borderRadius: 2,
+                    boxShadow: selectedSlot.isBlocked
+                      ? `0 6px 18px ${BRAND.green}44`
+                      : `0 6px 18px ${BRAND.red}44`,
+                    "&:hover": { filter: "brightness(.95)" },
+                  }}
+                >
+                  {selectedSlot.isBlocked
+                    ? t("slotsAdmin.dialog.activate")
+                    : t("slotsAdmin.dialog.deactivate")}
+                </Button>
+              )}
+
+
           </DialogActions>
         </Dialog>
         <Dialog

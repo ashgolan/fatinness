@@ -77,8 +77,8 @@ function formatDateRange(start, end, i18n) {
     i18n.language === "he"
       ? "he-IL"
       : i18n.language === "en"
-      ? "en-US"
-      : "ar-EG";
+        ? "en-US"
+        : "ar-EG";
 
   const opts = { day: "2-digit", month: "short", year: "numeric" };
 
@@ -208,38 +208,80 @@ export default function AdminSchedule() {
       handleServerError(err);
     }
   };
+  const saveNextWeekInternal = async () => {
+    const items = nextWeek.flatMap((d) =>
+      d.items
+        .filter((s) => s.startTime && s.endTime)
+        .map((s) => ({
+          date: fmt(addDays(serverNextWeekStart, d.dayOffset)),
+          startTime: s.startTime,
+          endTime: s.endTime,
+          capacity: Number(s.capacity) || 20,
+        }))
 
-  const saveChanges = async () => {
-    const changes = [];
+    );
 
-    Object.keys(currentEdits).forEach((key) => {
-      currentEdits[key].forEach((s) => {
-        if (s.startTime && s.endTime) {
-          changes.push({
-            date: key,
-            startTime: s.startTime,
-            endTime: s.endTime,
-            capacity: Number(s.capacity) || 20,
-          });
-        }
-      });
-    });
+    if (!items.length) return 0;
 
-    if (!changes.length) {
+    const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
+
+    setNextWeek(
+      Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] }))
+    );
+
+    return data?.created ?? items.length;
+  };
+  const saveAllChanges = async () => {
+    const hasCurrent =
+      Object.keys(currentEdits).length > 0;
+
+    const hasNext =
+      nextWeek.some((d) => d.items.length > 0);
+
+    if (!hasCurrent && !hasNext) {
       return toast.info(t("adminSchedule.info.noValidChanges"));
     }
 
     setSaving(true);
+
     try {
-      await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
+      let createdCurrent = 0;
+      let createdNext = 0;
+
+      // 🔹 الأسبوع الحالي
+      if (hasCurrent) {
+        const changes = [];
+        Object.keys(currentEdits).forEach((key) => {
+          currentEdits[key].forEach((s) => {
+            if (s.startTime && s.endTime) {
+              changes.push({
+                date: key,
+                startTime: s.startTime,
+                endTime: s.endTime,
+                capacity: Number(s.capacity) || 20,
+              });
+            }
+          });
+        });
+
+        await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
+        createdCurrent = changes.length;
+        setCurrentEdits({});
+      }
+
+      // 🔸 الأسبوع القادم
+      if (hasNext) {
+        createdNext = await saveNextWeekInternal();
+        await fetchNextWeek();
+      }
 
       toast.success(
-        t("adminSchedule.success.createdSlots", {
-          count: changes.length,
+        t("adminSchedule.success.savedAllDetailed", {
+          current: createdCurrent,
+          next: createdNext,
         })
       );
 
-      setCurrentEdits({});
       await fetchCurrentWeek();
     } catch (err) {
       handleServerError(err);
@@ -247,6 +289,8 @@ export default function AdminSchedule() {
       setSaving(false);
     }
   };
+
+
 
   // ===================== إدارة الأسبوع القادم =====================
   const addNextSlot = (dayIndex) => {
@@ -267,44 +311,11 @@ export default function AdminSchedule() {
     setNextWeek(copy);
   };
 
-  const saveNextWeek = async () => {
-    const items = nextWeek.flatMap((d) =>
-      d.items
-        .filter((s) => s.startTime && s.endTime)
-        .map((s) => ({
-          dayOffset: d.dayOffset,
-          startTime: s.startTime,
-          endTime: s.endTime,
-          capacity: Number(s.capacity) || 20,
-        }))
-    );
 
-    if (!items.length) {
-      return toast.warn(t("adminSchedule.info.addValid"));
-    }
 
-    setSaving(true);
-    try {
-      const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
-
-      toast.success(
-        t("adminSchedule.success.createdNext", {
-          count: data?.created ?? items.length,
-        })
-      );
-
-      fetchNextWeek();
-
-      setNextWeek(
-        Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] }))
-      );
-      setTab(1);
-    } catch (err) {
-      handleServerError(err);
-    } finally {
-      setSaving(false);
-    }
-  };
+  const hasUnsavedChanges =
+    Object.keys(currentEdits).length > 0 ||
+    nextWeek.some((d) => d.items.length > 0);
 
   // ===================== واجهة الصفحة =====================
   return (
@@ -500,6 +511,79 @@ export default function AdminSchedule() {
             </Tabs>
           </Box>
         </Paper>
+        {/* 🟡 شريط تغييرات غير محفوظة + زر حفظ */}
+        {hasUnsavedChanges && (
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 3,
+              px: 3,
+              py: 1.5,
+              borderRadius: 2,
+              border: "1px solid rgba(245,158,11,0.4)",
+              background: isDark
+                ? "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05))"
+                : "linear-gradient(135deg, rgba(254,243,199,1), rgba(253,230,138,0.8))",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              flexWrap: "wrap",
+            }}
+          >
+            {/* النص */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  backgroundColor: "#F59E0B",
+                  boxShadow: "0 0 10px rgba(245,158,11,0.8)",
+                }}
+              />
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: isDark ? "#FDE68A" : "#92400E",
+                }}
+              >
+                ⚠️ {t("adminSchedule.unsavedChanges")}
+              </Typography>
+            </Box>
+
+            {/* زر الحفظ */}
+            <Button
+              size="small"
+              onClick={saveAllChanges}
+              disabled={saving}
+              sx={{
+                px: 2.5,
+                py: 0.8,
+                fontSize: 13,
+                fontWeight: 900,
+                borderRadius: 999,
+                textTransform: "none",
+                background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
+                color: "#fff",
+                boxShadow: "0 6px 18px rgba(236,72,153,0.45)",
+                "&:hover": {
+                  filter: "brightness(0.95)",
+                },
+                "&:disabled": {
+                  background: "rgba(148,163,184,0.5)",
+                  boxShadow: "none",
+                },
+              }}
+            >
+              {saving
+                ? t("adminSchedule.savingLabel")
+                : t("adminSchedule.saveNow")}
+            </Button>
+          </Paper>
+        )}
+
 
         {/* ===== محتوى الأسبوع الحالي ===== */}
         {tab === 0 && (
@@ -612,50 +696,7 @@ export default function AdminSchedule() {
                   })}
                 </Grid>
 
-                {/* زر الحفظ */}
-                <Box sx={{ textAlign: "center", mt: 4 }}>
-                  <Button
-                    variant="contained"
-                    startIcon={
-                      saving ? (
-                        <CircularProgress size={20} color="inherit" />
-                      ) : (
-                        <SaveIcon />
-                      )
-                    }
-                    onClick={saveChanges}
-                    disabled={saving || Object.keys(currentEdits).length === 0}
-                    sx={{
-                      background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
-                      color: "#fff",
-                      px: 6,
-                      py: 2,
-                      fontSize: 15,
-                      fontWeight: 800,
-                      borderRadius: 999,
-                      boxShadow: isDark
-                        ? "0 18px 45px rgba(236,72,153,0.45)"
-                        : "0 18px 45px rgba(155,111,214,0.45)",
-                      "&:hover": {
-                        background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
-                        transform: "translateY(-2px)",
-                        boxShadow: isDark
-                          ? "0 24px 55px rgba(236,72,153,0.6)"
-                          : "0 24px 55px rgba(155,111,214,0.6)",
-                      },
-                      "&:disabled": {
-                        background: "rgba(148,163,184,0.5)",
-                        boxShadow: "none",
-                        transform: "none",
-                      },
-                      transition: "all 0.25s ease",
-                    }}
-                  >
-                    {saving
-                      ? t("adminSchedule.savingLabel", "جاري الحفظ...")
-                      : t("adminSchedule.saveAll")}
-                  </Button>
-                </Box>
+
               </>
             )}
           </>
@@ -757,53 +798,63 @@ export default function AdminSchedule() {
               })}
             </Grid>
 
-            {/* زر إنشاء الأسبوع القادم */}
-            <Box sx={{ textAlign: "center", mt: 4 }}>
-              <Button
-                variant="contained"
-                startIcon={
-                  saving ? (
-                    <CircularProgress size={20} color="inherit" />
-                  ) : (
-                    <SaveIcon />
-                  )
-                }
-                onClick={saveNextWeek}
-                disabled={saving}
-                sx={{
-                  background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.pink})`,
-                  color: "#fff",
-                  px: 6,
-                  py: 2,
-                  fontSize: 15,
-                  fontWeight: 800,
-                  borderRadius: 999,
-                  boxShadow: isDark
-                    ? "0 18px 45px rgba(245,158,11,0.45)"
-                    : "0 18px 45px rgba(245,158,11,0.45)",
-                  "&:hover": {
-                    background: `linear-gradient(135deg, #D97706, #DB2777)`,
-                    transform: "translateY(-2px)",
-                    boxShadow: isDark
-                      ? "0 24px 55px rgba(245,158,11,0.6)"
-                      : "0 24px 55px rgba(245,158,11,0.6)",
-                  },
-                  "&:disabled": {
-                    background: "rgba(148,163,184,0.5)",
-                    boxShadow: "none",
-                    transform: "none",
-                  },
-                  transition: "all 0.25s ease",
-                }}
-              >
-                {saving
-                  ? t("adminSchedule.creatingLabel", "جاري الإنشاء...")
-                  : t("adminSchedule.saveNextWeek")}
-              </Button>
-            </Box>
+
           </>
         )}
       </Box>
+      {/* 🔽 زر الحفظ الموحد */}
+      <Box
+        sx={{
+          mt: 8,                 // مسافة واضحة من المحتوى فوقه
+          mb: 4,                 // مسافة من أسفل الصفحة
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Button
+          variant="contained"
+          startIcon={
+            saving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />
+          }
+          onClick={saveAllChanges}
+          disabled={
+            saving ||
+            (Object.keys(currentEdits).length === 0 &&
+              nextWeek.every((d) => d.items.length === 0))
+          }
+          sx={{
+            minWidth: 280,        // يعطيه حضور بصري
+            px: 6,
+            py: 2,
+            fontSize: 16,
+            fontWeight: 900,
+            borderRadius: 999,
+            background: `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.pink})`,
+            color: "#fff",
+            boxShadow: isDark
+              ? "0 20px 50px rgba(236,72,153,0.45)"
+              : "0 20px 50px rgba(155,111,214,0.45)",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: isDark
+                ? "0 28px 65px rgba(236,72,153,0.6)"
+                : "0 28px 65px rgba(155,111,214,0.6)",
+            },
+            "&:disabled": {
+              background: "rgba(148,163,184,0.5)",
+              boxShadow: "none",
+              transform: "none",
+            },
+            transition: "all 0.25s ease",
+          }}
+        >
+          {saving
+            ? t("adminSchedule.savingLabel", "جاري الحفظ...")
+            : t("adminSchedule.saveAll", "حفظ جميع التغييرات")}
+        </Button>
+      </Box>
+
     </Box>
   );
 }

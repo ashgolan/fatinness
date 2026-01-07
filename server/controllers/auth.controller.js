@@ -477,17 +477,29 @@ export const updateUserRole = async (req, res) => {
 // =====================================================
 export const updatePreferredLanguage = async (req, res) => {
   try {
+    // 🔒 1) تأكد من وجود مستخدم
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ code: "UNAUTHORIZED" });
+    }
+
     const { preferredLanguage } = req.body;
 
+    // 🔒 2) تحقق من اللغة
     if (!["ar", "en", "he"].includes(preferredLanguage)) {
       return res.status(400).json({ code: "INVALID_LANGUAGE" });
     }
 
+    // 🔒 3) حدّث المستخدم
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { preferredLanguage },
       { new: true }
     );
+
+    // 🔒 4) تأكد أن المستخدم موجود
+    if (!user) {
+      return res.status(404).json({ code: "USER_NOT_FOUND" });
+    }
 
     return res.json({
       code: "LANGUAGE_UPDATED",

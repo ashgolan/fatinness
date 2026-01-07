@@ -300,7 +300,6 @@ export default function UsersAdmin() {
   const isPromoting = editUser?.role === "user" && newRoleValue === "admin";
 
   const isDemoting = editUser?.role === "admin" && newRoleValue === "user";
-
   return (
     <Box
       dir={i18n.dir()}
@@ -334,9 +333,7 @@ export default function UsersAdmin() {
               <Typography variant="h5" sx={{ fontWeight: 700 }}>
                 {t("usersAdmin.title")}
               </Typography>
-              <Typography variant="body2">
-                {t("usersAdmin.subtitle")}
-              </Typography>
+              <Typography variant="body2">{t("usersAdmin.subtitle")}</Typography>
             </Box>
           </Box>
         </Paper>
@@ -422,6 +419,7 @@ export default function UsersAdmin() {
                       {user.isSuperAdmin ? "🛡️" : "👑"}
                     </Box>
                   )}
+
                   {/* --------------------------- */}
                   {/* 👤 رأس البطاقة */}
                   {/* --------------------------- */}
@@ -468,9 +466,7 @@ export default function UsersAdmin() {
                   {/* 📌 معلومات المشتركة */}
                   {/* --------------------------- */}
                   <Box sx={{ mb: 2.5, display: "grid", gap: 1.2 }}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                    >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       <EmailIcon sx={{ fontSize: 18, color: "#1976d2" }} />
                       <Typography
                         variant="body2"
@@ -480,9 +476,7 @@ export default function UsersAdmin() {
                       </Typography>
                     </Box>
 
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                    >
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                       <PhoneIcon sx={{ fontSize: 18, color: "#1976d2" }} />
                       <Typography
                         variant="body2"
@@ -492,12 +486,8 @@ export default function UsersAdmin() {
                       </Typography>
                     </Box>
 
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
-                    >
-                      <EventAvailableIcon
-                        sx={{ fontSize: 18, color: "#1976d2" }}
-                      />
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                      <EventAvailableIcon sx={{ fontSize: 18, color: "#1976d2" }} />
                       <Typography
                         variant="body2"
                         sx={{
@@ -505,8 +495,7 @@ export default function UsersAdmin() {
                           fontWeight: 600,
                         }}
                       >
-                        {t("usersAdmin.totalBookings")}:{" "}
-                        {user.totalBookings || 0}
+                        {t("usersAdmin.totalBookings")}: {user.totalBookings || 0}
                       </Typography>
                     </Box>
                   </Box>
@@ -529,9 +518,7 @@ export default function UsersAdmin() {
                               "drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))",
                           },
                           "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                            {
-                              backgroundColor: "#ffeb3b",
-                            },
+                            { backgroundColor: "#ffeb3b" },
                         }}
                       />
                     }
@@ -552,9 +539,7 @@ export default function UsersAdmin() {
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
                   {/* --------------------------- */}
-                  {/* إخفاء كل الأزرار إذا كان هذا المستخدم هو السوبر أدمن */}
                   <Box sx={{ display: "grid", gap: 1.5 }}>
-                    {/* زر التعديل */}
                     <Button
                       fullWidth
                       variant="outlined"
@@ -576,7 +561,6 @@ export default function UsersAdmin() {
                       {t("usersAdmin.buttons.edit")}
                     </Button>
 
-                    {/* زر الحظر */}
                     <Button
                       fullWidth
                       variant="contained"
@@ -592,9 +576,7 @@ export default function UsersAdmin() {
                         textTransform: "none",
                         backgroundColor: user.isBlocked ? "#66bb6a" : "#ef5350",
                         "&:hover": {
-                          backgroundColor: user.isBlocked
-                            ? "#57a95b"
-                            : "#d32f2f",
+                          backgroundColor: user.isBlocked ? "#57a95b" : "#d32f2f",
                         },
                       }}
                     >
@@ -604,7 +586,6 @@ export default function UsersAdmin() {
                         : t("usersAdmin.buttons.block")}
                     </Button>
 
-                    {/* زر الحذف — ممنوع حذف السوبر أدمن */}
                     <Button
                       fullWidth
                       variant="contained"
@@ -641,10 +622,7 @@ export default function UsersAdmin() {
             }}
           >
             <SearchIcon sx={{ fontSize: 64, color: "#999", mb: 2 }} />
-            <Typography
-              variant="h6"
-              sx={{ color: theme.palette.text.secondary }}
-            >
+            <Typography variant="h6" sx={{ color: theme.palette.text.secondary }}>
               {t("usersAdmin.noResults")}
             </Typography>
           </Paper>
@@ -688,6 +666,7 @@ export default function UsersAdmin() {
               onChange={handleChange}
               sx={textFieldStyle}
             />
+
             {currentUser?.isSuperAdmin && (
               <TextField
                 label={t("usersAdmin.fields.newPassword")}
@@ -747,15 +726,10 @@ export default function UsersAdmin() {
               onChange={handleChange}
               sx={textFieldStyle}
             >
-              <MenuItem value="female">
-                {t("usersAdmin.gender.female")}
-              </MenuItem>
+              <MenuItem value="female">{t("usersAdmin.gender.female")}</MenuItem>
               <MenuItem value="male">{t("usersAdmin.gender.male")}</MenuItem>
             </TextField>
 
-            {/* --------------------------- */}
-            {/* 🟣 حقل الدور + نافذة تأكيد */}
-            {/* --------------------------- */}
             <TextField
               select
               label={t("usersAdmin.fields.role")}
@@ -764,26 +738,22 @@ export default function UsersAdmin() {
               onChange={(e) => {
                 const newRole = e.target.value;
 
-                // منع المديرات من ترقية أحد
                 if (newRole === "admin" && !currentUser?.isSuperAdmin) {
                   toast.error(t("usersAdmin.errors.onlySuperAdminCanPromote"));
                   return;
                 }
 
-                setNewRoleValue(newRole); // 👈 خزّنت الدور مؤقتًا
-                setPendingRoleChange(true); // 👈 افتح النافذة
+                setNewRoleValue(newRole);
+                setPendingRoleChange(true);
               }}
               sx={textFieldStyle}
             >
               <MenuItem value="user">{t("usersAdmin.roles.user")}</MenuItem>
-
-              {/* ✨ خيار المدير يظهر فقط للسوبر أدمن */}
               {currentUser?.isSuperAdmin && (
                 <MenuItem value="admin">{t("usersAdmin.roles.admin")}</MenuItem>
               )}
             </TextField>
-            {/* 🗓️ تواريخ الاشتراك — تظهر فقط للأدمن العادي */}
-            {/* 🗓️ تواريخ الاشتراك — للسوبر أدمن فقط */}
+
             {currentUser?.isSuperAdmin && (
               <>
                 <TextField
@@ -815,93 +785,13 @@ export default function UsersAdmin() {
                 />
               </>
             )}
-
-            {/* نافذة تأكيد ترقية المديرة */}
-            <Dialog
-              open={pendingRoleChange}
-              onClose={() => setPendingRoleChange(false)}
-              PaperProps={{
-                sx: { borderRadius: 3, p: 1, textAlign: "center" },
-              }}
-            >
-              <DialogTitle
-                sx={{
-                  fontWeight: 700,
-                  color: isDemoting ? "#d32f2f" : "#1976d2",
-                }}
-              >
-                {isPromoting
-                  ? t("usersAdmin.confirmRole.promoteTitle")
-                  : t("usersAdmin.confirmRole.demoteTitle")}
-              </DialogTitle>
-
-              <DialogContent>
-                <Typography sx={{ fontSize: "1rem", mb: 1 }}>
-                  {isPromoting
-                    ? t("usersAdmin.confirmRole.promoteText")
-                    : t("usersAdmin.confirmRole.demoteText")}
-                </Typography>
-
-                {isDemoting && (
-                  <Typography variant="body2" sx={{ color: "error.main" }}>
-                    {t("usersAdmin.confirmRole.demoteWarning")}
-                  </Typography>
-                )}
-              </DialogContent>
-
-              <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-                {/* ❌ إلغاء – نغلق النافذة ولا نغيّر الدور */}
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setPendingRoleChange(false);
-                    setNewRoleValue(null); // نلغي التغيير
-                  }}
-                  sx={{ color: "#666", borderColor: "#ccc" }}
-                >
-                  {t("common.cancel")}
-                </Button>
-
-                {/* ✔ موافقة – نطبق الدور الجديد */}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => {
-                    setPendingRoleChange(false);
-
-                    // هنا يتم التغيير الفعلي
-                    setEditData((prev) => ({
-                      ...prev,
-                      role: newRoleValue,
-                    }));
-
-                    setNewRoleValue(null);
-
-                    toast.info(t("usersAdmin.messages.tempAdmin"));
-                  }}
-                  sx={{
-                    fontWeight: 600,
-                    backgroundColor: "#1976d2",
-                    "&:hover": { backgroundColor: "#1565c0" },
-                  }}
-                >
-                  {t("usersAdmin.confirmRole.confirm")}
-                </Button>
-              </DialogActions>
-            </Dialog>
           </DialogContent>
 
           <DialogActions sx={{ justifyContent: "space-between", px: 3, pb: 2 }}>
-            {/* ❌ زر حذف المشتركة */}
-            <Button
-              color="error"
-              onClick={handleDeleteUser}
-              sx={{ fontWeight: 600 }}
-            >
+            <Button color="error" onClick={handleDeleteUser} sx={{ fontWeight: 600 }}>
               {t("usersAdmin.buttons.delete")}
             </Button>
 
-            {/* ❌ زر إلغاء */}
             <Button
               onClick={() => setEditOpen(false)}
               sx={{ color: "#777", fontWeight: 600 }}
@@ -909,7 +799,6 @@ export default function UsersAdmin() {
               {t("common.cancel")}
             </Button>
 
-            {/* ✔️ زر حفظ */}
             <Button
               variant="contained"
               onClick={handleSave}
@@ -923,6 +812,88 @@ export default function UsersAdmin() {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* ============================= */}
+        {/* 🟣 Dialog تأكيد ترقية الدور (مُخرج خارج Dialog التعديل) */}
+        {/* ============================= */}
+        <Dialog
+          open={pendingRoleChange}
+          onClose={() => {
+            setPendingRoleChange(false);
+            setNewRoleValue(null);
+          }}
+          PaperProps={{
+            sx: { borderRadius: 3, p: 1, textAlign: "center" },
+          }}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle
+            sx={{
+              fontWeight: 700,
+              color: isDemoting ? "#d32f2f" : "#1976d2",
+            }}
+          >
+            {isPromoting
+              ? t("usersAdmin.confirmRole.promoteTitle")
+              : t("usersAdmin.confirmRole.demoteTitle")}
+          </DialogTitle>
+
+          <DialogContent>
+            <Typography sx={{ fontSize: "1rem", mb: 1 }}>
+              {isPromoting
+                ? t("usersAdmin.confirmRole.promoteText")
+                : t("usersAdmin.confirmRole.demoteText")}
+            </Typography>
+
+            {isDemoting && (
+              <Typography variant="body2" sx={{ color: "error.main" }}>
+                {t("usersAdmin.confirmRole.demoteWarning")}
+              </Typography>
+            )}
+          </DialogContent>
+
+          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setPendingRoleChange(false);
+                setNewRoleValue(null);
+              }}
+              sx={{ color: "#666", borderColor: "#ccc" }}
+            >
+              {t("common.cancel")}
+            </Button>
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                setPendingRoleChange(false);
+
+                setEditData((prev) => ({
+                  ...prev,
+                  role: newRoleValue,
+                }));
+
+                setNewRoleValue(null);
+
+                toast.info(t("usersAdmin.messages.tempAdmin"));
+              }}
+              sx={{
+                fontWeight: 600,
+                backgroundColor: "#1976d2",
+                "&:hover": { backgroundColor: "#1565c0" },
+              }}
+            >
+              {t("usersAdmin.confirmRole.confirm")}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* --------------------------- */}
+        {/* 🗑️ Dialog تأكيد الحذف */}
+        {/* --------------------------- */}
         <Dialog
           open={deleteConfirmOpen}
           onClose={() => setDeleteConfirmOpen(false)}

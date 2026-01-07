@@ -248,8 +248,8 @@ export const exportAttendanceReport = async (req, res) => {
 
       const timeStr = hasSlot
         ? `${DateTime.fromJSDate(b.slot.startAt)
-            .setZone(ZONE)
-            .toFormat("HH:mm")} - ${DateTime.fromJSDate(b.slot.endAt)
+          .setZone(ZONE)
+          .toFormat("HH:mm")} - ${DateTime.fromJSDate(b.slot.endAt)
             .setZone(ZONE)
             .toFormat("HH:mm")}`
         : "—";
@@ -265,8 +265,8 @@ export const exportAttendanceReport = async (req, res) => {
         phone: b.user?.phone || "—",
         date: hasSlot
           ? DateTime.fromJSDate(b.slot.startAt)
-              .setZone(ZONE)
-              .toFormat("yyyy-MM-dd")
+            .setZone(ZONE)
+            .toFormat("yyyy-MM-dd")
           : "—",
         time: timeStr,
         status: statusStr,
@@ -962,10 +962,10 @@ export const getUserBookings = async (req, res) => {
         createdAt: b.createdAt,
         slot: b.slot
           ? {
-              startAt: b.slot.startAt,
-              endAt: b.slot.endAt,
-              isBlocked: b.slot.isBlocked,
-            }
+            startAt: b.slot.startAt,
+            endAt: b.slot.endAt,
+            isBlocked: b.slot.isBlocked,
+          }
           : null,
       };
     });
@@ -1045,7 +1045,7 @@ export const deleteUserCompletely = async (req, res) => {
     const bookings = await Booking.find({ user: userId });
     for (let b of bookings) {
       if (b.googleEventId) {
-        await deleteGoogleEvent(b.googleEventId).catch(() => {});
+        await deleteGoogleEvent(b.googleEventId).catch(() => { });
       }
     }
 
@@ -1058,8 +1058,10 @@ export const deleteUserCompletely = async (req, res) => {
     );
 
     // حذف الإشعارات
-    await Notification.deleteMany({ userId });
-
+    await Notification.deleteMany({
+      targetType: "user",
+      targetUser: userId,
+    });
     // حذف المستخدم نفسه
     await User.findByIdAndDelete(userId);
 

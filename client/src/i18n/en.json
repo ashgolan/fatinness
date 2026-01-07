@@ -2,11 +2,10 @@
   "footer": {
     "subtitle": "Women's Fitness Studio"
   },
-
   "navbar": {
     "admin_panel": "Admin Panel",
-    "logout": "Logout",
     "gallery": "Gallery",
+    "logout": "Logout",
     "home": "Home",
     "bookings_hub": "Bookings Hub",
     "login": "Login",
@@ -15,536 +14,60 @@
     "language": "Language",
     "about": "About"
   },
-
-  "dashboard": {
-    "dir": "ltr",
-    "welcome": "Welcome to Fatinness 💜",
-    "subtitle": "Your favorite fitness journey begins here ✨",
-
-    "profile_title": "Profile",
-    "profile_desc": "View your data and weight progress",
-
-    "booking_title": "Booking Hub",
-    "booking_desc": "Book sessions and track past & upcoming bookings",
-
-    "enter_now": "Enter Now 🚀",
-    "keep_going": "Keep pushing toward your goals!"
-  },
-
-  "adminDashboard": {
-    "welcomeTitle": "👋 Welcome",
-    "welcomeMessage": "You have {{sessions}} active sessions today and {{newUsers}} new members 💪",
-    "mainTitle": "📊 Global Statistics Dashboard",
-    "noData": "No data available at the moment.",
-
-    "errors": {
-      "fetchStats": "Failed to load statistics"
-    },
-
-    "cards": {
-      "totalUsers": "Total Members",
-      "activeUsers": "Active Members",
-      "blockedUsers": "Blocked Members",
-      "totalBookings": "Total Bookings",
-      "activeBookings": "Active Bookings",
-      "completedBookings": "Completed Bookings",
-      "cancelled": "Cancelled Bookings",
-      "totalSlots": "Total Sessions",
-      "todaySessions": "Today's Sessions",
-      "upcomingWeekSessions": "Next Week Sessions"
-    },
-
-    "chart": {
-      "title": "📈 Bookings in the last 7 days",
-      "activeBookingsLabel": "Active bookings",
-      "cancelledBookingsLabel": "Cancelled bookings",
-      "weekRatioTitle": "🔸 Bookings ratio over the last week:",
-      "activePercentLabel": "✅ Active: {{value}}%",
-      "cancelledPercentLabel": "❌ Cancelled: {{value}}%"
-    }
-  },
-
-  "adminNotifications": {
-    "title": "🔔 Send Custom Notification",
-    "notificationTitle": "Notification Title",
-    "notificationBody": "Notification Body",
-    "target": "Target Audience",
-    "allUsers": "All Users",
-    "send": "🔔 Send Notification",
-    "fetchError": "Failed to load data",
-    "emptyFields": "Please enter a title and message before sending.",
-    "sendFailed": "Failed to send notification",
-    "resendFailed": "Failed to resend notification",
-    "history": "🕘 Recent Notifications History",
-    "clearAll": "Clear All",
-    "confirmDeleteAll": "Are you sure you want to clear the entire log?",
-    "confirmDeleteOne": "Do you want to permanently delete this notification?",
-    "deletedOne": "🗑️ Notification deleted",
-    "deleteFailed": "Failed to delete notification",
-    "noNotifications": "No notifications yet.",
-    "resend": "Resend",
-    "delete": "Delete",
-    "resendWindowTitle": "🔁 Resend Notification",
-    "cancel": "Cancel",
-    "confirmSend": "📤 Confirm Send"
-  },
-
-  "adminReports": {
-    "title": "📤 Export Booking Reports",
-    "description": "Select the date range for exporting booking reports, or leave fields empty to export all data:",
-    "from": "From",
-    "to": "To",
-    "download": "📥 Download Report",
-    "success": "Report downloaded successfully ✅",
-    "fail": "Failed to download report ❌"
-  },
-
-  "adminSchedule": {
-    "title": "Schedule Management",
-    "subtitle": "Manage the sessions of the current and next week",
-
-    "currentWeek": "Current Week",
-    "nextWeek": "Next Week",
-    "current": "Current",
-    "next": "Next",
-    "savingLabel": "Saving...",
-    "creatingLabel": "Creating next week...",
-    "capacity": "Capacity",
-    "addSlot": "Add Session",
-    "saveAll": "Save Changes",
-    "saveNextWeek": "Generate Next Week Schedule",
-    "blocked": "Blocked",
-    "expand": "Expand View",
-
-    "confirm": {
-      "deleteSlot": "Are you sure you want to delete this session?"
-    },
-
-    "success": {
-      "deleted": "Session deleted successfully",
-      "saved": "Changes saved successfully",
-      "createdNext": "{{count}} sessions created for next week",
-      "createdSlots": "{{count}} new slots have been created successfully"
-    },
-
-    "errors": {
-      "fetchCurrent": "Failed to fetch current week data",
-      "saveFailed": "Failed to save changes",
-      "deleteFailed": "Failed to delete session",
-      "createNextFailed": "Failed to generate next week"
-    },
-
-    "info": {
-      "noValidChanges": "No valid changes to save",
-      "addValid": "Please add valid sessions first"
-    },
-
-    "noDeletePast": "You cannot delete a session from a previous day"
-  },
-
-  "adminSettings": {
-    "title": "General Club Settings",
-
-    "gallery": {
-      "title": "Club Photo Gallery",
-      "addImage": "Add New Image",
-      "uploadSuccess": "Image uploaded successfully",
-      "uploadFailed": "Failed to upload image",
-      "deleteSuccess": "Image deleted",
-      "deleteFailed": "Failed to delete image",
-      "confirmDelete": "Are you sure you want to delete this image?",
-      "maxImages": "You cannot add more than 10 images"
-    },
-
-    "card": {
-      "title": "Membership Card",
-      "change": "Change Card Image"
-    },
-
-    "logo": {
-      "title": "Club Logo",
-      "change": "Change Logo"
-    },
-
-    "fields": {
-      "clubName": "Club Name",
-      "contactNumber": "Contact Number",
-      "autoMessage": "Automatic Message",
-      "allowExtraBookings": "Allow Extra Bookings By Default"
-    },
-
-    "maintenance": {
-      "enabled": "Maintenance Mode Enabled",
-      "disabled": "System Operating Normally",
-      "enable": "Enable Maintenance Mode",
-      "disable": "Disable Maintenance Mode",
-      "confirmEnable": "Enable maintenance mode?",
-      "confirmDisable": "Disable maintenance mode?"
-    },
-
-    "errors": {
-      "loadFailed": "Failed to load settings",
-      "saveFailed": "Failed to save settings",
-      "required": "Please fill the required fields",
-      "uploadFailed": "Failed to upload image",
-      "maintenanceLoadFailed": "Failed to load maintenance status",
-      "maintenanceToggleFailed": "Failed to change maintenance mode"
-    },
-
-    "success": {
-      "saved": "Saved successfully",
-      "imageUpdated": "Image updated successfully"
-    },
-
-    "actions": {
-      "save": "Save Changes"
-    }
-  },
-
-  "bookingsAdmin": {
-    "noData": "There are no bookings to show",
-
-    "title": "Bookings Management",
-
-    "ratesTitle": "Overall Booking Rates",
-
-    "labels": {
-      "active": "Active",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-
-    "columns": {
-      "user": "User",
-      "active": "Active",
-      "cancelled": "Cancelled",
-      "completed": "Completed",
-      "actions": "Actions"
-    },
-
-    "filters": {
-      "all": "All",
-      "active": "Active",
-      "completed": "Completed",
-      "cancelled": "Cancelled"
-    },
-
-    "status": {
-      "booked": "Active",
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "blocked": "Blocked",
-      "unknown": "Unknown"
-    },
-
-    "showDetails": "Show Details",
-    "hideDetails": "Hide Details",
-
-    "errors": {
-      "summaryLoad": "Failed to load data",
-      "detailsLoad": "Failed to load booking details"
-    },
-
-    "details": {
-      "title": "Bookings for ",
-      "date": "Date",
-      "time": "Time",
-      "status": "Status",
-      "noBookings": "No bookings for this user"
-    },
-
-    "stats": {
-      "active": "Active",
-      "completed": "Completed",
-      "cancelled": "Cancelled",
-      "blocked": "Blocked",
-      "all": "All"
-    },
-
-    "buttons": {
-      "showDetails": "Show Details",
-      "hideDetails": "Hide Details"
-    }
-  },
-
-  "controlCenter": {
-    "title": "🎛️ Admin Control Center",
-    "subtitle": "Choose the section you want to manage from the list below 👇",
-
-    "sections": {
-      "newUser": "Add New Member",
-      "dashboard": "General Dashboard",
-      "users": "Members List",
-      "bookings": "Bookings",
-      "weeklySlots": "Weekly Schedule",
-      "templates": "Weekly Templates",
-      "notifications": "Notifications",
-      "settings": "General Settings",
-      "systemReset": "System Reset",
-      "subscriptionsReport": "Expiring Subscriptions"
-    },
-
-    "footerTitle": "A Complete Dashboard to Manage Fateness Studio",
-    "footerText": "You can always return to this page to manage all system features from one place."
-  },
-
-  "slotsAdmin": {
-    "header": {
-      "title": "Weekly Schedule Management",
-      "subtitle": "View and monitor all training sessions throughout the week"
-    },
-
-    "stats": {
-      "title": "Weekly Sessions Statistics",
-      "active": "Active",
-      "ended": "Ended",
-      "blocked": "Blocked",
-      "total": "Total"
-    },
-
-    "filters": {
-      "selectWeek": "Select Week",
-      "active": "Active",
-      "ended": "Ended",
-      "blocked": "Blocked",
-      "all": "All"
-    },
-
-    "day": {
-      "sessionsCount": "{{count}} sessions"
-    },
-
-    "card": {
-      "capacityLabel": "Capacity:",
-      "availableLabel": "Available:"
-    },
-
-    "empty": {
-      "title": "No sessions available this week",
-      "range": "From {{start}} to {{end}}"
-    },
-    "notify": {
-      "title": "Send Notification to Session Members",
-      "notificationTitle": "Notification Title",
-      "notificationBody": "Notification Body",
-      "cancel": "Cancel",
-      "send": "Send",
-      "sent": "Notification sent successfully",
-      "emptyFields": "Please fill in all fields"
-    },
-    "dialog": {
-      "title": "Session Details",
-      "membersTitle": "Registered Members ({{count}})",
-      "sendNotification": "Send Notification",
-      "status": {
-        "booked": "Booked",
-        "cancelled": "Cancelled"
-      },
-      "noMembers": "No members registered for this session",
-      "close": "Close",
-      "activate": "Activate Session",
-      "deactivate": "Block Session"
-    },
-
-    "common": {
-      "unknownUser": "Unknown User",
-      "noPhone": "No phone number"
-    },
-    "time": {
-      "days_one": "{{count}} day",
-      "days_other": "{{count}} days",
-
-      "hours_one": "{{count}} hour",
-      "hours_other": "{{count}} hours",
-
-      "minutes_one": "{{count}} minute",
-      "minutes_other": "{{count}} minutes",
-
-      "startsInSmart": "Starts in {{time}}",
-      "startedAgoSmart": "Started {{time}} ago",
-      "endedAgoSmart": "Ended {{time}} ago"
-    },
-    "status": {
-      "upcoming": "Upcoming",
-      "running": "In Progress",
-      "ended": "Ended",
-      "endedAgo": "Ended {{time}} ago",
-      "blocked": "Blocked",
-      "active": "Active",
-      "unknown": "Unknown",
-      "after": "after"
-    }
-  },
-  "systemReset": {
-    "noPermission": "You do not have permission to access this page.",
-    "pageTitle": "⚠️ System Reset — Reset Settings",
-
-    "execute": "Execute",
-
-    "confirmTitle": "Confirm Action",
-    "confirmMessage": "Are you sure you want to execute",
-    "cancel": "Cancel",
-    "confirmButton": "Yes, Execute",
-
-    "success": "Operation completed successfully.",
-    "error": "An error occurred during execution.",
-
-    "light": {
-      "title": "Light Reset",
-      "desc": "Deletes bookings, notifications, sessions, and templates only. Users remain untouched."
-    },
-
-    "medium": {
-      "title": "Medium Reset",
-      "desc": "Everything from Light Reset + delete all regular users and admins. Super Admin stays."
-    },
-
-    "hard": {
-      "title": "Hard Reset",
-      "desc": "Deletes almost everything except the Super Admin. Includes images and settings."
-    },
-
-    "factory": {
-      "title": "Factory Reset",
-      "desc": "Deletes the entire database. When entering the system, a new Super Admin will be required."
-    }
-  },
-  "registerSuperAdmin": {
-    "title": "Register Super Admin",
-    "username": "Username",
-    "email": "Email",
-    "phone": "Phone",
-    "pin": "PIN Code",
-    "confirmPin": "Confirm PIN",
-    "submit": "Create Super Admin",
-    "pinTooShort": "PIN must be at least 4 digits.",
-    "pinMismatch": "PIN codes do not match.",
-    "success": "Super Admin created successfully!"
-  },
-  "usersAdmin": {
-    "title": "Users Management",
-    "subtitle": "Manage all users and their booking activity in the studio",
-
-    "search": {
-      "placeholder": "Search by name, email, or phone..."
-    },
-
-    "card": {
-      "active": "Active",
-      "blocked": "Blocked"
-    },
-
-    "totalBookings": "Total Bookings",
-
-    "extraBooking": {
-      "label": "Allow Extra Booking",
-      "updated": "Extra booking setting updated successfully"
-    },
-
-    "buttons": {
-      "edit": "Edit",
-      "block": "Block",
-      "unblock": "Unblock",
-      "delete": "Delete User"
-    },
-
-    "noResults": "No matching users found",
-
-    "editUser": "Edit User Information",
-
-    "fields": {
-      "name": "Name",
-      "email": "Email",
-      "phone": "Phone",
-      "height": "Height (cm)",
-      "weight": "Weight (kg)",
-      "age": "Age",
-      "gender": "Gender",
-      "role": "Role",
-      "subscriptionEnd": "Subscription End Date",
-      "subscriptionStart": "Subscription Start Date",
-      "newPassword": "New Password"
-    },
-    "placeholders": {
-      "newPassword": "Leave empty if you don't want to change it"
-    },
-    "gender": {
-      "female": "Female",
-      "male": "Male"
-    },
-
-    "roles": {
-      "user": "User",
-      "admin": "Admin"
-    },
-
-    "confirm": {
-      "block": "Are you sure you want to block this user?",
-      "unblock": "Are you sure you want to unblock this user?",
-      "deleteUser": "Are you sure you want to delete this user? All bookings will be removed permanently!",
-      "deleteTitle": "Confirm Delete"
-    },
-
-    "confirmRole": {
-      "title": "⚠️ Confirm Admin Promotion",
-      "text": "You are about to promote this user to an Admin.",
-      "note": "This action grants full administrative access.",
-      "confirm": "Confirm Promotion"
-    },
-
-    "messages": {
-      "updated": "User information updated successfully",
-      "blocked": "User has been blocked successfully",
-      "unblocked": "User has been unblocked successfully",
-      "tempAdmin": "User set as admin temporarily — changes must be saved to take effect",
-      "deleted": "User deleted successfully."
-    },
-
-    "errors": {
-      "cannotBlockAdmin": "You cannot block a system administrator",
-      "cannotDeleteSuperAdmin": "You cannot delete the Super Admin.",
-      "onlySuperAdminCanChangePassword": "Only the super admin can change the password"
-    }
-  },
-
   "common": {
     "cancel": "Cancel",
     "save": "Save",
-    "developedBy": "Developed by A.Shaalan Tech"
+    "developedBy": "Developed by A.Sh1aalan Tech"
+  },
+  "weekdays": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+  "dashboard": {
+    "dir": "ltr",
+    "welcome": "Welcome to Fatinness 💜",
+    "subtitle": "Your favorite fitness club starts here ✨",
+    "profile_title": "Profile",
+    "profile_desc": "View your data and weight progress",
+    "booking_title": "Bookings Hub",
+    "booking_desc": "Book sessions and track your past and upcoming bookings",
+    "enter_now": "Enter Now 🚀",
+    "keep_going": "Keep progressing toward your goals!"
   },
   "login": {
     "title": "Fatinness Studio",
+    "identifier": "Username or Phone Number",
     "welcome": "Welcome back 💪",
-    "identifier": "Username or phone number",
-    "email": "Email Address",
+    "email": "Email",
     "password": "Password",
     "button": "Login",
     "buttonLoading": "Logging in...",
     "noAccount": "Don't have an account?",
     "createAccount": "Create a new account",
     "contactAdmin": "Please contact the administration to create a new account 🙏",
-
     "success": {
       "login": "Logged in successfully 🎉",
-      "fcmOptional": "Notifications were not activated (optional)."
+      "fcmOptional": "Notifications were not enabled (optional)."
     },
-
     "errors": {
       "status": "Error {{status}}",
-      "network": "Could not connect to the server. Check your internet or CORS settings.",
+      "network": "Unable to connect to the server. Check your internet connection or CORS settings.",
       "unexpected": "An unexpected error occurred.",
       "loginFailed": "Login failed"
     }
   },
-
   "register": {
     "title": "Create New Account",
-    "subtitle": "Only admins can add new users or administrators 👑",
+    "subtitle": "Only the admin can add new members or admins 👑",
     "submit": "Create Account",
     "submitting": "Creating account...",
     "success": "Account created successfully",
     "fail": "Failed to create account",
-
     "fields": {
       "username": "Username",
       "email": "Email",
@@ -554,16 +77,15 @@
       "female": "Female",
       "male": "Male",
       "role": "Account Type",
-      "roleUser": "User",
+      "roleUser": "Member",
       "roleAdmin": "Admin",
-      "roleHelper": "Choose if this is a user or an admin",
+      "roleHelper": "Choose whether Member or Admin",
       "height": "Height (cm)",
       "weight": "Weight (kg)",
       "age": "Age",
       "subscriptionEnd": "Subscription End Date"
     }
   },
-
   "profile": {
     "labels": {
       "user": "User"
@@ -596,15 +118,28 @@
     },
     "messages": {
       "noWeightData": "No weight data yet",
-      "weightSaved": "Weight saved successfully"
+      "weightSaved": "Weight saved successfully ✅"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Notifications are enabled on another device. You can transfer them to this device.",
+      "confirmTransfer": "Are you sure you want to transfer notifications to this device?",
+      "transferButton": "Transfer notifications to this device",
+      "transferring": "Transferring notifications...",
+      "transferredSuccess": "Notifications transferred successfully 🔔",
+      "transferFailed": "Failed to transfer notifications, please try again",
+      "notEnabled": "Notifications are not enabled on this device"
     },
     "errors": {
       "weightRequired": "Please enter the new weight",
-      "fetchFail": "Failed to load profile",
+      "fetchFail": "An error occurred while loading the profile",
       "saveFail": "Failed to save weight"
     },
     "chart": {
-      "label": "Weight (kg)"
+      "label": "Weight (kg)",
+      "weight": "Weight",
+      "note": "Reason",
+      "noNote": "No note"
     },
     "units": {
       "kg": "kg",
@@ -614,162 +149,540 @@
       "title": "Body Mass Index (BMI)",
       "underweight": "Underweight",
       "normal": "Normal",
-      "overweight": "Overweight",
-      "obese": "Obese",
-      "healthyRange": "Healthy Range",
-      "idealWeight": "Ideal Weight"
+      "overweight": "Slightly overweight",
+      "obese": "High",
+      "healthyRange": "Healthy range",
+      "idealWeight": "Ideal weight"
     },
     "language": {
       "title": "App Language"
     }
   },
-
+  "bookingsHub": {
+    "loading": "Loading data...",
+    "errors": {
+      "fetch": "Failed to load data",
+      "notFoundToCancel": "Booking not found to cancel"
+    },
+    "confirmCancel": "Are you sure you want to cancel this booking?",
+    "stats": {
+      "upcoming": "Upcoming",
+      "past": "Past",
+      "cancelled": "Cancelled"
+    },
+    "tabs": {
+      "available": "Available Sessions",
+      "myBookings": "My Bookings"
+    },
+    "views": {
+      "week": "Week View",
+      "month": "Full Month View"
+    },
+    "slotsLabel": "Session",
+    "capacityLabel": "Seats",
+    "filters": {
+      "upcoming": "Upcoming bookings",
+      "past": "Past bookings",
+      "cancelled": "Cancelled bookings"
+    },
+    "buttons": {
+      "processing": "⏳ Processing...",
+      "booked": "✅ Booked – click to cancel",
+      "full": "🔒 Full",
+      "bookNow": "🎯 Book now",
+      "cancelBooking": "🗑️ Cancel booking",
+      "rebook": "🔁 Rebook"
+    },
+    "emptySection": "No bookings in this section.",
+    "toasts": {
+      "bookSuccess": "Booking successful ✅",
+      "bookFail": "Booking failed",
+      "cancelSuccess": "Booking cancelled successfully ❌",
+      "cancelFail": "Failed to cancel booking",
+      "rebookSuccess": "Rebooked successfully 🔁",
+      "rebookFail": "Failed to rebook"
+    }
+  },
   "myBookings": {
     "title": "📅 My Bookings",
     "subtitle": "View your upcoming, past, or cancelled bookings",
-
     "filters": {
       "upcoming": "📆 Upcoming",
       "past": "✅ Past",
       "cancelled": "❌ Cancelled"
     },
-
-    "fetchError": "Failed to fetch bookings",
-    "noBookings": "No bookings in this section.",
-
+    "fetchError": "An error occurred while fetching bookings",
+    "noBookings": "There are no bookings in this section.",
     "time": "Time",
-
     "status": {
-      "booked": "Booked",
+      "booked": "Booked ✅",
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
-
     "cancelConfirm": "Are you sure you want to cancel this booking?",
-    "cancelSuccess": "Booking cancelled successfully",
-    "cancelFail": "Unable to cancel booking",
-
-    "cancelButton": "Cancel Booking",
+    "cancelSuccess": "Booking cancelled successfully ✅",
+    "cancelFail": "Failed to cancel booking",
+    "cancelButton": "Cancel booking",
     "cancelling": "Cancelling..."
   },
-
-  "weekdays": {
-    "sunday": "Sunday",
-    "monday": "Monday",
-    "tuesday": "Tuesday",
-    "wednesday": "Wednesday",
-    "thursday": "Thursday",
-    "friday": "Friday",
-    "saturday": "Saturday"
-  },
-
-  "bookingsHub": {
-    "loading": "Loading bookings...",
-
-    "errors": {
-      "fetch": "Failed to load data",
-      "notFoundToCancel": "Booking not found to cancel"
-    },
-
-    "confirmCancel": "Are you sure you want to cancel this booking?",
-
-    "stats": {
-      "upcoming": "Upcoming",
-      "past": "Completed",
-      "cancelled": "Cancelled"
-    },
-
-    "tabs": {
-      "available": "Available slots",
-      "myBookings": "My bookings"
-    },
-
-    "views": {
-      "week": "Week view",
-      "month": "Full month view"
-    },
-
-    "slotsLabel": "slot(s)",
-    "capacityLabel": "Seats",
-
-    "filters": {
-      "upcoming": "Upcoming",
-      "past": "Past",
-      "cancelled": "Cancelled"
-    },
-
-    "buttons": {
-      "processing": "Processing...",
-      "booked": "Booked – tap to cancel",
-      "full": "Full",
-      "bookNow": "Book now",
-      "cancelBooking": "Cancel booking",
-      "rebook": "Rebook"
-    },
-
-    "emptySection": "No bookings in this section.",
-
-    "toasts": {
-      "bookSuccess": "Booking created successfully ✅",
-      "bookFail": "Booking failed",
-      "cancelSuccess": "Booking cancelled successfully ❌",
-      "cancelFail": "Could not cancel booking",
-      "rebookSuccess": "Rebooked successfully 🔁",
-      "rebookFail": "Rebook failed"
-    }
-  },
-
   "subscription": {
     "title": "💳 Your Monthly Subscription",
     "status": "Status",
     "active": "Active ✅",
     "inactive": "Expired ❌",
-    "startDate": "Start Date",
-    "endDate": "End Date",
-
+    "startDate": "Start date",
+    "endDate": "End date",
     "buttons": {
-      "renew": "Renew Subscription"
+      "renew": "Renew subscription"
     },
-
     "notes": {
-      "production": "🔒 You will be redirected to a secure payment page",
-      "development": "🧪 Development mode: Renewal happens locally without payment"
+      "production": "🔒 You will be redirected to the secure payment page",
+      "development": "🧪 Development mode: renewal is processed locally without payment"
     },
-
     "errors": {
-      "load": "Failed to load subscription data",
+      "load": "An error occurred while loading subscription data",
       "paymentSession": "Failed to create payment session",
       "renewFail": "Subscription renewal failed"
     },
-
     "toasts": {
-      "renewSuccess": "Subscription renewed successfully! Redirecting..."
+      "renewSuccess": "Subscription renewed successfully ✅ Redirecting you to the booking page..."
     }
   },
-
+  "gallery": {
+    "title": "Club Gallery",
+    "empty": "No images yet",
+    "close": "Close"
+  },
   "schedule": {
-    "existing": "Existing Slots",
-    "new": "New Slots",
-    "add": "Add Slot",
+    "existing": "Existing sessions",
+    "new": "New sessions",
+    "add": "Add new session",
     "delete": "Delete",
     "from": "From",
     "to": "To",
     "capacity": "Capacity"
   },
-
-  "gallery": {
-    "title": "Club Photo Gallery",
-    "empty": "No images yet",
-    "close": "Close"
+  "adminDashboard": {
+    "welcomeTitle": "👋 Welcome",
+    "welcomeMessage": "Today you have {{sessions}} active sessions and {{newUsers}} new members 💪",
+    "mainTitle": "📊 General Statistics Dashboard",
+    "noData": "No data available at the moment.",
+    "errors": {
+      "fetchStats": "Failed to load statistics"
+    },
+    "cards": {
+      "totalUsers": "Total members",
+      "activeUsers": "Active members",
+      "blockedUsers": "Blocked members",
+      "totalBookings": "Total bookings",
+      "activeBookings": "Active bookings",
+      "completedBookings": "Completed bookings",
+      "cancelled": "Cancelled bookings",
+      "totalSlots": "Total sessions",
+      "todaySessions": "Today's sessions",
+      "upcomingWeekSessions": "Next week's sessions"
+    },
+    "chart": {
+      "title": "📈 Bookings in the last 7 days",
+      "activeBookingsLabel": "Active bookings",
+      "cancelledBookingsLabel": "Cancelled bookings",
+      "weekRatioTitle": "🔸 Booking ratio over the last week:",
+      "activePercentLabel": "✅ Active: {{value}}%",
+      "cancelledPercentLabel": "❌ Cancelled: {{value}}%"
+    }
+  },
+  "controlCenter": {
+    "title": "🎛️ Admin Control Center",
+    "subtitle": "Choose the section you want to manage from the list below 👇",
+    "sections": {
+      "newUser": "Add new member",
+      "dashboard": "Statistics dashboard",
+      "users": "Members list",
+      "bookings": "Bookings",
+      "weeklySlots": "Weekly schedule",
+      "templates": "Weekly templates",
+      "notifications": "Notifications",
+      "settings": "General settings",
+      "systemReset": "System reset",
+      "subscriptionsReport": "Subscriptions nearing expiration"
+    },
+    "footerTitle": "Comprehensive control panel for managing Fatinness Studio",
+    "footerText": "You can return to this page anytime to manage all aspects of the system from one place."
+  },
+  "adminNotifications": {
+    "title": "🔔 Send Custom Notification",
+    "notificationTitle": "Notification title",
+    "notificationBody": "Notification content",
+    "target": "Target audience",
+    "allUsers": "All members",
+    "send": "🔔 Send notification",
+    "fetchError": "Failed to fetch data",
+    "emptyFields": "Enter a title and content before sending.",
+    "sendFailed": "Sending failed",
+    "resendFailed": "Resending failed",
+    "history": "🕘 Notification history",
+    "clearAll": "Clear all",
+    "confirmDeleteAll": "Are you sure you want to clear the entire history?",
+    "confirmDeleteOne": "Do you want to permanently delete this notification?",
+    "deletedOne": "🗑️ Notification deleted",
+    "deleteFailed": "Failed to delete notification",
+    "noNotifications": "No notifications yet.",
+    "resend": "Resend",
+    "delete": "Delete permanently",
+    "resendWindowTitle": "🔁 Resend notification",
+    "cancel": "Cancel",
+    "confirmSend": "📤 Confirm sending",
+    "deletedAll": "🗑️ All notifications cleared"
+  },
+  "adminReports": {
+    "title": "📤 Export Booking Reports",
+    "description": "Select a time range to export the booking report, or leave the fields empty to export all data:",
+    "from": "From",
+    "to": "To",
+    "download": "📥 Download report",
+    "success": "Report downloaded successfully ✅",
+    "fail": "Failed to download report ❌"
+  },
+  "adminSchedule": {
+    "title": "Sessions Schedule",
+    "subtitle": "Manage sessions for the current and upcoming week",
+    "currentWeek": "Current week",
+    "nextWeek": "Next week",
+    "current": "Current",
+    "next": "Upcoming",
+    "unsavedChanges": "You have unsaved changes",
+    "saveNow": "Save now",
+    "savingLabel": "Saving...",
+    "creatingLabel": "Creating...",
+    "capacity": "Capacity",
+    "addSlot": "Add session",
+    "saveAll": "Save changes",
+    "saveNextWeek": "Create next week's schedule",
+    "blocked": "Disabled",
+    "expand": "Expanded view",
+    "confirm": {
+      "deleteSlot": "Do you want to delete this session?"
+    },
+    "success": {
+      "deleted": "Session deleted",
+      "savedAllDetailed": "Changes saved successfully (Current week: {{current}}, Next week: {{next}}) ✅",
+      "savedAll": "All changes were saved successfully ✅",
+      "createdNext": "{{count}} sessions created for next week",
+      "createdSlots": "{{count}} new sessions added successfully"
+    },
+    "errors": {
+      "fetchCurrent": "Failed to fetch current week data",
+      "saveFailed": "Failed to save changes",
+      "deleteFailed": "Failed to delete session",
+      "createNextFailed": "Failed to create next week"
+    },
+    "info": {
+      "noValidChanges": "No valid changes to save",
+      "addValid": "Add valid sessions first"
+    },
+    "noDeletePast": "Cannot delete a session in a past day"
+  },
+  "adminSettings": {
+    "title": "General Club Settings",
+    "gallery": {
+      "title": "Club Gallery",
+      "addImage": "Add new image",
+      "uploadSuccess": "Image uploaded successfully",
+      "uploadFailed": "Image upload failed",
+      "deleteSuccess": "Image deleted successfully",
+      "deleteFailed": "Failed to delete image",
+      "confirmDelete": "Do you want to delete the image?",
+      "maxImages": "You cannot add more than 10 images"
+    },
+    "card": {
+      "title": "Card image",
+      "change": "Change card image"
+    },
+    "logo": {
+      "title": "Club logo",
+      "change": "Change logo"
+    },
+    "fields": {
+      "clubName": "Club name",
+      "contactNumber": "Contact number",
+      "autoMessage": "Automatic message",
+      "allowExtraBookings": "Allow extra bookings by default"
+    },
+    "maintenance": {
+      "enabled": "System is in maintenance mode",
+      "disabled": "System is operating normally",
+      "enable": "Enable maintenance mode",
+      "disable": "Disable maintenance mode",
+      "confirmEnable": "Do you want to enable maintenance mode?",
+      "confirmDisable": "Do you want to disable maintenance mode?"
+    },
+    "errors": {
+      "loadFailed": "Failed to load settings",
+      "saveFailed": "Failed to save settings",
+      "required": "Please fill in required fields",
+      "uploadFailed": "Image upload failed",
+      "maintenanceLoadFailed": "Failed to load maintenance mode",
+      "maintenanceToggleFailed": "Failed to toggle maintenance mode"
+    },
+    "success": {
+      "saved": "Saved successfully",
+      "imageUpdated": "Image updated successfully"
+    },
+    "actions": {
+      "save": "Save changes"
+    }
+  },
+  "usersAdmin": {
+    "title": "Members Management",
+    "subtitle": "View and manage members accounts and permissions",
+    "editUser": "Edit member details",
+    "noResults": "No matching results found",
+    "search": {
+      "placeholder": "Search by name, email, or phone"
+    },
+    "totalBookings": "Total bookings",
+    "card": {
+      "active": "Active",
+      "blocked": "Blocked"
+    },
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone number",
+      "height": "Height (cm)",
+      "weight": "Weight (kg)",
+      "age": "Age",
+      "gender": "Gender",
+      "role": "Role",
+      "newPassword": "New password",
+      "subscriptionStart": "Subscription start",
+      "subscriptionEnd": "Subscription end"
+    },
+    "placeholders": {
+      "newPassword": "Leave empty to keep unchanged"
+    },
+    "gender": {
+      "female": "Female",
+      "male": "Male"
+    },
+    "roles": {
+      "user": "Member",
+      "admin": "Admin"
+    },
+    "buttons": {
+      "edit": "Edit",
+      "block": "Block",
+      "unblock": "Unblock",
+      "delete": "Delete"
+    },
+    "extraBooking": {
+      "label": "Allow extra booking",
+      "updated": "Extra booking setting updated"
+    },
+    "messages": {
+      "updated": "Member data updated successfully",
+      "deleted": "Member deleted successfully",
+      "blocked": "Member blocked",
+      "unblocked": "Member unblocked",
+      "tempAdmin": "Role changed temporarily, don’t forget to save changes"
+    },
+    "errors": {
+      "cannotBlockAdmin": "Admins cannot be blocked",
+      "cannotDeleteSuperAdmin": "The main admin cannot be deleted",
+      "onlySuperAdminCanPromote": "Only the main admin can promote a member to admin"
+    },
+    "confirm": {
+      "block": "Are you sure you want to block this member?",
+      "unblock": "Do you want to unblock this member?",
+      "deleteUser": "Are you sure you want to delete this member?",
+      "deleteTitle": "Delete confirmation"
+    },
+    "confirmRole": {
+      "promoteTitle": "Promote to admin",
+      "demoteTitle": "Demote to member",
+      "promoteText": "Are you sure you want to promote this member to admin?",
+      "demoteText": "Are you sure you want to remove admin privileges from this member?",
+      "demoteWarning": "All admin privileges will be lost immediately",
+      "confirm": "Confirm"
+    }
+  },
+  "bookingsAdmin": {
+    "noData": "No bookings to display",
+    "title": "Bookings Management",
+    "ratesTitle": "General booking rates",
+    "labels": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "columns": {
+      "user": "Member",
+      "active": "Active",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "actions": "Actions"
+    },
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "status": {
+      "booked": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "blocked": "Blocked",
+      "unknown": "Unknown"
+    },
+    "showDetails": "Show details",
+    "hideDetails": "Hide details",
+    "errors": {
+      "summaryLoad": "Failed to load data",
+      "detailsLoad": "Failed to load booking details"
+    },
+    "details": {
+      "title": "Bookings for ",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "noBookings": "No bookings for this member"
+    },
+    "stats": {
+      "active": "Active",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "blocked": "Blocked",
+      "all": "All"
+    },
+    "buttons": {
+      "showDetails": "Show details",
+      "hideDetails": "Hide details"
+    }
+  },
+  "slotsAdmin": {
+    "header": {
+      "title": "Weekly Schedule Management",
+      "subtitle": "View and track all sessions during the week"
+    },
+    "stats": {
+      "title": "Weekly Sessions Statistics",
+      "active": "Active",
+      "ended": "Ended",
+      "blocked": "Disabled",
+      "total": "Total"
+    },
+    "filters": {
+      "selectWeek": "Select display week",
+      "active": "Active",
+      "ended": "Ended",
+      "blocked": "Disabled",
+      "all": "All"
+    },
+    "day": {
+      "sessionsCount": "{{count}} sessions"
+    },
+    "card": {
+      "capacityLabel": "Capacity:",
+      "availableLabel": "Available:"
+    },
+    "weekRange": "{{start}} - {{end}}",
+    "empty": {
+      "title": "No sessions this week",
+      "weekRange": "{{start}} - {{end}}"
+    },
+    "dialog": {
+      "title": "Session details",
+      "membersTitle": "Registered members ({{count}})",
+      "sendNotification": "Send notification",
+      "status": {
+        "booked": "Booked",
+        "cancelled": "Cancelled"
+      },
+      "noMembers": "No members in this session",
+      "close": "Close",
+      "activate": "Activate session",
+      "deactivate": "Deactivate session"
+    },
+    "notify": {
+      "title": "Send notification to members",
+      "notificationTitle": "Notification title",
+      "notificationBody": "Notification content",
+      "cancel": "Cancel",
+      "send": "Send",
+      "sent": "Notification sent successfully",
+      "emptyFields": "Please fill in all fields"
+    },
+    "common": {
+      "unknownUser": "Unknown",
+      "noPhone": "No phone number"
+    },
+    "time": {
+      "days": "{{count}} days",
+      "hours": "{{count}} hours",
+      "minutes": "{{count}} minutes",
+      "startsInSmart": "Starts in {{time}}",
+      "startedAgoSmart": "Started {{time}} ago",
+      "endedAgoSmart": "Ended {{time}} ago"
+    },
+    "status": {
+      "upcoming": "Upcoming",
+      "running": "Running",
+      "ended": "Ended",
+      "endedAgo": "Ended {{time}} ago",
+      "blocked": "Disabled",
+      "active": "Active",
+      "unknown": "Unknown",
+      "after": "After"
+    }
+  },
+  "systemReset": {
+    "noPermission": "You do not have permission to access this page.",
+    "pageTitle": "⚠️ System Reset Settings — System Reset",
+    "execute": "Execute",
+    "confirmTitle": "Confirm action",
+    "confirmMessage": "Are you sure you want to execute this action?",
+    "cancel": "Cancel",
+    "confirmButton": "Yes, execute",
+    "success": "Operation completed successfully.",
+    "error": "An error occurred during execution.",
+    "light": {
+      "title": "Light reset",
+      "desc": "Deletes bookings, notifications, sessions, and templates only. Does not delete users."
+    },
+    "medium": {
+      "title": "Medium reset",
+      "desc": "Deletes everything from Light + deletes all users and regular admins. Only the main admin remains."
+    },
+    "hard": {
+      "title": "Hard reset",
+      "desc": "Deletes almost everything except the main admin. Includes deleting images and settings."
+    },
+    "factory": {
+      "title": "Factory reset",
+      "desc": "Deletes the entire database. On next login, a new main admin setup will appear."
+    }
+  },
+  "registerSuperAdmin": {
+    "title": "Create Main Admin",
+    "username": "Username",
+    "email": "Email",
+    "phone": "Phone number",
+    "pin": "PIN code",
+    "confirmPin": "Confirm PIN code",
+    "submit": "Create main admin",
+    "pinTooShort": "PIN code must be at least 4 digits.",
+    "pinMismatch": "PIN codes do not match.",
+    "success": "Main admin created successfully!"
   },
   "superAdminRegister": {
     "title": "Create Super Admin",
-    "subtitle": "This setup is required only once to initialize the system.",
+    "subtitle": "This step is performed only once to initialize the system.",
     "fields": {
       "username": "Username",
       "email": "Email",
       "password": "Password",
-      "phone": "Phone Number",
+      "phone": "Phone number",
       "gender": "Gender",
       "female": "Female",
       "male": "Male",
@@ -779,138 +692,135 @@
     },
     "submit": "Create Super Admin",
     "submitting": "Creating...",
-    "success": "Super Admin created successfully!",
-    "error": "Error creating Super Admin"
+    "success": "Super admin created successfully!",
+    "error": "An error occurred while creating the super admin"
   },
   "subscriptions": {
-    "title": "Subscriptions Report",
+    "title": "Subscription Reports",
     "activeSoon": "Expiring within 5 days",
-    "expired": "Expired",
+    "expired": "Expired subscriptions",
     "active": "Active",
-    "empty": "No users here",
-    "endDate": "End Date"
+    "empty": "No data available",
+    "endDate": "End date"
   },
   "fcm": {
-    "not_supported": "⚠️ Your device/browser does not support notifications.",
-    "permission_denied": "⚠️ Notifications were not enabled (optional).",
-    "missing_vapid": "VAPID key is missing.",
-    "success": "Notifications enabled successfully 🎉",
-    "error": "⚠️ Notifications were not enabled (optional)."
+    "not_supported": "Your device does not support notifications",
+    "permission_denied": "Notification permission denied",
+    "missing_vapid": "Notification VAPID key is missing",
+    "success": "Notifications enabled successfully 🔔",
+    "error": "An error occurred while enabling notifications",
+    "deviceOwnedByAnother": "Notifications are enabled for another user on this device",
+    "transferred": "Notifications transferred to this new device 📱",
+    "permission_blocked_help": "Notifications are blocked for this site. Please enable them from your browser settings (🔒 next to the address bar)."
   },
   "about": {
     "title": "About Fatinness App",
-    "description1": "Fatinness is a complete fitness studio management system designed to help members, trainers, and administration work efficiently and smoothly.",
-    "description2": "The app includes class schedules, booking system, notifications, reminders, weight tracking, subscription management, and more.",
+    "description1": "Fatinness is an integrated fitness center management system that helps members, trainers, and admins work in an organized and smooth way.",
+    "description2": "The app includes: session scheduling, booking system, notifications, reminders, weight tracking, subscription management, and more.",
     "developedBy": "Developed by A.Shaalan Tech",
     "email": "alaa.t.shaalan@gmail.com",
     "version": "Version 1.0.0"
   },
-
   "server": {
-    "UPLOAD_INVALID_IMAGE": "The uploaded file must be a valid image.",
-    "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and slots are required.",
-    "WEEK_TEMPLATE_CREATE_SUCCESS": "Week template created successfully.",
-    "WEEK_TEMPLATE_CREATE_ERROR": "Failed to create week template.",
+    "errors": {
+      "ADMIN_SLOT_OVERLAP": "There is a time conflict ⛔",
+      "ADMIN_SLOT_INVALID_TIME": "Invalid session time",
+      "ADMIN_SLOT_DUPLICATE": "Session already exists",
+      "NETWORK_ERROR": "Server connection error",
+      "UNKNOWN_ERROR": "An unexpected error occurred",
+      "AUTH_TOO_MANY_REQUESTS": "Login temporarily blocked due to too many attempts. ⏳ Please wait and try again.",
+      "SCHEDULER_STATUS_FETCH_ERROR": "Failed to fetch scheduler status.",
+      "SETTINGS_FETCH_ERROR": "Failed to fetch settings.",
+      "SETTINGS_UPDATE_ERROR": "Failed to update settings.",
+      "LOGO_UPLOAD_ERROR": "Logo upload failed.",
+      "ADMIN_SLOTS_WEEK_FETCH_ERROR": "Error fetching weekly sessions.",
+      "ADMIN_SLOTS_DAY_FETCH_ERROR": "Error fetching today's sessions.",
+      "ADMIN_SLOTS_UPCOMING_FETCH_ERROR": "Error fetching upcoming sessions.",
+      "AUTH_REGISTER_MISSING_FIELDS": "Required fields are missing.",
+      "AUTH_REGISTER_USER_EXISTS": "User already exists.",
+      "AUTH_REGISTER_SERVER_ERROR": "Error creating account.",
+      "AUTH_LOGIN_INVALID_FIELDS": "Username or phone number and password are required.",
+      "AUTH_LOGIN_MAINTENANCE": "System is under maintenance. Please try again later.",
+      "AUTH_LOGIN_SERVER_ERROR": "Server error.",
+      "AUTH_LOGIN_INCORRECT": "Incorrect username or password",
+      "AUTH_LOGIN_NOT_FOUND": "User not found",
+      "AUTH_LOGIN_BLOCKED": "This account has been temporarily blocked 🚫",
+      "BOOKING_SLOT_NOT_AVAILABLE": "This session is not available.",
+      "BOOKING_SLOT_PAST": "This session has already started or ended.",
+      "BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit.",
+      "BOOKING_SLOT_FULL": "This session is full.",
+      "BOOKING_CREATE_ERROR": "Error creating booking.",
+      "BOOKING_CANCEL_NOT_FOUND": "Booking not found.",
+      "BOOKING_CANCEL_FORBIDDEN": "Cancellation is not allowed.",
+      "BOOKING_CANCEL_TOO_LATE": "Booking cannot be cancelled within 12 hours of the session.",
+      "BOOKING_CANCEL_ERROR": "Error cancelling booking.",
+      "PROFILE_NOT_FOUND": "User not found.",
+      "PROFILE_UPDATE_ERROR": "Error updating profile data.",
+      "WEIGHT_ADD_MISSING": "Weight is required.",
+      "WEIGHT_ADD_ERROR": "Error updating weight.",
+      "WEIGHT_HISTORY_NOT_FOUND": "Weight history not found.",
+      "WEIGHT_HISTORY_FETCH_ERROR": "Error fetching weight history.",
+      "FCM_TOKEN_MISSING": "FCM token is missing.",
+      "SUB_RENEW_ERROR": "Error renewing subscription.",
+      "ADMIN_RESET_NOT_ALLOWED": "Only the main admin can perform a reset.",
+      "ADMIN_RESET_LIGHT_ERROR": "Error during light reset.",
+      "ADMIN_RESET_MEDIUM_ERROR": "Error during medium reset.",
+      "ADMIN_RESET_HARD_ERROR": "Error during hard reset.",
+      "ADMIN_RESET_FACTORY_ERROR": "Error during factory reset.",
+      "ADMIN_NOTIFICATION_MISSING_FIELDS": "Please enter notification title and content.",
+      "ADMIN_NOTIFICATION_USER_NOT_FOUND": "Member not found.",
+      "ADMIN_NOTIFICATION_NO_TARGETS": "No target members found.",
+      "ADMIN_NOTIFICATION_SEND_ERROR": "Error sending notification.",
+      "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "Notification not found.",
+      "ADMIN_NOTIFICATION_CLEAR_ERROR": "Failed to clear notification history.",
+      "ADMIN_DELETE_USER_NOT_FOUND": "User not found.",
+      "ADMIN_DELETE_NOT_ALLOWED": "Only the main admin can delete users.",
+      "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "The main admin cannot be deleted.",
+      "ADMIN_DELETE_SELF_FORBIDDEN": "You cannot delete yourself.",
+      "ADMIN_DELETE_ERROR": "Error deleting user.",
+      "SUBSCRIPTION_EXPIRED": "Your subscription has expired. Please renew to continue 💳",
+      "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "Notification title and body are required.",
+      "ADMIN_NOTIFICATION_ERROR": "Error sending notification.",
+      "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "System admin cannot be blocked.",
+      "ADMIN_TOGGLE_BLOCK_ERROR": "Error changing block status.",
+      "CSV_EXPORT_ERROR": "Failed to export report."
+    },
+    "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
+    "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",
+    "WEEK_TEMPLATE_CREATE_SUCCESS": "Weekly template created successfully.",
+    "WEEK_TEMPLATE_CREATE_ERROR": "Error creating weekly template.",
     "WEEK_TEMPLATE_NOT_FOUND": "Template not found.",
     "WEEK_TEMPLATE_APPLY_SUCCESS": "Template applied successfully.",
-    "WEEK_TEMPLATE_APPLY_ERROR": "Failed to apply template.",
-    "USER_NOT_FOUND": "User not found.",
-    "USER_UPDATE_SUCCESS": "User updated successfully.",
-    "USER_UPDATE_ERROR": "Failed to update user.",
-    "CSV_NO_DATA": "No data available to export.",
-
-    "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit (4) 🌸",
-    "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Slot ID is required.",
-    "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "An error occurred while verifying the weekly booking limit.",
-
-    "CSV_EXPORT_ERROR": "Failed to export CSV report.",
-    "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "Admin accounts cannot be blocked.",
-    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "User has been blocked.",
-    "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "User has been unblocked.",
-    "ADMIN_TOGGLE_BLOCK_ERROR": "Failed to toggle block status.",
-    "ADMIN_NOTIFICATION_MISSING_FIELDS": "Title and message are required.",
-    "ADMIN_NOTIFICATION_USER_NOT_FOUND": "Target user not found.",
-    "ADMIN_NOTIFICATION_NO_TARGETS": "No users to notify.",
-    "ADMIN_NOTIFICATION_SEND_ERROR": "Failed to send notification.",
-    "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "Notification not found.",
+    "WEEK_TEMPLATE_APPLY_ERROR": "Error applying template.",
+    "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached the maximum weekly booking limit (4) 🌸",
+    "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Session ID is required.",
+    "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit.",
+    "USER_NOT_FOUND": "Member not found.",
+    "USER_UPDATE_SUCCESS": "Member data updated successfully.",
+    "USER_UPDATE_ERROR": "Failed to update member data.",
+    "CSV_NO_DATA": "No data available for export.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "Member blocked successfully.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "Member unblocked successfully.",
     "ADMIN_NOTIFICATION_DELETE_SUCCESS": "Notification deleted.",
     "ADMIN_NOTIFICATION_CLEAR_SUCCESS": "Notification history cleared.",
-    "ADMIN_NOTIFICATION_CLEAR_ERROR": "Failed to clear notification history.",
-    "SCHEDULER_STATUS_FETCH_ERROR": "Failed to fetch scheduler status.",
-    "SETTINGS_FETCH_ERROR": "Failed to fetch settings.",
     "SETTINGS_UPDATE_SUCCESS": "Settings updated successfully.",
-    "SETTINGS_UPDATE_ERROR": "Failed to update settings.",
-    "LOGO_UPLOAD_MISSING_FILE": "Logo image is required.",
-    "LOGO_UPLOAD_ERROR": "Failed to upload logo.",
+    "LOGO_UPLOAD_MISSING_FILE": "Please select a logo image.",
     "LOGO_UPLOAD_SUCCESS": "Logo updated successfully.",
-    "ADMIN_SLOTS_WEEK_FETCH_ERROR": "Failed to fetch week slots.",
-    "ADMIN_SLOTS_DAY_FETCH_ERROR": "Failed to fetch day slots.",
-    "ADMIN_SLOTS_UPCOMING_FETCH_ERROR": "Failed to fetch upcoming slots.",
-    "AUTH_REGISTER_MISSING_FIELDS": "Required fields are missing.",
-    "AUTH_REGISTER_USER_EXISTS": "User already exists.",
     "AUTH_REGISTER_SUCCESS": "Account created successfully.",
-    "AUTH_REGISTER_SERVER_ERROR": "Failed to create account.",
-    "AUTH_LOGIN_INVALID_FIELDS": "Username/phone and password are required.",
-    "AUTH_TOO_MANY_REQUESTS": "Too many login attempts ⏳. Login has been temporarily blocked, please wait a few minutes and try again.",
-    "SUBSCRIPTION_EXPIRED": "Your subscription has expired. Please renew to continue 💳",
-    "AUTH_LOGIN_NOT_FOUND": "User not found.",
-    "AUTH_LOGIN_BLOCKED": "Your account is temporarily blocked.",
-    "AUTH_LOGIN_MAINTENANCE": "System is under maintenance.",
-    "AUTH_LOGIN_INCORRECT": "Incorrect login credentials.",
-    "AUTH_LOGIN_SUCCESS": "Logged in successfully.",
-    "BOOKING_SLOT_NOT_AVAILABLE": "The selected slot is not available.",
-    "BOOKING_SLOT_PAST": "This slot has already started or passed.",
-    "BOOKING_WEEKLY_LIMIT": "You have reached your weekly booking limit.",
-    "BOOKING_SLOT_FULL": "This slot is already full.",
+    "AUTH_LOGIN_SUCCESS": "Login successful.",
     "BOOKING_CREATE_SUCCESS": "Booking created successfully.",
-    "BOOKING_CREATE_ERROR": "Failed to create booking.",
-    "BOOKING_CANCEL_NOT_FOUND": "Booking not found.",
-    "BOOKING_CANCEL_FORBIDDEN": "You cannot cancel this booking.",
-    "BOOKING_CANCEL_TOO_LATE": "Cannot cancel within 12 hours of the session.",
     "BOOKING_CANCEL_SUCCESS": "Booking cancelled successfully.",
-    "BOOKING_CANCEL_ERROR": "Failed to cancel booking.",
-    "PROFILE_NOT_FOUND": "User not found.",
     "PROFILE_UPDATE_SUCCESS": "Profile updated successfully.",
-    "PROFILE_UPDATE_ERROR": "Failed to update profile.",
-    "WEIGHT_ADD_MISSING": "Weight is required.",
     "WEIGHT_ADD_SUCCESS": "Weight updated successfully.",
-    "WEIGHT_ADD_ERROR": "Failed to update weight.",
-    "WEIGHT_HISTORY_NOT_FOUND": "Weight history not found.",
-    "WEIGHT_HISTORY_FETCH_ERROR": "Failed to fetch weight history.",
-    "FCM_TOKEN_MISSING": "FCM token is required.",
     "FCM_TOKEN_SAVED": "FCM token saved successfully.",
     "SUB_RENEW_SUCCESS": "Subscription renewed successfully.",
-    "SUB_RENEW_ERROR": "Failed to renew subscription.",
-    "NETWORK_ERROR": "Network error: could not reach server",
-    "UNKNOWN_ERROR": "Unexpected error occurred",
-    "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "Notification title and body are required.",
-    "ADMIN_NOTIFICATION_SENT": "Notification sent successfully.",
-    "ADMIN_NOTIFICATION_ERROR": "An error occurred while sending the notification.",
-
-    "ADMIN_NOTIFICATION_SLOT_INFO": "Notification to all members of this session",
-    "ADMIN_NOTIFICATION_SLOT_SENT": "Notification sent to all session members.",
-    "ADMIN_RESET_NOT_ALLOWED": "Only the Super Admin can perform system reset.",
     "ADMIN_RESET_LIGHT_SUCCESS": "Light reset completed successfully.",
     "ADMIN_RESET_MEDIUM_SUCCESS": "Medium reset completed successfully.",
     "ADMIN_RESET_HARD_SUCCESS": "Hard reset completed successfully.",
     "ADMIN_RESET_FACTORY_SUCCESS": "Factory reset completed successfully.",
-    "ADMIN_RESET_LIGHT_ERROR": "Error during light reset.",
-    "ADMIN_RESET_MEDIUM_ERROR": "Error during medium reset.",
-    "ADMIN_RESET_HARD_ERROR": "Error during hard reset.",
-    "ADMIN_RESET_FACTORY_ERROR": "Error during factory reset.",
-
-    "ADMIN_DELETE_USER_NOT_FOUND": "User not found.",
-    "ADMIN_DELETE_NOT_ALLOWED": "Only the Super Admin can delete users.",
-    "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "Cannot delete the Super Admin.",
-    "ADMIN_DELETE_SELF_FORBIDDEN": "You cannot delete yourself.",
-    "ADMIN_DELETE_SUCCESS": "User deleted successfully.",
-    "ADMIN_DELETE_ERROR": "Unexpected error during deletion.",
-    "errors": {
-      "ADMIN_SLOT_OVERLAP": "There is an overlap between the slots ⛔",
-      "ADMIN_SLOT_INVALID_TIME": "Invalid slot time",
-      "ADMIN_SLOT_DUPLICATE": "The slot already exists",
-      "NETWORK_ERROR": "Network error",
-      "UNKNOWN_ERROR": "An unexpected error occurred"
-    }
+    "ADMIN_NOTIFICATION_SENT": "Notification sent successfully.",
+    "ADMIN_NOTIFICATION_SLOT_INFO": "Notification for all session members",
+    "ADMIN_NOTIFICATION_SLOT_SENT": "Notification sent to all session members.",
+    "ADMIN_DELETE_SUCCESS": "User deleted successfully."
   }
 }

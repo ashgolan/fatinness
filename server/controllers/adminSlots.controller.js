@@ -6,13 +6,10 @@ import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
 import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
+
 /**
  * Checks if a slot overlaps with existing ones
- * @param {Date} startAtUTC
- * @param {Date} endAtUTC
- * @returns {Promise<boolean>}
  */
-
 export async function hasOverlap(startAtUTC, endAtUTC) {
   const overlap = await Slot.findOne({
     startAt: { $lt: endAtUTC },
@@ -22,11 +19,10 @@ export async function hasOverlap(startAtUTC, endAtUTC) {
   return !!overlap;
 }
 
-//
 // =====================================================
 // 🔹 GET /admin/slots/week?start=YYYY-MM-DD
+// الأسبوع: الأحد → السبت
 // =====================================================
-
 export const adminGetWeekSlots = async (req, res) => {
   try {
     const { start } = req.query;
@@ -39,8 +35,7 @@ export const adminGetWeekSlots = async (req, res) => {
       return res.status(400).json({ error: "Invalid start date" });
     }
 
-    // ⬅️ الأحد كبداية أسبوع
-    // Luxon: weekday (1=Mon ... 7=Sun)
+    // Luxon weekday: 1=Mon ... 7=Sun
     const daysFromSunday = baseDate.weekday % 7;
 
     const weekStartLocal = baseDate
@@ -52,15 +47,13 @@ export const adminGetWeekSlots = async (req, res) => {
     const weekStartUTC = weekStartLocal.toUTC().toJSDate();
     const weekEndUTC = weekEndLocal.toUTC().toJSDate();
 
-    // 1️⃣ جلب الحصص
     const slots = await Slot.find({
       startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
     }).sort({ startAt: 1 });
 
-    // 2️⃣ حساب الحجوزات
     const slotIds = slots.map((s) => s._id);
-    let bookedBySlot = [];
 
+    let bookedBySlot = [];
     if (slotIds.length) {
       bookedBySlot = await Booking.aggregate([
         { $match: { slot: { $in: slotIds }, status: "booked" } },
@@ -73,7 +66,6 @@ export const adminGetWeekSlots = async (req, res) => {
       return acc;
     }, {});
 
-    // 3️⃣ تجهيز الحصص للفرونت (⬅️ هنا المهم)
     const enhancedSlots = slots.map((s) => {
       const bookedCount = bookedMap[s._id.toString()] || 0;
 
@@ -82,13 +74,14 @@ export const adminGetWeekSlots = async (req, res) => {
         startTime: DateTime.fromJSDate(s.startAt)
           .setZone(ZONE)
           .toFormat("HH:mm"),
-        endTime: DateTime.fromJSDate(s.endAt).setZone(ZONE).toFormat("HH:mm"),
+        endTime: DateTime.fromJSDate(s.endAt)
+          .setZone(ZONE)
+          .toFormat("HH:mm"),
         bookedCount,
         available: Math.max((s.capacity || 0) - bookedCount, 0),
       };
     });
 
-    // 4️⃣ تقسيم الأيام
     const days = {};
     for (let i = 0; i < 7; i++) {
       const key = weekStartLocal.plus({ days: i }).toFormat("yyyy-MM-dd");
@@ -117,9 +110,14 @@ export const adminGetWeekSlots = async (req, res) => {
   }
 };
 
+// =====================================================
+// 🔹 POST /admin/slots
+// إنشاء حصة ليوم معيّن
+// =====================================================
 export const adminCreateSlot = async (req, res) => {
   try {
     const { date, startTime, endTime, capacity = 20 } = req.body;
+
     if (!date || !startTime || !endTime) {
       return res.status(400).json({ code: "ADMIN_SLOT_MISSING_FIELDS" });
     }
@@ -156,7 +154,7 @@ export const adminCreateSlot = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SLOT_CREATE_ERROR" });
   }
 };
-//
+
 // =====================================================
 // 🔹 PUT /admin/slots/:id/block
 // =====================================================
@@ -179,34 +177,39 @@ export const adminToggleBlock = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SLOT_BLOCK_ERROR" });
   }
 };
+
+// =====================================================
+// 🔹 POST /admin/slots/next-week/bulk
+// ⬅️ النسخة المصحّحة (تعتمد على date الصريحة)
+// =====================================================
 export const adminCreateNextWeekBulk = async (req, res) => {
   try {
     const { items } = req.body;
+
     if (!Array.isArray(items) || !items.length) {
       return res.status(400).json({ code: "ADMIN_SLOT_BULK_EMPTY" });
     }
-
-    const baseLocal = DateTime.now().setZone(ZONE).startOf("week");
-    const nextWeekStart = baseLocal.plus({ weeks: 1 });
 
     const created = [];
     let skippedOverlap = 0;
     let skippedDuplicate = 0;
 
     for (const it of items) {
-      const dayLocal = nextWeekStart.plus({ days: it.dayOffset || 0 });
+      if (!it.date || !it.startTime || !it.endTime) continue;
 
       const startAtUTC = DateTime.fromISO(
-        `${dayLocal.toISODate()}T${it.startTime}`,
+        `${it.date}T${it.startTime}`,
         { zone: ZONE }
       ).toUTC();
 
       const endAtUTC = DateTime.fromISO(
-        `${dayLocal.toISODate()}T${it.endTime}`,
+        `${it.date}T${it.endTime}`,
         { zone: ZONE }
       ).toUTC();
 
-      const dayUTC = startAtUTC.startOf("day").toJSDate();
+      if (!startAtUTC.isValid || !endAtUTC.isValid || endAtUTC <= startAtUTC) {
+        continue;
+      }
 
       if (await hasOverlap(startAtUTC.toJSDate(), endAtUTC.toJSDate())) {
         skippedOverlap++;
@@ -224,7 +227,7 @@ export const adminCreateNextWeekBulk = async (req, res) => {
       }
 
       const s = await Slot.create({
-        date: dayUTC,
+        date: startAtUTC.startOf("day").toJSDate(),
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),
         capacity: Number(it.capacity) || 20,
