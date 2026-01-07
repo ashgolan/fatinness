@@ -4,14 +4,15 @@ import { UserContext } from "../context/UserContext";
 import { useSystemSetupCheck } from "../hooks/useSystemSetupCheck";
 
 export default function PrivateRoute({ role }) {
-  const { user, loading } = useContext(UserContext);
+  const { user, loadingUser } = useContext(UserContext);
   const location = useLocation();
 
   // ⭐ فحص إذا النظام يحتاج إنشاء Super Admin
   const { loading: setupLoading } = useSystemSetupCheck();
 
   // 📌 لا نعرض أي شيء قبل اكتمال الفحصين (تحميل المستخدم + فحص النظام)
-  if (loading || setupLoading) return null;
+  if (loadingUser || setupLoading) return <div style={{ height: "60vh" }} />;
+  ;
 
   // 🔹 إذا كان النظام يحتاج SuperAdmin (hook يقوم بتحويل المستخدم)
   // فلا نحتاج هنا أي منطق إضافي

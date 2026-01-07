@@ -71,6 +71,8 @@ export default function Navbar() {
   const fallbackLogo = "/brand/DEFAULT_LOGO.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const location = useLocation();
+  const minimalNavbarRoutes = ["/login", "/register", "/super-admin-register"];
+  const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
@@ -107,14 +109,23 @@ export default function Navbar() {
   const navLinks = useMemo(() => {
     if (loadingUser) return [];
 
-    if (!user) {
-      const currentPath = location.pathname;
-      const isAuthPage =
-        currentPath === "/login" || currentPath === "/register";
+    // 🔒 Navbar محدود (Login / Super Admin Register)
+    if (isMinimalNavbar) {
+      return user
+        ? [
+          {
+            label: t("navbar.logout"),
+            action: logout,
+            icon: <LogoutIcon />,
+          },
+        ]
+        : [];
+    }
 
-      return isAuthPage
-        ? []
-        : [{ label: t("navbar.login"), to: "/login", icon: <LogoutIcon /> }];
+    // ======= الوضع الطبيعي =======
+
+    if (!user) {
+      return [{ label: t("navbar.login"), to: "/login", icon: <LogoutIcon /> }];
     }
 
     if (user.role === "admin") {
@@ -142,7 +153,8 @@ export default function Navbar() {
       },
       { label: t("navbar.logout"), action: logout, icon: <LogoutIcon /> },
     ];
-  }, [user, loadingUser, t]);
+  }, [user, loadingUser, t, isMinimalNavbar]);
+
 
   if (loadingUser) {
     return (
@@ -152,9 +164,8 @@ export default function Navbar() {
         sx={{
           backgroundColor: mode === "dark" ? BRAND.paperDark : "#fff",
           color: mode === "dark" ? BRAND.textDark : "#333",
-          borderBottom: `1px solid ${
-            mode === "dark" ? BRAND.lineDark : "#ddd"
-          }`,
+          borderBottom: `1px solid ${mode === "dark" ? BRAND.lineDark : "#ddd"
+            }`,
         }}
       >
         <Toolbar sx={{ justifyContent: "center" }}>
@@ -194,9 +205,8 @@ export default function Navbar() {
         sx={{
           backgroundColor: mode === "dark" ? BRAND.paperDark : "#ffffff",
           color: mode === "dark" ? BRAND.textDark : "#222",
-          borderBottom: `1px solid ${
-            mode === "dark" ? BRAND.lineDark : "#ddd"
-          }`,
+          borderBottom: `1px solid ${mode === "dark" ? BRAND.lineDark : "#ddd"
+            }`,
           transition: "all 0.3s ease",
         }}
       >
@@ -241,9 +251,8 @@ export default function Navbar() {
               sx={{
                 fontWeight: 700,
                 fontSize: { xs: "1rem", sm: "1.2rem" },
-                background: `linear-gradient(90deg, ${
-                  mode === "dark" ? BRAND.gold : BRAND.purple
-                }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+                background: `linear-gradient(90deg, ${mode === "dark" ? BRAND.gold : BRAND.purple
+                  }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -455,9 +464,8 @@ export default function Navbar() {
                 variant="h6"
                 sx={{
                   fontWeight: 800,
-                  background: `linear-gradient(135deg, ${
-                    mode === "dark" ? BRAND.gold : BRAND.purple
-                  }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+                  background: `linear-gradient(135deg, ${mode === "dark" ? BRAND.gold : BRAND.purple
+                    }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}

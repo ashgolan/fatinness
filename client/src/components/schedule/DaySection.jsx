@@ -57,8 +57,8 @@ export default function DaySection({
     if (!slot?.endAt) return false;
     return new Date(slot.endAt) < new Date();
   }
-console.log("existingSlots:", existingSlots);
-console.log("existingSlots:", existingSlots);
+  console.log("existingSlots:", existingSlots);
+  console.log("existingSlots:", existingSlots);
 
   return (
     <Paper
@@ -74,8 +74,8 @@ console.log("existingSlots:", existingSlots);
         border: isToday
           ? colors.todayBorder
           : isPast
-          ? colors.pastBorder
-          : colors.border,
+            ? colors.pastBorder
+            : colors.border,
         opacity: isPast ? 0.7 : 1,
         transition: "all 0.25s ease",
         "&:hover": {
@@ -232,12 +232,21 @@ console.log("existingSlots:", existingSlots);
           <TextField
             label={t("schedule.capacity")}
             value={slot.capacity}
-            onChange={(e) => onUpdateNew(idx, "capacity", e.target.value)}
             type="number"
             fullWidth
             sx={{ mt: 1 }}
             InputLabelProps={{ shrink: true }}
+            inputProps={{
+              min: 1,     // ⛔ يمنع 0 بالسهم
+              step: 1,
+            }}
+            onChange={(e) => {
+              const val = Number(e.target.value);
+              if (val < 1) return; // ⛔ يمنع 0 والسلبي
+              onUpdateNew(idx, "capacity", val);
+            }}
           />
+
 
           <Box sx={{ width: "100%", textAlign: "right", mt: 1 }}>
             <Tooltip title={t("schedule.delete")} arrow>

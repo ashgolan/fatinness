@@ -181,9 +181,9 @@ export default function UsersAdmin() {
 
       toast.success(
         data?.message ||
-          (user.isBlocked
-            ? t("usersAdmin.messages.unblocked")
-            : t("usersAdmin.messages.blocked"))
+        (user.isBlocked
+          ? t("usersAdmin.messages.unblocked")
+          : t("usersAdmin.messages.blocked"))
       );
 
       await fetchUsers();
@@ -505,36 +505,37 @@ export default function UsersAdmin() {
                   {/* --------------------------- */}
                   {/* ⚡ السماح بالحجز الإضافي */}
                   {/* --------------------------- */}
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={user.allowExtraBookings}
-                        onChange={() => toggleExtraBooking(user)}
-                        disabled={user.isBlocked || user.role === "admin"}
-                        sx={{
-                          "& .MuiSwitch-switchBase.Mui-checked": {
-                            color: "#FFD700",
-                            filter:
-                              "drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))",
-                          },
-                          "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                            { backgroundColor: "#ffeb3b" },
-                        }}
-                      />
-                    }
-                    label={
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.text.secondary,
-                        }}
-                      >
-                        {t("usersAdmin.extraBooking.label")}
-                      </Typography>
-                    }
-                    sx={{ mb: 2 }}
-                  />
+                  {user.role === "user" && (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={user.allowExtraBookings}
+                          onChange={() => toggleExtraBooking(user)}
+                          disabled={user.isBlocked || user.role === "admin"}
+                          sx={{
+                            "& .MuiSwitch-switchBase.Mui-checked": {
+                              color: "#FFD700",
+                              filter:
+                                "drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))",
+                            },
+                            "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                              { backgroundColor: "#ffeb3b" },
+                          }}
+                        />
+                      }
+                      label={
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: theme.palette.text.secondary,
+                          }}
+                        >
+                          {t("usersAdmin.extraBooking.label")}
+                        </Typography>
+                      }
+                      sx={{ mb: 2 }}
+                    />)}
 
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}

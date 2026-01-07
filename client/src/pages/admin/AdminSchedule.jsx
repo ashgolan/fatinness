@@ -80,7 +80,12 @@ function formatDateRange(start, end, i18n) {
         ? "en-US"
         : "ar-EG";
 
-  const opts = { day: "2-digit", month: "short", year: "numeric" };
+  const opts = {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    numberingSystem: "latn", // ⭐ هذا هو المفتاح
+  };
 
   return `${new Date(start).toLocaleDateString(locale, opts)} ← ${new Date(
     end
@@ -310,12 +315,19 @@ export default function AdminSchedule() {
     copy[dayIndex].items.splice(idx, 1);
     setNextWeek(copy);
   };
+  const isValidSlot = (s) =>
+    s.startTime &&
+    s.endTime &&
+    Number(s.capacity) >= 1;
+
 
 
 
   const hasUnsavedChanges =
-    Object.keys(currentEdits).length > 0 ||
-    nextWeek.some((d) => d.items.length > 0);
+    Object.values(currentEdits).some((slots) =>
+      slots.some(isValidSlot)
+    ) ||
+    nextWeek.some((d) => d.items.some(isValidSlot));
 
   // ===================== واجهة الصفحة =====================
   return (
@@ -818,11 +830,8 @@ export default function AdminSchedule() {
             saving ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />
           }
           onClick={saveAllChanges}
-          disabled={
-            saving ||
-            (Object.keys(currentEdits).length === 0 &&
-              nextWeek.every((d) => d.items.length === 0))
-          }
+          disabled={saving || !hasUnsavedChanges}
+
           sx={{
             minWidth: 280,        // يعطيه حضور بصري
             px: 6,
