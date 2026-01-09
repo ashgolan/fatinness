@@ -32,6 +32,9 @@ export const getUserProfile = async (req, res) => {
       user.weightHistory?.length > 0
         ? user.weightHistory[user.weightHistory.length - 1]
         : null;
+    const notificationsOwned =
+      user.deviceOwnerId &&
+      user.deviceOwnerId.toString() === user._id.toString();
 
     return res.json({
       id: user._id,
@@ -47,7 +50,7 @@ export const getUserProfile = async (req, res) => {
       role: user.role,
       isSuperAdmin: user.isSuperAdmin || false,
       allowExtraBookings: user.allowExtraBookings || false,
-
+      notificationsOwned,
       stats: {
         completedBookings,
         cancelledBookings,
