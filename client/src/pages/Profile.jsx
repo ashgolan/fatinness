@@ -284,10 +284,13 @@ export default function Profile() {
               : "1px solid rgba(0,0,0,0.06)",
           }}
         >
-          <div style={{ marginBottom: "8px", wordBreak: "break-all" }}>
-            <strong style={{ color: textMain }}>📱 Device FCM:</strong>{" "}
-            {deviceFcmToken || "—"}
+          <div style={{ wordBreak: "break-all" }}>
+            <strong style={{ color: textMain }}>👤 User FCM status:</strong>{" "}
+            {user?.notificationsOwned
+              ? "Owned by this user"
+              : "Owned by another user"}
           </div>
+
 
           <div style={{ wordBreak: "break-all" }}>
             <strong>User FCM:</strong> {user?.ownedFcmToken || "—"}
