@@ -783,7 +783,10 @@
       "ADMIN_NOTIFICATION_ERROR": "حدث خطأ أثناء إرسال الإشعار.",
       "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "لا يمكن حظر مديرة النظام.",
       "ADMIN_TOGGLE_BLOCK_ERROR": "حدث خطأ أثناء تغيير حالة الحظر.",
-      "CSV_EXPORT_ERROR": "فشل تصدير التقرير."
+      "CSV_EXPORT_ERROR": "فشل تصدير التقرير.",
+      "BOOKING_SLOT_ID_REQUIRED": "لم يتم تحديد الحصة المراد حجزها ❌",
+      "ADMIN_BOOKING_CREATE_ERROR": "حدث خطأ أثناء إنشاء الحجز."
+
     },
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",

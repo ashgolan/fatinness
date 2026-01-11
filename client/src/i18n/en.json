@@ -783,7 +783,9 @@
       "ADMIN_NOTIFICATION_ERROR": "Error sending notification.",
       "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "System admin cannot be blocked.",
       "ADMIN_TOGGLE_BLOCK_ERROR": "Error changing block status.",
-      "CSV_EXPORT_ERROR": "Failed to export report."
+      "CSV_EXPORT_ERROR": "Failed to export report.",
+      "BOOKING_SLOT_ID_REQUIRED": "No class slot was selected ❌",
+      "ADMIN_BOOKING_CREATE_ERROR": "An error occurred while creating the booking."
     },
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",

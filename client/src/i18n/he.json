@@ -783,7 +783,9 @@
       "ADMIN_NOTIFICATION_ERROR": "אירעה שגיאה בשליחת ההתראה.",
       "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "לא ניתן לחסום מנהלת מערכת.",
       "ADMIN_TOGGLE_BLOCK_ERROR": "אירעה שגיאה בשינוי מצב החסימה.",
-      "CSV_EXPORT_ERROR": "ייצוא הדוח נכשל."
+      "CSV_EXPORT_ERROR": "ייצוא הדוח נכשל.",
+      "BOOKING_SLOT_ID_REQUIRED": "לא נבחרה חוגה להזמנה ❌",
+      "ADMIN_BOOKING_CREATE_ERROR": "אירעה שגיאה בעת יצירת ההזמנה."
     },
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "שם התבנית והאימונים נדרשים.",

@@ -14,7 +14,12 @@ import { ZONE } from "../utils/time.js";
 export const createBooking = async (req, res) => {
   try {
     const user = req.user;
- 
+    const { slotId, paymentRef } = req.body; // ✅ هذا كان ناقصًا
+    if (!slotId) {
+      return res.status(400).json({
+        code: "BOOKING_SLOT_ID_REQUIRED",
+      });
+    }
     if (
       user.subscriptionStatus === "expired" ||
       (user.subscriptionEnd && user.subscriptionEnd < new Date())
