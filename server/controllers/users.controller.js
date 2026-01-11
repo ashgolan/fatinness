@@ -35,8 +35,6 @@ export const getUserProfile = async (req, res) => {
     const notificationsOwned =
       user.fcmTokens?.length > 0 &&
       user.fcmTokens[0].ownerUserId?.toString() === user._id.toString();
-    const ownedFcmToken =
-      user.fcmTokens?.length > 0 ? user.fcmTokens[0].token : null;
 
     return res.json({
       id: user._id,
@@ -47,7 +45,6 @@ export const getUserProfile = async (req, res) => {
       height: user.height,
       weight: user.weight,
       age: user.age,
-      ownedFcmToken,
 
       // 🔥 أهم نقطة:
       role: user.role,

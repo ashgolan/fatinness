@@ -242,17 +242,7 @@ export default function Profile() {
       },
     },
   };
-  const [deviceFcmToken, setDeviceFcmToken] = useState(null);
-  useEffect(() => {
-    (async () => {
-      try {
-        const token = await registerFcmToken({ silent: true });
-        setDeviceFcmToken(token || null);
-      } catch (e) {
-        console.warn("FCM device token not available");
-      }
-    })();
-  }, []);
+
 
   return (
     <div
@@ -271,32 +261,7 @@ export default function Profile() {
         {/* ===============================
     FCM DEBUG INFO (TOP)
 =============================== */}
-        <div
-          style={{
-            background: cardBg,
-            borderRadius: "16px",
-            padding: "16px 20px",
-            marginBottom: "24px",
-            fontSize: "13px",
-            color: textSub,
-            border: isDark
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "1px solid rgba(0,0,0,0.06)",
-          }}
-        >
-          <div style={{ wordBreak: "break-all" }}>
-            <strong style={{ color: textMain }}>👤 User FCM status:</strong>{" "}
-            {user?.notificationsOwned
-              ? "Owned by this user"
-              : "Owned by another user"}
-          </div>
 
-
-          <div style={{ wordBreak: "break-all" }}>
-            <strong>User FCM:</strong> {user?.ownedFcmToken || "—"}
-            {user?.notificationsOwned ? "Owned by this user" : "Owned by another user"}
-          </div>
-        </div>
 
         {/* ===============================
             HEADER
