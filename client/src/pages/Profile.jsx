@@ -139,8 +139,8 @@ export default function Profile() {
         i18n.language === "ar"
           ? "ar-EG"
           : i18n.language === "he"
-          ? "he-IL"
-          : "en-US",
+            ? "he-IL"
+            : "en-US",
         { month: "short", day: "numeric" }
       )
     ),
@@ -200,8 +200,8 @@ export default function Profile() {
               i18n.language === "ar"
                 ? "ar-EG"
                 : i18n.language === "he"
-                ? "he-IL"
-                : "en-US",
+                  ? "he-IL"
+                  : "en-US",
               {
                 weekday: "long",
                 year: "numeric",
@@ -242,6 +242,17 @@ export default function Profile() {
       },
     },
   };
+  const [deviceFcmToken, setDeviceFcmToken] = useState(null);
+  useEffect(() => {
+    (async () => {
+      try {
+        const token = await registerFcmToken({ silent: true });
+        setDeviceFcmToken(token || null);
+      } catch (e) {
+        console.warn("FCM device token not available");
+      }
+    })();
+  }, []);
 
   return (
     <div
@@ -256,6 +267,34 @@ export default function Profile() {
       <div
         style={{ maxWidth: "1280px", margin: "0 auto", padding: "32px 16px" }}
       >
+
+        {/* ===============================
+    FCM DEBUG INFO (TOP)
+=============================== */}
+        <div
+          style={{
+            background: cardBg,
+            borderRadius: "16px",
+            padding: "16px 20px",
+            marginBottom: "24px",
+            fontSize: "13px",
+            color: textSub,
+            border: isDark
+              ? "1px solid rgba(255,255,255,0.08)"
+              : "1px solid rgba(0,0,0,0.06)",
+          }}
+        >
+          <div style={{ marginBottom: "8px", wordBreak: "break-all" }}>
+            <strong style={{ color: textMain }}>📱 Device FCM:</strong>{" "}
+            {deviceFcmToken || "—"}
+          </div>
+
+          <div style={{ wordBreak: "break-all" }}>
+            <strong>User FCM:</strong> {user?.ownedFcmToken || "—"}
+            {user?.notificationsOwned ? "Owned by this user" : "Owned by another user"}
+          </div>
+        </div>
+
         {/* ===============================
             HEADER
         =============================== */}
