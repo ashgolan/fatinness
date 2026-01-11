@@ -33,8 +33,8 @@ export const getUserProfile = async (req, res) => {
         ? user.weightHistory[user.weightHistory.length - 1]
         : null;
     const notificationsOwned =
-      user.deviceOwnerId &&
-      user.deviceOwnerId.toString() === user._id.toString();
+      user.fcmTokens?.length > 0 &&
+      user.fcmTokens[0].ownerUserId?.toString() === user._id.toString();
     const ownedFcmToken =
       user.fcmTokens?.length > 0 ? user.fcmTokens[0].token : null;
 
