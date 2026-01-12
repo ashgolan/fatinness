@@ -43,6 +43,9 @@ export default function Profile() {
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
 
+  const [openAddWeight, setOpenAddWeight] = useState(false);
+
+
   async function transferFcmToThisDevice() {
     try {
       setTransferring(true);
@@ -244,7 +247,9 @@ export default function Profile() {
   };
 
 
+
   return (
+
     <div
       style={{
         minHeight: "100vh",
@@ -268,21 +273,44 @@ export default function Profile() {
         =============================== */}
         <div
           style={{
-            padding: "40px 24px",
-            borderRadius: "24px",
+            padding: "20px",
+            borderRadius: "20px",
             background: isDark
-              ? "linear-gradient(135deg, #312E81 0%, #5B21B6 50%, #831843 100%)"
-              : "linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%)",
-            textAlign: "center",
+              ? "linear-gradient(135deg, #312E81, #5B21B6, #831843)"
+              : "linear-gradient(135deg, #6366f1, #a855f7, #ec4899)",
             color: "#fff",
-            marginBottom: "32px",
+            marginBottom: "20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
           }}
         >
-          <h1 style={{ fontSize: "34px", marginBottom: "8px" }}>
-            {user?.username || t("profile.labels.user")}
-          </h1>
-          <p>{user?.email}</p>
+          <div
+            style={{
+              width: "56px",
+              height: "56px",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: "22px",
+              fontWeight: 700,
+            }}
+          >
+            {user?.username?.charAt(0) || "U"}
+          </div>
+
+          <div>
+            <h2 style={{ margin: 0, fontSize: "20px" }}>
+              {user?.username || t("profile.labels.user")}
+            </h2>
+            <p style={{ margin: 0, opacity: 0.85, fontSize: "13px" }}>
+              {user?.email}
+            </p>
+          </div>
         </div>
+
 
         {/* ===============================
             BMI SECTION (OPTION 4)
@@ -303,22 +331,36 @@ export default function Profile() {
 
             <div
               style={{
-                padding: "20px",
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                padding: "16px",
                 borderRadius: "16px",
                 background: bmiColor + "22",
                 border: `2px solid ${bmiColor}`,
-                textAlign: "center",
-                marginBottom: "16px",
               }}
             >
-              <h1 style={{ fontSize: "48px", margin: 0, color: bmiColor }}>
-                {bmi}
-              </h1>
-              <p
-                style={{ fontSize: "20px", color: bmiColor, fontWeight: "600" }}
+              <div
+                style={{
+                  fontSize: "40px",
+                  fontWeight: 800,
+                  color: bmiColor,
+                  minWidth: "80px",
+                  textAlign: "center",
+                }}
               >
-                {bmiStatus}
-              </p>
+                {bmi}
+              </div>
+
+              <div>
+                <p style={{ margin: 0, fontWeight: 600, color: bmiColor }}>
+                  {bmiStatus}
+                </p>
+                <p style={{ margin: 0, fontSize: "13px", color: textSub }}>
+                  {t("profile.bmi.idealWeight")}: {idealMin}–{idealMax}{" "}
+                  {t("profile.units.kg")}
+                </p>
+              </div>
             </div>
 
             <p style={{ color: textSub }}>
@@ -373,15 +415,15 @@ export default function Profile() {
               key={stat.label}
               style={{
                 background: cardBg,
-                padding: "20px",
-                borderRadius: "16px",
+                padding: "14px",
+                borderRadius: "14px",
                 textAlign: "center",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
               }}
             >
               <div style={{ fontSize: "28px" }}>{stat.icon}</div>
-              <p style={{ color: textSub }}>{stat.label}</p>
-              <h3 style={{ color: textMain }}>{stat.value}</h3>
+              <p style={{ color: textSub, fontSize: "12px" }}>{stat.label}</p>
+              <h3 style={{ color: textMain, margin: 0 }}>{stat.value}</h3>
             </div>
           ))}
         </div>
@@ -470,7 +512,7 @@ export default function Profile() {
             <div
               style={{
                 width: "100%",
-                height: window.innerWidth < 600 ? "280px" : "480px", // ← هنا السحر
+                height: window.innerWidth < 600 ? "200px" : "320px",
                 position: "relative",
               }}
             >
@@ -478,7 +520,7 @@ export default function Profile() {
             </div>
           ) : (
             <p
-              style={{ textAlign: "center", color: textSub, padding: "64px 0" }}
+              style={{ textAlign: "center", color: textSub, padding: "24px 0" }}
             >
               {t("profile.messages.noWeightData")}
             </p>
@@ -488,12 +530,12 @@ export default function Profile() {
         {/* ===============================
             ADD WEIGHT
         =============================== */}
-        <div
+        {/* <div
           style={{
             background: cardBg,
             borderRadius: "24px",
-            padding: "24px",
-            marginBottom: "64px",
+            padding: "20px",
+            marginBottom: "40px",
           }}
         >
           <h2>{t("profile.sections.addWeight")}</h2>
@@ -524,7 +566,7 @@ export default function Profile() {
               onChange={(e) => setNote(e.target.value)}
               style={{
                 width: "100%",
-                height: "48px",
+                height: "64px",
                 padding: "12px 16px",
               }}
             />
@@ -546,8 +588,134 @@ export default function Profile() {
               {saving ? t("profile.buttons.saving") : t("profile.buttons.save")}
             </button>
           </form>
-        </div>
+        </div> */}
       </div>
+      <button
+        onClick={() => setOpenAddWeight(true)}
+        style={{
+          position: "fixed",
+          bottom: "24px",
+          right: i18n.language === "ar" ? "auto" : "24px",
+          left: i18n.language === "ar" ? "24px" : "auto",
+          width: "64px",
+          height: "64px",
+          borderRadius: "50%",
+          border: "none",
+          background: "linear-gradient(135deg, #a855f7, #6366f1)",
+          color: "#fff",
+          fontSize: "36px",
+          cursor: "pointer",
+          boxShadow: "0 12px 30px rgba(0,0,0,0.3)",
+          zIndex: 999,
+        }}
+      >
+        +
+      </button>
+
+      {
+        openAddWeight && (
+          <div
+            onClick={() => setOpenAddWeight(false)}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.4)",
+              zIndex: 1000,
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: cardBg,
+                borderTopLeftRadius: "24px",
+                borderTopRightRadius: "24px",
+                padding: "24px",
+                animation: "slideUp 0.3s ease-out",
+              }}
+            >
+              <h3 style={{ marginTop: 0 }}>
+                ➕ {t("profile.sections.addWeight")}
+              </h3>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleAddWeight();
+                  setOpenAddWeight(false);
+                }}
+              >
+                <input
+                  type="number"
+                  step="0.1"
+                  placeholder={t("profile.fields.weightPlaceholder")}
+                  value={newWeight}
+                  onChange={(e) => setNewWeight(e.target.value)}
+                  style={{
+                    width: "100%",
+                    height: "48px",
+                    padding: "0 16px",
+                    marginBottom: "12px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+
+                <textarea
+                  placeholder={t("profile.fields.notePlaceholder")}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  style={{
+                    width: "100%",
+                    height: "72px",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  disabled={saving || !newWeight}
+                  style={{
+                    width: "100%",
+                    height: "48px",
+                    marginTop: "16px",
+                    background:
+                      "linear-gradient(135deg, #a855f7 0%, #6366f1 100%)",
+                    color: "#fff",
+                    borderRadius: "12px",
+                    fontWeight: "600",
+                    opacity: saving || !newWeight ? 0.6 : 1,
+                    border: "none",
+                  }}
+                >
+                  {saving
+                    ? t("profile.buttons.saving")
+                    : t("profile.buttons.save")}
+                </button>
+              </form>
+            </div>
+          </div>
+        )
+      }
+
+      <style>
+        {`
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+  `}
+      </style>
     </div>
+
   );
 }
