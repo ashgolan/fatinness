@@ -265,3 +265,46 @@ export const transferFcmOwnership = async (req, res) => {
     return res.status(500).json({ code: "FCM_TRANSFER_ERROR" });
   }
 };
+// 🔍 فحص ملكية FCM Token (قراءة فقط)
+export const checkFcmOwnership = async (req, res) => {
+  try {
+    const { fcmToken } = req.body;
+
+    // لا يوجد توكن أصلاً
+    if (!fcmToken) {
+      return res.json({ hasToken: false });
+    }
+
+    const userId = req.user._id;
+
+    // البحث عن أي مستخدم يملك هذا التوكن
+    const owner = await User.findOne({
+      "fcmTokens.token": fcmToken,
+    }).select("_id");
+
+    // التوكن غير مسجل عند أي مستخدم
+    if (!owner) {
+      return res.json({
+        hasToken: true,
+        ownedByCurrentUser: false,
+      });
+    }
+
+    // التوكن يخص المستخدم الحالي
+    if (owner._id.toString() === userId.toString()) {
+      return res.json({
+        hasToken: true,
+        ownedByCurrentUser: true,
+      });
+    }
+
+    // التوكن يخص مستخدم آخر
+    return res.json({
+      hasToken: true,
+      ownedByCurrentUser: false,
+    });
+  } catch (err) {
+    console.error("❌ checkFcmOwnership error:", err);
+    return res.json({ hasToken: false });
+  }
+};

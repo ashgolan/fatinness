@@ -45,6 +45,31 @@ export default function Profile() {
 
   const [openAddWeight, setOpenAddWeight] = useState(false);
 
+  const [fcmStatus, setFcmStatus] = useState({
+    checked: false,
+    ownedByCurrentUser: true,
+  });
+  const checkFcmOwnership = async () => {
+    try {
+      const token = await registerFcmToken({ silent: true });
+      if (!token) {
+        setFcmStatus({ checked: true, ownedByCurrentUser: false });
+        return;
+      }
+
+      const { data } = await Api.post("/users/fcm/check", {
+        fcmToken: token,
+      });
+
+      setFcmStatus({
+        checked: true,
+        ownedByCurrentUser: data.ownedByCurrentUser === true,
+      });
+    } catch (err) {
+      console.error(err);
+      setFcmStatus({ checked: true, ownedByCurrentUser: false });
+    }
+  };
 
   async function transferFcmToThisDevice() {
     try {
@@ -77,8 +102,9 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    fetchProfile();
+    fetchProfile().then(checkFcmOwnership);
   }, []);
+
 
   const handleAddWeight = async () => {
     if (!newWeight) return toast.warning(t("profile.errors.weightRequired"));
@@ -432,7 +458,7 @@ export default function Profile() {
     TRANSFER NOTIFICATIONS
 =============================== */}
 
-        {!user?.notificationsOwned && (
+        {fcmStatus.checked && !fcmStatus.ownedByCurrentUser && (
           <div
             style={{
               background: cardBg,

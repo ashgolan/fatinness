@@ -6,6 +6,7 @@ import {
   getWeightHistory,
   updateFcmToken,
   transferFcmOwnership,
+  checkFcmOwnership,
   
 } from "../controllers/users.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -19,6 +20,8 @@ router.put("/me", updateUserProfile);
 router.get("/me/weight-history", authMiddleware, getWeightHistory);
 router.post("/me/weight", authMiddleware, addWeightPoint);
 router.post("/fcm", updateFcmToken);
+
+router.post("/fcm/check", authMiddleware, checkFcmOwnership);
 
 router.post("/fcm/transfer", authMiddleware, transferFcmOwnership);
 
