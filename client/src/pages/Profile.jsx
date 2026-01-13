@@ -622,7 +622,7 @@ export default function Profile() {
         onClick={() => setOpenAddWeight(true)}
         style={{
           position: "fixed",
-          bottom: "24px",
+          bottom: "60px",
           right: i18n.language === "ar" ? "auto" : "24px",
           left: i18n.language === "ar" ? "24px" : "auto",
           width: "64px",
