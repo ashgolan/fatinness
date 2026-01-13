@@ -149,11 +149,7 @@ onMessage(messaging, (payload) => {
         <span style={{ fontWeight: 700, color: isDark ? "#fbbf24" : "#7c3aed" }}>
           🔔 {payload.notification.title}
         </span>
-        <br />
-        <span>:</span>
-        <br />
-        <span>:</span>
-        <br />
+        <span> : </span>
         <span style={{ color: isDark ? "#eee" : "#333" }}>
           {payload.notification.body || ""}
         </span>
