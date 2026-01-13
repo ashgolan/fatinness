@@ -1,8 +1,9 @@
-import { getMessaging, getToken, isSupported } from "firebase/messaging";
+import { getMessaging, onMessage, getToken, isSupported } from "firebase/messaging";
 import { app } from "./config";
 import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import i18n from "i18next";
+
 export async function registerFcmToken({ silent = false } = {}) {
   try {
     // 1️⃣ دعم المتصفح
@@ -134,3 +135,19 @@ export async function checkFcmOwnership() {
     return { hasToken: false };
   }
 }
+
+const messaging = getMessaging(app);
+
+onMessage(messaging, (payload) => {
+  console.log("📩 FCM foreground message:", payload);
+
+  if (payload?.notification?.title) {
+    toast.info(
+      `🔔 ${payload.notification.title}\n${payload.notification.body || ""}`,
+      {
+        position: "top-center",
+        autoClose: 5000,
+      }
+    );
+  }
+});
