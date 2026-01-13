@@ -785,7 +785,10 @@
       "ADMIN_TOGGLE_BLOCK_ERROR": "Error changing block status.",
       "CSV_EXPORT_ERROR": "Failed to export report.",
       "BOOKING_SLOT_ID_REQUIRED": "No class slot was selected ❌",
-      "ADMIN_BOOKING_CREATE_ERROR": "An error occurred while creating the booking."
+      "ADMIN_BOOKING_CREATE_ERROR": "An error occurred while creating the booking.",
+      "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached the maximum weekly booking limit (4) 🌸",
+      "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Session ID is required.",
+      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit."
     },
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",
@@ -794,9 +797,6 @@
     "WEEK_TEMPLATE_NOT_FOUND": "Template not found.",
     "WEEK_TEMPLATE_APPLY_SUCCESS": "Template applied successfully.",
     "WEEK_TEMPLATE_APPLY_ERROR": "Error applying template.",
-    "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached the maximum weekly booking limit (4) 🌸",
-    "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Session ID is required.",
-    "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit.",
     "USER_NOT_FOUND": "Member not found.",
     "USER_UPDATE_SUCCESS": "Member data updated successfully.",
     "USER_UPDATE_ERROR": "Failed to update member data.",
