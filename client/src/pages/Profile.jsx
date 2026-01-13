@@ -493,7 +493,9 @@ export default function Profile() {
                 try {
                   await transferFcmToThisDevice();
                   await fetchProfile();
+                  await checkFcmOwnership(); // 🔥 هذا هو السطر المهم
                   toast.success(t("profile.notifications.transferredSuccess"));
+
                 } catch {
                   toast.error(t("profile.notifications.transferFailed"));
                 } finally {
