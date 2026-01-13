@@ -142,12 +142,23 @@ onMessage(messaging, (payload) => {
   console.log("📩 FCM foreground message:", payload);
 
   if (payload?.notification?.title) {
+    const isDark = document.body.classList.contains("dark");
+
     toast.info(
-      `🔔 ${payload.notification.title}\n${payload.notification.body || ""}`,
-      {
-        position: "top-center",
-        autoClose: 5000,
-      }
+      <div style={{ textAlign: "start", lineHeight: "1.2" }}>
+        <span style={{ fontWeight: 700, color: isDark ? "#fbbf24" : "#7c3aed" }}>
+          🔔 {payload.notification.title}
+        </span>
+        <br />
+        <span>:</span>
+        <br />
+        <span>:</span>
+        <br />
+        <span style={{ color: isDark ? "#eee" : "#333" }}>
+          {payload.notification.body || ""}
+        </span>
+      </div>
     );
+
   }
 });
