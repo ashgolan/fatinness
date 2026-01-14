@@ -4,6 +4,8 @@ import { Api } from "../api/Api";
 import { toast } from "react-toastify";
 import i18n from "i18next";
 
+let retryTimer = null;
+
 export async function registerFcmToken({ silent = false } = {}) {
   try {
     // 1️⃣ دعم المتصفح
@@ -11,7 +13,7 @@ export async function registerFcmToken({ silent = false } = {}) {
     if (!("Notification" in window)) return null;
     if (!navigator.serviceWorker) return null;
 
-    // 2️⃣ طلب الإذن (لو مرفوض لا نكرر)
+    // 2️⃣ الإذن
     if (Notification.permission === "denied") {
       if (!silent) toast.info(i18n.t("fcm.permission_denied"));
       return null;
@@ -25,42 +27,57 @@ export async function registerFcmToken({ silent = false } = {}) {
       }
     }
 
-    // 3️⃣ تسجيل SW (مرة واحدة)
-    const registration =
+    // 3️⃣ Service Worker (والانتظار حتى يصبح active)
+    let registration =
       (await navigator.serviceWorker.getRegistration("/")) ||
       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
+
+    if (!registration.active) {
+      await new Promise((resolve) => {
+        const sw = registration.installing || registration.waiting;
+        if (!sw) return resolve();
+
+        sw.addEventListener("statechange", () => {
+          if (sw.state === "activated") resolve();
+        });
+      });
+    }
 
     // 4️⃣ FCM Token
     const messaging = getMessaging(app);
     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
-    if (!vapidKey) {
-      console.error("❌ Missing VAPID key");
-      return null;
-    }
+    if (!vapidKey) return null;
 
     const token = await getToken(messaging, {
       vapidKey,
       serviceWorkerRegistration: registration,
     });
 
-    if (!token) return null;
+    if (!token) throw new Error("FCM_TOKEN_NOT_READY");
 
     // 5️⃣ إرسال للسيرفر
     await Api.post("/users/fcm", { fcmToken: token });
 
     if (!silent) {
-      setTimeout(() => {
-        toast.success(i18n.t("fcm.success"));
-      }, 300);
+      toast.success(i18n.t("fcm.success"));
     }
 
     return token;
   } catch (err) {
-    console.error("❌ FCM error:", err);
-    if (!silent) toast.error(i18n.t("fcm.error"));
+    console.log("FCM not ready yet:", err?.message);
+
+    // 🔁 Retry ذكي (مرة واحدة)
+    if (!retryTimer) {
+      retryTimer = setTimeout(() => {
+        retryTimer = null;
+        registerFcmToken({ silent: true });
+      }, 60000); // بعد دقيقة
+    }
+
     return null;
   }
 }
+
 
 export async function transferFcmToThisDevice() {
   try {

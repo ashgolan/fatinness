@@ -100,8 +100,9 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
     return {
       successCount: 0,
       failureCount: tokens.length,
-      invalidTokens: tokens,
+      invalidTokens: [], // ❗ لا نحذفهم عند خطأ عام
     };
+
   }
 }
 

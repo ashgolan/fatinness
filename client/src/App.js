@@ -55,6 +55,7 @@ import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
 import PrivateRoute from "./utils/PrivateRoute";
 import { Api } from "./api/Api";
 import i18n from "./i18n/i18n";
+import { registerFcmToken } from "./firebase/registerFcmToken";
 
 // ================================
 // RTL / LTR Wrapper
@@ -95,13 +96,33 @@ export default function App() {
 
   // ✅ check-first-run فقط إذا يوجد Token
   useEffect(() => {
-    // const hasToken = document.cookie.includes("JWT=");
-    // if (!hasToken) return;
 
     Api.get("/auth/check-first-run")
       .then((res) => setNeedsSetup(res.data.needsSetup))
       .catch(() => setNeedsSetup(false));
   }, []);
+
+
+  // 🔔 FCM retry ذكي عند العودة للتطبيق
+  useEffect(() => {
+    const retryFcm = () => {
+      registerFcmToken({ silent: true });
+    };
+
+    window.addEventListener("focus", retryFcm);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        retryFcm();
+      }
+    });
+
+    return () => {
+      window.removeEventListener("focus", retryFcm);
+      document.removeEventListener("visibilitychange", retryFcm);
+    };
+  }, []);
+
 
   const isSplash = location.pathname === "/";
 
