@@ -252,3 +252,27 @@ export const adminCreateNextWeekBulk = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SLOT_BULK_ERROR" });
   }
 };
+
+
+export const adminDeleteSlot = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const slot = await Slot.findById(id);
+    if (!slot) {
+      return res.status(404).json({ code: "SLOT_NOT_FOUND" });
+    }
+
+    // 🔒 (اختياري) منع حذف حصة عليها حجوزات
+    if (slot.bookings?.length > 0) {
+      return res.status(400).json({ code: "SLOT_HAS_BOOKINGS" });
+    }
+
+    await slot.deleteOne();
+
+    res.json({ code: "SLOT_DELETED_SUCCESSFULLY" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ code: "DELETE_SLOT_FAILED" });
+  }
+};

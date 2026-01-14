@@ -7,6 +7,7 @@ import { adminGetSlotBookings } from "../controllers/admin.controller.js";
 import {
   adminCreateNextWeekBulk,
   adminCreateSlot,
+  adminDeleteSlot,
   adminGetWeekSlots,
   adminToggleBlock,
 } from "../controllers/adminSlots.controller.js";
@@ -23,7 +24,7 @@ router.get("/week", adminGetWeekSlots);
 router.post("/", adminCreateSlot);
 
 // ❌ حذف حصة معينة
-//router.delete("/:id", adminDeleteSlot);
+router.delete("/:id", adminDeleteSlot);
 
 router.get("/:id/bookings", adminGetSlotBookings);
 
