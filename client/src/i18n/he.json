@@ -378,6 +378,10 @@
       "deleteFailed": "מחיקת האימון נכשלה",
       "createNextFailed": "יצירת השבוע הבא נכשלה"
     },
+    "warning": {
+      "overlapSkipped": "⚠️ {{count}} אימונים נדחו עקב חפיפה בזמנים",
+      "duplicateSkipped": "ℹ️ {{count}} אימונים כפולים נדחו"
+    },
     "info": {
       "noValidChanges": "אין שינויים תקינים לשמירה",
       "addValid": "נא להוסיף אימונים תקינים תחילה"

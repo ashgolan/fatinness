@@ -223,10 +223,9 @@ export default function AdminSchedule() {
           endTime: s.endTime,
           capacity: Number(s.capacity) || 20,
         }))
-
     );
 
-    if (!items.length) return 0;
+    if (!items.length) return null;
 
     const { data } = await Api.post("/admin/slots/next-week/bulk", { items });
 
@@ -234,8 +233,9 @@ export default function AdminSchedule() {
       Array.from({ length: 7 }, (_, i) => ({ dayOffset: i, items: [] }))
     );
 
-    return data?.created ?? items.length;
+    return data; // 🔥 مهم
   };
+
   const saveAllChanges = async () => {
     const hasCurrent = Object.values(currentEdits)
       .some(slots => slots.some(isValidSlot));
@@ -284,8 +284,27 @@ export default function AdminSchedule() {
       }
 
       if (hasNext) {
-        createdNext = await saveNextWeekInternal();
+        const result = await saveNextWeekInternal();
+
+        if (result?.skippedOverlap > 0) {
+          toast.warning(
+            t("adminSchedule.warning.overlapSkipped", {
+              count: result.skippedOverlap,
+            })
+          );
+        }
+
+        if (result?.skippedDuplicate > 0) {
+          toast.info(
+            t("adminSchedule.warning.duplicateSkipped", {
+              count: result.skippedDuplicate,
+            })
+          );
+        }
+
+        createdNext = result?.created || 0;
       }
+
 
       if (createdCurrent > 0 || createdNext > 0) {
         toast.success(
@@ -295,6 +314,7 @@ export default function AdminSchedule() {
           })
         );
       }
+
 
     } catch (err) {
       handleServerError(err);

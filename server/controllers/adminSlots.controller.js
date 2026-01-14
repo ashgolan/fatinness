@@ -187,6 +187,73 @@ export const adminToggleBlock = async (req, res) => {
 // 🔹 POST /admin/slots/next-week/bulk
 // ⬅️ النسخة المصحّحة (تعتمد على date الصريحة)
 // =====================================================
+// export const adminCreateNextWeekBulk = async (req, res) => {
+//   try {
+//     const { items } = req.body;
+
+//     if (!Array.isArray(items) || !items.length) {
+//       return res.status(400).json({ code: "ADMIN_SLOT_BULK_EMPTY" });
+//     }
+
+//     const created = [];
+//     let skippedOverlap = 0;
+//     let skippedDuplicate = 0;
+
+//     for (const it of items) {
+//       if (!it.date || !it.startTime || !it.endTime) continue;
+
+//       const startAtUTC = DateTime.fromISO(
+//         `${it.date}T${it.startTime}`,
+//         { zone: ZONE }
+//       ).toUTC();
+
+//       const endAtUTC = DateTime.fromISO(
+//         `${it.date}T${it.endTime}`,
+//         { zone: ZONE }
+//       ).toUTC();
+
+//       if (!startAtUTC.isValid || !endAtUTC.isValid || endAtUTC <= startAtUTC) {
+//         continue;
+//       }
+
+//       if (await hasOverlap(startAtUTC.toJSDate(), endAtUTC.toJSDate())) {
+//         skippedOverlap++;
+//         continue;
+//       }
+
+//       const exists = await Slot.findOne({
+//         startAt: startAtUTC.toJSDate(),
+//         endAt: endAtUTC.toJSDate(),
+//       });
+
+//       if (exists) {
+//         skippedDuplicate++;
+//         continue;
+//       }
+
+//       const s = await Slot.create({
+//         date: startAtUTC.startOf("day").toJSDate(),
+//         startAt: startAtUTC.toJSDate(),
+//         endAt: endAtUTC.toJSDate(),
+//         capacity: Number(it.capacity) || 20,
+//       });
+
+//       created.push(s._id);
+//     }
+
+//     res.status(201).json({
+//       created: created.length,
+//       skippedOverlap,
+//       skippedDuplicate,
+//       code: "ADMIN_SLOT_BULK_CREATED",
+//     });
+//   } catch (e) {
+//     console.error("❌ adminCreateNextWeekBulk error:", e);
+//     res.status(500).json({ code: "ADMIN_SLOT_BULK_ERROR" });
+//   }
+// };
+
+
 export const adminCreateNextWeekBulk = async (req, res) => {
   try {
     const { items } = req.body;
@@ -199,8 +266,19 @@ export const adminCreateNextWeekBulk = async (req, res) => {
     let skippedOverlap = 0;
     let skippedDuplicate = 0;
 
-    for (const it of items) {
-      if (!it.date || !it.startTime || !it.endTime) continue;
+    // 🔹 ترتيب العناصر زمنيًا (ضروري!)
+    const sortedItems = [...items].sort((a, b) => {
+      if (a.date !== b.date) {
+        return a.date.localeCompare(b.date);
+      }
+      return a.startTime.localeCompare(b.startTime);
+    });
+
+    for (const it of sortedItems) {
+      if (!it.date || !it.startTime || !it.endTime) {
+        skippedDuplicate++;
+        continue;
+      }
 
       const startAtUTC = DateTime.fromISO(
         `${it.date}T${it.startTime}`,
@@ -212,15 +290,25 @@ export const adminCreateNextWeekBulk = async (req, res) => {
         { zone: ZONE }
       ).toUTC();
 
-      if (!startAtUTC.isValid || !endAtUTC.isValid || endAtUTC <= startAtUTC) {
+      // ❌ وقت غير صالح
+      if (!startAtUTC.isValid || !endAtUTC.isValid) {
+        skippedDuplicate++;
         continue;
       }
 
+      // ❌ نهاية قبل البداية
+      if (endAtUTC <= startAtUTC) {
+        skippedOverlap++;
+        continue;
+      }
+
+      // ❌ تداخل (DB هو مصدر الحقيقة – مثل القالب)
       if (await hasOverlap(startAtUTC.toJSDate(), endAtUTC.toJSDate())) {
         skippedOverlap++;
         continue;
       }
 
+      // ❌ تكرار تام
       const exists = await Slot.findOne({
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),
@@ -231,27 +319,30 @@ export const adminCreateNextWeekBulk = async (req, res) => {
         continue;
       }
 
-      const s = await Slot.create({
+      // ✅ إنشاء الحصة
+      const slot = await Slot.create({
         date: startAtUTC.startOf("day").toJSDate(),
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),
         capacity: Number(it.capacity) || 20,
       });
 
-      created.push(s._id);
+      created.push(slot._id);
     }
 
-    res.status(201).json({
+    return res.status(201).json({
+      code: "ADMIN_SLOT_BULK_CREATED",
       created: created.length,
       skippedOverlap,
       skippedDuplicate,
-      code: "ADMIN_SLOT_BULK_CREATED",
+      skippedTotal: skippedOverlap + skippedDuplicate,
     });
   } catch (e) {
     console.error("❌ adminCreateNextWeekBulk error:", e);
-    res.status(500).json({ code: "ADMIN_SLOT_BULK_ERROR" });
+    return res.status(500).json({ code: "ADMIN_SLOT_BULK_ERROR" });
   }
 };
+
 
 
 export const adminDeleteSlot = async (req, res) => {

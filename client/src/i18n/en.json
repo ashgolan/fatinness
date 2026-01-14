@@ -378,6 +378,10 @@
       "deleteFailed": "Failed to delete session",
       "createNextFailed": "Failed to create next week"
     },
+    "warning": {
+      "overlapSkipped": "⚠️ {{count}} sessions were skipped due to time overlap",
+      "duplicateSkipped": "ℹ️ {{count}} duplicate sessions were skipped"
+    },
     "info": {
       "noValidChanges": "No valid changes to save",
       "addValid": "Add valid sessions first"

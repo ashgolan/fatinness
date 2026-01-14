@@ -378,6 +378,10 @@
       "deleteFailed": "فشل حذف الحصة",
       "createNextFailed": "فشل إنشاء الأسبوع القادم"
     },
+    "warning": {
+      "overlapSkipped": "⚠️ تم تجاهل {{count}} حصة بسبب تعارض في المواعيد",
+      "duplicateSkipped": "ℹ️ تم تجاهل {{count}} حصة مكررة"
+    },
     "info": {
       "noValidChanges": "لا يوجد تغييرات صالحة للحفظ",
       "addValid": "أضف حصصًا صالحة أولًا"
