@@ -55,7 +55,12 @@ export default function BookingsHub() {
     t("weekdays.friday"),
     t("weekdays.saturday"),
   ];
+  const WEEKLY_LIMIT = 4;
 
+  const canBookMore = useMemo(
+    () => myBookings.length < WEEKLY_LIMIT,
+    [myBookings]
+  );
   const [bookingInProgress, setBookingInProgress] = useState(false);
 
 
@@ -120,12 +125,15 @@ export default function BookingsHub() {
 
   const handleBook = useCallback(
     async (slotId) => {
-      if (myBookings.length >= 4) {
+      const WEEKLY_LIMIT = 4;
+
+      if (!canBookMore) {
         toast.info(t("bookingsHub.errors.weeklyLimitReached"), {
           toastId: "weekly-limit",
         });
         return;
       }
+
 
       if (bookingInProgress) return;
 
@@ -176,6 +184,9 @@ export default function BookingsHub() {
         }
 
         await Api.delete(`/bookings/${bookingIdLocal}`);
+        setMyBookings((prev) =>
+          prev.filter((id) => id !== slotId)
+        );
         toast.success(t("bookingsHub.toasts.cancelSuccess"));
         await fetchData();
       } catch (err) {
