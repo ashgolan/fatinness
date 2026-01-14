@@ -10,14 +10,19 @@ import { ZONE } from "../utils/time.js";
 /**
  * Checks if a slot overlaps with existing ones
  */
-export async function hasOverlap(startAtUTC, endAtUTC) {
-  const overlap = await Slot.findOne({
-    startAt: { $lt: endAtUTC },
-    endAt: { $gt: startAtUTC },
-  }).select("_id");
+export async function hasOverlap(startAtUTC, endAtUTC, session = null) {
+  const overlap = await Slot.findOne(
+    {
+      startAt: { $lt: endAtUTC },
+      endAt: { $gt: startAtUTC },
+    },
+    "_id",
+    session ? { session } : undefined
+  );
 
   return !!overlap;
 }
+
 
 // =====================================================
 // 🔹 GET /admin/slots/week?start=YYYY-MM-DD
