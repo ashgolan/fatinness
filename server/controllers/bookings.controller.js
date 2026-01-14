@@ -57,22 +57,41 @@ export const createBooking = async (req, res) => {
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
 
-    const userBookingsThisWeek = await Booking.countDocuments(
+    const userBookingsThisWeek = await Booking.aggregate([
       {
-        user: user._id,
-        status: "booked",
-        createdAt: {
-          $gte: weekStartLocal.toUTC().toJSDate(),
-          $lte: weekEndLocal.toUTC().toJSDate(),
+        $match: {
+          user: user._id,
+          status: "booked",
         },
       },
-      { session }
-    );
+      {
+        $lookup: {
+          from: "slots",
+          localField: "slot",
+          foreignField: "_id",
+          as: "slot",
+        },
+      },
+      { $unwind: "$slot" },
+      {
+        $match: {
+          "slot.startAt": {
+            $gte: weekStartLocal.toUTC().toJSDate(),
+            $lte: weekEndLocal.toUTC().toJSDate(),
+          },
+        },
+      },
+      { $count: "count" },
+    ]);
 
-    if (userBookingsThisWeek >= allowed) {
+    const count = userBookingsThisWeek[0]?.count || 0;
+
+
+    if (count >= allowed) {
       await session.abortTransaction();
       return res.status(403).json({ code: "ADMIN_BOOKING_WEEKLY_LIMIT" });
     }
+
 
     // ============================
     // 🪑 سعة الحصة
