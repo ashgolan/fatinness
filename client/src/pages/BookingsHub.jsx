@@ -125,7 +125,6 @@ export default function BookingsHub() {
 
   const handleBook = useCallback(
     async (slotId) => {
-      const WEEKLY_LIMIT = 4;
 
       if (!canBookMore) {
         toast.info(t("bookingsHub.errors.weeklyLimitReached"), {
@@ -153,7 +152,7 @@ export default function BookingsHub() {
         setBookingInProgress(false);
       }
     },
-    [fetchData, bookingInProgress]
+    [fetchData, bookingInProgress, canBookMore]
   );
 
 
