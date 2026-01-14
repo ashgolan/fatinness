@@ -130,7 +130,12 @@ export const applyTemplate = async (req, res) => {
         { zone: ZONE }
       ).toUTC();
 
-      if (!startAtUTC.isValid || !endAtUTC.isValid || endAtUTC <= startAtUTC) {
+      if (!startAtUTC.isValid || !endAtUTC.isValid) {
+        skippedDuplicate++;
+        continue;
+      }
+
+      if (endAtUTC <= startAtUTC) {
         skippedDuplicate++;
         continue;
       }
@@ -182,7 +187,9 @@ export const applyTemplate = async (req, res) => {
       created: createdSlots.length,
       skippedOverlap,
       skippedDuplicate,
+      skippedTotal: skippedOverlap + skippedDuplicate,
     });
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
