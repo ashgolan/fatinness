@@ -162,7 +162,8 @@
     "loading": "Loading data...",
     "errors": {
       "fetch": "Failed to load data",
-      "notFoundToCancel": "Booking not found to cancel"
+      "notFoundToCancel": "Booking not found to cancel",
+      "weeklyLimitReached": "You have reached the maximum number of bookings for this week"
     },
     "confirmCancel": "Are you sure you want to cancel this booking?",
     "stats": {

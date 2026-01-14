@@ -555,68 +555,6 @@ export default function Profile() {
           )}
         </div>
 
-        {/* ===============================
-            ADD WEIGHT
-        =============================== */}
-        {/* <div
-          style={{
-            background: cardBg,
-            borderRadius: "24px",
-            padding: "20px",
-            marginBottom: "40px",
-          }}
-        >
-          <h2>{t("profile.sections.addWeight")}</h2>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleAddWeight();
-            }}
-          >
-            <input
-              type="number"
-              step="0.1"
-              placeholder={t("profile.fields.weightPlaceholder")}
-              value={newWeight}
-              onChange={(e) => setNewWeight(e.target.value)}
-              style={{
-                width: "100%",
-                height: "48px",
-                padding: "0 16px",
-                marginBottom: "16px",
-              }}
-            />
-
-            <textarea
-              placeholder={t("profile.fields.notePlaceholder")}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              style={{
-                width: "100%",
-                height: "64px",
-                padding: "12px 16px",
-              }}
-            />
-
-            <button
-              type="submit"
-              disabled={saving || !newWeight}
-              style={{
-                width: "100%",
-                height: "48px",
-                marginTop: "16px",
-                background: "linear-gradient(135deg, #a855f7 0%, #6366f1 100%)",
-                color: "#fff",
-                borderRadius: "8px",
-                fontWeight: "600",
-                opacity: saving || !newWeight ? 0.6 : 1,
-              }}
-            >
-              {saving ? t("profile.buttons.saving") : t("profile.buttons.save")}
-            </button>
-          </form>
-        </div> */}
       </div>
       <button
         onClick={() => setOpenAddWeight(true)}

@@ -56,6 +56,9 @@ export default function BookingsHub() {
     t("weekdays.saturday"),
   ];
 
+  const [bookingInProgress, setBookingInProgress] = useState(false);
+
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
@@ -117,21 +120,32 @@ export default function BookingsHub() {
 
   const handleBook = useCallback(
     async (slotId) => {
-      console.log("BOOKING SLOT:", slotId);
+      if (myBookings.length >= 4) {
+        toast.info(t("bookingsHub.errors.weeklyLimitReached"));
+        return;
+      }
+
+      if (bookingInProgress) return;
+
+      setBookingInProgress(true);
       setBookingId(slotId);
+
       try {
         const res = await Api.post("/bookings", { slotId });
-        console.log("BOOK RESPONSE:", res.data); // <<<<<< أريد هذا
+        console.log("BOOK RESPONSE:", res.data);
+
         toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
-        handleServerError(err); // ⬅️ الآن سيظهر التوست الصحيح
+        handleServerError(err);
       } finally {
         setBookingId(null);
+        setBookingInProgress(false);
       }
     },
-    [fetchData]
+    [fetchData, bookingInProgress]
   );
+
 
   const handleCancel = useCallback(
     async (slotId, fromMyBookings = false, bookingIdDirect = null) => {
@@ -481,30 +495,30 @@ function AvailableView({
                 border: isToday
                   ? "2.8px solid #0f766e" // 🔷 لون اليوم الجديد (تركوازي داكن)
                   : isSelected
-                  ? `2px solid ${BRAND.gold}`
-                  : isAvailable
-                  ? `2px solid ${BRAND.purple}CC`
-                  : mode === "dark"
-                  ? "2px solid rgba(255,255,255,0.08)"
-                  : "2px solid #ddd",
+                    ? `2px solid ${BRAND.gold}`
+                    : isAvailable
+                      ? `2px solid ${BRAND.purple}CC`
+                      : mode === "dark"
+                        ? "2px solid rgba(255,255,255,0.08)"
+                        : "2px solid #ddd",
 
                 boxShadow: isToday
                   ? "0 0 6px rgba(15,118,110,0.35), inset 0 0 3px rgba(15,118,110,0.15)"
                   : isSelected
-                  ? `0 0 8px ${BRAND.gold}44`
-                  : "none",
+                    ? `0 0 8px ${BRAND.gold}44`
+                    : "none",
 
                 background: isToday
                   ? "rgba(84, 126, 122, 0.05)"
                   : mode === "dark"
-                  ? "rgba(255,255,255,0.03)"
-                  : "rgba(255,255,255,0.8)",
+                    ? "rgba(255,255,255,0.03)"
+                    : "rgba(255,255,255,0.8)",
 
                 color: isToday
                   ? "#0f766e"
                   : isAvailable
-                  ? BRAND.purple
-                  : "#999",
+                    ? BRAND.purple
+                    : "#999",
 
                 display: "flex",
                 alignItems: "center",
@@ -633,8 +647,8 @@ function AvailableView({
                       border: isBooked
                         ? "2px solid #10b981"
                         : isFull
-                        ? `2px solid ${mode === "dark" ? "#444" : "#ddd"}`
-                        : `2px solid ${BRAND.purple}`,
+                          ? `2px solid ${mode === "dark" ? "#444" : "#ddd"}`
+                          : `2px solid ${BRAND.purple}`,
                       transition: "all 0.3s ease",
                     }}
                   >
@@ -662,7 +676,11 @@ function AvailableView({
                       onClick={() =>
                         isBooked ? handleCancel(slot._id) : handleBook(slot._id)
                       }
-                      disabled={isProcessing || (isFull && !isBooked)}
+                      disabled={
+                        isProcessing ||
+                        bookingInProgress ||
+                        (isFull && !isBooked)
+                      }
                       style={{
                         width: "100%",
                         padding: "10px 0",
@@ -674,10 +692,10 @@ function AvailableView({
                         background: isProcessing
                           ? "#999"
                           : isFull && !isBooked
-                          ? "#999"
-                          : isBooked
-                          ? "linear-gradient(135deg, #10b981, #059669)"
-                          : `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
+                            ? "#999"
+                            : isBooked
+                              ? "linear-gradient(135deg, #10b981, #059669)"
+                              : `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
                         cursor:
                           isProcessing || (isFull && !isBooked)
                             ? "not-allowed"
@@ -685,13 +703,14 @@ function AvailableView({
                         transition: "all 0.3s ease",
                       }}
                     >
-                      {isProcessing
+                      {bookingInProgress
                         ? t("bookingsHub.buttons.processing")
                         : isBooked
-                        ? t("bookingsHub.buttons.booked")
-                        : isFull
-                        ? t("bookingsHub.buttons.full")
-                        : t("bookingsHub.buttons.bookNow")}
+                          ? t("bookingsHub.buttons.booked")
+                          : isFull
+                            ? t("bookingsHub.buttons.full")
+                            : t("bookingsHub.buttons.bookNow")}
+
                     </button>
                   </div>
                 );

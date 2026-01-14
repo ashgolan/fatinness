@@ -11,109 +11,123 @@ import { ZONE } from "../utils/time.js";
 /**
  * 🔹 إنشاء حجز جديد (UTC-safe)
  */
+import mongoose from "mongoose";
+import { DateTime } from "luxon";
+
 export const createBooking = async (req, res) => {
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
+
     const user = req.user;
-    const { slotId, paymentRef } = req.body; // ✅ هذا كان ناقصًا
+    const { slotId, paymentRef } = req.body;
+
     if (!slotId) {
-      return res.status(400).json({
-        code: "BOOKING_SLOT_ID_REQUIRED",
-      });
+      await session.abortTransaction();
+      return res.status(400).json({ code: "BOOKING_SLOT_ID_REQUIRED" });
     }
+
     if (
       user.subscriptionStatus === "expired" ||
       (user.subscriptionEnd && user.subscriptionEnd < new Date())
     ) {
-      return res.status(403).json({
-        code: "SUBSCRIPTION_EXPIRED",
-      });
+      await session.abortTransaction();
+      return res.status(403).json({ code: "SUBSCRIPTION_EXPIRED" });
     }
-    const slot = await Slot.findById(slotId);
+
+    const slot = await Slot.findById(slotId).session(session);
     if (!slot || slot.isBlocked) {
+      await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
     }
 
-    // ⏱️ الآن
     const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
-
-    // ⛔ لا يمكن حجز حصة ماضية
     if (!slot.startAt || slot.startAt <= nowUTC) {
+      await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_PAST" });
     }
 
     // ============================
-    // 📅 حد الحجوزات الأسبوعية (الأحد)
+    // 📅 حد الحجوزات الأسبوعية
     // ============================
     const slotLocal = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
     const weekStartLocal = slotLocal.startOf("week").minus({ days: 1 });
     const weekEndLocal = weekStartLocal.plus({ days: 6 }).endOf("day");
 
-    const userBookingsThisWeek = await Booking.countDocuments({
-      user: user._id,
-      status: "booked",
-      createdAt: {
-        $gte: weekStartLocal.toUTC().toJSDate(),
-        $lte: weekEndLocal.toUTC().toJSDate(),
-      },
-    });
-
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
 
+    const userBookingsThisWeek = await Booking.countDocuments(
+      {
+        user: user._id,
+        status: "booked",
+        createdAt: {
+          $gte: weekStartLocal.toUTC().toJSDate(),
+          $lte: weekEndLocal.toUTC().toJSDate(),
+        },
+      },
+      { session }
+    );
+
     if (userBookingsThisWeek >= allowed) {
+      await session.abortTransaction();
       return res.status(403).json({ code: "ADMIN_BOOKING_WEEKLY_LIMIT" });
     }
 
     // ============================
     // 🪑 سعة الحصة
     // ============================
-    const slotBookingsCount = await Booking.countDocuments({
-      slot: slot._id,
-      status: "booked",
-    });
+    const slotBookingsCount = await Booking.countDocuments(
+      { slot: slot._id, status: "booked" },
+      { session }
+    );
 
     if (slotBookingsCount >= (slot.capacity || 9999)) {
+      await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_FULL" });
     }
 
     // ============================
     // ✅ إنشاء الحجز
     // ============================
-    const booking = await Booking.create({
-      user: user._id,
-      slot: slot._id,
-      paymentRef,
-    });
+    const booking = await Booking.create(
+      [
+        {
+          user: user._id,
+          slot: slot._id,
+          paymentRef,
+        },
+      ],
+      { session }
+    );
 
-    // ============================
-    // 📅 Google Calendar
-    // ============================
+    await session.commitTransaction();
+    session.endSession();
+
+    // 🔔 أشياء غير حرجة خارج الترانزاكشن
     if (user.google?.accessToken) {
-      try {
-        await createGoogleEvent(user, booking);
-      } catch (err) {
-        console.warn("⚠️ Google Calendar skipped:", err.message);
-      }
+      createGoogleEvent(user, booking[0]).catch(() => { });
     }
 
-    // ============================
-    // 🔔 Reminder (يعتمد على startAt)
-    // ============================
-    try {
-      await scheduleReminder(booking._id, slot.startAt);
-    } catch (err) {
-      console.warn("⚠️ Reminder scheduling failed:", err.message);
-    }
+    scheduleReminder(booking[0]._id, slot.startAt).catch(() => { });
 
-    res.status(201).json({
+    return res.status(201).json({
       code: "ADMIN_BOOKING_CREATED",
-      booking,
+      booking: booking[0],
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
     console.error("❌ Error in createBooking:", error);
-    res.status(500).json({ code: "ADMIN_BOOKING_CREATE_ERROR" });
+
+    return res.status(500).json({
+      code: "ADMIN_BOOKING_CREATE_ERROR",
+    });
   }
 };
+
 
 /**
  * 🔹 إلغاء الحجز (UTC-safe)

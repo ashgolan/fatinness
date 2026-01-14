@@ -162,7 +162,8 @@
     "loading": "טוען נתונים...",
     "errors": {
       "fetch": "טעינת הנתונים נכשלה",
-      "notFoundToCancel": "לא נמצאה הזמנה לביטול"
+      "notFoundToCancel": "לא נמצאה הזמנה לביטול",
+      "weeklyLimitReached": "הגעת למספר המרבי של הזמנות לשבוע זה"
     },
     "confirmCancel": "האם את בטוחה שברצונך לבטל הזמנה זו?",
     "stats": {
