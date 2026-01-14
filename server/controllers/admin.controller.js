@@ -78,8 +78,126 @@ export const createWeekTemplate = async (req, res) => {
 // 🟦 تطبيق قالب أسبوعي (UTC-safe)
 // =======================
 
-export const applyTemplate = async (req, res) => {
+// export const applyTemplate = async (req, res) => {
 
+//   const { templateId, startDate } = req.body;
+
+//   if (!templateId || !startDate) {
+//     return res.status(400).json({ code: "ADMIN_TEMPLATE_REQUIRED" });
+//   }
+
+//   const startLocal = DateTime.fromISO(startDate, { zone: ZONE });
+//   if (!startLocal.isValid) {
+//     return res.status(400).json({ code: "ADMIN_TEMPLATE_INVALID_START_DATE" });
+//   }
+
+//   const session = await mongoose.startSession();
+
+//   try {
+//     session.startTransaction();
+
+//     const template = await WeekTemplate.findById(templateId).session(session);
+//     if (!template) {
+//       await session.abortTransaction();
+//       session.endSession();
+//       return res.status(404).json({ code: "ADMIN_TEMPLATE_NOT_FOUND" });
+//     }
+//     // 2️⃣ تاريخ البداية (محلي – الأحد)
+//     const startLocal = DateTime.fromISO(startDate, { zone: ZONE });
+//     if (!startLocal.isValid) {
+//       return res
+//         .status(400)
+//         .json({ code: "ADMIN_TEMPLATE_INVALID_START_DATE" });
+//     }
+
+//     const createdSlots = [];
+//     let skippedOverlap = 0;
+//     let skippedDuplicate = 0;
+
+//     // 3️⃣ إنشاء الحصص من القالب
+//     for (const tpl of template.slots) {
+//       // اليوم المحلي للحصة
+//       const dayLocal = startLocal.plus({ days: tpl.dateOffset || 0 });
+
+//       // وقت البداية والنهاية (محلي → UTC)
+//       const startAtUTC = DateTime.fromISO(
+//         `${dayLocal.toISODate()}T${tpl.startTime}`,
+//         { zone: ZONE }
+//       ).toUTC();
+
+//       const endAtUTC = DateTime.fromISO(
+//         `${dayLocal.toISODate()}T${tpl.endTime}`,
+//         { zone: ZONE }
+//       ).toUTC();
+
+//       if (!startAtUTC.isValid || !endAtUTC.isValid) {
+//         skippedDuplicate++;
+//         continue;
+//       }
+
+//       if (endAtUTC <= startAtUTC) {
+//         skippedDuplicate++;
+//         continue;
+//       }
+
+//       // 4️⃣ فحص التداخل (UTC)
+//       if (await hasOverlap(
+//         startAtUTC.toJSDate(),
+//         endAtUTC.toJSDate(),
+//         session
+//       )) {
+//         skippedOverlap++;
+//         continue;
+//       }
+
+//       // 5️⃣ منع التكرار
+//       const exists = await Slot.findOne({
+//         startAt: startAtUTC.toJSDate(),
+//         endAt: endAtUTC.toJSDate(),
+//       }).session(session);
+
+
+//       if (exists) {
+//         skippedDuplicate++;
+//         continue;
+//       }
+
+//       // 6️⃣ إنشاء الحصة
+//       const [slot] = await Slot.create(
+//         [
+//           {
+//             date: startAtUTC.startOf("day").toJSDate(),
+//             startAt: startAtUTC.toJSDate(),
+//             endAt: endAtUTC.toJSDate(),
+//             capacity: tpl.capacity,
+//             templateId: template._id,
+//           },
+//         ],
+//         { session }
+//       );
+
+//       createdSlots.push(slot._id);
+//     }
+//     await session.commitTransaction();
+//     session.endSession();
+//     // 7️⃣ الرد
+//     return res.json({
+//       code: "ADMIN_TEMPLATE_APPLIED",
+//       created: createdSlots.length,
+//       skippedOverlap,
+//       skippedDuplicate,
+//       skippedTotal: skippedOverlap + skippedDuplicate,
+//     });
+
+//   } catch (error) {
+//     await session.abortTransaction();
+//     session.endSession();
+//     console.error("❌ applyTemplate error:", error);
+//     return res.status(500).json({ code: "ADMIN_TEMPLATE_APPLY_ERROR" });
+//   }
+// };
+
+export const applyTemplate = async (req, res) => {
   const { templateId, startDate } = req.body;
 
   if (!templateId || !startDate) {
@@ -102,24 +220,27 @@ export const applyTemplate = async (req, res) => {
       session.endSession();
       return res.status(404).json({ code: "ADMIN_TEMPLATE_NOT_FOUND" });
     }
-    // 2️⃣ تاريخ البداية (محلي – الأحد)
-    const startLocal = DateTime.fromISO(startDate, { zone: ZONE });
-    if (!startLocal.isValid) {
-      return res
-        .status(400)
-        .json({ code: "ADMIN_TEMPLATE_INVALID_START_DATE" });
-    }
 
     const createdSlots = [];
     let skippedOverlap = 0;
     let skippedDuplicate = 0;
 
-    // 3️⃣ إنشاء الحصص من القالب
+    // 🔹 لحفظ الحصص المقبولة داخل نفس العملية (template ↔ template)
+    const localRanges = [];
+
+    // 🔹 فحص تداخل محلي
+    const hasLocalOverlap = (start, end) => {
+      return localRanges.some(
+        (r) => start < r.end && end > r.start
+      );
+    };
+
+    // =========================
+    // إنشاء الحصص من القالب
+    // =========================
     for (const tpl of template.slots) {
-      // اليوم المحلي للحصة
       const dayLocal = startLocal.plus({ days: tpl.dateOffset || 0 });
 
-      // وقت البداية والنهاية (محلي → UTC)
       const startAtUTC = DateTime.fromISO(
         `${dayLocal.toISODate()}T${tpl.startTime}`,
         { zone: ZONE }
@@ -130,39 +251,48 @@ export const applyTemplate = async (req, res) => {
         { zone: ZONE }
       ).toUTC();
 
+      // ❌ وقت غير صالح
       if (!startAtUTC.isValid || !endAtUTC.isValid) {
         skippedDuplicate++;
         continue;
       }
 
+      // ❌ نهاية قبل البداية
       if (endAtUTC <= startAtUTC) {
-        skippedDuplicate++;
-        continue;
-      }
-
-      // 4️⃣ فحص التداخل (UTC)
-      if (await hasOverlap(
-        startAtUTC.toJSDate(),
-        endAtUTC.toJSDate(),
-        session
-      )) {
         skippedOverlap++;
         continue;
       }
 
-      // 5️⃣ منع التكرار
+      // ❌ تداخل داخل نفس القالب
+      if (hasLocalOverlap(startAtUTC, endAtUTC)) {
+        skippedOverlap++;
+        continue;
+      }
+
+      // ❌ تداخل مع حصص موجودة في قاعدة البيانات
+      if (
+        await hasOverlap(
+          startAtUTC.toJSDate(),
+          endAtUTC.toJSDate(),
+          session
+        )
+      ) {
+        skippedOverlap++;
+        continue;
+      }
+
+      // ❌ تكرار تام (نفس البداية والنهاية)
       const exists = await Slot.findOne({
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),
       }).session(session);
-
 
       if (exists) {
         skippedDuplicate++;
         continue;
       }
 
-      // 6️⃣ إنشاء الحصة
+      // ✅ إنشاء الحصة
       const [slot] = await Slot.create(
         [
           {
@@ -176,12 +306,18 @@ export const applyTemplate = async (req, res) => {
         { session }
       );
 
+      // حفظها للفحص المحلي
+      localRanges.push({
+        start: startAtUTC,
+        end: endAtUTC,
+      });
+
       createdSlots.push(slot._id);
     }
+
     await session.commitTransaction();
     session.endSession();
 
-    // 7️⃣ الرد
     return res.json({
       code: "ADMIN_TEMPLATE_APPLIED",
       created: createdSlots.length,
@@ -189,7 +325,6 @@ export const applyTemplate = async (req, res) => {
       skippedDuplicate,
       skippedTotal: skippedOverlap + skippedDuplicate,
     });
-
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
@@ -197,6 +332,8 @@ export const applyTemplate = async (req, res) => {
     return res.status(500).json({ code: "ADMIN_TEMPLATE_APPLY_ERROR" });
   }
 };
+
+
 
 // =======================
 // 🟦 تمكين الحجز الإضافي
