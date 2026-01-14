@@ -121,7 +121,9 @@ export default function BookingsHub() {
   const handleBook = useCallback(
     async (slotId) => {
       if (myBookings.length >= 4) {
-        toast.info(t("bookingsHub.errors.weeklyLimitReached"));
+        toast.info(t("bookingsHub.errors.weeklyLimitReached"), {
+          toastId: "weekly-limit",
+        });
         return;
       }
 
@@ -159,8 +161,9 @@ export default function BookingsHub() {
             (b) => b.slot._id === slotId && b.status === "booked"
           );
           if (!booking) {
-            toast.error(t("bookingsHub.errors.notFoundToCancel"));
-            return;
+            toast.error(t("bookingsHub.errors.notFoundToCancel"), {
+              toastId: "cancel-not-found",
+            }); return;
           }
           bookingIdLocal = booking._id;
         }
@@ -188,7 +191,9 @@ export default function BookingsHub() {
   const handleRebook = async (slotId) => {
     try {
       await Api.post("/bookings", { slotId });
-      toast.success(t("bookingsHub.toasts.rebookSuccess"));
+      toast.success(t("bookingsHub.toasts.bookSuccess"), {
+        toastId: "book-success",
+      });
       await fetchData();
     } catch (err) {
       handleServerError(err);
@@ -705,7 +710,7 @@ function AvailableView({
                         transition: "all 0.3s ease",
                       }}
                     >
-                      {bookingInProgress
+                      {isProcessing
                         ? t("bookingsHub.buttons.processing")
                         : isBooked
                           ? t("bookingsHub.buttons.booked")
