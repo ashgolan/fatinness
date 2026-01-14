@@ -133,21 +133,21 @@ export default function AdminSchedule() {
   };
 
   const fetchNextWeek = async () => {
+    if (!serverWeekStart) return;
+
     try {
       const { data } = await Api.get("/admin/slots/week", {
         params: {
-          start: fmt(addDays(serverWeekStart, 7)), // ✅ هذا الصحيح
+          start: fmt(addDays(serverWeekStart, 7)),
         },
       });
-
-      console.log("NEXT WEEK DATA:", data);
-
       setNextWeekData(data);
       setServerNextWeekStart(new Date(data.weekStart));
     } catch (err) {
       handleServerError(err);
     }
   };
+
 
   useEffect(() => {
     fetchCurrentWeek();
@@ -237,11 +237,10 @@ export default function AdminSchedule() {
     return data?.created ?? items.length;
   };
   const saveAllChanges = async () => {
-    const hasCurrent =
-      Object.keys(currentEdits).length > 0;
+    const hasCurrent = Object.values(currentEdits)
+      .some(slots => slots.some(isValidSlot));
 
-    const hasNext =
-      nextWeek.some((d) => d.items.length > 0);
+    const hasNext = nextWeek.some(d => d.items.some(isValidSlot));
 
     if (!hasCurrent && !hasNext) {
       return toast.info(t("adminSchedule.info.noValidChanges"));
@@ -253,45 +252,59 @@ export default function AdminSchedule() {
       let createdCurrent = 0;
       let createdNext = 0;
 
-      // 🔹 الأسبوع الحالي
       if (hasCurrent) {
         const changes = [];
-        Object.keys(currentEdits).forEach((key) => {
-          currentEdits[key].forEach((s) => {
-            if (s.startTime && s.endTime) {
-              changes.push({
-                date: key,
-                startTime: s.startTime,
-                endTime: s.endTime,
-                capacity: Number(s.capacity) || 20,
-              });
+
+        Object.entries(currentEdits).forEach(([date, slots]) => {
+          slots.forEach(s => {
+            if (isValidSlot(s)) {
+              changes.push({ date, ...s, capacity: Number(s.capacity) || 20 });
             }
           });
         });
 
-        await Promise.all(changes.map((c) => Api.post("/admin/slots", c)));
-        createdCurrent = changes.length;
+        let successCount = 0;
+
+        for (const c of changes) {
+          try {
+            await Api.post("/admin/slots", c);
+            successCount++;
+          } catch (err) {
+            if (successCount > 0) {
+              toast.warning(
+                t("adminSchedule.partialSave", { count: successCount })
+              );
+            }
+            throw err;
+          }
+        }
+
+        createdCurrent = successCount;
         setCurrentEdits({});
       }
 
-      // 🔸 الأسبوع القادم
       if (hasNext) {
         createdNext = await saveNextWeekInternal();
-        await fetchNextWeek();
       }
 
-      toast.success(
-        t("adminSchedule.success.savedAllDetailed", {
-          current: createdCurrent,
-          next: createdNext,
-        })
-      );
+      if (createdCurrent > 0 || createdNext > 0) {
+        toast.success(
+          t("adminSchedule.success.savedAllDetailed", {
+            current: createdCurrent,
+            next: createdNext,
+          })
+        );
+      }
 
-      await fetchCurrentWeek();
     } catch (err) {
       handleServerError(err);
+      setCurrentEdits({});
     } finally {
       setSaving(false);
+      await Promise.all([
+        fetchCurrentWeek(),
+        fetchNextWeek(),
+      ]);
     }
   };
 
@@ -323,11 +336,12 @@ export default function AdminSchedule() {
 
 
 
-  const hasUnsavedChanges =
-    Object.values(currentEdits).some((slots) =>
+  const hasUnsavedChanges = useMemo(() =>
+    Object.values(currentEdits).some(slots =>
       slots.some(isValidSlot)
     ) ||
-    nextWeek.some((d) => d.items.some(isValidSlot));
+    nextWeek.some(d => d.items.some(isValidSlot))
+    , [currentEdits, nextWeek]);
 
   // ===================== واجهة الصفحة =====================
   return (

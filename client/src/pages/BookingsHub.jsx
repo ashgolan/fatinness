@@ -355,6 +355,7 @@ export default function BookingsHub() {
                 bookingId,
                 toLocalKey,
                 t,
+                bookingInProgress,   // ✅ أضف هذا
 
                 // ⬇️ نمرر المرجع
                 slotsRef,
@@ -404,6 +405,7 @@ function AvailableView({
   bookingId,
   toLocalKey,
   t,
+  bookingInProgress, // ✅ أضف هذا
 
   // ⬇️ المرجع القادم من الأعلى
   slotsRef,
