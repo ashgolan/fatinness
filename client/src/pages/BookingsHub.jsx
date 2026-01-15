@@ -490,33 +490,23 @@ function AvailableView({
                 borderRadius: 18,
 
                 /* 🔴 أولوية اليوم الحالي */
-                border: isToday
-                  ? "2.8px solid #0f766e" // 🔷 لون اليوم الجديد (تركوازي داكن)
-                  : isSelected
-                    ? `2px solid ${BRAND.gold}`
-                    : isAvailable
-                      ? `2px solid ${BRAND.purple}CC`
-                      : mode === "dark"
-                        ? "2px solid rgba(255,255,255,0.08)"
-                        : "2px solid #ddd",
-
-                boxShadow: isToday
-                  ? "0 0 6px rgba(15,118,110,0.35), inset 0 0 3px rgba(15,118,110,0.15)"
-                  : isSelected
-                    ? `0 0 8px ${BRAND.gold}44`
-                    : "none",
-
-                background: isToday
-                  ? "rgba(84, 126, 122, 0.05)"
-                  : mode === "dark"
-                    ? "rgba(255,255,255,0.03)"
-                    : "rgba(255,255,255,0.8)",
-
-                color: isToday
-                  ? "#0f766e"
+                border: isSelected
+                  ? `2px solid ${BRAND.gold}`
                   : isAvailable
-                    ? BRAND.purple
-                    : "#999",
+                    ? `2px solid ${BRAND.purple}CC`
+                    : mode === "dark"
+                      ? "2px solid rgba(255,255,255,0.08)"
+                      : "2px solid #ddd",
+
+
+                boxShadow: isSelected ? `0 0 8px ${BRAND.gold}44` : "none",
+
+
+                background: mode === "dark"
+                  ? "rgba(255,255,255,0.03)"
+                  : "rgba(255,255,255,0.8)",
+
+                color: isAvailable ? BRAND.purple : "#999",
 
                 display: "flex",
                 alignItems: "center",
@@ -528,7 +518,25 @@ function AvailableView({
                 paddingTop: 10,
                 paddingRight: 4,
               }}
+
             >
+              {isToday && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 7,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
+                    boxShadow: "0 0 10px rgba(236,72,153,0.35)",
+                  }}
+                />
+              )}
+
+
               <div
                 style={{
                   fontSize: 11,
