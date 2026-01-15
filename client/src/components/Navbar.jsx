@@ -420,6 +420,7 @@ export default function Navbar() {
           <IconButton
             onClick={() => setDrawerOpen(true)}
             sx={{
+              display: { xs: "flex", md: "none" }, // ✅ هذا هو السطر المهم
               color: mode === "dark" ? BRAND.textDark : "#333",
               "&:hover": {
                 backgroundColor:
@@ -428,10 +429,10 @@ export default function Navbar() {
                     : "rgba(160,24,96,0.08)",
               },
             }}
-
           >
             <MenuIcon />
           </IconButton>
+
         </Toolbar>
       </AppBar>
 
