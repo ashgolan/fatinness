@@ -16,9 +16,9 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
-import { registerFcmToken } from "../firebase/registerFcmToken";
+// import { registerFcmToken } from "../firebase/registerFcmToken";
 import { Button, CircularProgress } from "@mui/material";
-import SyncIcon from "@mui/icons-material/Sync";
+// import SyncIcon from "@mui/icons-material/Sync";
 ChartJS.register(
   LineElement,
   CategoryScale,
@@ -38,61 +38,61 @@ export default function Profile() {
   const [newWeight, setNewWeight] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
-  const [transferring, setTransferring] = useState(false);
+  // const [transferring, setTransferring] = useState(false);
 
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
 
   const [openAddWeight, setOpenAddWeight] = useState(false);
 
-  const [fcmStatus, setFcmStatus] = useState({
-    checked: false,
-    ownedByCurrentUser: true,
-  });
+  // const [fcmStatus, setFcmStatus] = useState({
+  //   checked: false,
+  //   ownedByCurrentUser: true,
+  // });
 
   const [bmiIndicator, setBmiIndicator] = useState(0);
 
 
 
-  const checkFcmOwnership = async () => {
-    try {
-      const token = await registerFcmToken({ silent: true });
-      if (!token) {
-        setFcmStatus({ checked: true, ownedByCurrentUser: false });
-        return;
-      }
+  // const checkFcmOwnership = async () => {
+  //   try {
+  //     const token = await registerFcmToken({ silent: true });
+  //     if (!token) {
+  //       setFcmStatus({ checked: true, ownedByCurrentUser: false });
+  //       return;
+  //     }
 
-      const { data } = await Api.post("/users/fcm/check", {
-        fcmToken: token,
-      });
+  //     const { data } = await Api.post("/users/fcm/check", {
+  //       fcmToken: token,
+  //     });
 
-      setFcmStatus({
-        checked: true,
-        ownedByCurrentUser: data.ownedByCurrentUser === true,
-      });
-    } catch (err) {
-      console.error(err);
-      setFcmStatus({ checked: true, ownedByCurrentUser: false });
-    }
-  };
+  //     setFcmStatus({
+  //       checked: true,
+  //       ownedByCurrentUser: data.ownedByCurrentUser === true,
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //     setFcmStatus({ checked: true, ownedByCurrentUser: false });
+  //   }
+  // };
 
-  async function transferFcmToThisDevice() {
-    try {
-      setTransferring(true);
+  // async function transferFcmToThisDevice() {
+  //   try {
+  //     setTransferring(true);
 
-      const token = await registerFcmToken({ silent: true });
-      if (!token) throw new Error("NO_TOKEN");
+  //     const token = await registerFcmToken({ silent: true });
+  //     if (!token) throw new Error("NO_TOKEN");
 
-      await Api.post("/users/fcm/transfer", { fcmToken: token });
+  //     await Api.post("/users/fcm/transfer", { fcmToken: token });
 
-      // ❌ لا toast هنا
-    } catch (err) {
-      console.error(err);
-      throw err;
-    } finally {
-      setTransferring(false);
-    }
-  }
+  //     // ❌ لا toast هنا
+  //   } catch (err) {
+  //     console.error(err);
+  //     throw err;
+  //   } finally {
+  //     setTransferring(false);
+  //   }
+  // }
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -107,7 +107,7 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    fetchProfile().then(checkFcmOwnership);
+    fetchProfile();
   }, []);
 
 
@@ -540,7 +540,7 @@ export default function Profile() {
     TRANSFER NOTIFICATIONS
 =============================== */}
 
-        {fcmStatus.checked && !fcmStatus.ownedByCurrentUser && (
+        {/* {fcmStatus.checked && !fcmStatus.ownedByCurrentUser && (
           <div
             style={{
               background: cardBg,
@@ -604,7 +604,7 @@ export default function Profile() {
               )}
             </Button>
           </div>
-        )}
+        )} */}
         {/* ===============================
             CHART
         =============================== */}
