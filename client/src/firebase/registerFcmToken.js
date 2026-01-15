@@ -154,31 +154,35 @@ export async function checkFcmOwnership() {
 }
 
 const messaging = getMessaging(app);
+
 onMessage(messaging, (payload) => {
   console.log("📩 FCM foreground message:", payload);
 
   if (!payload?.notification?.title) return;
 
   const isDark = document.body.classList.contains("dark");
+  const adminLabel = i18n.t("notifications.admin");
 
   toast.info(
-    <div style={{ textAlign: "start", lineHeight: "1.4" }}>
+    <div style={{ textAlign: "start", lineHeight: "1.5" }}>
+      {/* السطر الأول */}
       <div
         style={{
           fontWeight: 700,
-          marginBottom: 4,
+          marginBottom: 6,
           color: isDark ? "#fbbf24" : "#7c3aed",
         }}
       >
-        🔔 {payload.notification.title}
+        {adminLabel} : {payload.notification.title}
       </div>
 
+      {/* السطر الثاني */}
       <div style={{ color: isDark ? "#eee" : "#333" }}>
         {payload.notification.body || ""}
       </div>
     </div>,
     {
-      containerId: "fcm",   // 🔥 المفتاح
+      containerId: "fcm",
       autoClose: false,
       closeButton: true,
     }

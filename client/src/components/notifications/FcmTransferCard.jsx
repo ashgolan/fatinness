@@ -22,6 +22,13 @@ export default function FcmTransferCard() {
         checked: false,
         ownedByCurrentUser: true,
     });
+    const handleTransferClick = () => {
+        if (transferring) return;
+
+        if (!window.confirm(t("profile.notifications.confirmTransfer"))) return;
+
+        transferFcmToThisDevice();
+    };
 
     // ===== نفس دالة البروفايل =====
     const checkFcmOwnership = async (forcedToken) => {
@@ -97,32 +104,32 @@ export default function FcmTransferCard() {
             </p>
 
             <Button
+                fullWidth                    // ✅ يزيد مساحة النقر (اختياري لكن ممتاز UX)
                 variant="contained"
-                startIcon={!transferring && <SyncIcon />}
                 disabled={transferring}
-                onClick={() => {
-                    if (!window.confirm(t("profile.notifications.confirmTransfer")))
-                        return;
-                    transferFcmToThisDevice();
-                }}
+                onClick={handleTransferClick}
+                startIcon={
+                    transferring ? (
+                        <CircularProgress size={18} color="inherit" />
+                    ) : (
+                        <SyncIcon />
+                    )
+                }
                 sx={{
                     borderRadius: "14px",
                     px: 3,
-                    py: 1.3,
+                    py: 1.5,
                     fontWeight: 600,
                     textTransform: "none",
                     boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                    cursor: transferring ? "not-allowed" : "pointer",
                 }}
             >
-                {transferring ? (
-                    <>
-                        <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                        {t("profile.notifications.transferring")}
-                    </>
-                ) : (
-                    t("profile.notifications.transferButton")
-                )}
+                {transferring
+                    ? t("profile.notifications.transferring")
+                    : t("profile.notifications.transferButton")}
             </Button>
+
         </div>
     );
 }

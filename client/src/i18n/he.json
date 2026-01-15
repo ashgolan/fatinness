@@ -727,6 +727,9 @@
     "email": "alaa.t.shaalan@gmail.com",
     "version": "גרסה 1.0.0"
   },
+  "notifications": {
+    "admin": "ההנהלה"
+  },
   "server": {
     "errors": {
       "ADMIN_SLOT_OVERLAP": "קיים חפיפה בין הזמנים ⛔",
