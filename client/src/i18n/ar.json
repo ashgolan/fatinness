@@ -176,8 +176,8 @@
       "myBookings": "حجوزاتي"
     },
     "views": {
-      "week": "عرض الأسبوع",
-      "month": "عرض الشهر الكامل"
+      "week": "هذا الأسبوع",
+      "month": "الأيام الـ 30 القادمة"
     },
     "slotsLabel": "حصة",
     "capacityLabel": "المقاعد",
@@ -792,9 +792,9 @@
       "CSV_EXPORT_ERROR": "فشل تصدير التقرير.",
       "BOOKING_SLOT_ID_REQUIRED": "لم يتم تحديد الحصة المراد حجزها ❌",
       "ADMIN_BOOKING_CREATE_ERROR": "حدث خطأ أثناء إنشاء الحجز.",
-      "ADMIN_BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأقصى (4) من الحجوزات الأسبوعية 🌸",
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "رقم الحصة مطلوب.",
-      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "حدث خطأ أثناء التحقق من الحد الأسبوعي."
+      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "حدث خطأ أثناء التحقق من الحد الأسبوعي.",
+      "weeklyLimitMessage": "وصلت إلى الحد الأقصى ({{max}} حصص) للأسبوع 🌸\nمن {{start}} إلى {{end}}\nيمكنك الحجز مجددًا في الأسبوع التالي 🤍"
     },
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",

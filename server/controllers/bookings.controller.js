@@ -35,6 +35,9 @@ export const createBooking = async (req, res) => {
       return res.status(403).json({ code: "SUBSCRIPTION_EXPIRED" });
     }
 
+    // ============================
+    // 📌 جلب الحصة
+    // ============================
     const slot = await Slot.findById(slotId).session(session);
     if (!slot || slot.isBlocked) {
       await session.abortTransaction();
@@ -48,7 +51,14 @@ export const createBooking = async (req, res) => {
     }
 
     // ============================
-    // 📅 حد الحجوزات الأسبوعية
+    // 📅 weekKey (الحل الذهبي)
+    // ============================
+    const slotWeekKey = DateTime
+      .fromJSDate(slot.startAt)
+      .setZone(ZONE)
+      .toFormat("kkkk-'W'WW"); // مثال: 2026-W03
+    // ============================
+    // 📅 حدود الأسبوع (لرسالة ذكية للمستخدم)
     // ============================
     const slotLocal = DateTime
       .fromJSDate(slot.startAt)
@@ -59,6 +69,7 @@ export const createBooking = async (req, res) => {
 
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
+
 
     const userBookingsThisWeek = await Booking.aggregate([
       {
@@ -77,25 +88,35 @@ export const createBooking = async (req, res) => {
       },
       { $unwind: "$slot" },
       {
-        $match: {
-          "slot.startAt": {
-            $gte: weekStartLocal.toUTC().toJSDate(),
-            $lte: weekEndLocal.toUTC().toJSDate(),
+        $addFields: {
+          weekKey: {
+            $dateToString: {
+              format: "%G-W%V", // ISO week-year + week number
+              date: "$slot.startAt",
+              timezone: ZONE,
+            },
           },
+        },
+      },
+      {
+        $match: {
+          weekKey: slotWeekKey,
         },
       },
       { $count: "count" },
     ]);
 
-
     const count = userBookingsThisWeek[0]?.count || 0;
-
 
     if (count >= allowed) {
       await session.abortTransaction();
-      return res.status(403).json({ code: "ADMIN_BOOKING_WEEKLY_LIMIT" });
+      return res.status(403).json({
+        code: "ADMIN_BOOKING_WEEKLY_LIMIT",
+        max: allowed,
+        weekStart: weekStartLocal.toISODate(), // مثال: 2026-01-21
+        weekEnd: weekEndLocal.toISODate(),     // مثال: 2026-01-27
+      });
     }
-
 
     // ============================
     // 🪑 سعة الحصة
@@ -127,7 +148,7 @@ export const createBooking = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    // 🔔 أشياء غير حرجة خارج الترانزاكشن
+    // 🔔 عمليات غير حرجة
     if (user.google?.accessToken) {
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
@@ -149,7 +170,6 @@ export const createBooking = async (req, res) => {
     });
   }
 };
-
 
 /**
  * 🔹 إلغاء الحجز (UTC-safe)

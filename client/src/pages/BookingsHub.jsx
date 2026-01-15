@@ -55,12 +55,7 @@ export default function BookingsHub() {
     t("weekdays.friday"),
     t("weekdays.saturday"),
   ];
-  const WEEKLY_LIMIT = 4;
 
-  const canBookMore = useMemo(
-    () => myBookings.length < WEEKLY_LIMIT,
-    [myBookings]
-  );
   const [bookingInProgress, setBookingInProgress] = useState(false);
 
 
@@ -71,7 +66,6 @@ export default function BookingsHub() {
         Api.get("/slots/upcoming"),
         Api.get("/bookings/me"),
       ]);
-      console.log("RAW SLOTS RESPONSE :", slotsRes.data);
 
       const rawGrouped = slotsRes.data?.slots || {};
       const grouped = {};
@@ -100,10 +94,7 @@ export default function BookingsHub() {
 
       setSlotsByDay(filtered);
 
-      console.log("SLOTS FROM SERVER:", slotsRes.data);
-
       setSlotsByDay(filtered);
-      console.log("FILTERED SLOTS:", filtered);
 
       const myActive = bookingsRes.data
         .filter((b) => b.status === "booked")
@@ -126,14 +117,6 @@ export default function BookingsHub() {
   const handleBook = useCallback(
     async (slotId) => {
 
-      if (!canBookMore) {
-        toast.info(t("bookingsHub.errors.weeklyLimitReached"), {
-          toastId: "weekly-limit",
-        });
-        return;
-      }
-
-
       if (bookingInProgress) return;
 
       setBookingInProgress(true);
@@ -152,7 +135,7 @@ export default function BookingsHub() {
         setBookingInProgress(false);
       }
     },
-    [fetchData, bookingInProgress, canBookMore]
+    [fetchData, bookingInProgress]
   );
 
 
@@ -215,20 +198,18 @@ export default function BookingsHub() {
 
   const todayKey = toLocalKey(new Date());
 
-  const year = localNow.year;
-  const month = localNow.month; // ⚠️ من 1 إلى 12
-  const daysInMonth = localNow.daysInMonth;
+  const today = DateTime.now().setZone("local").startOf("day");
 
-  const monthDates = [...Array(daysInMonth)].map(
-    (_, i) => new Date(year, month - 1, i + 1)
+  const calendarDates = [...Array(30)].map((_, i) =>
+    today.plus({ days: i }).toJSDate()
   );
+
+
   // now سبق أن عرّفناه
   // const now = DateTime.utc();
 
   // 🟢 بداية الأسبوع (الأحد)
   const startOfWeek = localNow.startOf("week");
-  // Luxon يعتبر الاثنين بداية الأسبوع افتراضيًا
-  // لذلك نعدّل لو أردنا الأحد:
 
   const startOfSundayWeek = startOfWeek.minus({ days: 1 });
 
@@ -237,7 +218,9 @@ export default function BookingsHub() {
     startOfSundayWeek.plus({ days: i }).toJSDate()
   );
 
-  const gridDates = view === "week" ? weekDates : monthDates;
+  const gridDates = view === "week"
+    ? weekDates
+    : calendarDates;
 
   const upcomingBookings = allBookings.filter(
     (b) =>
@@ -486,8 +469,6 @@ function AvailableView({
           const hasMyBooking = slotsByDay[key]?.some((s) =>
             myBookings.includes(s._id)
           );
-
-          console.log("LOOKING FOR DATE:", key, slotsByDay[key]);
 
           return (
             <div

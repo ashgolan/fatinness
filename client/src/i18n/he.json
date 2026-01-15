@@ -176,8 +176,8 @@
       "myBookings": "ההזמנות שלי"
     },
     "views": {
-      "week": "תצוגת שבוע",
-      "month": "תצוגת חודש מלא"
+      "week": "השבוע",
+      "month": "30 הימים הקרובים"
     },
     "slotsLabel": "אימון",
     "capacityLabel": "מקומות",
@@ -792,9 +792,9 @@
       "CSV_EXPORT_ERROR": "ייצוא הדוח נכשל.",
       "BOOKING_SLOT_ID_REQUIRED": "לא נבחרה חוגה להזמנה ❌",
       "ADMIN_BOOKING_CREATE_ERROR": "אירעה שגיאה בעת יצירת ההזמנה.",
-      "ADMIN_BOOKING_WEEKLY_LIMIT": "הגעת למכסת ההזמנות השבועית המרבית (4) 🌸",
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "נדרש מזהה אימון.",
-      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "אירעה שגיאה בבדיקת המכסה השבועית."
+      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "אירעה שגיאה בבדיקת המכסה השבועית.",
+      "weeklyLimitMessage": "הגעת למגבלה השבועית ({{max}} אימונים) 🌸\nמ־{{start}} עד {{end}}\nניתן להזמין שוב בשבוע הבא 🤍"
     },
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "שם התבנית והאימונים נדרשים.",

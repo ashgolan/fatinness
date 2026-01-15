@@ -176,8 +176,8 @@
       "myBookings": "My Bookings"
     },
     "views": {
-      "week": "Week View",
-      "month": "Full Month View"
+      "week": "This Week",
+      "month": "Next 30 Days"
     },
     "slotsLabel": "Session",
     "capacityLabel": "Seats",
@@ -792,9 +792,9 @@
       "CSV_EXPORT_ERROR": "Failed to export report.",
       "BOOKING_SLOT_ID_REQUIRED": "No class slot was selected ❌",
       "ADMIN_BOOKING_CREATE_ERROR": "An error occurred while creating the booking.",
-      "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached the maximum weekly booking limit (4) 🌸",
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Session ID is required.",
-      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit."
+      "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit.",
+      "weeklyLimitMessage": "YOU HAVE REACHED THE WEEKLY LIMIT ({{max}} SESSIONS) 🌸\nFROM {{start}} TO {{end}}\nYOU CAN BOOK AGAIN NEXT WEEK 🤍"
     },
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",

@@ -10,7 +10,6 @@ import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { apiLimiter } from "../middlewares/rateLimit.middleware.js";
 import { verifyActiveSubscription } from "../middlewares/subscription.middleware.js";
 import { checkSlotCapacity } from "../middlewares/capacity.middleware.js";
-import { checkWeeklyBookingLimit } from "../middlewares/weeklyLimit.middleware.js";
 import { checkSlotTimeValidity } from "../middlewares/slotTime.middleware.js";
 
 const router = express.Router();
@@ -30,7 +29,6 @@ router.post(
   apiLimiter,
   // verifyActiveSubscription, // يمكن تفعيلها لاحقًا
   checkSlotTimeValidity,
-  checkWeeklyBookingLimit,
   checkSlotCapacity,
   createBooking
 );
