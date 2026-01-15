@@ -22,13 +22,6 @@ export default function FcmTransferCard() {
         checked: false,
         ownedByCurrentUser: true,
     });
-    const handleTransferClick = () => {
-        if (transferring) return;
-
-        if (!window.confirm(t("profile.notifications.confirmTransfer"))) return;
-
-        transferFcmToThisDevice();
-    };
 
     // ===== نفس دالة البروفايل =====
     const checkFcmOwnership = async (forcedToken) => {
@@ -64,16 +57,13 @@ export default function FcmTransferCard() {
             await Api.post("/users/fcm/transfer", { fcmToken: token });
 
             toast.success(t("profile.notifications.transferredSuccess"));
-
-            // 🔥 المهم
-            await checkFcmOwnership(token);
+            await checkFcmOwnership();
         } catch {
             toast.error(t("profile.notifications.transferFailed"));
         } finally {
             setTransferring(false);
         }
     };
-
 
     useEffect(() => {
         checkFcmOwnership();
@@ -104,30 +94,30 @@ export default function FcmTransferCard() {
             </p>
 
             <Button
-                fullWidth                    // ✅ يزيد مساحة النقر (اختياري لكن ممتاز UX)
                 variant="contained"
+                startIcon={transferring ? null : <SyncIcon />}
                 disabled={transferring}
-                onClick={handleTransferClick}
-                startIcon={
-                    transferring ? (
-                        <CircularProgress size={18} color="inherit" />
-                    ) : (
-                        <SyncIcon />
-                    )
-                }
+                onClick={() => {
+                    if (!window.confirm(t("profile.notifications.confirmTransfer"))) return;
+                    transferFcmToThisDevice();
+                }}
                 sx={{
                     borderRadius: "14px",
                     px: 3,
-                    py: 1.5,
+                    py: 1.3,
                     fontWeight: 600,
                     textTransform: "none",
                     boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-                    cursor: transferring ? "not-allowed" : "pointer",
                 }}
             >
-                {transferring
-                    ? t("profile.notifications.transferring")
-                    : t("profile.notifications.transferButton")}
+                {transferring ? (
+                    <>
+                        <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                        {t("profile.notifications.transferring")}
+                    </>
+                ) : (
+                    t("profile.notifications.transferButton")
+                )}
             </Button>
 
         </div>
