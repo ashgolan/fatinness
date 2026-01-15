@@ -251,8 +251,11 @@ export default function Navbar() {
               sx={{
                 fontWeight: 700,
                 fontSize: { xs: "1rem", sm: "1.2rem" },
-                background: `linear-gradient(90deg, ${mode === "dark" ? BRAND.gold : BRAND.purple
-                  }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+                background:
+                  mode === "dark"
+                    ? `linear-gradient(90deg, ${BRAND.gold}, #f3e3b0)`
+                    : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`,
+
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
@@ -285,9 +288,10 @@ export default function Navbar() {
                 "& .MuiSwitch-track": {
                   background:
                     mode === "dark"
-                      ? "linear-gradient(90deg, #FBC02D, #A01860)"
+                      ? "linear-gradient(90deg, #FBC02D, #E6C87A)"
                       : "linear-gradient(90deg, #A01860, #FBC02D)",
                 },
+
               }}
             />
             <DarkModeIcon
@@ -303,12 +307,13 @@ export default function Navbar() {
               sx={{
                 color: mode === "dark" ? BRAND.textDark : "#555",
                 ml: 1,
+                transition: "color 0.25s ease, transform 0.2s ease",
                 "&:hover": {
                   color: mode === "dark" ? BRAND.gold : BRAND.purple,
                   transform: "scale(1.1)",
-                  transition: "0.2s",
                 },
               }}
+
             >
               <LanguageIcon />
             </IconButton>
@@ -337,15 +342,17 @@ export default function Navbar() {
                     backgroundColor:
                       i18n.language === lang.code
                         ? mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.05)"
+                          ? "rgba(251,192,45,0.14)"   // 🟡 ذهبي ناعم مريح لليل
+                          : "rgba(160,24,96,0.08)"   // 🟣 بنفسجي خفيف للنهار
                         : "transparent",
+
                     "&:hover": {
                       backgroundColor:
                         mode === "dark"
-                          ? "rgba(255,255,255,0.12)"
-                          : "rgba(0,0,0,0.08)",
+                          ? "rgba(251,192,45,0.20)"  // 🟡 Hover ذهبي أوضح قليلًا
+                          : "rgba(160,24,96,0.12)",  // 🟣 Hover بنفسجي ناعم
                     },
+
                   }}
                 >
                   <span style={{ fontSize: "1.25rem" }}>{lang.flag}</span>
@@ -413,9 +420,15 @@ export default function Navbar() {
           <IconButton
             onClick={() => setDrawerOpen(true)}
             sx={{
-              display: { xs: "flex", md: "none" },
               color: mode === "dark" ? BRAND.textDark : "#333",
+              "&:hover": {
+                backgroundColor:
+                  mode === "dark"
+                    ? "rgba(251,192,45,0.12)"
+                    : "rgba(160,24,96,0.08)",
+              },
             }}
+
           >
             <MenuIcon />
           </IconButton>
@@ -464,8 +477,11 @@ export default function Navbar() {
                 variant="h6"
                 sx={{
                   fontWeight: 800,
-                  background: `linear-gradient(135deg, ${mode === "dark" ? BRAND.gold : BRAND.purple
-                    }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+                  background:
+                    mode === "dark"
+                      ? `linear-gradient(90deg, ${BRAND.gold}, #f3e3b0)`
+                      : `linear-gradient(90deg, ${BRAND.purple}, ${BRAND.gold})`,
+
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                 }}
@@ -506,19 +522,33 @@ export default function Navbar() {
                 display: "flex",
                 alignItems: "center",
                 gap: 1.4,
+
+                // ✅ لون النص
+                color:
+                  i18n.language === lang.code
+                    ? mode === "dark"
+                      ? BRAND.gold        // المختار في الليل
+                      : BRAND.purple     // المختار في النهار
+                    : mode === "dark"
+                      ? BRAND.textDark   // غير مختار في الليل
+                      : "#333",          // غير مختار في النهار
+
+                // ✅ الخلفية
                 backgroundColor:
                   i18n.language === lang.code
                     ? mode === "dark"
-                      ? "rgba(255,255,255,0.08)"
-                      : "rgba(0,0,0,0.05)"
+                      ? "rgba(251,192,45,0.14)"
+                      : "rgba(160,24,96,0.08)"
                     : "transparent",
+
                 "&:hover": {
                   backgroundColor:
                     mode === "dark"
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,0,0,0.07)",
+                      ? "rgba(251,192,45,0.20)"
+                      : "rgba(160,24,96,0.12)",
                 },
               }}
+
             >
               <span style={{ fontSize: "1.25rem" }}>{lang.flag}</span>
               {lang.label}
