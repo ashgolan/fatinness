@@ -231,17 +231,23 @@ export const transferFcmOwnership = async (req, res) => {
     }
 
     // 🔍 المستخدم الحالي الذي يملك التوكن
-    const ownerUser = await User.findOne({
-      "fcmTokens.token": fcmToken,
-    });
+    await User.updateMany(
+      {
+        _id: { $ne: req.user._id },
+        "fcmTokens.token": fcmToken,
+      },
+      {
+        $pull: { fcmTokens: { token: fcmToken } },
+      }
+    );
 
     // 🧹 إزالة التوكن من أي مستخدم آخر
-    if (ownerUser && !ownerUser._id.equals(user._id)) {
-      ownerUser.fcmTokens = ownerUser.fcmTokens.filter(
-        (t) => t.token !== fcmToken
-      );
-      await ownerUser.save();
-    }
+    // if (ownerUser && !ownerUser._id.equals(user._id)) {
+    //   ownerUser.fcmTokens = ownerUser.fcmTokens.filter(
+    //     (t) => t.token !== fcmToken
+    //   );
+    //   await ownerUser.save();
+    // }
 
     // ✅ نضيف التوكن لهذا المستخدم فقط
     user.fcmTokens = [
