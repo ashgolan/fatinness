@@ -49,6 +49,11 @@ export default function Profile() {
     checked: false,
     ownedByCurrentUser: true,
   });
+
+  const [bmiIndicator, setBmiIndicator] = useState(0);
+
+
+
   const checkFcmOwnership = async () => {
     try {
       const token = await registerFcmToken({ silent: true });
@@ -156,6 +161,37 @@ export default function Profile() {
 
   const idealMin = user?.height ? (18.5 * heightM * heightM).toFixed(1) : null;
   const idealMax = user?.height ? (24.9 * heightM * heightM).toFixed(1) : null;
+
+  // ===============================
+  // ▶ BMI SCALE HELPERS
+  // ===============================
+
+  // ===============================
+  // ▶ BMI SCALE HELPERS
+  // ===============================
+  const getBmiPercent = (bmi) => {
+    const min = 15;
+    const max = 40;
+    const clamped = Math.min(Math.max(bmi, min), max);
+    return ((clamped - min) / (max - min)) * 100;
+  };
+
+  // ✅ حركة المؤشر (مضمونة)
+  useEffect(() => {
+    if (!bmi) return;
+
+    const percent = getBmiPercent(Number(bmi));
+
+    // 1) رجعه للصفر
+    setBmiIndicator(0);
+
+    // 2) فريم أول ثم فريم ثاني => transition يشتغل أكيد
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setBmiIndicator(percent);
+      });
+    });
+  }, [bmi]);
 
   // ===============================
   // ▶ CHART DATA
@@ -386,6 +422,52 @@ export default function Profile() {
                   {t("profile.bmi.idealWeight")}: {idealMin}–{idealMax}{" "}
                   {t("profile.units.kg")}
                 </p>
+              </div>
+            </div>
+            {/* ===============================
+    BMI VISUAL SCALE
+=============================== */}
+            <div style={{ marginTop: "24px" }}>
+              <div
+                style={{
+                  position: "relative",
+                  height: "14px",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                  background:
+                    "linear-gradient(to right, #3b82f6 0%, #22c55e 40%, #22c55e 62%, #eab308 75%, #ef4444 100%)",
+                }}
+              >
+                {/* Indicator */}
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-6px",
+                    left: `${bmiIndicator}%`,
+                    transition: "left 0.9s cubic-bezier(0.4, 0, 0.2, 1)",
+                    willChange: "left",
+                    transform: "translateX(-50%)",
+                    width: "0",
+                    height: "0",
+                    borderLeft: "6px solid transparent",
+                    borderRight: "6px solid transparent",
+                    borderTop: `10px solid ${bmiColor}`,
+                  }}
+                />
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: "11px",
+                  color: textSub,
+                  marginTop: "6px",
+                }}
+              >
+                <span>18.5</span>
+                <span>24.9</span>
+                <span>30+</span>
               </div>
             </div>
 

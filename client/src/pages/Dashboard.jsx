@@ -21,6 +21,7 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 
 import { useTranslation } from "react-i18next";
+import FcmTransferCard from "../components/notifications/FcmTransferCard";
 
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
@@ -75,6 +76,7 @@ export default function Dashboard() {
           : "linear-gradient(135deg, #FFF9E6 0%, #FCE4EC 30%, #F3E5F5 70%, #FFF8E1 100%)",
       }}
     >
+      <FcmTransferCard/>
       {/* دوائر خلفية */}
       <Box
         sx={{
