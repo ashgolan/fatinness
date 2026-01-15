@@ -26,6 +26,17 @@ root.render(
           <UserProvider>      {/* 🟡 بيانات المستخدم */}
             <App />
             <ToastContainer position="top-center" autoClose={3000} rtl />
+            <ToastContainer
+              containerId="fcm"
+              position="top-center"
+              autoClose={false}     // 🔥 لا إغلاق تلقائي
+              newestOnTop
+              limit={3}
+              closeOnClick={false}
+              draggable={false}
+              pauseOnHover
+              rtl
+            />
           </UserProvider>
         </BrandProvider>
       </ThemeModeProvider>

@@ -154,24 +154,33 @@ export async function checkFcmOwnership() {
 }
 
 const messaging = getMessaging(app);
-
 onMessage(messaging, (payload) => {
   console.log("📩 FCM foreground message:", payload);
 
-  if (payload?.notification?.title) {
-    const isDark = document.body.classList.contains("dark");
+  if (!payload?.notification?.title) return;
 
-    toast.info(
-      <div style={{ textAlign: "start", lineHeight: "1.2" }}>
-        <span style={{ fontWeight: 700, color: isDark ? "#fbbf24" : "#7c3aed" }}>
-          🔔 {payload.notification.title}
-        </span>
-        <span> : </span>
-        <span style={{ color: isDark ? "#eee" : "#333" }}>
-          {payload.notification.body || ""}
-        </span>
+  const isDark = document.body.classList.contains("dark");
+
+  toast.info(
+    <div style={{ textAlign: "start", lineHeight: "1.4" }}>
+      <div
+        style={{
+          fontWeight: 700,
+          marginBottom: 4,
+          color: isDark ? "#fbbf24" : "#7c3aed",
+        }}
+      >
+        🔔 {payload.notification.title}
       </div>
-    );
 
-  }
+      <div style={{ color: isDark ? "#eee" : "#333" }}>
+        {payload.notification.body || ""}
+      </div>
+    </div>,
+    {
+      containerId: "fcm",   // 🔥 المفتاح
+      autoClose: false,
+      closeButton: true,
+    }
+  );
 });
