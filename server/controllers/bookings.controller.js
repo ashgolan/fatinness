@@ -50,10 +50,12 @@ export const createBooking = async (req, res) => {
     // ============================
     // 📅 حد الحجوزات الأسبوعية
     // ============================
-    const nowLocal = DateTime.now().setZone(ZONE);
+    const slotLocal = DateTime
+      .fromJSDate(slot.startAt)
+      .setZone(ZONE);
 
-    const weekStartLocal = nowLocal.startOf("week").minus({ days: 1 });
-    const weekEndLocal = weekStartLocal.plus({ days: 6 }).endOf("day");
+    const weekStartLocal = slotLocal.startOf("week");
+    const weekEndLocal = slotLocal.endOf("week");
 
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
@@ -84,6 +86,7 @@ export const createBooking = async (req, res) => {
       },
       { $count: "count" },
     ]);
+
 
     const count = userBookingsThisWeek[0]?.count || 0;
 
