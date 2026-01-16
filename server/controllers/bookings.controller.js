@@ -7,12 +7,12 @@ import {
 } from "../utils/googleCalendar.js";
 import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
-import axios from "axios";
 
 /**
  * 🔹 إنشاء حجز جديد (UTC-safe)
  */
 import mongoose from "mongoose";
+import { createBookingReminderTask } from "../utils/cloudTasks.js";
 
 export const createBooking = async (req, res) => {
   const session = await mongoose.startSession();
@@ -154,21 +154,14 @@ export const createBooking = async (req, res) => {
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
 
-    if (user.fcmToken) {
-      try {
-        const reminderResponse = await axios.post(
-          "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
-          {
-            bookingId: booking[0]._id.toString(),
-            userFcmToken: user.fcmToken,
-            startAt: slot.startAt.toISOString(),
-          }
-        );
-
-        console.log("⏰ Reminder scheduled:", reminderResponse.data);
-      } catch (e) {
-        console.error("⚠️ Failed to schedule reminder:", e.message);
-      }
+    try {
+      await createBookingReminderTask({
+        bookingId: booking[0]._id.toString(),
+        userFcmToken: user.fcmToken,
+        startAt: slot.startAt.toISOString(),
+      });
+    } catch (e) {
+      console.error("⚠️ Failed to create Cloud Task:", e.message);
     }
 
     return res.status(201).json({
