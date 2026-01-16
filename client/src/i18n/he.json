@@ -797,7 +797,8 @@
       "ADMIN_BOOKING_CREATE_ERROR": "אירעה שגיאה בעת יצירת ההזמנה.",
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "נדרש מזהה אימון.",
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "אירעה שגיאה בבדיקת המכסה השבועית.",
-      "weeklyLimitMessage": "הגעת למגבלה השבועית ({{max}} אימונים) 🌸\nמ־{{start}} עד {{end}}\nניתן להזמין שוב בשבוע הבא 🤍"
+      "weeklyLimitMessage": "הגעת למגבלה השבועית ({{max}} אימונים) 🌸\nמ־{{start}} עד {{end}}\nניתן להזמין שוב בשבוע הבא 🤍",
+      "PHONE_ALREADY_EXISTS": "מספר הטלפון כבר קיים במערכת"
     },
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "שם התבנית והאימונים נדרשים.",

@@ -271,12 +271,12 @@ function generateToken(user) {
 const isProd = process.env.NODE_ENV === "production";
 
 function setAuthCookie(res, token) {
-res.cookie("JWT", token, {
-  httpOnly: true,
-  secure: true,        // HTTPS
-  sameSite: "none",    // 🔥 Cross-Domain
-  maxAge: 7 * 24 * 60 * 60 * 1000,
-});
+  res.cookie("JWT", token, {
+    httpOnly: true,
+    secure: true,        // HTTPS
+    sameSite: "none",    // 🔥 Cross-Domain
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
 }
 
@@ -312,14 +312,17 @@ export const registerUser = async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({ code: "ADMIN_AUTH_MISSING_FIELDS" });
     }
-
     const exists = await User.findOne({
-      $or: [{ username }, { email }],
+      $or: [{ username }, { email }, { phone }],
     });
 
     if (exists) {
+      if (exists.phone === phone) {
+        return res.status(409).json({ code: "PHONE_ALREADY_EXISTS" });
+      }
       return res.status(409).json({ code: "ADMIN_AUTH_USER_EXISTS" });
     }
+
 
     const passwordHash = await bcrypt.hash(password, 10);
 
@@ -372,6 +375,12 @@ export const registerUser = async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Register Error:", err);
+
+    // 🛑 رقم هاتف مكرر من MongoDB
+    if (err.code === 11000 && err.keyPattern?.phone) {
+      return res.status(409).json({ code: "PHONE_ALREADY_EXISTS" });
+    }
+
     return res.status(500).json({ code: "ADMIN_AUTH_SERVER_ERROR" });
   }
 };

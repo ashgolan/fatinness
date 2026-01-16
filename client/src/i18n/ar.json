@@ -797,7 +797,8 @@
       "ADMIN_BOOKING_CREATE_ERROR": "حدث خطأ أثناء إنشاء الحجز.",
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "رقم الحصة مطلوب.",
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "حدث خطأ أثناء التحقق من الحد الأسبوعي.",
-      "weeklyLimitMessage": "وصلت إلى الحد الأقصى ({{max}} حصص) للأسبوع 🌸\nمن {{start}} إلى {{end}}\nيمكنك الحجز مجددًا في الأسبوع التالي 🤍"
+      "weeklyLimitMessage": "وصلت إلى الحد الأقصى ({{max}} حصص) للأسبوع 🌸\nمن {{start}} إلى {{end}}\nيمكنك الحجز مجددًا في الأسبوع التالي 🤍",
+      "PHONE_ALREADY_EXISTS": "رقم الهاتف مستخدم مسبقًا"
     },
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",
