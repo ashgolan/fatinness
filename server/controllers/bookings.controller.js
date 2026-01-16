@@ -154,15 +154,18 @@ export const createBooking = async (req, res) => {
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
 
-    try {
-      await createBookingReminderTask({
-        bookingId: booking[0]._id.toString(),
-        userFcmToken: user.fcmToken,
-        startAt: slot.startAt.toISOString(),
-      });
-    } catch (e) {
-      console.error("⚠️ Failed to create Cloud Task:", e.message);
-    }
+// if (process.env.NODE_ENV === "production") {
+//   try {
+//     await createBookingReminderTask({
+//       bookingId: booking[0]._id.toString(),
+//       userFcmToken: user.fcmToken,
+//       startAt: slot.startAt.toISOString(),
+//     });
+//   } catch (e) {
+//     console.error("⚠️ Failed to create Cloud Task:", e.message);
+//   }
+// }
+
 
     return res.status(201).json({
       code: "ADMIN_BOOKING_CREATED",
