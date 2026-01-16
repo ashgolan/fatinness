@@ -154,7 +154,6 @@ const nowUTC = DateTime.utc().toJSDate();
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
 
-<<<<<<< HEAD
     try {
       const reminderResponse = await axios.post(
         "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
@@ -164,20 +163,6 @@ const nowUTC = DateTime.utc().toJSDate();
           startAt: slot.startAt.toISOString(),
         }
       );
-=======
-// if (process.env.NODE_ENV === "production") {
-//   try {
-//     await createBookingReminderTask({
-//       bookingId: booking[0]._id.toString(),
-//       userFcmToken: user.fcmToken,
-//       startAt: slot.startAt.toISOString(),
-//     });
-//   } catch (e) {
-//     console.error("⚠️ Failed to create Cloud Task:", e.message);
-//   }
-// }
-
->>>>>>> 3ca3e466503b4d9eef5bf481254f592ad787ee3a
 
       console.log("⏰ Reminder scheduled:", reminderResponse.data);
     } catch (e) {
