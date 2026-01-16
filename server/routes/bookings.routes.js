@@ -26,7 +26,7 @@ router.get("/", getAllBookings);
 // ✅ إنشاء حجز جديد مع الحماية الكاملة
 router.post(
   "/",
-  apiLimiter,
+  // apiLimiter,
   // verifyActiveSubscription, // يمكن تفعيلها لاحقًا
   checkSlotTimeValidity,
   checkSlotCapacity,

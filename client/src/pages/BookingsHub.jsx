@@ -46,6 +46,10 @@ export default function BookingsHub() {
   const [bookingsFilter, setBookingsFilter] = useState("upcoming");
   const [refreshing, setRefreshing] = useState(false);
 
+  const bookingLockRef = useRef(false);
+
+
+
   const dayNames = [
     t("weekdays.sunday"),
     t("weekdays.monday"),
@@ -116,27 +120,28 @@ export default function BookingsHub() {
 
   const handleBook = useCallback(
     async (slotId) => {
-
-      if (bookingInProgress) return;
+      if (bookingLockRef.current) return;
+      bookingLockRef.current = true;
 
       setBookingInProgress(true);
       setBookingId(slotId);
 
       try {
-        const res = await Api.post("/bookings", { slotId });
-        console.log("BOOK RESPONSE:", res.data);
-
+        await Api.post("/bookings", { slotId });
         toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
-        handleServerError(err);
+        handleServerError(err); // 👈 يعتمد فقط على السيرفر
       } finally {
+        bookingLockRef.current = false;
         setBookingId(null);
         setBookingInProgress(false);
       }
     },
-    [fetchData, bookingInProgress]
+    [fetchData, t]
   );
+
+
 
 
   const handleCancel = useCallback(

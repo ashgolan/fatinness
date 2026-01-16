@@ -2,8 +2,19 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { DateTime } from "luxon";
 
+const ERROR_TOAST_ID = "global-server-error";
+
 export default function useServerError() {
   const { t } = useTranslation();
+
+  const showError = (message, options = {}) => {
+    toast.dismiss(ERROR_TOAST_ID); // ⛔ أغلق أي toast سابق
+    toast.error(message, {
+      toastId: ERROR_TOAST_ID,      // 🔒 Toast واحد فقط
+      autoClose: 6000,
+      ...options,
+    });
+  };
 
   const handleServerError = (error) => {
     const status = error?.response?.status;
@@ -16,7 +27,7 @@ export default function useServerError() {
     });
 
     // =================================================
-    // 🟢 1️⃣ أخطاء منطقية متوقعة (لا تقتل التطبيق)
+    // 🟢 1️⃣ أخطاء منطقية متوقعة (Business rules)
     // =================================================
     if (status && status < 500) {
       const code = data?.code;
@@ -32,51 +43,46 @@ export default function useServerError() {
           ? DateTime.fromISO(weekEnd).toFormat("dd/LL")
           : "";
 
-        toast.error(
+        showError(
           t("server.errors.weeklyLimitMessage", {
             max,
             start,
             end,
-          }),
-          { autoClose: 6000 }
+          })
         );
         return;
       }
 
       // 🧾 أي code معروف
       if (code) {
-        toast.error(t(`server.errors.${code}`));
+        showError(t(`server.errors.${code}`));
         return;
       }
 
-      // fallback منطقي
-      toast.error(t("server.errors.UNKNOWN_ERROR"));
+      showError(t("server.errors.UNKNOWN_ERROR"));
       return;
     }
 
     // =================================================
-    // 🔴 2️⃣ أخطاء شبكة حقيقية
+    // 🔴 2️⃣ أخطاء شبكة
     // =================================================
-    if (
-      error?.message === "Network Error" ||
-      (!status && error?.request)
-    ) {
-      toast.error(t("server.errors.NETWORK_ERROR"));
+    if (error?.message === "Network Error" || (!status && error?.request)) {
+      showError(t("server.errors.NETWORK_ERROR"));
       return;
     }
 
     // =================================================
-    // 🔥 3️⃣ أخطاء سيرفر (5xx) — فقط هنا نعتبرها خطيرة
+    // 🔥 3️⃣ أخطاء سيرفر (5xx)
     // =================================================
     if (status >= 500) {
-      toast.error(t("server.errors.SERVER_UNAVAILABLE"));
+      showError(t("server.errors.SERVER_UNAVAILABLE"));
       return;
     }
 
     // =================================================
     // 🪫 fallback أخير
     // =================================================
-    toast.error(t("server.errors.UNKNOWN_ERROR"));
+    showError(t("server.errors.UNKNOWN_ERROR"));
   };
 
   return handleServerError;

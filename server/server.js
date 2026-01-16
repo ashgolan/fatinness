@@ -72,6 +72,7 @@ app.use(cookieParser());
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 200,
+  
 });
 app.use("/api", apiLimiter);
 
