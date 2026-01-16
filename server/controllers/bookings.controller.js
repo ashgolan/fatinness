@@ -7,6 +7,7 @@ import {
 } from "../utils/googleCalendar.js";
 import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
+import axios from "axios";
 
 /**
  * 🔹 إنشاء حجز جديد (UTC-safe)
@@ -44,7 +45,7 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
     }
 
-    const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
+    const nowUTC = DateTime.utc().toJSDate();
     if (!slot.startAt || slot.startAt <= nowUTC) {
       await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_PAST" });
@@ -153,12 +154,28 @@ export const createBooking = async (req, res) => {
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
 
-    scheduleReminder(booking[0]._id, slot.startAt).catch(() => { });
+    if (user.fcmToken) {
+      try {
+        const reminderResponse = await axios.post(
+          "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
+          {
+            bookingId: booking[0]._id.toString(),
+            userFcmToken: user.fcmToken,
+            startAt: slot.startAt.toISOString(),
+          }
+        );
+
+        console.log("⏰ Reminder scheduled:", reminderResponse.data);
+      } catch (e) {
+        console.error("⚠️ Failed to schedule reminder:", e.message);
+      }
+    }
 
     return res.status(201).json({
       code: "ADMIN_BOOKING_CREATED",
       booking: booking[0],
     });
+
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
