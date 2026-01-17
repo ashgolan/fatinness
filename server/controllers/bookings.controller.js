@@ -45,7 +45,7 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
     }
 
-const nowUTC = DateTime.utc().toJSDate();
+    const nowUTC = DateTime.utc().toJSDate();
     if (!slot.startAt || slot.startAt <= nowUTC) {
       await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_PAST" });
@@ -153,6 +153,7 @@ const nowUTC = DateTime.utc().toJSDate();
     if (user.google?.accessToken) {
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
+console.log("FCM TOKEN:", user.fcmToken);
 
     try {
       const reminderResponse = await axios.post(

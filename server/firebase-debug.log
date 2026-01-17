@@ -1,16 +1,16 @@
-[debug] [2026-01-16T21:26:37.091Z] ----------------------------------------------------------------------
-[debug] [2026-01-16T21:26:37.095Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\alaat\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
-[debug] [2026-01-16T21:26:37.095Z] CLI Version:   15.3.1
-[debug] [2026-01-16T21:26:37.095Z] Platform:      win32
-[debug] [2026-01-16T21:26:37.096Z] Node Version:  v24.12.0
-[debug] [2026-01-16T21:26:37.096Z] Time:          Fri Jan 16 2026 23:26:37 GMT+0200 (שעון ישראל (חורף))
-[debug] [2026-01-16T21:26:37.096Z] ----------------------------------------------------------------------
+[debug] [2026-01-17T05:56:27.884Z] ----------------------------------------------------------------------
+[debug] [2026-01-17T05:56:27.890Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\alaat\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only functions
+[debug] [2026-01-17T05:56:27.893Z] CLI Version:   15.3.1
+[debug] [2026-01-17T05:56:27.893Z] Platform:      win32
+[debug] [2026-01-17T05:56:27.893Z] Node Version:  v24.12.0
+[debug] [2026-01-17T05:56:27.897Z] Time:          Sat Jan 17 2026 07:56:27 GMT+0200 (שעון ישראל (חורף))
+[debug] [2026-01-17T05:56:27.898Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2026-01-16T21:26:38.880Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2026-01-16T21:26:38.881Z] > authorizing via signed-in user (alaa.t.shaalan@gmail.com)
-[debug] [2026-01-16T21:26:38.881Z] [iam] checking project fateness-364c3 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
-[debug] [2026-01-16T21:26:38.882Z] Checked if tokens are valid: false, expires at: 1768585557660
-[debug] [2026-01-16T21:26:38.882Z] Checked if tokens are valid: false, expires at: 1768585557660
-[debug] [2026-01-16T21:26:38.882Z] > refreshing access token with scopes: []
-[debug] [2026-01-16T21:26:38.884Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2026-01-16T21:26:38.884Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-17T05:56:38.410Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-17T05:56:38.414Z] > authorizing via signed-in user (alaa.t.shaalan@gmail.com)
+[debug] [2026-01-17T05:56:38.414Z] [iam] checking project fateness-364c3 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2026-01-17T05:56:38.423Z] Checked if tokens are valid: true, expires at: 1768632407914
+[debug] [2026-01-17T05:56:38.424Z] Checked if tokens are valid: true, expires at: 1768632407914
+[debug] [2026-01-17T05:56:38.430Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/fateness-364c3:testIamPermissions [none]
+[debug] [2026-01-17T05:56:38.431Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/fateness-364c3:testIamPermissions x-goog-quota-user=projects/fateness-364c3
+[debug] [2026-01-17T05:56:38.431Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/fateness-364c3:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}

@@ -28,12 +28,15 @@ export const pingScheduler = pubsub
 // 🔔 إنشاء مهمة تذكير قبل ساعتين
 // =====================================
 export const scheduleBookingReminder = https.onRequest(async (req, res) => {
+    console.log("🚀 scheduleBookingReminder called", req.body);
+
     try {
         const { bookingId, userFcmToken, startAt } = req.body;
 
-        if (!bookingId || !userFcmToken || !startAt) {
+        if (!bookingId || !startAt) {
             return res.status(400).json({ error: "Missing fields" });
         }
+
 
         // ⏱️ حساب وقت التذكير (UTC صريح)
         const reminderAt = DateTime
@@ -51,7 +54,7 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
         }
 
         // ⚠️ المتغير الصحيح داخل Firebase Functions
-        const project = admin.app().options.projectId;
+        const project = process.env.GCLOUD_PROJECT;
         const location = "us-central1";
         const queue = "booking-reminders";
 
@@ -104,8 +107,10 @@ export const sendBookingReminder = https.onRequest(async (req, res) => {
         const { bookingId, userFcmToken, startAt } = req.body;
 
         if (!userFcmToken) {
-            return res.status(400).json({ error: "Missing FCM token" });
+            console.log("ℹ️ No FCM token, skipping notification");
+            return res.json({ skipped: true });
         }
+
 
         await admin.messaging().send({
             token: userFcmToken,
