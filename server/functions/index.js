@@ -114,15 +114,15 @@ export const sendBookingReminder = https.onRequest(async (req, res) => {
 
         await admin.messaging().send({
             token: userFcmToken,
-            notification: {
+            data: {
+                type: "BOOKING_REMINDER",
                 title: "⏰ تذكير بالحصة",
                 body: "تبقّى ساعتان على حصتك، نراك قريبًا 💪",
-            },
-            data: {
                 bookingId: bookingId || "",
                 startAt: startAt || "",
             },
         });
+
 
         return res.json({ sent: true });
     } catch (err) {

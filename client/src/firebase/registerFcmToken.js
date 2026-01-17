@@ -158,14 +158,14 @@ const messaging = getMessaging(app);
 onMessage(messaging, (payload) => {
   console.log("📩 FCM foreground message:", payload);
 
-  if (!payload?.notification?.title) return;
+  const title = payload.data.title;
+  const body = payload.data.body;
 
   const isDark = document.body.classList.contains("dark");
   const adminLabel = i18n.t("notifications.admin");
 
   toast.info(
     <div style={{ textAlign: "start", lineHeight: "1.5" }}>
-      {/* السطر الأول */}
       <div
         style={{
           fontWeight: 700,
@@ -173,12 +173,10 @@ onMessage(messaging, (payload) => {
           color: isDark ? "#fbbf24" : "#7c3aed",
         }}
       >
-        {adminLabel} : {payload.notification.title}
+        {adminLabel} : {title}
       </div>
-
-      {/* السطر الثاني */}
       <div style={{ color: isDark ? "#eee" : "#333" }}>
-        {payload.notification.body || ""}
+        {body}
       </div>
     </div>,
     {
