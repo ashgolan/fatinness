@@ -2,6 +2,7 @@ import { pubsub, https } from "firebase-functions/v1";
 import admin from "firebase-admin";
 import { DateTime } from "luxon";
 import { CloudTasksClient } from "@google-cloud/tasks";
+import { onCall } from "firebase-functions/https";
 
 // =====================================
 // 🔧 تهيئة Firebase Admin (مرة واحدة فقط)
@@ -27,41 +28,37 @@ export const pingScheduler = pubsub
 // =====================================
 // 🔔 إنشاء مهمة تذكير قبل ساعتين
 // =====================================
-export const scheduleBookingReminder = https.onRequest(async (req, res) => {
-    console.log("🚀 scheduleBookingReminder called", req.body);
-
+export const scheduleBookingReminder = https.onCall(async (data, context) => {
     try {
-        const { bookingId, userFcmToken, startAt } = req.body;
+        const { bookingId, userFcmToken, startAt } = data;
 
         if (!bookingId || !startAt || !userFcmToken) {
-            return res.status(400).json({ error: "Missing fields" });
+            throw new https.HttpsError(
+                "invalid-argument",
+                "Missing fields"
+            );
         }
 
-
-
-        // ⏱️ حساب وقت التذكير (UTC صريح)
+        // ⏱️ حساب وقت التذكير
         const reminderAt = DateTime
             .fromISO(startAt, { zone: "utc" })
             .minus({ hours: 2 })
             .toUTC();
 
-        // إذا فات وقت التذكير لا ننشئ Task
         if (reminderAt <= DateTime.utc()) {
-            return res.json({
+            return {
                 skipped: true,
                 reason: "reminder time passed",
                 reminderAt: reminderAt.toISO(),
-            });
+            };
         }
 
-        // ⚠️ المتغير الصحيح داخل Firebase Functions
         const project = process.env.GCLOUD_PROJECT;
         const location = "us-central1";
         const queue = "booking-reminders";
 
         const parent = tasksClient.queuePath(project, location, queue);
 
-        // اسم task فريد لمنع التكرار
         const taskId = `booking-${bookingId}-reminder`;
         const taskName = tasksClient.taskPath(project, location, queue, taskId);
 
@@ -70,9 +67,7 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
             httpRequest: {
                 httpMethod: "POST",
                 url: `https://us-central1-${project}.cloudfunctions.net/sendBookingReminder`,
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: Buffer.from(
                     JSON.stringify({ bookingId, userFcmToken, startAt })
                 ).toString("base64"),
@@ -84,19 +79,18 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
 
         await tasksClient.createTask({ parent, task });
 
-        return res.json({
+        return {
             ok: true,
             bookingId,
             reminderAt: reminderAt.toISO(),
-        });
+        };
     } catch (err) {
-        // task موجود مسبقًا (idempotency)
         if (err.code === 6) {
-            return res.json({ ok: true, duplicated: true });
+            return { ok: true, duplicated: true };
         }
 
         console.error("❌ scheduleBookingReminder error:", err);
-        return res.status(500).json({ error: "Failed to schedule reminder" });
+        throw new https.HttpsError("internal", "Failed to schedule reminder");
     }
 });
 
@@ -116,17 +110,17 @@ export const sendBookingReminder = https.onRequest(async (req, res) => {
         await admin.messaging().send({
             token: userFcmToken,
 
-            // 🟢 هذا سيعمل عندما التطبيق مفتوح
+            // 🟢 זה יעבוד כשהאפליקציה פתוחה
             data: {
                 type: "BOOKING_REMINDER",
-                title: "⏰ تذكير بالحصة",
-                body: "تبقّى ساعتان على حصتك 💪",
+                title: "⏰ תזכורת לאימון",
+                body: "נותרו שעתיים עד לאימון שלך 💪",
             },
 
-            // 🟢 هذا سيعمل عندما التطبيق مغلق
+            // 🟢 זה יעבוד כשהאפליקציה סגורה
             notification: {
-                title: "⏰ تذكير بالحصة",
-                body: "تبقّى ساعتان على حصتك 💪",
+                title: "⏰ תזכורת לאימון",
+                body: "נותרו שעתיים עד לאימון שלך 💪",
             },
         });
 
