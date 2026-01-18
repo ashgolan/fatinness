@@ -166,6 +166,7 @@ export const createBooking = async (req, res) => {
     }
 
 
+
     try {
       await scheduleBookingReminderCall({
         bookingId: booking[0]._id.toString(),
@@ -177,6 +178,12 @@ export const createBooking = async (req, res) => {
     } catch (e) {
       console.error("⚠️ Failed to schedule reminder:", e.message);
     }
+
+    // ✅ هذا السطر كان ناقصًا
+    return res.status(201).json({
+      code: "ADMIN_BOOKING_CREATED",
+      booking: booking[0],
+    });
 
 
   } catch (error) {
