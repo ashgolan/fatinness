@@ -82,85 +82,85 @@ export async function registerFcmToken({ silent = false } = {}) {
 }
 
 
-export async function transferFcmToThisDevice() {
-  try {
-    const messaging = getMessaging(app);
-    const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
+// export async function transferFcmToThisDevice() {
+//   try {
+//     const messaging = getMessaging(app);
+//     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
 
-    const registration =
-      (await navigator.serviceWorker.getRegistration("/")) ||
-      (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
+//     const registration =
+//       (await navigator.serviceWorker.getRegistration("/")) ||
+//       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
 
-    const token = await getToken(messaging, {
-      vapidKey,
-      serviceWorkerRegistration: registration,
-    });
+//     const token = await getToken(messaging, {
+//       vapidKey,
+//       serviceWorkerRegistration: registration,
+//     });
 
-    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
-
-
-    if (!token) {
-      toast.error(i18n.t("fcm.error"));
-      return;
-    }
-
-    await Api.post("/users/fcm/transfer", { fcmToken: token });
-
-    toast.success(i18n.t("fcm.transferred"));
-  } catch (err) {
-    console.error(err);
-    toast.error(i18n.t("fcm.error"));
-  }
-}
+//     console.log("🔥 FCM TOKEN FROM DEVICE:", token);
 
 
-export async function checkFcmOwnership() {
-  try {
-    // 1️⃣ تحقق من دعم الإشعارات
-    if (!(await isSupported())) return { hasToken: false };
-    if (!("Notification" in window)) return { hasToken: false };
-    if (!navigator.serviceWorker) return { hasToken: false };
+//     if (!token) {
+//       toast.error(i18n.t("fcm.error"));
+//       return;
+//     }
 
-    // 2️⃣ لو لم يُمنح الإذن أصلاً
-    if (Notification.permission !== "granted") {
-      return { hasToken: false };
-    }
+//     await Api.post("/users/fcm/transfer", { fcmToken: token });
 
-    // 3️⃣ الحصول على Service Worker
-    const registration =
-      (await navigator.serviceWorker.getRegistration("/")) ||
-      (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
-
-    // 4️⃣ الحصول على token الحالي من الجهاز
-    const messaging = getMessaging(app);
-    const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
-
-    if (!vapidKey) return { hasToken: false };
-
-    const token = await getToken(messaging, {
-      vapidKey,
-      serviceWorkerRegistration: registration,
-    });
-
-    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
+//     toast.success(i18n.t("fcm.transferred"));
+//   } catch (err) {
+//     console.error(err);
+//     toast.error(i18n.t("fcm.error"));
+//   }
+// }
 
 
-    if (!token) return { hasToken: false };
+// export async function checkFcmOwnership() {
+//   try {
+//     // 1️⃣ تحقق من دعم الإشعارات
+//     if (!(await isSupported())) return { hasToken: false };
+//     if (!("Notification" in window)) return { hasToken: false };
+//     if (!navigator.serviceWorker) return { hasToken: false };
 
-    // 5️⃣ إرسال token للسيرفر (فحص فقط)
-    const { data } = await Api.post("/users/fcm/check", {
-      fcmToken: token,
-    });
+//     // 2️⃣ لو لم يُمنح الإذن أصلاً
+//     if (Notification.permission !== "granted") {
+//       return { hasToken: false };
+//     }
 
-    // السيرفر يجب أن يعيد:
-    // { hasToken: true, ownedByCurrentUser: true/false }
+//     // 3️⃣ الحصول على Service Worker
+//     const registration =
+//       (await navigator.serviceWorker.getRegistration("/")) ||
+//       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
 
-    return data;
-  } catch (err) {
-    console.warn("FCM ownership check failed");
-    return { hasToken: false };
-  }
-}
+//     // 4️⃣ الحصول على token الحالي من الجهاز
+//     const messaging = getMessaging(app);
+//     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
+
+//     if (!vapidKey) return { hasToken: false };
+
+//     const token = await getToken(messaging, {
+//       vapidKey,
+//       serviceWorkerRegistration: registration,
+//     });
+
+//     console.log("🔥 FCM TOKEN FROM DEVICE:", token);
+
+
+//     if (!token) return { hasToken: false };
+
+//     // 5️⃣ إرسال token للسيرفر (فحص فقط)
+//     const { data } = await Api.post("/users/fcm/check", {
+//       fcmToken: token,
+//     });
+
+//     // السيرفر يجب أن يعيد:
+//     // { hasToken: true, ownedByCurrentUser: true/false }
+
+//     return data;
+//   } catch (err) {
+//     console.warn("FCM ownership check failed");
+//     return { hasToken: false };
+//   }
+// }
 
 const messaging = getMessaging(app);
 
