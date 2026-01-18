@@ -21,10 +21,6 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 
 import { useTranslation } from "react-i18next";
-import SyncIcon from "@mui/icons-material/Sync";
-import { Api } from "../api/Api";
-import { registerFcmToken } from "../firebase/registerFcmToken";
-import { toast } from "react-toastify";
 
 const float = keyframes`
   0%, 100% { transform: translateY(0px); }
@@ -42,67 +38,7 @@ export default function Dashboard() {
 
   const fallbackCard = "/uploads/DEFAULT_CARD.jpg";
   const imgSrc = loadingBrand ? null : cardUrl || fallbackCard;
-  const [transferring, setTransferring] = React.useState(false);
-  const [fcmStatus, setFcmStatus] = React.useState({
-    checked: false,
-    ownedByCurrentUser: true,
-    hasToken: null,
-    raw: null,
-  });
-  const checkFcmOwnership = async (forcedToken) => {
-    try {
-      const token = forcedToken || await registerFcmToken({ silent: true });
-
-      if (!token) {
-        setFcmStatus({
-          checked: true,
-          ownedByCurrentUser: null,
-          hasToken: false,
-          raw: null,
-        });
-        return;
-      }
-
-      const { data } = await Api.post("/users/fcm/check", {
-        fcmToken: token,
-      });
-
-      setFcmStatus({
-        checked: true,
-        ownedByCurrentUser: data.ownedByCurrentUser,
-        hasToken: data.hasToken,
-        raw: data,
-      });
-    } catch (err) {
-      setFcmStatus({
-        checked: true,
-        ownedByCurrentUser: null,
-        hasToken: null,
-        raw: { error: err?.message },
-      });
-    }
-  };
-
-
-  const transferFcmToThisDevice = async () => {
-    try {
-      setTransferring(true);
-      const token = await registerFcmToken({ silent: true });
-      if (!token) throw new Error("NO_TOKEN");
-
-      await Api.post("/users/fcm/transfer", { fcmToken: token });
-
-      toast.success(t("profile.notifications.transferredSuccess"));
-      await checkFcmOwnership();
-    } catch {
-      toast.error(t("profile.notifications.transferFailed"));
-    } finally {
-      setTransferring(false);
-    }
-  };
-  React.useEffect(() => {
-    checkFcmOwnership();
-  }, []);
+  
 
   // 🔹 الاختصارات مع الترجمة
   const shortcuts = [
@@ -171,75 +107,7 @@ export default function Dashboard() {
           animationDelay: "1s",
         }}
       />
-      <Box
-        sx={{
-          mb: 3,
-          p: 2,
-          borderRadius: 2,
-          background: "#111",
-          color: "#0f0",
-          fontSize: "12px",
-          fontFamily: "monospace",
-          whiteSpace: "pre-wrap",
-        }}
-      >
-        <strong>FCM DEBUG</strong>
-        {"\n"}checked: {String(fcmStatus.checked)}
-        {"\n"}hasToken: {String(fcmStatus.hasToken)}
-        {"\n"}ownedByCurrentUser: {String(fcmStatus.ownedByCurrentUser)}
-        {"\n"}raw: {JSON.stringify(fcmStatus.raw, null, 2)}
-      </Box>
-
-      {fcmStatus.checked && fcmStatus.hasToken && fcmStatus.ownedByCurrentUser === false && (
-        <Box
-          sx={{
-            mb: 4,
-            p: 3,
-            borderRadius: 3,
-            textAlign: "center",
-            background: isDark ? "#232334" : "#FFFFFF",
-            border: isDark
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
-          <Typography sx={{ fontWeight: 700, mb: 1 }}>
-            🔔 {t("profile.notifications.title")}
-          </Typography>
-
-          <Typography
-            sx={{ fontSize: "14px", color: isDark ? "#AAA" : "#6b7280", mb: 2 }}
-          >
-            {t("profile.notifications.description")}
-          </Typography>
-
-          <Button
-            variant="contained"
-            startIcon={!transferring && <SyncIcon />}
-            disabled={transferring}
-            onClick={() => {
-              if (!window.confirm(t("profile.notifications.confirmTransfer"))) return;
-              transferFcmToThisDevice();
-            }}
-            sx={{
-              borderRadius: 2,
-              px: 3,
-              py: 1.2,
-              textTransform: "none",
-              fontWeight: 600,
-            }}
-          >
-            {transferring ? (
-              <>
-                <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                {t("profile.notifications.transferring")}
-              </>
-            ) : (
-              t("profile.notifications.transferButton")
-            )}
-          </Button>
-        </Box>
-      )}
+      
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         {/* صورة الغلاف */}

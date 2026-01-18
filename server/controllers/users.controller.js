@@ -211,98 +211,98 @@ export const updateFcmToken = async (req, res) => {
   }
 };
 
-export const transferFcmOwnership = async (req, res) => {
-  try {
-    const { fcmToken } = req.body;
+// export const transferFcmOwnership = async (req, res) => {
+//   try {
+//     const { fcmToken } = req.body;
 
-    if (!fcmToken) {
-      return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
-    }
+//     if (!fcmToken) {
+//       return res.status(400).json({ code: "FCM_TOKEN_REQUIRED" });
+//     }
 
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(404).json({ code: "USER_NOT_FOUND" });
-    }
+//     const user = await User.findById(req.user._id);
+//     if (!user) {
+//       return res.status(404).json({ code: "USER_NOT_FOUND" });
+//     }
 
-    // 🔍 المستخدم الحالي الذي يملك التوكن
-    await User.updateMany(
-      {
-        _id: { $ne: req.user._id },
-        "fcmTokens.token": fcmToken,
-      },
-      {
-        $pull: { fcmTokens: { token: fcmToken } },
-      }
-    );
+//     // 🔍 المستخدم الحالي الذي يملك التوكن
+//     await User.updateMany(
+//       {
+//         _id: { $ne: req.user._id },
+//         "fcmTokens.token": fcmToken,
+//       },
+//       {
+//         $pull: { fcmTokens: { token: fcmToken } },
+//       }
+//     );
 
-    // 🧹 إزالة التوكن من أي مستخدم آخر
-    // if (ownerUser && !ownerUser._id.equals(user._id)) {
-    //   ownerUser.fcmTokens = ownerUser.fcmTokens.filter(
-    //     (t) => t.token !== fcmToken
-    //   );
-    //   await ownerUser.save();
-    // }
+//     // 🧹 إزالة التوكن من أي مستخدم آخر
+//     // if (ownerUser && !ownerUser._id.equals(user._id)) {
+//     //   ownerUser.fcmTokens = ownerUser.fcmTokens.filter(
+//     //     (t) => t.token !== fcmToken
+//     //   );
+//     //   await ownerUser.save();
+//     // }
 
-    // ✅ نضيف التوكن لهذا المستخدم فقط
-    user.fcmTokens = [
-      {
-        token: fcmToken,
-        ownerUserId: user._id,
-        createdAt: new Date(),
-      },
-    ];
+//     // ✅ نضيف التوكن لهذا المستخدم فقط
+//     user.fcmTokens = [
+//       {
+//         token: fcmToken,
+//         ownerUserId: user._id,
+//         createdAt: new Date(),
+//       },
+//     ];
 
-    await user.save();
+//     await user.save();
 
-    return res.json({
-      code: "FCM_TRANSFERRED",
-      notificationsOwned: true,
-    });
-  } catch (err) {
-    console.error("❌ transferFcmOwnership error:", err);
-    return res.status(500).json({ code: "FCM_TRANSFER_ERROR" });
-  }
-};
-// 🔍 فحص ملكية FCM Token (قراءة فقط)
-export const checkFcmOwnership = async (req, res) => {
-  try {
-    const { fcmToken } = req.body;
+//     return res.json({
+//       code: "FCM_TRANSFERRED",
+//       notificationsOwned: true,
+//     });
+//   } catch (err) {
+//     console.error("❌ transferFcmOwnership error:", err);
+//     return res.status(500).json({ code: "FCM_TRANSFER_ERROR" });
+//   }
+// };
+// // 🔍 فحص ملكية FCM Token (قراءة فقط)
+// export const checkFcmOwnership = async (req, res) => {
+//   try {
+//     const { fcmToken } = req.body;
 
-    // لا يوجد توكن أصلاً
-    if (!fcmToken) {
-      return res.json({ hasToken: false });
-    }
+//     // لا يوجد توكن أصلاً
+//     if (!fcmToken) {
+//       return res.json({ hasToken: false });
+//     }
 
-    const userId = req.user._id;
+//     const userId = req.user._id;
 
-    // البحث عن أي مستخدم يملك هذا التوكن
-    const owner = await User.findOne({
-      "fcmTokens.token": fcmToken,
-    }).select("_id");
+//     // البحث عن أي مستخدم يملك هذا التوكن
+//     const owner = await User.findOne({
+//       "fcmTokens.token": fcmToken,
+//     }).select("_id");
 
-    // التوكن غير مسجل عند أي مستخدم
-    if (!owner) {
-      return res.json({
-        hasToken: true,
-        ownedByCurrentUser: false,
-      });
-    }
+//     // التوكن غير مسجل عند أي مستخدم
+//     if (!owner) {
+//       return res.json({
+//         hasToken: true,
+//         ownedByCurrentUser: false,
+//       });
+//     }
 
-    // التوكن يخص المستخدم الحالي
-    if (owner._id.toString() === userId.toString()) {
-      return res.json({
-        hasToken: true,
-        ownedByCurrentUser: true,
-      });
-    }
+//     // التوكن يخص المستخدم الحالي
+//     if (owner._id.toString() === userId.toString()) {
+//       return res.json({
+//         hasToken: true,
+//         ownedByCurrentUser: true,
+//       });
+//     }
 
-    // التوكن يخص مستخدم آخر
-    return res.json({
-      hasToken: true,
-      ownedByCurrentUser: false,
-    });
-  } catch (err) {
-    console.error("❌ checkFcmOwnership error:", err);
-    return res.json({ hasToken: false });
-  }
-};
+//     // التوكن يخص مستخدم آخر
+//     return res.json({
+//       hasToken: true,
+//       ownedByCurrentUser: false,
+//     });
+//   } catch (err) {
+//     console.error("❌ checkFcmOwnership error:", err);
+//     return res.json({ hasToken: false });
+//   }
+// };
