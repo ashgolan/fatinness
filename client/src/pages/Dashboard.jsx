@@ -155,56 +155,61 @@ export default function Dashboard() {
           animationDelay: "1s",
         }}
       />
-      {fcmStatus.checked && !fcmStatus.ownedByCurrentUser && (
-        <Box
-          sx={{
-            mb: 4,
-            p: 3,
-            borderRadius: 3,
-            textAlign: "center",
-            background: isDark ? "#232334" : "#FFFFFF",
-            border: isDark
-              ? "1px solid rgba(255,255,255,0.08)"
-              : "1px solid rgba(0,0,0,0.05)",
-          }}
-        >
-          <Typography sx={{ fontWeight: 700, mb: 1 }}>
-            🔔 {t("profile.notifications.title")}
-          </Typography>
-
-          <Typography
-            sx={{ fontSize: "14px", color: isDark ? "#AAA" : "#6b7280", mb: 2 }}
-          >
-            {t("profile.notifications.description")}
-          </Typography>
-
-          <Button
-            variant="contained"
-            startIcon={!transferring && <SyncIcon />}
-            disabled={transferring}
-            onClick={() => {
-              if (!window.confirm(t("profile.notifications.confirmTransfer"))) return;
-              transferFcmToThisDevice();
-            }}
+      {(
+        fcmStatus.checked &&
+        fcmStatus.hasToken &&
+        !fcmStatus.ownedByCurrentUser
+      )
+        && (
+          <Box
             sx={{
-              borderRadius: 2,
-              px: 3,
-              py: 1.2,
-              textTransform: "none",
-              fontWeight: 600,
+              mb: 4,
+              p: 3,
+              borderRadius: 3,
+              textAlign: "center",
+              background: isDark ? "#232334" : "#FFFFFF",
+              border: isDark
+                ? "1px solid rgba(255,255,255,0.08)"
+                : "1px solid rgba(0,0,0,0.05)",
             }}
           >
-            {transferring ? (
-              <>
-                <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
-                {t("profile.notifications.transferring")}
-              </>
-            ) : (
-              t("profile.notifications.transferButton")
-            )}
-          </Button>
-        </Box>
-      )}
+            <Typography sx={{ fontWeight: 700, mb: 1 }}>
+              🔔 {t("profile.notifications.title")}
+            </Typography>
+
+            <Typography
+              sx={{ fontSize: "14px", color: isDark ? "#AAA" : "#6b7280", mb: 2 }}
+            >
+              {t("profile.notifications.description")}
+            </Typography>
+
+            <Button
+              variant="contained"
+              startIcon={!transferring && <SyncIcon />}
+              disabled={transferring}
+              onClick={() => {
+                if (!window.confirm(t("profile.notifications.confirmTransfer"))) return;
+                transferFcmToThisDevice();
+              }}
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                py: 1.2,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              {transferring ? (
+                <>
+                  <CircularProgress size={18} color="inherit" sx={{ mr: 1 }} />
+                  {t("profile.notifications.transferring")}
+                </>
+              ) : (
+                t("profile.notifications.transferButton")
+              )}
+            </Button>
+          </Box>
+        )}
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         {/* صورة الغلاف */}
