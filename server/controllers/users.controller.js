@@ -177,40 +177,34 @@ export const updateFcmToken = async (req, res) => {
     }
 
     // 🔍 هل هذا التوكن مسجل عند أي مستخدم؟
-    const ownerUser = await User.findOne({
-      "fcmTokens.token": fcmToken,
-    });
+    // 🧹 إزالة هذا التوكن من أي مستخدم آخر
+    await User.updateMany(
+      {
+        _id: { $ne: user._id },
+        "fcmTokens.token": fcmToken,
+      },
+      {
+        $pull: { fcmTokens: { token: fcmToken } },
+      }
+    );
 
-    // 🟢 لا يوجد مالك → أول تسجيل على هذا الجهاز
-    if (!ownerUser) {
-      user.fcmTokens.push({
+    // ✅ استبدال كل التوكنات بتوكن واحد فقط
+    user.fcmTokens = [
+      {
         token: fcmToken,
         ownerUserId: user._id,
         createdAt: new Date(),
-      });
+      },
+    ];
 
-      await user.save();
+    await user.save();
 
-      return res.json({
-        code: "FCM_TOKEN_SAVED_AS_OWNER",
-        isOwner: true,
-      });
-    }
-
-    // 🟡 نفس المستخدم (إعادة تسجيل)
-    if (ownerUser._id.equals(user._id)) {
-      return res.json({
-        code: "FCM_TOKEN_ALREADY_REGISTERED",
-        isOwner: true,
-      });
-    }
-
-    // 🔴 التوكن مملوك لمستخدم آخر
     return res.json({
-      code: "FCM_TOKEN_OWNED_BY_ANOTHER_USER",
-      isOwner: false,
-      ownerUserId: ownerUser._id,
+      code: "FCM_TOKEN_REGISTERED",
+      isOwner: true,
     });
+
+
   } catch (err) {
     console.error("❌ updateFcmToken error:", err);
     res.status(500).json({ code: "FCM_TOKEN_ERROR" });
@@ -257,8 +251,6 @@ export const transferFcmOwnership = async (req, res) => {
         createdAt: new Date(),
       },
     ];
-
-    user.deviceOwnerId = user._id;
 
     await user.save();
 
