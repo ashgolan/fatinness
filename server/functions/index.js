@@ -33,9 +33,10 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
     try {
         const { bookingId, userFcmToken, startAt } = req.body;
 
-        if (!bookingId || !startAt) {
+        if (!bookingId || !startAt || !userFcmToken) {
             return res.status(400).json({ error: "Missing fields" });
         }
+
 
 
         // ⏱️ حساب وقت التذكير (UTC صريح)
@@ -106,6 +107,11 @@ export const sendBookingReminder = https.onRequest(async (req, res) => {
     try {
 
         const { userFcmToken } = req.body;
+
+        if (!userFcmToken) {
+            console.warn("⚠️ sendBookingReminder called without FCM token");
+            return res.status(200).json({ skipped: true });
+        }
 
         await admin.messaging().send({
             token: userFcmToken,
