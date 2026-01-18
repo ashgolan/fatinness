@@ -67,7 +67,12 @@ export const scheduleBookingReminder = https.onCall(async (data, context) => {
             httpRequest: {
                 httpMethod: "POST",
                 url: `https://us-central1-${project}.cloudfunctions.net/sendBookingReminder`,
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                oidcToken: {
+                    serviceAccountEmail: `${project}@appspot.gserviceaccount.com`,
+                },
                 body: Buffer.from(
                     JSON.stringify({ bookingId, userFcmToken, startAt })
                 ).toString("base64"),
@@ -76,6 +81,7 @@ export const scheduleBookingReminder = https.onCall(async (data, context) => {
                 seconds: Math.floor(reminderAt.toSeconds()),
             },
         };
+
 
         await tasksClient.createTask({ parent, task });
 
@@ -99,7 +105,11 @@ export const scheduleBookingReminder = https.onCall(async (data, context) => {
 // =====================================
 export const sendBookingReminder = https.onRequest(async (req, res) => {
     try {
+        const authHeader = req.headers.authorization || "";
 
+        if (!authHeader.startsWith("Bearer ")) {
+            return res.status(403).send("Forbidden");
+        }
         const { userFcmToken } = req.body;
 
         if (!userFcmToken) {
