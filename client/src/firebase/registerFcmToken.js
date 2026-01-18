@@ -53,6 +53,9 @@ export async function registerFcmToken({ silent = false } = {}) {
       serviceWorkerRegistration: registration,
     });
 
+    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
+
+
     if (!token) throw new Error("FCM_TOKEN_NOT_READY");
 
     // 5️⃣ إرسال للسيرفر
@@ -92,6 +95,9 @@ export async function transferFcmToThisDevice() {
       vapidKey,
       serviceWorkerRegistration: registration,
     });
+
+    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
+
 
     if (!token) {
       toast.error(i18n.t("fcm.error"));
@@ -136,6 +142,9 @@ export async function checkFcmOwnership() {
       serviceWorkerRegistration: registration,
     });
 
+    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
+
+
     if (!token) return { hasToken: false };
 
     // 5️⃣ إرسال token للسيرفر (فحص فقط)
@@ -158,31 +167,16 @@ const messaging = getMessaging(app);
 onMessage(messaging, (payload) => {
   console.log("📩 FCM foreground message:", payload);
 
-  const title = payload.data.title;
-  const body = payload.data.body;
-
-  const isDark = document.body.classList.contains("dark");
-  const adminLabel = i18n.t("notifications.admin");
+  if (payload?.data?.type !== "BOOKING_REMINDER") return;
 
   toast.info(
-    <div style={{ textAlign: "start", lineHeight: "1.5" }}>
-      <div
-        style={{
-          fontWeight: 700,
-          marginBottom: 6,
-          color: isDark ? "#fbbf24" : "#7c3aed",
-        }}
-      >
-        {adminLabel} : {title}
-      </div>
-      <div style={{ color: isDark ? "#eee" : "#333" }}>
-        {body}
-      </div>
-    </div>,
+    <>
+      <b>{payload.data.title}</b>
+      <div>{payload.data.body}</div>
+    </>,
     {
       containerId: "fcm",
       autoClose: false,
-      closeButton: true,
     }
   );
 });

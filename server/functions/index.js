@@ -104,29 +104,21 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
 // =====================================
 export const sendBookingReminder = https.onRequest(async (req, res) => {
     try {
-        const { bookingId, userFcmToken, startAt } = req.body;
+        console.log("📨 Incoming reminder task", req.body);
 
-        if (!userFcmToken) {
-            console.log("ℹ️ No FCM token, skipping notification");
-            return res.json({ skipped: true });
-        }
-
+        const { userFcmToken } = req.body;
 
         await admin.messaging().send({
             token: userFcmToken,
-            data: {
-                type: "BOOKING_REMINDER",
+            notification: {
                 title: "⏰ تذكير بالحصة",
-                body: "تبقّى ساعتان على حصتك، نراك قريبًا 💪",
-                bookingId: bookingId || "",
-                startAt: startAt || "",
+                body: "تبقّى ساعتان على حصتك 💪",
             },
         });
 
-
-        return res.json({ sent: true });
-    } catch (err) {
-        console.error("❌ sendBookingReminder error:", err);
-        return res.status(500).json({ error: "Failed to send FCM" });
+        res.status(200).json({ ok: true });
+    } catch (e) {
+        console.error("❌ sendBookingReminder failed", e);
+        res.status(500).json({ error: "FCM failed" });
     }
 });
