@@ -153,14 +153,25 @@ export const createBooking = async (req, res) => {
     if (user.google?.accessToken) {
       createGoogleEvent(user, booking[0]).catch(() => { });
     }
-console.log("FCM TOKEN:", user.fcmToken);
+    // ✅ اختيار التوكن المملوك للجهاز الحالي فقط
+    const activeFcm = user.fcmTokens?.find(
+      (t) => t.ownedByCurrentUser === true
+    );
+
+    if (!activeFcm) {
+      console.log("⚠️ No active FCM token for this user, skipping reminder");
+      return res.status(201).json({
+        code: "ADMIN_BOOKING_CREATED",
+        booking: booking[0],
+      });
+    }
 
     try {
       const reminderResponse = await axios.post(
         "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
         {
           bookingId: booking[0]._id.toString(),
-          userFcmToken: user.fcmToken,
+          userFcmToken: activeFcm.token,
           startAt: slot.startAt.toISOString(),
         }
       );

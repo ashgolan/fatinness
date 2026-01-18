@@ -104,17 +104,26 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
 // =====================================
 export const sendBookingReminder = https.onRequest(async (req, res) => {
     try {
-        console.log("📨 Incoming reminder task", req.body);
 
         const { userFcmToken } = req.body;
 
         await admin.messaging().send({
             token: userFcmToken,
+
+            // 🟢 هذا سيعمل عندما التطبيق مفتوح
+            data: {
+                type: "BOOKING_REMINDER",
+                title: "⏰ تذكير بالحصة",
+                body: "تبقّى ساعتان على حصتك 💪",
+            },
+
+            // 🟢 هذا سيعمل عندما التطبيق مغلق
             notification: {
                 title: "⏰ تذكير بالحصة",
                 body: "تبقّى ساعتان على حصتك 💪",
             },
         });
+
 
         res.status(200).json({ ok: true });
     } catch (e) {
