@@ -377,6 +377,7 @@ export default function BookingsHub() {
                 toLocalKey,
                 t,
                 bookingInProgress,   // ✅ أضف هذا
+                lang, // ✅ أضف هذا
 
                 // ⬇️ نمرر المرجع
                 slotsRef,
@@ -429,6 +430,7 @@ function AvailableView({
   toLocalKey,
   t,
   bookingInProgress, // ✅ أضف هذا
+  lang, // ✅ هنا
 
   // ⬇️ المرجع القادم من الأعلى
   slotsRef,
@@ -642,7 +644,7 @@ function AvailableView({
                 }}
               >
                 {DateTime.fromISO(selectedDate, { zone: "local" })
-                  .setLocale("ar")
+                  .setLocale(lang)
                   .toFormat("cccc")}{" "}
                 - {selectedDate}
               </h3>
