@@ -26,10 +26,10 @@ messaging.onBackgroundMessage((payload) => {
   console.log("📩 Background message received:", payload);
 
   const title =
-    payload.notification?.title || "⏰ تذكير";
+    payload.notification?.title || "⏰ תזכורת";
 
   const options = {
-    body: payload.notification?.body || "لديك إشعار جديد",
+    body: payload.notification?.body || "התראה",
     icon: "/logo192x192.png",
     data: {
       url: "/", // أو رابط الحجز
