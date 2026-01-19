@@ -272,7 +272,6 @@ export default function Register() {
               name="email"
               value={form.email}
               onChange={handleChange}
-              required
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

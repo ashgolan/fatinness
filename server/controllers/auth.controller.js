@@ -53,7 +53,6 @@ export const registerUser = async (req, res) => {
     const {
       username,
       password,
-      email,
       phone,
       gender,
       height,
@@ -63,11 +62,21 @@ export const registerUser = async (req, res) => {
       subscriptionEnd,
     } = req.body;
 
+    const finalEmail =
+      req.body.email?.trim() ||
+      `user_${Date.now()}_${Math.floor(Math.random() * 1000)}@fateness.local`;
+
+    // 3️⃣ تحقق أساسي
     if (!username || !password) {
       return res.status(400).json({ code: "ADMIN_AUTH_MISSING_FIELDS" });
     }
+
     const exists = await User.findOne({
-      $or: [{ username }, { email }, { phone }],
+      $or: [
+        { username },
+        { phone },
+        ...(req.body.email ? [{ email: req.body.email.trim() }] : []),
+      ],
     });
 
     if (exists) {
@@ -87,7 +96,7 @@ export const registerUser = async (req, res) => {
     const user = await User.create({
       username,
       passwordHash,
-      email,
+      email: finalEmail,
       phone,
       gender: gender || "female",
       height: height ?? null,

@@ -17,7 +17,9 @@ const subscriptionSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema(
   {
     username: { type: String },
-    email: { type: String, unique: true },
+    email: {
+      type: String, unique: true, sparse: true, // ⭐ مهم جدًا
+    },
     passwordHash: { type: String, required: true },
     phone: { type: String, unique: true },
 
