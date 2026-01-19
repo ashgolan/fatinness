@@ -378,6 +378,7 @@ export default function BookingsHub() {
                 handleCancel,
                 handleRebook,
                 t,
+
               }}
             />
           )}
@@ -748,6 +749,8 @@ function MyBookingsView({
   handleCancel,
   handleRebook,
   t,
+  myBookings, // ✅ أضف هذا
+
 }) {
   const now = new Date();
 
@@ -769,6 +772,7 @@ function MyBookingsView({
           { value: "past", label: t("bookingsHub.filters.past") },
           { value: "cancelled", label: t("bookingsHub.filters.cancelled") },
         ].map((f) => (
+
           <button
             key={f.value}
             onClick={() => setBookingsFilter(f.value)}
@@ -810,6 +814,8 @@ function MyBookingsView({
           }}
         >
           {filteredBookings.map((b) => {
+            const isRebooked = myBookings.includes(b.slot._id);
+
             const isCancelled = b.status === "cancelled" || b.slot.isBlocked;
             const isPast = new Date(b.slot.startAt) < now;
 
@@ -860,7 +866,7 @@ function MyBookingsView({
                   </button>
                 )}
 
-                {!isPast && isCancelled && (
+                {!isPast && isCancelled && !isRebooked && (
                   <button
                     onClick={() => handleRebook(b.slot._id)}
                     style={{
