@@ -1001,7 +1001,9 @@ export const updateUserByAdmin = async (req, res) => {
 
     // 🟦 تحديث الحقول العادية
     if (username !== undefined) user.username = username;
-    if (email !== undefined) user.email = email;
+    if (email !== undefined && email.trim() !== "") {
+      user.email = email.trim();
+    }
     if (phone !== undefined) user.phone = phone;
     if (gender !== undefined) user.gender = gender;
     if (height !== undefined) user.height = height;

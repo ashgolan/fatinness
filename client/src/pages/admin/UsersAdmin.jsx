@@ -230,6 +230,9 @@ export default function UsersAdmin() {
         subscriptionEnd: editData.subscriptionEnd || null,
       };
 
+      if (!payload.email?.trim()) {
+        delete payload.email;
+      }
       // ⭐ إذا لم تُكتب كلمة مرور → لا نرسلها
       if (!payload.password) {
         delete payload.password;
