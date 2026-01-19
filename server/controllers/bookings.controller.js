@@ -165,20 +165,18 @@ export const createBooking = async (req, res) => {
       });
     }
 
-
-
     try {
-      await axios.post(
+      const reminderResponse = await axios.post(
         "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
         {
           bookingId: booking[0]._id.toString(),
+          userFcmToken: user.fcmToken,
           userFcmToken: activeFcm.token,
           startAt: slot.startAt.toISOString(),
         }
       );
 
-      console.log("⏰ Reminder scheduled (HTTP)");
-
+      console.log("⏰ Reminder scheduled:", reminderResponse.data);
     } catch (e) {
       console.error("⚠️ Failed to schedule reminder:", e.message);
     }

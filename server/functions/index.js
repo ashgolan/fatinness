@@ -4,46 +4,47 @@ import { DateTime } from "luxon";
 import { CloudTasksClient } from "@google-cloud/tasks";
 
 // =====================================
-// 🔧 Firebase Admin (مرة واحدة فقط)
+// 🔧 تهيئة Firebase Admin (مرة واحدة فقط)
 // =====================================
 admin.initializeApp();
 
 // =====================================
-// 🔧 Cloud Tasks Client
+// 🔧 Cloud Tasks Client (مرة واحدة فقط)
 // =====================================
 const tasksClient = new CloudTasksClient();
 
 // =====================================
-// 🔔 Ping Scheduler (اختياري)
+// 🔔 اختبار حياة Cloud Scheduler (اختياري)
 // =====================================
 export const pingScheduler = pubsub
-    .schedule("* * * * *")
+    .schedule("* * * * *") // كل دقيقة
     .timeZone("UTC")
     .onRun(() => {
-        console.log("⏱ Scheduler alive:", DateTime.utc().toISO());
+        console.log("⏱ Firebase Scheduler alive:", DateTime.utc().toISO());
         return null;
     });
 
 // =====================================
-// 🔔 إنشاء تذكير قبل ساعتين (HTTP + Secret)
+// 🔔 إنشاء مهمة تذكير قبل ساعتين
 // =====================================
 export const scheduleBookingReminder = https.onRequest(async (req, res) => {
-    try {
-        // 🔐 حماية داخلية
-       
+    console.log("🚀 scheduleBookingReminder called", req.body);
 
+    try {
         const { bookingId, userFcmToken, startAt } = req.body;
 
-        if (!bookingId || !startAt || !userFcmToken) {
+        if (!bookingId || !startAt) {
             return res.status(400).json({ error: "Missing fields" });
         }
 
-        // ⏱️ حساب وقت التذكير (UTC)
+
+        // ⏱️ حساب وقت التذكير (UTC صريح)
         const reminderAt = DateTime
             .fromISO(startAt, { zone: "utc" })
             .minus({ hours: 2 })
             .toUTC();
 
+        // إذا فات وقت التذكير لا ننشئ Task
         if (reminderAt <= DateTime.utc()) {
             return res.json({
                 skipped: true,
@@ -52,12 +53,14 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
             });
         }
 
+        // ⚠️ المتغير الصحيح داخل Firebase Functions
         const project = process.env.GCLOUD_PROJECT;
         const location = "us-central1";
         const queue = "booking-reminders";
 
         const parent = tasksClient.queuePath(project, location, queue);
 
+        // اسم task فريد لمنع التكرار
         const taskId = `booking-${bookingId}-reminder`;
         const taskName = tasksClient.taskPath(project, location, queue, taskId);
 
@@ -68,7 +71,6 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
                 url: `https://us-central1-${project}.cloudfunctions.net/sendBookingReminder`,
                 headers: {
                     "Content-Type": "application/json",
-                    "x-internal-secret": process.env.INTERNAL_TASK_SECRET,
                 },
                 body: Buffer.from(
                     JSON.stringify({ bookingId, userFcmToken, startAt })
@@ -87,6 +89,7 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
             reminderAt: reminderAt.toISO(),
         });
     } catch (err) {
+        // task موجود مسبقًا (idempotency)
         if (err.code === 6) {
             return res.json({ ok: true, duplicated: true });
         }
@@ -97,24 +100,14 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
 });
 
 // =====================================
-// 🔔 إرسال إشعار FCM (محمي بالـ Secret)
+// 🔔 إرسال إشعار FCM عند تنفيذ المهمة
 // =====================================
 export const sendBookingReminder = https.onRequest(async (req, res) => {
     try {
-        // 🔐 تحقق من السر الداخلي
-        const secret = req.headers["x-internal-secret"];
-
-        if (secret !== process.env.INTERNAL_TASK_SECRET) {
-            console.error("❌ Invalid internal secret");
-            return res.status(403).json({ error: "Forbidden" });
-        }
 
         const { userFcmToken } = req.body;
 
-        if (!userFcmToken) {
-            console.warn("⚠️ sendBookingReminder called without FCM token");
-            return res.status(200).json({ skipped: true });
-        }
+
 
         await admin.messaging().send({
             token: userFcmToken,
@@ -133,9 +126,16 @@ export const sendBookingReminder = https.onRequest(async (req, res) => {
             },
         });
 
-        return res.status(200).json({ ok: true });
+
+        res.status(200).json({ ok: true });
     } catch (e) {
         console.error("❌ sendBookingReminder failed", e);
-        return res.status(500).json({ error: "FCM failed" });
+        res.status(500).json({ error: "FCM failed" });
     }
 });
+
+
+
+
+
+
