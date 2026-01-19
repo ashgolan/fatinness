@@ -25,8 +25,14 @@ export default function BookingsHub() {
   const handleServerError = useServerError();
 
   const { mode, BRAND } = useThemeMode();
-  const { t } = useTranslation();
-  const lang = t.language; // ar | he | en
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
+  const locale =
+    lang === "he"
+      ? "he"
+      : lang === "en"
+        ? "en"
+        : "ar";
 
   // ⬇️ المرجع الخاص بالسكرول
   const slotsRef = useRef(null);
@@ -279,7 +285,7 @@ export default function BookingsHub() {
 
   return (
     <div
-      dir="rtl"
+      dir={i18n.dir()}
       style={{
         minHeight: "100vh",
         padding: "20px",
@@ -378,7 +384,7 @@ export default function BookingsHub() {
                 t,
                 bookingInProgress,   // ✅ أضف هذا
                 lang, // ✅ أضف هذا
-
+                locale,
                 // ⬇️ نمرر المرجع
                 slotsRef,
               }}
@@ -430,8 +436,7 @@ function AvailableView({
   toLocalKey,
   t,
   bookingInProgress, // ✅ أضف هذا
-  lang, // ✅ هنا
-
+  locale,
   // ⬇️ المرجع القادم من الأعلى
   slotsRef,
 }) {
@@ -644,9 +649,10 @@ function AvailableView({
                 }}
               >
                 {DateTime.fromISO(selectedDate, { zone: "local" })
-                  .setLocale(lang)
-                  .toFormat("cccc")}{" "}
-                - {selectedDate}
+                  .setLocale(locale)
+                  .toFormat("cccc dd/MM")}
+
+                {/* - {selectedDate} */}
               </h3>
             </div>
 
