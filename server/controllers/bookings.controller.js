@@ -168,13 +168,17 @@ export const createBooking = async (req, res) => {
 
 
     try {
-      await scheduleBookingReminderCall({
-        bookingId: booking[0]._id.toString(),
-        userFcmToken: activeFcm.token,
-        startAt: slot.startAt.toISOString(),
-      });
+      await axios.post(
+        "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
+        {
+          bookingId: booking[0]._id.toString(),
+          userFcmToken: activeFcm.token,
+          startAt: slot.startAt.toISOString(),
+        }
+      );
 
-      console.log("⏰ Reminder scheduled (onCall)");
+      console.log("⏰ Reminder scheduled (HTTP)");
+
     } catch (e) {
       console.error("⚠️ Failed to schedule reminder:", e.message);
     }
