@@ -1,6 +1,5 @@
 import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
-import { scheduleReminder } from "../utils/scheduler.js";
 import {
   createGoogleEvent,
   deleteGoogleEvent,
@@ -170,7 +169,6 @@ export const createBooking = async (req, res) => {
         "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
         {
           bookingId: booking[0]._id.toString(),
-          userFcmToken: user.fcmToken,
           userFcmToken: activeFcm.token,
           startAt: slot.startAt.toISOString(),
         }

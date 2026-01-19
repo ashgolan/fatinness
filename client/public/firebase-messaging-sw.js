@@ -23,16 +23,29 @@ const messaging = firebase.messaging();
 */
 
 messaging.onBackgroundMessage((payload) => {
-  // في إشعار Notification → النظام يعرضه تلقائياً
-  // نحن فقط نستطيع التعامل مع الضغط عليه
+  console.log("📩 Background message received:", payload);
+
+  const title =
+    payload.notification?.title || "⏰ تذكير";
+
+  const options = {
+    body: payload.notification?.body || "لديك إشعار جديد",
+    icon: "/logo192x192.png",
+    data: {
+      url: "/", // أو رابط الحجز
+    },
+  };
+
+  self.registration.showNotification(title, options);
 });
+
 
 /* فتح الرابط عند الضغط */
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   const url = event.notification?.data?.url || "/";
-  
+
   event.waitUntil(
     clients.matchAll({ type: "window" }).then((clientList) => {
       // إذا هناك نافذة مفتوحة → نستخدمها
