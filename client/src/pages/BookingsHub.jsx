@@ -226,22 +226,40 @@ export default function BookingsHub() {
   const gridDates = view === "week"
     ? weekDates
     : calendarDates;
+  const uniqueBookingsBySlot = useMemo(() => {
+    const map = new Map();
 
-  const upcomingBookings = allBookings.filter(
+    // نمرّ من الأحدث إلى الأقدم
+    [...allBookings]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .forEach((b) => {
+        const slotId = b.slot._id;
+        if (!map.has(slotId)) {
+          map.set(slotId, b);
+        }
+      });
+
+    return Array.from(map.values());
+  }, [allBookings]);
+
+  const upcomingBookings = uniqueBookingsBySlot.filter(
     (b) =>
       new Date(b.slot.startAt) >= now &&
       b.status === "booked" &&
       !b.slot.isBlocked
   );
-  const pastBookings = allBookings.filter(
+
+  const pastBookings = uniqueBookingsBySlot.filter(
     (b) =>
       new Date(b.slot.startAt) < now &&
       b.status !== "cancelled" &&
       !b.slot.isBlocked
   );
-  const cancelledBookings = allBookings.filter(
+
+  const cancelledBookings = uniqueBookingsBySlot.filter(
     (b) => b.status === "cancelled" || b.slot.isBlocked
   );
+
 
   const filteredBookings = useMemo(() => {
     if (bookingsFilter === "upcoming") return upcomingBookings;
@@ -750,7 +768,6 @@ function MyBookingsView({
   handleCancel,
   handleRebook,
   t,
-  myBookings, // ✅ أضف هذا
 
 }) {
   const now = new Date();
@@ -815,7 +832,6 @@ function MyBookingsView({
           }}
         >
           {filteredBookings.map((b) => {
-            const isRebooked = myBookings.includes(b.slot._id);
 
             const isCancelled = b.status === "cancelled" || b.slot.isBlocked;
             const isPast = new Date(b.slot.startAt) < now;
@@ -867,7 +883,7 @@ function MyBookingsView({
                   </button>
                 )}
 
-                {!isPast && isCancelled && !isRebooked && (
+                {!isPast && isCancelled && (
                   <button
                     onClick={() => handleRebook(b.slot._id)}
                     style={{
