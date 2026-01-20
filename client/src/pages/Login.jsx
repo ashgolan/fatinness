@@ -82,13 +82,18 @@ export default function Login() {
         // 🔔 تفعيل الإشعارات (اختياري + ذكي)
         // 🔔 محاولة تفعيل الإشعارات (بدون إزعاج)
         setTimeout(() => {
-          registerFcmToken({ silent: false });
-        }, 800);
+          registerFcmToken({ silent: true });
+        }, 500);
+
+        // 🔁 محاولة ثانية احتياطية (مهمة جداً للموبايل)
+        setTimeout(() => {
+          registerFcmToken({ silent: true });
+        }, 3000);
 
         // 🔄 تحديث بيانات المستخدم بدون await
 
         const lang = localStorage.getItem("appLanguage") || "ar";
-        Api.put("/auth/language", { preferredLanguage: lang }).catch(() => {});
+        Api.put("/auth/language", { preferredLanguage: lang }).catch(() => { });
 
         navigate(data.user.role === "admin" ? "/admin/control" : from, {
           replace: true,
@@ -233,9 +238,8 @@ export default function Login() {
             sx={{
               fontWeight: 800,
               fontSize: { xs: "1.8rem", sm: "2rem" },
-              background: `linear-gradient(135deg, ${
-                isDark ? BRAND.gold : BRAND.purple
-              } 0%, ${isDark ? BRAND.purple : BRAND.gold} 100%)`,
+              background: `linear-gradient(135deg, ${isDark ? BRAND.gold : BRAND.purple
+                } 0%, ${isDark ? BRAND.purple : BRAND.gold} 100%)`,
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -335,9 +339,8 @@ export default function Login() {
               fontSize: "1.05rem",
               fontWeight: 700,
               borderRadius: "10px",
-              background: `linear-gradient(135deg, ${
-                isDark ? BRAND.gold : BRAND.purple
-              }, ${isDark ? BRAND.purple : BRAND.gold})`,
+              background: `linear-gradient(135deg, ${isDark ? BRAND.gold : BRAND.purple
+                }, ${isDark ? BRAND.purple : BRAND.gold})`,
               color: "#fff",
               textTransform: "none",
               gap: "10px",
