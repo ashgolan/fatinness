@@ -38,7 +38,10 @@ export const createBooking = async (req, res) => {
     // ============================
     // 📌 جلب الحصة
     // ============================
-    const slot = await Slot.findById(slotId).session(session);
+    const slot = await Slot.findOne({
+      _id: slotId,
+      isDeleted: false,
+    }).session(session);
     if (!slot || slot.isBlocked) {
       await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });

@@ -12,7 +12,10 @@ export const checkSlotTimeValidity = async (req, res, next) => {
       });
     }
 
-    const slot = await Slot.findById(slotId);
+    const slot = await Slot.findOne({
+      _id: slotId,
+      isDeleted: false,
+    });
     if (!slot) {
       return res.status(404).json({
         code: "SLOT_NOT_FOUND",

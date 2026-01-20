@@ -9,7 +9,10 @@ export const checkSlotCapacity = async (req, res, next) => {
       return res.status(400).json({ message: "Slot ID is required." });
     }
 
-    const slot = await Slot.findById(slotId);
+    const slot = await Slot.findOne({
+      _id: slotId,
+      isDeleted: false,
+    });
     if (!slot) {
       return res.status(404).json({ message: "Slot not found." });
     }

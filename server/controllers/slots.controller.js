@@ -38,6 +38,7 @@ export const getWeekSlots = async (req, res) => {
 
     const slots = await Slot.find({
       startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
+      isDeleted: false, // 🆕 تجاهل الحصص المحذوفة
       isBlocked: false,
     }).sort({ startAt: 1 });
 
@@ -70,8 +71,10 @@ export const getDaySlots = async (req, res) => {
     const endUTC = dayLocal.endOf("day").toUTC().toJSDate();
 
     const slots = await Slot.find({
-      startAt: { $gte: startUTC, $lte: endUTC },
+      startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
+      isDeleted: false, // 🆕 تجاهل الحصص المحذوفة
       isBlocked: false,
+
     }).sort({ startAt: 1 });
 
     const nowUTC = DateTime.now().setZone(ZONE).toUTC().toJSDate();
@@ -115,7 +118,8 @@ export const getUpcomingSlots = async (req, res) => {
     // 1️⃣ جلب الحصص
     const slots = await Slot.find({
       startAt: { $gte: startUTC, $lte: endUTC },
-      isBlocked: false,
+      isDeleted: false, // 🗑️ تجاهل المحذوف
+      isBlocked: false, // 🚫 تجاهل المغلق
     })
       .sort({ startAt: 1 })
       .lean();

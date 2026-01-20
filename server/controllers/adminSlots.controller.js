@@ -51,9 +51,11 @@ export const adminGetWeekSlots = async (req, res) => {
 
     const weekStartUTC = weekStartLocal.toUTC().toJSDate();
     const weekEndUTC = weekEndLocal.toUTC().toJSDate();
-
     const slots = await Slot.find({
       startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
+      isDeleted: false, // 🆕 تجاهل الحصص المحذوفة
+      isBlocked: false,
+
     }).sort({ startAt: 1 });
 
     const slotIds = slots.map((s) => s._id);
@@ -61,8 +63,18 @@ export const adminGetWeekSlots = async (req, res) => {
     let bookedBySlot = [];
     if (slotIds.length) {
       bookedBySlot = await Booking.aggregate([
-        { $match: { slot: { $in: slotIds }, status: "booked" } },
-        { $group: { _id: "$slot", bookedCount: { $sum: 1 } } },
+        {
+          $match: {
+            slot: { $in: slotIds },
+            status: "booked",
+          },
+        },
+        {
+          $group: {
+            _id: "$slot",
+            bookedCount: { $sum: 1 },
+          },
+        },
       ]);
     }
 
@@ -346,24 +358,63 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 
 
 export const adminDeleteSlot = async (req, res) => {
+  const session = await mongoose.startSession();
+
   try {
+    session.startTransaction();
+
     const { id } = req.params;
 
-    const slot = await Slot.findById(id);
-    if (!slot) {
+    const slot = await Slot.findById(id).session(session);
+    if (!slot || slot.isDeleted) {
+      await session.abortTransaction();
       return res.status(404).json({ code: "SLOT_NOT_FOUND" });
     }
 
-    // 🔒 (اختياري) منع حذف حصة عليها حجوزات
-    if (slot.bookings?.length > 0) {
-      return res.status(400).json({ code: "SLOT_HAS_BOOKINGS" });
+    // ❌ منع حذف حصة بدأت
+    const now = DateTime.utc();
+    const slotStart = DateTime.fromJSDate(slot.startAt, { zone: "utc" });
+
+    if (slotStart <= now) {
+      await session.abortTransaction();
+      return res.status(400).json({ code: "SLOT_ALREADY_STARTED" });
     }
 
-    await slot.deleteOne();
+    // 🧾 جلب الحجوزات
+    const bookings = await Booking.find({
+      slot: id,
+      status: "booked",
+    })
+      .populate("user", "fcmTokens preferredLanguage")
+      .session(session);
 
-    res.json({ code: "SLOT_DELETED_SUCCESSFULLY" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ code: "DELETE_SLOT_FAILED" });
+    // ❌ إلغاء الحجوزات
+    await Booking.updateMany(
+      { slot: id },
+      {
+        status: "cancelled",
+        cancelledReason: "SLOT_DELETED",
+        cancelledAt: new Date(),
+      },
+      { session }
+    );
+
+    // 🗑️ Soft delete للحصة
+    slot.isDeleted = true;
+    slot.deletedAt = new Date();
+    slot.deletedBy = req.user._id;
+    await slot.save({ session });
+
+    await session.commitTransaction();
+
+    // 🔔 إرسال الإشعارات (بعد commit)
+    sendSlotDeletedNotifications(bookings, slot);
+
+    return res.json({ code: "SLOT_DELETED_SUCCESSFULLY" });
+  } catch (e) {
+    await session.abortTransaction();
+    throw e;
+  } finally {
+    session.endSession();
   }
 };

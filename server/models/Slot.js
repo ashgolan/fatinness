@@ -6,6 +6,17 @@ const SlotSchema = new mongoose.Schema({
   endAt: { type: Date, required: true },
   capacity: { type: Number, default: 20 },
   isBlocked: { type: Boolean, default: false },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+    index: true,
+  },
+
+  deletedAt: {
+    type: Date,
+    default: null,
+  },
+
   templateId: { type: mongoose.Schema.Types.ObjectId, ref: "WeekTemplate" },
   createdAt: { type: Date, default: Date.now },
 });
