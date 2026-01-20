@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useMemo } from "react";
 import { Api } from "../api/Api";
+import { registerFcmToken } from "../firebase/registerFcmToken";
 
 export const UserContext = createContext();
 
@@ -23,6 +24,12 @@ export function UserProvider({ children }) {
 
     init();
   }, []);
+useEffect(() => {
+  if (!user || !user._id) return;
+
+  // 🔔 تسجيل FCM تلقائي بعد login
+  registerFcmToken({ silent: true });
+}, [user?._id]);
 
   const value = useMemo(
     () => ({ user, setUser, loadingUser }),

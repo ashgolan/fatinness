@@ -104,24 +104,24 @@ export default function App() {
 
 
   // 🔔 FCM retry ذكي عند العودة للتطبيق
-  useEffect(() => {
-    const retryFcm = () => {
-      registerFcmToken({ silent: true });
-    };
+  // useEffect(() => {
+  //   const retryFcm = () => {
+  //     registerFcmToken({ silent: true });
+  //   };
 
-    window.addEventListener("focus", retryFcm);
+  //   window.addEventListener("focus", retryFcm);
 
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        retryFcm();
-      }
-    });
+  //   document.addEventListener("visibilitychange", () => {
+  //     if (document.visibilityState === "visible") {
+  //       retryFcm();
+  //     }
+  //   });
 
-    return () => {
-      window.removeEventListener("focus", retryFcm);
-      document.removeEventListener("visibilitychange", retryFcm);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("focus", retryFcm);
+  //     document.removeEventListener("visibilitychange", retryFcm);
+  //   };
+  // }, []);
 
 
   const isSplash = location.pathname === "/";

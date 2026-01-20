@@ -6,6 +6,8 @@ import i18n from "i18next";
 
 let retryTimer = null;
 
+let refreshListenerAttached = false;
+
 export async function registerFcmToken({ silent = false } = {}) {
   try {
     // 1️⃣ دعم المتصفح
@@ -27,7 +29,7 @@ export async function registerFcmToken({ silent = false } = {}) {
       }
     }
 
-    // 3️⃣ Service Worker (والانتظار حتى يصبح active)
+    // 3️⃣ Service Worker
     let registration =
       (await navigator.serviceWorker.getRegistration("/")) ||
       (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
@@ -43,7 +45,7 @@ export async function registerFcmToken({ silent = false } = {}) {
       });
     }
 
-    // 4️⃣ FCM Token
+    // 4️⃣ FCM
     const messaging = getMessaging(app);
     const vapidKey = process.env.REACT_APP_FIREBASE_VAPID_KEY;
     if (!vapidKey) return null;
@@ -53,13 +55,27 @@ export async function registerFcmToken({ silent = false } = {}) {
       serviceWorkerRegistration: registration,
     });
 
-    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
-
-
     if (!token) throw new Error("FCM_TOKEN_NOT_READY");
 
-    // 5️⃣ إرسال للسيرفر
+    console.log("🔥 FCM TOKEN FROM DEVICE:", token);
+
+    // 5️⃣ إرسال دائم للسيرفر (حتى لو مكرر)
     await Api.post("/users/fcm", { fcmToken: token });
+
+    // 6️⃣ 🔥 الاستماع لتغيير التوكن (مرة واحدة فقط)
+    if (!refreshListenerAttached) {
+      refreshListenerAttached = true;
+
+      onTokenRefresh(messaging, async (newToken) => {
+        console.log("🔄 FCM TOKEN REFRESHED:", newToken);
+
+        try {
+          await Api.post("/users/fcm", { fcmToken: newToken });
+        } catch (e) {
+          console.error("❌ Failed to sync refreshed token", e);
+        }
+      });
+    }
 
     if (!silent) {
       toast.success(i18n.t("fcm.success"));
@@ -69,17 +85,18 @@ export async function registerFcmToken({ silent = false } = {}) {
   } catch (err) {
     console.log("FCM not ready yet:", err?.message);
 
-    // 🔁 Retry ذكي (مرة واحدة)
+    // 🔁 Retry ذكي
     if (!retryTimer) {
       retryTimer = setTimeout(() => {
         retryTimer = null;
         registerFcmToken({ silent: true });
-      }, 60000); // بعد دقيقة
+      }, 60000);
     }
 
     return null;
   }
 }
+
 
 
 // export async function transferFcmToThisDevice() {
