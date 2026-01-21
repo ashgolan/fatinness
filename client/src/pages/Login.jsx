@@ -92,8 +92,11 @@ export default function Login() {
 
         // 🔄 تحديث بيانات المستخدم بدون await
 
-        const lang = localStorage.getItem("appLanguage") || "ar";
-        Api.put("/auth/language", { preferredLanguage: lang }).catch(() => { });
+        // const lang = localStorage.getItem("appLanguage") || "he";
+
+        // if (data.user?.preferredLanguage !== lang) {
+        //   Api.put("/auth/language", { preferredLanguage: lang }).catch(() => { });
+        // }
 
         navigate(data.user.role === "admin" ? "/admin/control" : from, {
           replace: true,

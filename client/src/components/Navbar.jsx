@@ -58,6 +58,9 @@ export default function Navbar() {
   ];
   const drawerAnchor = i18n.dir() === "rtl" ? "right" : "left";
   const changeLanguage = async (lang) => {
+    console.log("🌍 changeLanguage clicked:", lang);
+
+    // 1️⃣ تغيير الواجهة فورًا
     i18n.changeLanguage(lang);
     localStorage.setItem("appLanguage", lang);
 
@@ -66,22 +69,48 @@ export default function Navbar() {
 
     setLangMenuAnchor(null);
 
-    // 🔐 مزامنة اللغة مع السيرفر إذا المستخدم مسجل دخول
-    if (user?._id) {
-      try {
-        const { data } = await Api.put("/auth/language", {
-          preferredLanguage: lang,
-        });
+    console.log("👤 current user:", user);
+    console.log("🗣️ current preferredLanguage:", user?.preferredLanguage);
 
-        // (اختياري) تحديث user في الـ context
-        setUser((prev) =>
-          prev ? { ...prev, preferredLanguage: data.preferredLanguage } : prev
-        );
-      } catch (e) {
-        console.warn("⚠️ Failed to sync preferredLanguage with server");
-      }
+    // 2️⃣ مزامنة مع السيرفر فقط إذا المستخدم مسجّل دخول
+    if (!user?.id) {
+      console.warn("⚠️ No user logged in → skip server sync");
+      return;
+    }
+
+
+    if (user.preferredLanguage === lang) {
+      console.warn("ℹ️ Same language, no need to update server");
+      return;
+    }
+
+    console.log("📡 Sending PUT /auth/language", {
+      preferredLanguage: lang,
+    });
+
+    try {
+      const { data } = await Api.put("/auth/language", {
+        preferredLanguage: lang,
+      });
+
+      console.log("✅ Server responded:", data);
+
+      // 3️⃣ تحديث الـ context (مهم)
+      setUser((prev) => {
+        const updated = prev
+          ? { ...prev, preferredLanguage: data.preferredLanguage }
+          : prev;
+
+        console.log("🔄 Updated user in context:", updated);
+        return updated;
+      });
+    } catch (e) {
+      console.error("❌ Failed to sync language with server");
+      console.error("status:", e?.response?.status);
+      console.error("data:", e?.response?.data);
     }
   };
+
 
 
   const fallbackLogo = "/brand/DEFAULT_LOGO.png";

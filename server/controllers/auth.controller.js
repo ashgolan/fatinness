@@ -186,6 +186,10 @@ export const loginUser = async (req, res) => {
     const token = generateToken(user);
     setAuthCookie(res, token);
 
+    console.log("🍪 JWT COOKIE SET", {
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+    });
     return res.json({
       code: "AUTH_LOGIN_SUCCESS",
       user: {
@@ -194,8 +198,11 @@ export const loginUser = async (req, res) => {
         phone: user.phone,
         role: user.role,
         isSuperAdmin: user.isSuperAdmin,
+        preferredLanguage: user.preferredLanguage, // ✅
+
       },
     });
+
   } catch (err) {
     console.error("❌ Login Error:", err);
     return res.status(500).json({ code: "AUTH_LOGIN_SERVER_ERROR" });
