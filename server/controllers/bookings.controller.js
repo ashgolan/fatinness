@@ -168,12 +168,13 @@ export const createBooking = async (req, res) => {
     }
 
     try {
-      const reminderResponse = await axios.post(
+      await axios.post(
         "https://us-central1-fateness-364c3.cloudfunctions.net/scheduleBookingReminder",
         {
           bookingId: booking[0]._id.toString(),
           userFcmToken: activeFcm.token,
           startAt: slot.startAt.toISOString(),
+          secret: process.env.REMINDER_SECRET, // 🔐
         }
       );
 
