@@ -370,7 +370,6 @@ export const adminCreateNextWeekBulk = async (req, res) => {
  */
 export async function notifySlotDeletedUsers({ slotId }) {
 
-  if (!slotId || !title || !body) return;
 
   // 1️⃣ Get all bookings for this slot (even cancelled)
   const bookings = await Booking.find({

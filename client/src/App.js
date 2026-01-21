@@ -3,6 +3,9 @@ import "./i18n/i18n";
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
+import { useContext } from "react";
+import { UserContext } from "./context/UserContext";
+
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
@@ -18,7 +21,6 @@ import rtlPlugin from "stylis-plugin-rtl";
 // 🔹 Context
 import { ThemeModeProvider, useThemeMode } from "./context/ThemeContext";
 import { DirectionProvider, useDirection } from "./context/DirectionContext";
-
 // 🔹 Layout
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
@@ -94,6 +96,18 @@ export default function App() {
     i18n.changeLanguage(savedLang);
   }, []);
 
+  const { user } = useContext(UserContext);
+
+  useEffect(() => {
+    if (!user?.preferredLanguage) return;
+
+    i18n.changeLanguage(user.preferredLanguage);
+    localStorage.setItem("appLanguage", user.preferredLanguage);
+
+    document.documentElement.dir =
+      user.preferredLanguage === "en" ? "ltr" : "rtl";
+  }, [user]);
+
   // ✅ check-first-run فقط إذا يوجد Token
   useEffect(() => {
 
@@ -101,27 +115,6 @@ export default function App() {
       .then((res) => setNeedsSetup(res.data.needsSetup))
       .catch(() => setNeedsSetup(false));
   }, []);
-
-
-  // 🔔 FCM retry ذكي عند العودة للتطبيق
-  // useEffect(() => {
-  //   const retryFcm = () => {
-  //     registerFcmToken({ silent: true });
-  //   };
-
-  //   window.addEventListener("focus", retryFcm);
-
-  //   document.addEventListener("visibilitychange", () => {
-  //     if (document.visibilityState === "visible") {
-  //       retryFcm();
-  //     }
-  //   });
-
-  //   return () => {
-  //     window.removeEventListener("focus", retryFcm);
-  //     document.removeEventListener("visibilitychange", retryFcm);
-  //   };
-  // }, []);
 
 
   const isSplash = location.pathname === "/";
