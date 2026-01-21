@@ -6,6 +6,8 @@ import Booking from "../models/Booking.js";
 import Slot from "../models/Slot.js";
 import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
+import mongoose from "mongoose";
+import { sendSmartNotification } from "../utils/notify.js";
 
 /**
  * Checks if a slot overlaps with existing ones
@@ -357,6 +359,55 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 
 
 
+/**
+ * 🔔 Notify all users who had a booking on a deleted slot
+ * Used ONLY after slot deletion
+ */
+export async function notifySlotDeletedUsers({
+  slotId,
+  title,
+  body,
+}) {
+  if (!slotId || !title || !body) return;
+
+  // 1️⃣ Get all bookings for this slot (even cancelled)
+  const bookings = await Booking.find({
+    slot: slotId,
+    status: { $in: ["booked", "cancelled"] },
+  }).populate("user");
+
+  if (!bookings.length) return;
+
+  // 2️⃣ Collect unique users
+  const userMap = new Map();
+
+  for (const b of bookings) {
+    if (b.user && b.user._id) {
+      userMap.set(b.user._id.toString(), b.user);
+    }
+  }
+
+  const users = Array.from(userMap.values());
+  if (!users.length) return;
+
+  // 3️⃣ Send notifications
+  for (const user of users) {
+    try {
+      await sendSmartNotification({
+        user,
+        title,
+        body,
+        channel: "push",
+      });
+    } catch (e) {
+      console.error(
+        `⚠️ Failed to notify user ${user._id} about deleted slot`,
+        e.message
+      );
+    }
+  }
+}
+
 export const adminDeleteSlot = async (req, res) => {
   const session = await mongoose.startSession();
 
@@ -408,8 +459,11 @@ export const adminDeleteSlot = async (req, res) => {
     await session.commitTransaction();
 
     // 🔔 إرسال الإشعارات (بعد commit)
-    sendSlotDeletedNotifications(bookings, slot);
-
+    notifySlotDeletedUsers({
+      slotId: slot._id,
+      title: "האימון בוטל",
+      body: " מצטערים , האימון שהזמנת בוטל",
+    });
     return res.json({ code: "SLOT_DELETED_SUCCESSFULLY" });
   } catch (e) {
     await session.abortTransaction();
