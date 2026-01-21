@@ -798,7 +798,8 @@
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "Session ID is required.",
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit.",
       "weeklyLimitMessage": "YOU HAVE REACHED THE WEEKLY LIMIT ({{max}} SESSIONS) 🌸\nFROM {{start}} TO {{end}}\nYOU CAN BOOK AGAIN NEXT WEEK 🤍",
-      "PHONE_ALREADY_EXISTS": "Phone number already exists"
+      "PHONE_ALREADY_EXISTS": "Phone number already exists",
+      "SLOT_NOT_FOUND": "This session is no longer available or has been cancelled"
     },
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",

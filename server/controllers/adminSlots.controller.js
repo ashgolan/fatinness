@@ -368,10 +368,13 @@ export const adminCreateNextWeekBulk = async (req, res) => {
  * 🔔 Notify all users who had a booking on a deleted slot
  * Used ONLY after slot deletion
  */
+
 export async function notifySlotDeletedUsers({ slotId }) {
+  // 0️⃣ جلب الحصة
+  const slot = await Slot.findById(slotId);
+  if (!slot) return;
 
-
-  // 1️⃣ Get all bookings for this slot (even cancelled)
+  // 1️⃣ جلب جميع الحجوزات (حتى الملغاة)
   const bookings = await Booking.find({
     slot: slotId,
     status: { $in: ["booked", "cancelled"] },
@@ -379,7 +382,7 @@ export async function notifySlotDeletedUsers({ slotId }) {
 
   if (!bookings.length) return;
 
-  // 2️⃣ Collect unique users
+  // 2️⃣ تجميع المستخدمين بدون تكرار
   const userMap = new Map();
 
   for (const b of bookings) {
@@ -391,13 +394,31 @@ export async function notifySlotDeletedUsers({ slotId }) {
   const users = Array.from(userMap.values());
   if (!users.length) return;
 
-  // 3️⃣ Send notifications
+  // 3️⃣ إرسال الإشعارات مع تفصيل الحصة
   for (const user of users) {
     try {
-      const { title, body } = getNotificationText(
+      const dt = DateTime
+        .fromJSDate(slot.startAt)
+        .setZone(ZONE);
+
+      const formatted =
+        user.preferredLanguage === "ar"
+          ? dt.toFormat("dd/LL - HH:mm")
+          : user.preferredLanguage === "he"
+            ? dt.toFormat("dd/LL HH:mm")
+            : dt.toFormat("dd/MM HH:mm");
+
+      const { title } = getNotificationText(
         "slotCancelled",
         user.preferredLanguage
       );
+
+      const body =
+        user.preferredLanguage === "ar"
+          ? `تم إلغاء الحصة ${formatted}`
+          : user.preferredLanguage === "he"
+            ? `האימון בתאריך ${formatted} בוטל`
+            : `The session on ${formatted} was cancelled`;
 
       await sendSmartNotification({
         user,
@@ -407,9 +428,9 @@ export async function notifySlotDeletedUsers({ slotId }) {
         data: {
           type: "SLOT_CANCELLED",
           slotId,
+          startAt: slot.startAt.toISOString(),
         },
       });
-
     } catch (e) {
       console.error(
         `⚠️ Failed to notify user ${user._id} about deleted slot`,
