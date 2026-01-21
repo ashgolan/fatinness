@@ -57,16 +57,32 @@ export default function Navbar() {
     { code: "en", label: "English", flag: "🇺🇸", dir: "ltr" },
   ];
   const drawerAnchor = i18n.dir() === "rtl" ? "right" : "left";
-
-  const changeLanguage = (lang) => {
+  const changeLanguage = async (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("appLanguage", lang);
 
     const selected = LANGUAGES.find((l) => l.code === lang);
     document.documentElement.dir = selected?.dir || "ltr";
 
-    setLangMenuAnchor(null); // ⬅️ مهم لإغلاق القائمة
+    setLangMenuAnchor(null);
+
+    // 🔐 مزامنة اللغة مع السيرفر إذا المستخدم مسجل دخول
+    if (user?._id) {
+      try {
+        const { data } = await Api.put("/auth/language", {
+          preferredLanguage: lang,
+        });
+
+        // (اختياري) تحديث user في الـ context
+        setUser((prev) =>
+          prev ? { ...prev, preferredLanguage: data.preferredLanguage } : prev
+        );
+      } catch (e) {
+        console.warn("⚠️ Failed to sync preferredLanguage with server");
+      }
+    }
   };
+
 
   const fallbackLogo = "/brand/DEFAULT_LOGO.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
@@ -103,6 +119,15 @@ export default function Navbar() {
       navigate("/login");
     }
   };
+  useEffect(() => {
+    if (!user?.preferredLanguage) return;
+
+    i18n.changeLanguage(user.preferredLanguage);
+    localStorage.setItem("appLanguage", user.preferredLanguage);
+
+    document.documentElement.dir =
+      user.preferredLanguage === "en" ? "ltr" : "rtl";
+  }, [user]);
 
   const isAdmin = user?.role === "admin";
 

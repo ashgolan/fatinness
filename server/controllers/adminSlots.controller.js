@@ -8,6 +8,7 @@ import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
 import mongoose from "mongoose";
 import { sendSmartNotification } from "../utils/notify.js";
+import { getNotificationText } from "../utils/getNotificationText.js";
 
 /**
  * Checks if a slot overlaps with existing ones
@@ -367,11 +368,8 @@ export const adminCreateNextWeekBulk = async (req, res) => {
  * 🔔 Notify all users who had a booking on a deleted slot
  * Used ONLY after slot deletion
  */
-export async function notifySlotDeletedUsers({
-  slotId,
-  title,
-  body,
-}) {
+export async function notifySlotDeletedUsers({ slotId }) {
+
   if (!slotId || !title || !body) return;
 
   // 1️⃣ Get all bookings for this slot (even cancelled)
@@ -397,12 +395,22 @@ export async function notifySlotDeletedUsers({
   // 3️⃣ Send notifications
   for (const user of users) {
     try {
+      const { title, body } = getNotificationText(
+        "slotCancelled",
+        user.preferredLanguage
+      );
+
       await sendSmartNotification({
         user,
         title,
         body,
         channel: "push",
+        data: {
+          type: "SLOT_CANCELLED",
+          slotId,
+        },
       });
+
     } catch (e) {
       console.error(
         `⚠️ Failed to notify user ${user._id} about deleted slot`,
@@ -465,9 +473,8 @@ export const adminDeleteSlot = async (req, res) => {
     // 🔔 إرسال الإشعارات (بعد commit)
     notifySlotDeletedUsers({
       slotId: slot._id,
-      title: "האימון בוטל",
-      body: " מצטערים , האימון שהזמנת בוטל",
     });
+
     return res.json({ code: "SLOT_DELETED_SUCCESSFULLY" });
   } catch (e) {
     await session.abortTransaction();
