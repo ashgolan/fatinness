@@ -15,6 +15,7 @@ import { sendSmartNotification } from "../utils/notify.js";
 export async function hasOverlap(startAtUTC, endAtUTC, session = null) {
   const overlap = await Slot.findOne(
     {
+      isDeleted: false,
       startAt: { $lt: endAtUTC },
       endAt: { $gt: startAtUTC },
     },
@@ -161,6 +162,7 @@ export const adminCreateSlot = async (req, res) => {
       date: startAtUTC.startOf("day").toJSDate(),
       startAt: startAtUTC.toJSDate(),
       endAt: endAtUTC.toJSDate(),
+
       capacity: Number(capacity) || 20,
     });
 
@@ -326,6 +328,8 @@ export const adminCreateNextWeekBulk = async (req, res) => {
       const exists = await Slot.findOne({
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),
+        isDeleted: false, // ⭐ مهم
+
       });
 
       if (exists) {

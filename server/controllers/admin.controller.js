@@ -285,6 +285,8 @@ export const applyTemplate = async (req, res) => {
       const exists = await Slot.findOne({
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),
+        isDeleted: false, // ⭐ مهم
+
       }).session(session);
 
       if (exists) {
@@ -547,7 +549,9 @@ export const getDashboardStats = async (req, res) => {
 
     const todaySessions = await Slot.countDocuments({
       startAt: { $gte: startOfDayUTC, $lte: endOfDayUTC },
+      isDeleted: false,
     });
+
 
     // =======================
     // 🔥 الحجوزات النشطة
@@ -575,6 +579,7 @@ export const getDashboardStats = async (req, res) => {
 
     const upcomingWeekSessions = await Slot.countDocuments({
       startAt: { $gte: nextWeekStartUTC, $lte: nextWeekEndUTC },
+      isDeleted: false,
     });
 
     // =======================
@@ -609,7 +614,7 @@ export const getDashboardStats = async (req, res) => {
 
         Booking.countDocuments(),
         Booking.countDocuments({ status: "cancelled" }),
-        Slot.countDocuments(),
+        Slot.countDocuments({ isDeleted: false }),
       ]);
 
     // =======================
