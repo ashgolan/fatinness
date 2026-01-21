@@ -2,22 +2,31 @@ import { pubsub, https } from "firebase-functions/v1";
 import admin from "firebase-admin";
 import { DateTime } from "luxon";
 import { CloudTasksClient } from "@google-cloud/tasks";
+import { defineString } from "firebase-functions/params";
 
 // =====================================
-// 🔧 تهيئة Firebase Admin (مرة واحدة فقط)
+// 🔧 Firebase Admin (مرة واحدة فقط)
 // =====================================
 admin.initializeApp();
 
 // =====================================
-// 🔧 Cloud Tasks Client (مرة واحدة فقط)
+// 🔧 Cloud Tasks Client
 // =====================================
 const tasksClient = new CloudTasksClient();
 
 // =====================================
-// 🔔 اختبار حياة Cloud Scheduler (اختياري)
+// 🔐 Runtime Params (حل دائم)
+// =====================================
+const apiUrl = "https://api.fatinness.cloud";
+
+export const REMINDER_SECRET = defineString("REMINDER_SECRET");
+
+
+// =====================================
+// 🔔 Ping Scheduler (اختياري)
 // =====================================
 export const pingScheduler = pubsub
-    .schedule("* * * * *") // كل دقيقة
+    .schedule("* * * * *")
     .timeZone("UTC")
     .onRun(() => {
         console.log("⏱ Firebase Scheduler alive:", DateTime.utc().toISO());
@@ -25,7 +34,7 @@ export const pingScheduler = pubsub
     });
 
 // =====================================
-// 🔔 إنشاء مهمة تذكير قبل ساعتين
+// 🔔 إنشاء Cloud Task للتذكير
 // =====================================
 export const scheduleBookingReminder = https.onRequest(async (req, res) => {
     console.log("🚀 scheduleBookingReminder called", req.body);
@@ -37,43 +46,49 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
             return res.status(400).json({ error: "Missing fields" });
         }
 
-
-        // ⏱️ حساب وقت التذكير (UTC صريح)
+        // ⏱️ حساب وقت التذكير (UTC)
         const reminderAt = DateTime
             .fromISO(startAt, { zone: "utc" })
             .minus({ hours: 2 })
             .toUTC();
 
-        // إذا فات وقت التذكير لا ننشئ Task
+        // ⛔ إذا فات وقت التذكير
         if (reminderAt <= DateTime.utc()) {
             return res.json({
                 skipped: true,
-                reason: "reminder time passed",
+                reason: "REMINDER_TIME_PASSED",
                 reminderAt: reminderAt.toISO(),
             });
         }
 
-        // ⚠️ المتغير الصحيح داخل Firebase Functions
+        // 📍 Cloud Tasks config
         const project = process.env.GCLOUD_PROJECT;
         const location = "us-central1";
         const queue = "booking-reminders";
 
         const parent = tasksClient.queuePath(project, location, queue);
 
-        // اسم task فريد لمنع التكرار
+        // 🆔 Task ID ثابت (idempotent)
         const taskId = `booking-${bookingId}-reminder`;
         const taskName = tasksClient.taskPath(project, location, queue, taskId);
+
+        // 🔐 Params (الدائم)
+        const secret = REMINDER_SECRET.value();
 
         const task = {
             name: taskName,
             httpRequest: {
                 httpMethod: "POST",
-                url: `https://us-central1-${project}.cloudfunctions.net/sendBookingReminder`,
+                url: `${apiUrl}/internal/send-booking-reminder`,
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: Buffer.from(
-                    JSON.stringify({ bookingId, userFcmToken, startAt })
+                    JSON.stringify({
+                        bookingId,
+                        userFcmToken,
+                        secret,
+                    })
                 ).toString("base64"),
             },
             scheduleTime: {
@@ -89,53 +104,48 @@ export const scheduleBookingReminder = https.onRequest(async (req, res) => {
             reminderAt: reminderAt.toISO(),
         });
     } catch (err) {
-        // task موجود مسبقًا (idempotency)
+        // 🔁 Task موجود مسبقًا
         if (err.code === 6) {
             return res.json({ ok: true, duplicated: true });
         }
 
         console.error("❌ scheduleBookingReminder error:", err);
-        return res.status(500).json({ error: "Failed to schedule reminder" });
+        return res.status(500).json({ error: "FAILED_TO_SCHEDULE_REMINDER" });
     }
 });
+
 
 // =====================================
 // 🔔 إرسال إشعار FCM عند تنفيذ المهمة
 // =====================================
-export const sendBookingReminder = https.onRequest(async (req, res) => {
-    try {
+// export const sendBookingReminder = https.onRequest(async (req, res) => {
+//     try {
 
-        const { userFcmToken } = req.body;
-
-
-
-        await admin.messaging().send({
-            token: userFcmToken,
-
-            // 🟢 يعمل عندما التطبيق مفتوح
-            data: {
-                type: "BOOKING_REMINDER",
-                title: "⏰ תזכורת לאימון",
-                body: "נותרו שעתיים עד לאימון שלך 💪",
-            },
-
-            // 🟢 يعمل عندما التطبيق مغلق
-            notification: {
-                title: "⏰ תזכורת לאימון",
-                body: "נותרו שעתיים עד לאימון שלך 💪",
-            },
-        });
-
-
-        res.status(200).json({ ok: true });
-    } catch (e) {
-        console.error("❌ sendBookingReminder failed", e);
-        res.status(500).json({ error: "FCM failed" });
-    }
-});
+//         const { userFcmToken } = req.body;
 
 
 
+//         await admin.messaging().send({
+//             token: userFcmToken,
+
+//             // 🟢 يعمل عندما التطبيق مفتوح
+//             data: {
+//                 type: "BOOKING_REMINDER",
+//                 title: "⏰ תזכורת לאימון",
+//                 body: "נותרו שעתיים עד לאימון שלך 💪",
+//             },
+
+//             // 🟢 يعمل عندما التطبيق مغلق
+//             notification: {
+//                 title: "⏰ תזכורת לאימון",
+//                 body: "נותרו שעתיים עד לאימון שלך 💪",
+//             },
+//         });
 
 
-
+//         res.status(200).json({ ok: true });
+//     } catch (e) {
+//         console.error("❌ sendBookingReminder failed", e);
+//         res.status(500).json({ error: "FCM failed" });
+//     }
+// });
