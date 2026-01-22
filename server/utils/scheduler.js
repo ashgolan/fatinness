@@ -38,177 +38,201 @@ agenda.on("ready", async () => {
 // ======================================================
 // 🔔 تذكير قبل ساعتين
 // ======================================================
-agenda.define("send-reminder", async (job) => {
-  const { bookingId } = job.attrs.data;
+// agenda.define("send-reminder", async (job) => {
+//   const { bookingId } = job.attrs.data;
 
-  const booking = await Booking.findById(bookingId).populate("user slot");
-  if (!booking || booking.status !== "booked") return;
-  if (booking.reminderSent) return;
+//   const booking = await Booking.findById(bookingId).populate("user slot");
+//   if (!booking || booking.status !== "booked") return;
+//   if (booking.reminderSent) return;
 
-  const lang = booking.user.preferredLanguage || "ar";
-  const locale = getLocale(lang);
+//   const lang = booking.user.preferredLanguage || "ar";
+//   const locale = getLocale(lang);
 
-  const startUTC = DateTime.fromJSDate(booking.slot.startAt, { zone: "utc" });
+//   const startUTC = DateTime.fromJSDate(booking.slot.startAt, { zone: "utc" });
 
-  const dateStr = startUTC
-    .setZone(ZONE)
-    .toLocaleString(DateTime.DATE_FULL, { locale });
+//   const dateStr = startUTC
+//     .setZone(ZONE)
+//     .toLocaleString(DateTime.DATE_FULL, { locale });
 
-  const timeStr = startUTC.setZone(ZONE).toFormat("HH:mm");
+//   const timeStr = startUTC.setZone(ZONE).toFormat("HH:mm");
 
-  await sendSmartNotification({
-    user: booking.user,
-    title: NOTIFICATION_TITLE,
-    body:
-      lang === "en"
-        ? `You have training today ${dateStr} at ${timeStr}`
-        : lang === "he"
-        ? `יש לך אימון היום ${dateStr} בשעה ${timeStr}`
-        : `لديكِ تدريب اليوم ${dateStr} الساعة ${timeStr}`,
-  });
+//   await sendSmartNotification({
+//     user: booking.user,
+//     title: NOTIFICATION_TITLE,
+//     body:
+//       lang === "en"
+//         ? `You have training today ${dateStr} at ${timeStr}`
+//         : lang === "he"
+//         ? `יש לך אימון היום ${dateStr} בשעה ${timeStr}`
+//         : `لديكِ تدريب اليوم ${dateStr} الساعة ${timeStr}`,
+//   });
 
-  booking.reminderSent = true;
-  await booking.save();
+//   booking.reminderSent = true;
+//   await booking.save();
 
-  console.log("🔔 Reminder sent");
-});
+//   console.log("🔔 Reminder sent");
+// });
 
 // ======================================================
 // 🏁 إنهاء الحصة
 // ======================================================
-agenda.define("mark-completed", async (job) => {
-  const { bookingId } = job.attrs.data;
+// agenda.define("mark-completed", async (job) => {
+//   const { bookingId } = job.attrs.data;
 
-  const booking = await Booking.findById(bookingId).populate("user slot");
-  if (!booking || booking.status !== "booked") return;
+//   const booking = await Booking.findById(bookingId).populate("user slot");
+//   if (!booking || booking.status !== "booked") return;
 
-  const nowUTC = DateTime.utc();
-  const endUTC = DateTime.fromJSDate(booking.slot.endAt, { zone: "utc" });
-  if (nowUTC < endUTC) return;
+//   const nowUTC = DateTime.utc();
+//   const endUTC = DateTime.fromJSDate(booking.slot.endAt, { zone: "utc" });
+//   if (nowUTC < endUTC) return;
 
-  booking.status = "completed";
-  await booking.save();
+//   booking.status = "completed";
+//   await booking.save();
 
-  const lang = booking.user.preferredLanguage || "ar";
+//   const lang = booking.user.preferredLanguage || "ar";
 
-  await sendSmartNotification({
-    user: booking.user,
-    title: NOTIFICATION_TITLE,
-    body:
-      lang === "en"
-        ? "You completed your training 💪"
-        : lang === "he"
-        ? "סיימת את האימון שלך 💪"
-        : "لقد أنهيتِ تدريبك 💪",
-  });
-});
+//   await sendSmartNotification({
+//     user: booking.user,
+//     title: NOTIFICATION_TITLE,
+//     body:
+//       lang === "en"
+//         ? "You completed your training 💪"
+//         : lang === "he"
+//         ? "סיימת את האימון שלך 💪"
+//         : "لقد أنهيتِ تدريبك 💪",
+//   });
+// });
 
 // ======================================================
 // ⭐ فحص الاشتراكات
 // ======================================================
 agenda.define("check-subscriptions-daily", async () => {
+  console.log("🔁 Running daily subscription check");
+
   const users = await User.find({
     subscriptionEnd: { $ne: null },
   });
 
   const now = DateTime.utc();
 
-  for (const u of users) {
-    const endUTC = DateTime.fromJSDate(u.subscriptionEnd, { zone: "utc" });
+  for (const user of users) {
+    try {
+      const endUTC = DateTime.fromJSDate(user.subscriptionEnd, { zone: "utc" });
 
-    // الفرق بالأيام (تقريبي لليوم)
-    const diffDays = Math.floor(endUTC.diff(now, "days").days);
+      // الفرق بالأيام (تقريبي)
+      const diffDays = Math.floor(endUTC.diff(now, "days").days);
+      const lang = user.preferredLanguage || "ar";
 
-    // ======================================================
-    // 🔔 تذكير قبل 5 أيام
-    // ======================================================
-    if (diffDays === 5 && !u.notified5Days) {
-      await sendSmartNotification({
-        user: u,
-        title: NOTIFICATION_TITLE,
-        body:
-          u.preferredLanguage === "en"
-            ? "Your subscription will expire in 5 days"
-            : u.preferredLanguage === "he"
-            ? "המנוי שלך יסתיים בעוד 5 ימים"
-            : "يتبقى 5 أيام على انتهاء اشتراكك",
-      });
+      // ===============================
+      // 🔔 تذكير قبل 5 أيام
+      // ===============================
+      if (diffDays === 5 && !user.notified5Days) {
+        const { title, body } = getNotificationText(
+          "subscriptionExpiring5Days",
+          lang
+        );
 
-      u.notified5Days = true;
-      await u.save();
-    }
+        await sendSmartNotification({
+          user,
+          title,
+          body,
+          channel: "push",
+          data: { type: "SUBSCRIPTION_EXPIRING_5_DAYS" },
+        });
 
-    // ======================================================
-    // 🔔 تذكير قبل يومين
-    // ======================================================
-    if (diffDays === 2 && !u.notified2Days) {
-      await sendSmartNotification({
-        user: u,
-        title: NOTIFICATION_TITLE,
-        body:
-          u.preferredLanguage === "en"
-            ? "Your subscription will expire in 2 days"
-            : u.preferredLanguage === "he"
-            ? "המנוי שלך יסתיים בעוד יומיים"
-            : "يتبقى يومان على انتهاء اشتراكك",
-      });
+        user.notified5Days = true;
+        await user.save();
+        continue;
+      }
 
-      u.notified2Days = true;
-      await u.save();
-    }
+      // ===============================
+      // 🔔 تذكير قبل يومين
+      // ===============================
+      if (diffDays === 2 && !user.notified2Days) {
+        const { title, body } = getNotificationText(
+          "subscriptionExpiring2Days",
+          lang
+        );
 
-    // ======================================================
-    // ⛔ إنهاء الاشتراك (بعد 02:00 ليلًا)
-    // ======================================================
-    const afterTwoAM = now.hour >= 2;
+        await sendSmartNotification({
+          user,
+          title,
+          body,
+          channel: "push",
+          data: { type: "SUBSCRIPTION_EXPIRING_2_DAYS" },
+        });
 
-    if (now >= endUTC && afterTwoAM && u.subscriptionStatus !== "expired") {
-      u.subscriptionStatus = "expired";
-      await u.save();
+        user.notified2Days = true;
+        await user.save();
+        continue;
+      }
 
-      await sendSmartNotification({
-        user: u,
-        title: NOTIFICATION_TITLE,
-        body:
-          u.preferredLanguage === "en"
-            ? "Your subscription has expired. Booking is disabled."
-            : u.preferredLanguage === "he"
-            ? "המנוי שלך הסתיים. לא ניתן להזמין אימונים."
-            : "انتهى اشتراكك وتم إيقاف الحجز",
-      });
+      // ===============================
+      // ⛔ انتهاء الاشتراك (بعد 02:00)
+      // ===============================
+      const afterTwoAM = now.hour >= 2;
+
+      if (
+        now >= endUTC &&
+        afterTwoAM &&
+        user.subscriptionStatus !== "expired"
+      ) {
+        user.subscriptionStatus = "expired";
+        await user.save();
+
+        const { title, body } = getNotificationText(
+          "subscriptionExpired",
+          lang
+        );
+
+        await sendSmartNotification({
+          user,
+          title,
+          body,
+          channel: "push",
+          data: { type: "SUBSCRIPTION_EXPIRED" },
+        });
+      }
+    } catch (err) {
+      console.error(
+        `⚠️ Failed subscription check for user ${user._id}`,
+        err.message
+      );
     }
   }
+
+  console.log("✅ Daily subscription check completed");
 });
 
 
 // ======================================================
 // 🕒 جدولة الحجز (✨ التحسين الوحيد ✨)
 // ======================================================
-export const scheduleReminder = async (bookingId, startAt, endAt) => {
-  await agenda.cancel({ "data.bookingId": bookingId });
+// export const scheduleReminder = async (bookingId, startAt, endAt) => {
+//   await agenda.cancel({ "data.bookingId": bookingId });
 
-  const startUTC = DateTime.fromJSDate(startAt, { zone: "utc" });
-  const endUTC = DateTime.fromJSDate(endAt, { zone: "utc" });
-  const reminderAt = startUTC.minus({ hours: 2 });
-  const now = DateTime.utc();
+//   const startUTC = DateTime.fromJSDate(startAt, { zone: "utc" });
+//   const endUTC = DateTime.fromJSDate(endAt, { zone: "utc" });
+//   const reminderAt = startUTC.minus({ hours: 2 });
+//   const now = DateTime.utc();
 
-  // ⭐ التحسين المهم
-  if (reminderAt <= now) {
-    await agenda.now("send-reminder", { bookingId });
-  } else {
-    await agenda.schedule(reminderAt.toJSDate(), "send-reminder", {
-      bookingId,
-    });
-  }
+//   // ⭐ التحسين المهم
+//   if (reminderAt <= now) {
+//     await agenda.now("send-reminder", { bookingId });
+//   } else {
+//     await agenda.schedule(reminderAt.toJSDate(), "send-reminder", {
+//       bookingId,
+//     });
+//   }
 
-  await agenda.schedule(
-    endUTC.plus({ minutes: 1 }).toJSDate(),
-    "mark-completed",
-    { bookingId }
-  );
+//   await agenda.schedule(
+//     endUTC.plus({ minutes: 1 }).toJSDate(),
+//     "mark-completed",
+//     { bookingId }
+//   );
 
-  console.log("⏱ Scheduler set for booking:", bookingId);
-};
+//   console.log("⏱ Scheduler set for booking:", bookingId);
+// };
 
 // ======================================================
 // 🚀 بدء المجدول (كما كان)
