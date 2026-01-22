@@ -363,7 +363,8 @@
     "expand": "عرض موسّع",
     "partialSave": "تم حفظ {{count}} من الحصص، لكن حدث خطأ في البقية.",
     "confirm": {
-      "deleteSlot": "هل تريد حذف هذه الحصة؟"
+      "deleteSlot": "هل تريد حذف هذه الحصة؟",
+      "reactivateSlot": "هل أنت متأكد أنك تريد إعادة تفعيل هذه الحصة؟"
     },
     "success": {
       "deleted": "تم حذف الحصة",
@@ -387,7 +388,10 @@
       "addValid": "أضف حصصًا صالحة أولًا"
     },
     "noDeletePast": "لا يمكن حذف حصة في يوم سابق",
-    "cancelled": "⛔ حصة ملغاة"
+    "cancelled": "⛔ حصة ملغاة",
+    "reactivate": "إعادة تفعيل الحصة",
+    "reactivatedSuccess": "تمت إعادة تفعيل الحصة بنجاح",
+    "reactivateError": "تعذر إعادة تفعيل الحصة"
   },
   "adminSettings": {
     "title": "الإعدادات العامة للنادي",

@@ -9,6 +9,7 @@ import {
   adminCreateSlot,
   adminDeleteSlot,
   adminGetWeekSlots,
+  adminReactivateSlot,
   adminToggleBlock,
 } from "../controllers/adminSlots.controller.js";
 
@@ -32,5 +33,8 @@ router.get("/:id/bookings", adminGetSlotBookings);
 router.post("/next-week/bulk", adminCreateNextWeekBulk);
 
 router.put("/:id/block", adminToggleBlock);
+
+// ♻️ إعادة تفعيل حصة محذوفة
+router.put("/:id/reactivate", adminReactivateSlot);
 
 export default router;

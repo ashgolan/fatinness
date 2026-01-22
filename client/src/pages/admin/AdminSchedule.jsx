@@ -131,6 +131,29 @@ export default function AdminSchedule() {
       setLoading(false);
     }
   };
+  const onReactivateExisting = async (slotId) => {
+    const confirmed = window.confirm(
+      t("adminSchedule.confirm.reactivateSlot")
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await Api.put(`/admin/slots/${slotId}/reactivate`);
+
+      toast.success(t("adminSchedule.reactivatedSuccess"));
+
+      await Promise.all([
+        fetchCurrentWeek(),
+        fetchNextWeek(),
+      ]);
+    } catch (e) {
+      console.error("Reactivate error:", e);
+      toast.error(t("adminSchedule.reactivateError"));
+    }
+  };
+
+
 
   const fetchNextWeek = async () => {
     if (!serverWeekStart) return;
@@ -736,6 +759,8 @@ export default function AdminSchedule() {
                           }
                           onRemoveNew={(idx) => removeSlot(key, idx)}
                           onDeleteExisting={deleteSlot}
+                          onReactivateExisting={onReactivateExisting}
+
                         />
                       </Grid>
                     );
@@ -838,6 +863,8 @@ export default function AdminSchedule() {
                       }
                       onRemoveNew={(idx) => removeNextSlot(i, idx)}
                       onDeleteExisting={deleteSlot}
+                      onReactivateExisting={onReactivateExisting}
+
                     />
                   </Grid>
                 );

@@ -10,6 +10,7 @@ import {
   Tooltip,
   Divider,
 } from "@mui/material";
+import ReplayIcon from "@mui/icons-material/Replay";
 
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -26,6 +27,8 @@ export default function DaySection({
   onUpdateNew,
   onRemoveNew,
   onDeleteExisting,
+  onReactivateExisting, // ✅ جديد
+
 }) {
   function fmtTime(date) {
     if (!date) return "";
@@ -57,7 +60,6 @@ export default function DaySection({
     if (!slot?.endAt) return false;
     return new Date(slot.endAt) < new Date();
   }
-  console.log("🟣 existingSlots:", existingSlots);
 
   return (
     <Paper
@@ -182,29 +184,46 @@ export default function DaySection({
                   </Box>
 
                   {/* 🔥 زر الحذف فقط إذا لم تنتهِ الحصة */}
-                  {!isSlotPast(slot) && (
-                    <Tooltip
-                      title={
-                        isDeleted
-                          ? t("schedule.cancelled")
-                          : t("schedule.delete")
-                      }
-                      arrow
-                    >
-                      <span>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    {/* ♻️ زر إعادة التفعيل */}
+                    {isDeleted && !isSlotPast(slot) && (
+                      <Tooltip title={t("adminSchedule.reactivate")} arrow>
                         <IconButton
-                          disabled={isDeleted}
                           size="small"
-                          onClick={() => onDeleteExisting(slot._id)}
-                          sx={{
-                            color: isDeleted ? "#9ca3af" : "#ef4444",
-                          }}
+                          onClick={() => onReactivateExisting(slot._id)}
+                          sx={{ color: "#10b981" }} // أخضر
                         >
-                          <DeleteIcon fontSize="small" />
+                          <ReplayIcon fontSize="small" />
                         </IconButton>
-                      </span>
-                    </Tooltip>
-                  )}
+                      </Tooltip>
+                    )}
+
+                    {/* ❌ زر الحذف */}
+                    {!isSlotPast(slot) && (
+                      <Tooltip
+                        title={
+                          isDeleted
+                            ? t("adminSchedule.cancelled")
+                            : t("schedule.delete")
+                        }
+                        arrow
+                      >
+                        <span>
+                          <IconButton
+                            disabled={isDeleted}
+                            size="small"
+                            onClick={() => onDeleteExisting(slot._id)}
+                            sx={{
+                              color: isDeleted ? "#9ca3af" : "#ef4444",
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
+                  </Box>
+
                 </Box>
               </Paper>
             );

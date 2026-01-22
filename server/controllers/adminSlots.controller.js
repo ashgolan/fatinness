@@ -13,20 +13,44 @@ import { getNotificationText } from "../utils/getNotificationText.js";
 /**
  * Checks if a slot overlaps with existing ones
  */
-export async function hasOverlap(startAtUTC, endAtUTC, session = null) {
+// export async function hasOverlap(startAtUTC, endAtUTC, session = null) {
+//   const overlap = await Slot.findOne(
+//     {
+//       isDeleted: false,
+//       startAt: { $lt: endAtUTC },
+//       endAt: { $gt: startAtUTC },
+//     },
+//     "_id",
+//     session ? { session } : undefined
+//   );
+
+//   return !!overlap;
+// }
+
+export async function hasOverlap(
+  startAtUTC,
+  endAtUTC,
+  session = null,
+  excludeSlotId = null
+) {
+  const query = {
+    isDeleted: false,
+    startAt: { $lt: endAtUTC },
+    endAt: { $gt: startAtUTC },
+  };
+
+  if (excludeSlotId) {
+    query._id = { $ne: excludeSlotId };
+  }
+
   const overlap = await Slot.findOne(
-    {
-      isDeleted: false,
-      startAt: { $lt: endAtUTC },
-      endAt: { $gt: startAtUTC },
-    },
+    query,
     "_id",
     session ? { session } : undefined
   );
 
   return !!overlap;
 }
-
 
 // =====================================================
 // 🔹 GET /admin/slots/week?start=YYYY-MM-DD
@@ -368,7 +392,6 @@ export const adminCreateNextWeekBulk = async (req, res) => {
  * 🔔 Notify all users who had a booking on a deleted slot
  * Used ONLY after slot deletion
  */
-
 export async function notifySlotDeletedUsers({ slotId }) {
   // 0️⃣ جلب الحصة
   const slot = await Slot.findById(slotId);
@@ -384,7 +407,6 @@ export async function notifySlotDeletedUsers({ slotId }) {
 
   // 2️⃣ تجميع المستخدمين بدون تكرار
   const userMap = new Map();
-
   for (const b of bookings) {
     if (b.user && b.user._id) {
       userMap.set(b.user._id.toString(), b.user);
@@ -394,31 +416,28 @@ export async function notifySlotDeletedUsers({ slotId }) {
   const users = Array.from(userMap.values());
   if (!users.length) return;
 
-  // 3️⃣ إرسال الإشعارات مع تفصيل الحصة
+  // 3️⃣ تجهيز وقت الحصة مرة واحدة
+  const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
+
+  // 4️⃣ إرسال الإشعارات
   for (const user of users) {
     try {
-      const dt = DateTime
-        .fromJSDate(slot.startAt)
-        .setZone(ZONE);
+      const lang = user.preferredLanguage || "ar";
 
       const formatted =
-        user.preferredLanguage === "ar"
+        lang === "ar"
           ? dt.toFormat("dd/LL - HH:mm")
-          : user.preferredLanguage === "he"
+          : lang === "he"
             ? dt.toFormat("dd/LL HH:mm")
             : dt.toFormat("dd/MM HH:mm");
 
-      const { title } = getNotificationText(
-        "slotCancelled",
-        user.preferredLanguage
-      );
+      const message = getNotificationText("slotCancelled", lang);
 
+      const title = message?.title || "";
       const body =
-        user.preferredLanguage === "ar"
-          ? `تم إلغاء الحصة ${formatted}`
-          : user.preferredLanguage === "he"
-            ? `האימון בתאריך ${formatted} בוטל`
-            : `The session on ${formatted} was cancelled`;
+        typeof message?.body === "function"
+          ? message.body({ dateTime: formatted })
+          : message?.body || "";
 
       await sendSmartNotification({
         user,
@@ -439,6 +458,68 @@ export async function notifySlotDeletedUsers({ slotId }) {
     }
   }
 }
+export async function notifySlotReactivatedUsers({ slotId }) {
+  const slot = await Slot.findById(slotId);
+  if (!slot) return;
+
+  // 🔥 نفس منطق الحذف (مصدر الحقيقة)
+  const bookings = await Booking.find({
+    slot: slotId,
+    status: { $in: ["booked", "cancelled"] },
+  }).populate("user");
+
+  if (!bookings.length) return;
+
+  const userMap = new Map();
+  for (const b of bookings) {
+    if (b.user && b.user._id) {
+      userMap.set(b.user._id.toString(), b.user);
+    }
+  }
+
+  const users = Array.from(userMap.values());
+  if (!users.length) return;
+
+  const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
+
+  for (const user of users) {
+    try {
+      const lang = user.preferredLanguage || "ar";
+      const formatted =
+        lang === "ar"
+          ? dt.toFormat("dd/LL - HH:mm")
+          : lang === "he"
+            ? dt.toFormat("dd/LL HH:mm")
+            : dt.toFormat("dd/MM HH:mm");
+
+      const message = getNotificationText("slotReactivated", lang);
+
+      const title = message?.title || "";
+      const body =
+        typeof message?.body === "function"
+          ? message.body({ dateTime: formatted })
+          : message?.body || "";
+
+      await sendSmartNotification({
+        user,
+        title,
+        body,
+        channel: "push",
+        data: {
+          type: "SLOT_REACTIVATED",
+          slotId,
+          startAt: slot.startAt.toISOString(),
+        },
+      });
+    } catch (e) {
+      console.error(
+        `⚠️ Failed to notify user ${user._id} about reactivated slot`,
+        e.message
+      );
+    }
+  }
+}
+
 
 export const adminDeleteSlot = async (req, res) => {
   const session = await mongoose.startSession();
@@ -507,57 +588,69 @@ export const adminDeleteSlot = async (req, res) => {
 // =====================================================
 // 🔹 PUT /admin/slots/:id/reactivate
 // =====================================================
-// export const adminReactivateSlot = async (req, res) => {
-//   const session = await mongoose.startSession();
+export const adminReactivateSlot = async (req, res) => {
+  const session = await mongoose.startSession();
 
-//   try {
-//     session.startTransaction();
+  try {
+    session.startTransaction();
 
-//     const { id } = req.params;
+    const { id } = req.params;
+    console.log("♻️ Reactivate slot:", id);
 
-//     const slot = await Slot.findById(id).session(session);
-//     if (!slot || !slot.isDeleted) {
-//       await session.abortTransaction();
-//       return res.status(404).json({ code: "SLOT_NOT_FOUND_OR_NOT_DELETED" });
-//     }
+    const slot = await Slot.findById(id).session(session);
+    console.log("📦 Slot from DB:", slot);
 
-//     // ❌ لا يمكن إعادة تفعيل حصة بدأت
-//     const now = DateTime.utc();
-//     const slotStart = DateTime.fromJSDate(slot.startAt, { zone: "utc" });
-//     if (slotStart <= now) {
-//       await session.abortTransaction();
-//       return res.status(400).json({ code: "SLOT_ALREADY_STARTED" });
-//     }
+    if (!slot || !slot.isDeleted) {
+      console.log("❌ Slot not found or not deleted");
+      await session.abortTransaction();
+      return res.status(404).json({ code: "SLOT_NOT_FOUND_OR_NOT_DELETED" });
+    }
 
-//     // ❌ فحص التداخل
-//     if (
-//       await hasOverlap(
-//         slot.startAt,
-//         slot.endAt,
-//         session
-//       )
-//     ) {
-//       await session.abortTransaction();
-//       return res.status(409).json({ code: "SLOT_OVERLAP" });
-//     }
+    const now = DateTime.utc();
+    const slotStart = DateTime.fromJSDate(slot.startAt, { zone: "utc" });
 
-//     // ♻️ إعادة التفعيل
-//     slot.isDeleted = false;
-//     slot.deletedAt = null;
-//     slot.deletedBy = null;
-//     await slot.save({ session });
+    console.log("⏰ now:", now.toISO());
+    console.log("⏰ slotStart:", slotStart.toISO());
 
-//     await session.commitTransaction();
+    if (slotStart <= now) {
+      console.log("❌ SLOT_ALREADY_STARTED");
+      await session.abortTransaction();
+      return res.status(400).json({ code: "SLOT_ALREADY_STARTED" });
+    }
 
-//     // 🔔 إشعار المشتركين السابقين (بدون إعادة حجز)
-//     notifySlotDeletedUsers({ slotId: slot._id });
+    // ⬇️ فحص التداخل مع لوج
+    const overlap = await Slot.findOne({
+      _id: { $ne: slot._id },
+      isDeleted: false,
+      startAt: { $lt: slot.endAt },
+      endAt: { $gt: slot.startAt },
+    }).session(session);
 
-//     return res.json({ code: "SLOT_REACTIVATED_SUCCESSFULLY" });
-//   } catch (e) {
-//     await session.abortTransaction();
-//     console.error("❌ adminReactivateSlot error:", e);
-//     return res.status(500).json({ code: "SLOT_REACTIVATE_ERROR" });
-//   } finally {
-//     session.endSession();
-//   }
-// };
+    console.log("🔎 Overlap result:", overlap);
+
+    if (overlap) {
+      console.log("❌ SLOT_OVERLAP with:", overlap._id);
+      await session.abortTransaction();
+      return res.status(409).json({ code: "SLOT_OVERLAP" });
+    }
+
+    // ♻️ إعادة التفعيل
+    slot.isDeleted = false;
+    slot.deletedAt = null;
+    slot.deletedBy = null;
+    await slot.save({ session });
+
+    await session.commitTransaction();
+    console.log("✅ SLOT_REACTIVATED_SUCCESSFULLY");
+    notifySlotReactivatedUsers({ slotId: slot._id });
+
+    return res.json({ code: "SLOT_REACTIVATED_SUCCESSFULLY" });
+  } catch (e) {
+    await session.abortTransaction();
+    console.error("❌ adminReactivateSlot error:", e);
+    return res.status(500).json({ code: "SLOT_REACTIVATE_ERROR" });
+  } finally {
+    session.endSession();
+  }
+};
+
