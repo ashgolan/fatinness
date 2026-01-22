@@ -391,8 +391,7 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 /**
  * 🔔 Notify all users who had a booking on a deleted slot
  * Used ONLY after slot deletion
- */
-export async function notifySlotDeletedUsers({ slotId }) {
+ */export async function notifySlotDeletedUsers({ slotId }) {
   // 0️⃣ جلب الحصة
   const slot = await Slot.findById(slotId);
   if (!slot) return;
@@ -424,20 +423,19 @@ export async function notifySlotDeletedUsers({ slotId }) {
     try {
       const lang = user.preferredLanguage || "ar";
 
-      const formatted =
+      const formattedDateTime =
         lang === "ar"
           ? dt.toFormat("dd/LL - HH:mm")
           : lang === "he"
             ? dt.toFormat("dd/LL HH:mm")
             : dt.toFormat("dd/MM HH:mm");
 
-      const message = getNotificationText("slotCancelled", lang);
-
-      const title = message?.title || "";
-      const body =
-        typeof message?.body === "function"
-          ? message.body({ dateTime: formatted })
-          : message?.body || "";
+      // ✅ getNotificationText الآن يرجع نصوص جاهزة
+      const { title, body } = getNotificationText(
+        "slotCancelled",
+        lang,
+        { dateTime: formattedDateTime }
+      );
 
       await sendSmartNotification({
         user,
@@ -459,10 +457,11 @@ export async function notifySlotDeletedUsers({ slotId }) {
   }
 }
 export async function notifySlotReactivatedUsers({ slotId }) {
+  // 0️⃣ جلب الحصة
   const slot = await Slot.findById(slotId);
   if (!slot) return;
 
-  // 🔥 نفس منطق الحذف (مصدر الحقيقة)
+  // 1️⃣ جلب جميع الحجوزات (حتى الملغاة)
   const bookings = await Booking.find({
     slot: slotId,
     status: { $in: ["booked", "cancelled"] },
@@ -470,6 +469,7 @@ export async function notifySlotReactivatedUsers({ slotId }) {
 
   if (!bookings.length) return;
 
+  // 2️⃣ تجميع المستخدمين بدون تكرار
   const userMap = new Map();
   for (const b of bookings) {
     if (b.user && b.user._id) {
@@ -480,25 +480,27 @@ export async function notifySlotReactivatedUsers({ slotId }) {
   const users = Array.from(userMap.values());
   if (!users.length) return;
 
+  // 3️⃣ تجهيز وقت الحصة مرة واحدة
   const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
 
+  // 4️⃣ إرسال الإشعارات
   for (const user of users) {
     try {
       const lang = user.preferredLanguage || "ar";
-      const formatted =
+
+      const formattedDateTime =
         lang === "ar"
           ? dt.toFormat("dd/LL - HH:mm")
           : lang === "he"
             ? dt.toFormat("dd/LL HH:mm")
             : dt.toFormat("dd/MM HH:mm");
 
-      const message = getNotificationText("slotReactivated", lang);
-
-      const title = message?.title || "";
-      const body =
-        typeof message?.body === "function"
-          ? message.body({ dateTime: formatted })
-          : message?.body || "";
+      // ✅ getNotificationText يرجع title/body كنصوص جاهزة
+      const { title, body } = getNotificationText(
+        "slotReactivated",
+        lang,
+        { dateTime: formattedDateTime }
+      );
 
       await sendSmartNotification({
         user,
@@ -519,6 +521,7 @@ export async function notifySlotReactivatedUsers({ slotId }) {
     }
   }
 }
+
 
 
 export const adminDeleteSlot = async (req, res) => {
