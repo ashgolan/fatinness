@@ -57,6 +57,7 @@ export default function DaySection({
     if (!slot?.endAt) return false;
     return new Date(slot.endAt) < new Date();
   }
+  console.log("🟣 existingSlots:", existingSlots);
 
   return (
     <Paper
@@ -125,50 +126,90 @@ export default function DaySection({
             {t("schedule.existing")}
           </Typography>
 
-          {existingSlots.map((slot) => (
-            <Paper
-              key={slot._id}
-              sx={{
-                p: 1.5,
-                mb: 1,
-                borderRadius: 2,
-                background: colors.card,
-                border: isDark ? "1px solid #555" : "1px solid rgba(0,0,0,0.1)",
-              }}
-            >
-              <Box
+          {existingSlots.map((slot) => {
+            const isDeleted = slot.isDeleted === true;
+
+            return (
+              <Paper
+                key={slot._id}
                 sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  p: 1.5,
+                  mb: 1,
+                  borderRadius: 2,
+                  background: isDeleted
+                    ? "rgba(148,163,184,0.15)"
+                    : colors.card,
+                  border: isDeleted
+                    ? "1px dashed rgba(148,163,184,0.6)"
+                    : isDark
+                      ? "1px solid #555"
+                      : "1px solid rgba(0,0,0,0.1)",
+                  opacity: isDeleted ? 0.6 : 1,
                 }}
               >
-                <Typography
+                <Box
                   sx={{
-                    fontWeight: 700,
-                    color: colors.text,
-                    fontSize: 15,
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  {fmtTime(slot.startAt)} - {fmtTime(slot.endAt)}
-                </Typography>
-
-                {/* 🔥 زر الحذف فقط إذا لم تنتهِ الحصة */}
-                {!isSlotPast(slot) && (
-                  <Tooltip title={t("schedule.delete")} arrow>
-                    <IconButton
-                      color="error"
-                      size="small"
-                      onClick={() => onDeleteExisting(slot._id)}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        color: colors.text,
+                        fontSize: 15,
+                      }}
                     >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-            </Paper>
-          ))}
+                      {fmtTime(slot.startAt)} - {fmtTime(slot.endAt)}
+                    </Typography>
+
+                    {isDeleted && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "#6b7280",
+                          fontWeight: 700,
+                          ml: 1,
+                        }}
+                      >
+                        {t("adminSchedule.cancelled")}
+                      </Typography>
+                    )}
+
+                  </Box>
+
+                  {/* 🔥 زر الحذف فقط إذا لم تنتهِ الحصة */}
+                  {!isSlotPast(slot) && (
+                    <Tooltip
+                      title={
+                        isDeleted
+                          ? t("schedule.cancelled")
+                          : t("schedule.delete")
+                      }
+                      arrow
+                    >
+                      <span>
+                        <IconButton
+                          disabled={isDeleted}
+                          size="small"
+                          onClick={() => onDeleteExisting(slot._id)}
+                          sx={{
+                            color: isDeleted ? "#9ca3af" : "#ef4444",
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  )}
+                </Box>
+              </Paper>
+            );
+          })}
+
 
           <Divider sx={{ my: 2, borderColor: isDark ? "#444" : "#ddd" }} />
         </>

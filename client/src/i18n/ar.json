@@ -386,7 +386,8 @@
       "noValidChanges": "لا يوجد تغييرات صالحة للحفظ",
       "addValid": "أضف حصصًا صالحة أولًا"
     },
-    "noDeletePast": "لا يمكن حذف حصة في يوم سابق"
+    "noDeletePast": "لا يمكن حذف حصة في يوم سابق",
+    "cancelled": "⛔ حصة ملغاة"
   },
   "adminSettings": {
     "title": "الإعدادات العامة للنادي",
@@ -800,7 +801,6 @@
       "weeklyLimitMessage": "وصلت إلى الحد الأقصى ({{max}} حصص) للأسبوع 🌸\nمن {{start}} إلى {{end}}\nيمكنك الحجز مجددًا في الأسبوع التالي 🤍",
       "PHONE_ALREADY_EXISTS": "رقم الهاتف مستخدم مسبقًا",
       "SLOT_NOT_FOUND": "هذه الحصة لم تعد متاحة أو تم إلغاؤها"
-
     },
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",

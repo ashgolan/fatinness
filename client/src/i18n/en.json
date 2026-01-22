@@ -386,7 +386,9 @@
       "noValidChanges": "No valid changes to save",
       "addValid": "Add valid sessions first"
     },
-    "noDeletePast": "Cannot delete a session in a past day"
+    "noDeletePast": "Cannot delete a session in a past day",
+        "cancelled": "⛔ Session cancelled"
+
   },
   "adminSettings": {
     "title": "General Club Settings",

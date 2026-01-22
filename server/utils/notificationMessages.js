@@ -17,15 +17,36 @@ export const NOTIFICATION_MESSAGES = {
   slotCancelled: {
     ar: {
       title: "❌ تم إلغاء الحصة",
-      body: "نعتذر، تم إلغاء الحصة التي قمت بحجزها",
+      body: ({ dateTime }) =>
+        `نعتذر، تم إلغاء الحصة ${dateTime}`,
     },
     he: {
       title: "❌ האימון בוטל",
-      body: "מצטערים, האימון שהזמנת בוטל",
+      body: ({ dateTime }) =>
+        `מצטערים, האימון בתאריך ${dateTime} בוטל`,
     },
     en: {
       title: "❌ Session Cancelled",
-      body: "Sorry, the session you booked has been cancelled",
+      body: ({ dateTime }) =>
+        `Sorry, the session on ${dateTime} has been cancelled`,
+    },
+  },
+
+  slotReactivated: {
+    ar: {
+      title: "♻️ إعادة تفعيل الحصة",
+      body: ({ dateTime }) =>
+        `تمت إعادة تفعيل الحصة ${dateTime}`,
+    },
+    he: {
+      title: "♻️ אימון הופעל מחדש",
+      body: ({ dateTime }) =>
+        `האימון בתאריך ${dateTime} הופעל מחדש`,
+    },
+    en: {
+      title: "♻️ Session Reactivated",
+      body: ({ dateTime }) =>
+        `The session on ${dateTime} has been reactivated`,
     },
   },
 };

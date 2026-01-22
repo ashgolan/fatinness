@@ -57,8 +57,8 @@ export const adminGetWeekSlots = async (req, res) => {
     const weekEndUTC = weekEndLocal.toUTC().toJSDate();
     const slots = await Slot.find({
       startAt: { $gte: weekStartUTC, $lte: weekEndUTC },
-      isDeleted: false, // 🆕 تجاهل الحصص المحذوفة
-      isBlocked: false,
+      // isDeleted: false,
+      // isBlocked: false,
 
     }).sort({ startAt: 1 });
 
@@ -503,3 +503,61 @@ export const adminDeleteSlot = async (req, res) => {
     session.endSession();
   }
 };
+
+// =====================================================
+// 🔹 PUT /admin/slots/:id/reactivate
+// =====================================================
+// export const adminReactivateSlot = async (req, res) => {
+//   const session = await mongoose.startSession();
+
+//   try {
+//     session.startTransaction();
+
+//     const { id } = req.params;
+
+//     const slot = await Slot.findById(id).session(session);
+//     if (!slot || !slot.isDeleted) {
+//       await session.abortTransaction();
+//       return res.status(404).json({ code: "SLOT_NOT_FOUND_OR_NOT_DELETED" });
+//     }
+
+//     // ❌ لا يمكن إعادة تفعيل حصة بدأت
+//     const now = DateTime.utc();
+//     const slotStart = DateTime.fromJSDate(slot.startAt, { zone: "utc" });
+//     if (slotStart <= now) {
+//       await session.abortTransaction();
+//       return res.status(400).json({ code: "SLOT_ALREADY_STARTED" });
+//     }
+
+//     // ❌ فحص التداخل
+//     if (
+//       await hasOverlap(
+//         slot.startAt,
+//         slot.endAt,
+//         session
+//       )
+//     ) {
+//       await session.abortTransaction();
+//       return res.status(409).json({ code: "SLOT_OVERLAP" });
+//     }
+
+//     // ♻️ إعادة التفعيل
+//     slot.isDeleted = false;
+//     slot.deletedAt = null;
+//     slot.deletedBy = null;
+//     await slot.save({ session });
+
+//     await session.commitTransaction();
+
+//     // 🔔 إشعار المشتركين السابقين (بدون إعادة حجز)
+//     notifySlotDeletedUsers({ slotId: slot._id });
+
+//     return res.json({ code: "SLOT_REACTIVATED_SUCCESSFULLY" });
+//   } catch (e) {
+//     await session.abortTransaction();
+//     console.error("❌ adminReactivateSlot error:", e);
+//     return res.status(500).json({ code: "SLOT_REACTIVATE_ERROR" });
+//   } finally {
+//     session.endSession();
+//   }
+// };
