@@ -58,19 +58,25 @@ export const internalSendBookingReminder = async (req, res) => {
         await admin.messaging().send({
             token: userFcmToken,
 
-            // 📱 Web + Android (أفضل ممارسة)
             data: {
                 type: "BOOKING_REMINDER",
                 title,
                 body,
             },
 
-            // 📲 Mobile notification
-            notification: {
-                title,
-                body,
+            android: {
+                priority: "high",
+            },
+
+            apns: {
+                payload: {
+                    aps: {
+                        sound: "default",
+                    },
+                },
             },
         });
+
 
 
         console.log("✅ Reminder sent", bookingId);

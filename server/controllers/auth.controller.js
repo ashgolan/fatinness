@@ -257,7 +257,7 @@ export const updateUserRole = async (req, res) => {
 export const updatePreferredLanguage = async (req, res) => {
   try {
     // 🔒 1) تأكد من وجود مستخدم
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user._id) {
       return res.status(401).json({ code: "UNAUTHORIZED" });
     }
 
@@ -270,7 +270,7 @@ export const updatePreferredLanguage = async (req, res) => {
 
     // 🔒 3) حدّث المستخدم
     const user = await User.findByIdAndUpdate(
-      req.user.id,
+      req.user._id,
       { preferredLanguage },
       { new: true }
     );
