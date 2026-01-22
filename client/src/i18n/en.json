@@ -338,13 +338,14 @@
     "deletedAll": "🗑️ All notifications cleared"
   },
   "adminReports": {
-    "title": "📤 Export Booking Reports",
-    "description": "Select a time range to export the booking report, or leave the fields empty to export all data:",
-    "from": "From",
-    "to": "To",
-    "download": "📥 Download report",
-    "success": "Report downloaded successfully ✅",
-    "fail": "Failed to download report ❌"
+    "title": "Reports",
+    "description": "You can export attendance reports for a selected date range",
+    "from": "From date",
+    "to": "To date",
+    "download": "Download report",
+    "success": "Report downloaded successfully",
+    "invalidRange": "Invalid date range",
+    "noPermission": "This page is available to super admin only"
   },
   "adminSchedule": {
     "title": "Sessions Schedule",

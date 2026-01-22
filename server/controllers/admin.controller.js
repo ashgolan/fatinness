@@ -278,15 +278,16 @@ export const exportAttendanceReport = async (req, res) => {
 
     const csv = createObjectCsvStringifier({
       header: [
-        { id: "username", title: "الاسم" },
-        { id: "email", title: "البريد" },
-        { id: "phone", title: "الهاتف" },
-        { id: "date", title: "تاريخ الجلسة" },
-        { id: "time", title: "الوقت" },
-        { id: "status", title: "الحالة" },
-        { id: "createdAt", title: "تاريخ الحجز" },
+        { id: "username", title: "שם" },
+        { id: "email", title: "דוא״ל" },
+        { id: "phone", title: "טלפון" },
+        { id: "date", title: "תאריך האימון" },
+        { id: "time", title: "שעה" },
+        { id: "status", title: "סטטוס" },
+        { id: "createdAt", title: "תאריך ההזמנה" },
       ],
     });
+
 
     const records = bookings.map((b) => {
       const hasSlot = !!b.slot?.startAt && !!b.slot?.endAt;
