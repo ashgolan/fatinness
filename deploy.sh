@@ -16,6 +16,6 @@ npm install --production
 cd ..
 
 echo "♻️ restart pm2"
-pm2 restart fateness
+pm2 restart fatinness
 
 echo "✅ deploy finished"
