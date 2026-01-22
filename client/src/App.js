@@ -175,6 +175,8 @@ export default function App() {
                       path="/admin/dashboard"
                       element={<AdminDashboard />}
                     />
+                    <Route path="reports" element={<AdminReports />} />
+
                     <Route
                       path="/admin/system-reset"
                       element={<AdminSystemReset />}

@@ -305,7 +305,9 @@
       "notifications": "התראות",
       "settings": "הגדרות כלליות",
       "systemReset": "איפוס מערכת",
-      "subscriptionsReport": "מנויים לקראת סיום"
+      "subscriptionsReport": "מנויים לקראת סיום",
+      "reports": "דוחות",
+      "reportsHint": "ייצוא דוחות נוכחות"
     },
     "footerTitle": "לוח בקרה מקיף לניהול Fatinness Studio",
     "footerText": "ניתן לחזור לדף זה בכל עת כדי לנהל את כל היבטי המערכת ממקום אחד."

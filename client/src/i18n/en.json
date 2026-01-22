@@ -305,7 +305,9 @@
       "notifications": "Notifications",
       "settings": "General settings",
       "systemReset": "System reset",
-      "subscriptionsReport": "Subscriptions nearing expiration"
+      "subscriptionsReport": "Subscriptions nearing expiration",
+      "reports": "Reports",
+      "reportsHint": "Export attendance reports"
     },
     "footerTitle": "Comprehensive control panel for managing Fatinness Studio",
     "footerText": "You can return to this page anytime to manage all aspects of the system from one place."

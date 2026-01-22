@@ -20,7 +20,7 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 export default function ControlCenter() {
   const navigate = useNavigate();
   const { mode, BRAND } = useThemeMode();
-  const { t,i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const isDark = mode === "dark";
 
@@ -66,6 +66,17 @@ export default function ControlCenter() {
       iconColor: "#ab47bc",
     },
     {
+      title: t("controlCenter.sections.reports"),
+      hint: t("controlCenter.sections.reportsHint"),
+      icon: <AssessmentIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+      path: "/admin/reports",
+      gradient: "linear-gradient(135deg, #2563eb 0%, #38bdf8 100%)",
+      iconBg: "linear-gradient(135deg, rgba(37,99,235,0.15), rgba(56,189,248,0.15))",
+      iconColor: "#2563eb",
+    }
+
+    ,
+    {
       title: t("controlCenter.sections.templates"),
       icon: <LayersIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
       path: "/admin/schedule",
@@ -90,21 +101,21 @@ export default function ControlCenter() {
       iconColor: "#546e7a",
     },
     {
-  title: t("controlCenter.sections.subscriptionsReport"),
-  icon: <HourglassEmptyIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-  path: "/admin/subscriptions-report",
-  gradient: "linear-gradient(135deg, #d97706 0%, #fbbf24 100%)",
-  iconBg: "linear-gradient(135deg, rgba(217,119,6,0.15), rgba(251,191,36,0.15))",
-  iconColor: "#d97706",
-},
+      title: t("controlCenter.sections.subscriptionsReport"),
+      icon: <HourglassEmptyIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+      path: "/admin/subscriptions-report",
+      gradient: "linear-gradient(135deg, #d97706 0%, #fbbf24 100%)",
+      iconBg: "linear-gradient(135deg, rgba(217,119,6,0.15), rgba(251,191,36,0.15))",
+      iconColor: "#d97706",
+    },
     {
-  title: t("controlCenter.sections.systemReset"),
-  icon: <CleaningServicesIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-  path: "/admin/system-reset",
-  gradient: "linear-gradient(135deg, #d50000 0%, #ff8a80 100%)",
-  iconBg: "linear-gradient(135deg, rgba(213,0,0,0.15), rgba(255,138,128,0.15))",
-  iconColor: "#d50000",
-}
+      title: t("controlCenter.sections.systemReset"),
+      icon: <CleaningServicesIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+      path: "/admin/system-reset",
+      gradient: "linear-gradient(135deg, #d50000 0%, #ff8a80 100%)",
+      iconBg: "linear-gradient(135deg, rgba(213,0,0,0.15), rgba(255,138,128,0.15))",
+      iconColor: "#d50000",
+    }
   ];
 
   return (
@@ -128,9 +139,8 @@ export default function ControlCenter() {
             sx={{
               fontWeight: 800,
               fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" },
-              background: `linear-gradient(135deg, ${
-                isDark ? BRAND.gold : BRAND.purple
-              }, ${isDark ? BRAND.purple : BRAND.gold})`,
+              background: `linear-gradient(135deg, ${isDark ? BRAND.gold : BRAND.purple
+                }, ${isDark ? BRAND.purple : BRAND.gold})`,
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
@@ -211,10 +221,26 @@ export default function ControlCenter() {
                   <Box sx={{ color: section.iconColor }}>{section.icon}</Box>
                 </Box>
 
+                {/* العنوان */}
                 <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                   {section.title}
                 </Typography>
+
+                {/* 👇 الوصف الصغير هنا */}
+                {section.hint && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: isDark ? BRAND.subDark : "#777",
+                      mt: 0.5,
+                      display: "block",
+                    }}
+                  >
+                    {section.hint}
+                  </Typography>
+                )}
               </Paper>
+
             </Box>
           ))}
         </Box>

@@ -305,7 +305,9 @@
       "notifications": "الإشعارات",
       "settings": "الإعدادات العامة",
       "systemReset": "إعادة ضبط النظام",
-      "subscriptionsReport": "اشتراكات قرب انتهاءها"
+      "subscriptionsReport": "اشتراكات قرب انتهاءها",
+      "reports": "التقارير",
+      "reportsHint": "تصدير تقارير الحضور"
     },
     "footerTitle": "لوحة تحكم متكاملة لإدارة Fatinness Studio",
     "footerText": "يمكنك العودة إلى هذه الصفحة في أي وقت لإدارة جميع جوانب النظام من مكان واحد."
