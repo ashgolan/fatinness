@@ -187,13 +187,24 @@ onMessage(messaging, (payload) => {
   if (payload?.data?.type !== "BOOKING_REMINDER") return;
 
   toast.info(
-    <>
-      <b>{payload.data.title}</b>
-      <div>{payload.data.body}</div>
-    </>,
+    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+      <span style={{ fontSize: 22 }}>⏰</span>
+
+      <div>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>
+          {payload.data.title}
+        </div>
+
+        <div style={{ fontSize: 14, opacity: 0.85 }}>
+          {payload.data.body}
+        </div>
+      </div>
+    </div>,
     {
       containerId: "fcm",
       autoClose: false,
+      closeOnClick: true,
     }
   );
+
 });

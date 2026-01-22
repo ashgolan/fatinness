@@ -1,4 +1,3 @@
-// 📁 server/utils/fcm.js
 import admin from "firebase-admin";
 import fs from "fs";
 
@@ -40,7 +39,7 @@ if (!admin.apps.length) {
 }
 
 // ======================================================
-// 🔥 إرسال إشعار إلى عدة أجهزة + كشف التوكنات الميتة
+// 🔥 إرسال إشعار إلى عدة أجهزة (DATA-ONLY)
 // ======================================================
 export async function sendFcmToTokens(tokens = [], message = {}) {
   if (!tokens.length) {
@@ -51,23 +50,26 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
     const response = await admin.messaging().sendEachForMulticast({
       tokens,
 
-      notification: {
+      // ❌ لا notification هنا نهائياً
+      // ✅ Data-only message (يعمل في foreground + background)
+      data: {
+        type: message.type || "BOOKING_REMINDER",
         title: message.title || "Fatinness Studio",
         body: message.body || "",
-      },
-
-      data: {
-        url: message.url || process.env.CLIENT_URL || "",
+        url: message.url || process.env.CLIENT_URL || "/",
         ...message.data,
       },
 
       android: {
         priority: "high",
-        notification: { sound: "default" },
       },
 
       apns: {
-        payload: { aps: { sound: "default" } },
+        payload: {
+          aps: {
+            sound: "default",
+          },
+        },
       },
     });
 
@@ -100,34 +102,38 @@ export async function sendFcmToTokens(tokens = [], message = {}) {
     return {
       successCount: 0,
       failureCount: tokens.length,
-      invalidTokens: [], // ❗ لا نحذفهم عند خطأ عام
+      invalidTokens: [],
     };
-
   }
 }
 
-
 // ======================================================
-// 🔥 إرسال إشعار لجهاز واحد
+// 🔥 إرسال إشعار لجهاز واحد (DATA-ONLY)
 // ======================================================
 export async function sendPushNotification(token, title, body, data = {}) {
   try {
     return await admin.messaging().send({
       token,
-      notification: {
+
+      // ❌ بدون notification
+      data: {
+        type: data.type || "BOOKING_REMINDER",
         title: title || "Fatinness Studio",
         body: body || "",
-      },
-      data: {
-        url: data.url || process.env.CLIENT_URL || "",
+        url: data.url || process.env.CLIENT_URL || "/",
         ...data,
       },
+
       android: {
         priority: "high",
-        notification: { sound: "default" },
       },
+
       apns: {
-        payload: { aps: { sound: "default" } },
+        payload: {
+          aps: {
+            sound: "default",
+          },
+        },
       },
     });
   } catch (err) {

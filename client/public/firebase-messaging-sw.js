@@ -25,19 +25,19 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log("📩 Background message received:", payload);
 
-  const title =
-    payload.notification?.title || "⏰ תזכורת";
+  const title = payload.data?.title || "⏰ תזכורת";
 
   const options = {
-    body: payload.notification?.body || "התראה",
+    body: payload.data?.body || "",
     icon: "/logo192x192.png",
     data: {
-      url: "/", // أو رابط الحجز
+      url: payload.data?.url || "/",
     },
   };
 
   self.registration.showNotification(title, options);
 });
+
 
 
 /* فتح الرابط عند الضغط */
