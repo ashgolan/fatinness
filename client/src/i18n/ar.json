@@ -807,7 +807,11 @@
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "حدث خطأ أثناء التحقق من الحد الأسبوعي.",
       "weeklyLimitMessage": "وصلت إلى الحد الأقصى ({{max}} حصص) للأسبوع 🌸\nمن {{start}} إلى {{end}}\nيمكنك الحجز مجددًا في الأسبوع التالي 🤍",
       "PHONE_ALREADY_EXISTS": "رقم الهاتف مستخدم مسبقًا",
-      "SLOT_NOT_FOUND": "هذه الحصة لم تعد متاحة أو تم إلغاؤها"
+      "SLOT_NOT_FOUND": "هذه الحصة لم تعد متاحة أو تم إلغاؤها",
+      "UNAUTHORIZED_NO_TOKEN": "يجب تسجيل الدخول للمتابعة",
+      "UNAUTHORIZED_INVALID_TOKEN": "جلسة تسجيل الدخول غير صالحة، يرجى تسجيل الدخول مرة أخرى",
+      "UNAUTHORIZED_USER_NOT_FOUND": "المستخدم غير موجود أو تم حذفه",
+      "ADMIN_ONLY_ACCESS": "هذا الإجراء مخصص للمشرفين فقط"
     },
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",

@@ -338,13 +338,13 @@
     "deletedAll": "🗑️ כל ההתראות נמחקו"
   },
   "adminReports": {
-  "title": "דוחות",
-  "description": "ניתן לייצא דוחות נוכחות לפי טווח תאריכים",
-  "from": "מתאריך",
-  "to": "עד תאריך",
-  "download": "הורדת הדוח",
-  "success": "הדוח הורד בהצלחה",
-  "invalidRange": "טווח התאריכים אינו תקין",
+    "title": "דוחות",
+    "description": "ניתן לייצא דוחות נוכחות לפי טווח תאריכים",
+    "from": "מתאריך",
+    "to": "עד תאריך",
+    "download": "הורדת הדוח",
+    "success": "הדוח הורד בהצלחה",
+    "invalidRange": "טווח התאריכים אינו תקין",
     "noPermission": "דף זה זמין לסופר אדמין בלבד"
   },
   "adminSchedule": {
@@ -807,7 +807,11 @@
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "אירעה שגיאה בבדיקת המכסה השבועית.",
       "weeklyLimitMessage": "הגעת למגבלה השבועית ({{max}} אימונים) 🌸\nמ־{{start}} עד {{end}}\nניתן להזמין שוב בשבוע הבא 🤍",
       "PHONE_ALREADY_EXISTS": "מספר הטלפון כבר קיים במערכת",
-      "SLOT_NOT_FOUND": "האימון אינו זמין יותר או בוטל"
+      "SLOT_NOT_FOUND": "האימון אינו זמין יותר או בוטל",
+      "UNAUTHORIZED_NO_TOKEN": "יש להתחבר כדי להמשיך",
+      "UNAUTHORIZED_INVALID_TOKEN": "ההתחברות אינה תקפה, נא להתחבר מחדש",
+      "UNAUTHORIZED_USER_NOT_FOUND": "המשתמש לא נמצא או נמחק",
+      "ADMIN_ONLY_ACCESS": "גישה זו מיועדת למנהלים בלבד"
     },
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "שם התבנית והאימונים נדרשים.",

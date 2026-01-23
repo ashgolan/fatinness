@@ -807,7 +807,11 @@
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "Error checking weekly limit.",
       "weeklyLimitMessage": "YOU HAVE REACHED THE WEEKLY LIMIT ({{max}} SESSIONS) 🌸\nFROM {{start}} TO {{end}}\nYOU CAN BOOK AGAIN NEXT WEEK 🤍",
       "PHONE_ALREADY_EXISTS": "Phone number already exists",
-      "SLOT_NOT_FOUND": "This session is no longer available or has been cancelled"
+      "SLOT_NOT_FOUND": "This session is no longer available or has been cancelled",
+      "UNAUTHORIZED_NO_TOKEN": "You must be logged in to continue",
+      "UNAUTHORIZED_INVALID_TOKEN": "Your session is invalid, please log in again",
+      "UNAUTHORIZED_USER_NOT_FOUND": "User not found or has been deleted",
+      "ADMIN_ONLY_ACCESS": "This action is restricted to administrators only"
     },
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",
