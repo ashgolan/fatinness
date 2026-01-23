@@ -87,8 +87,19 @@ export default function AdminReports() {
           {t("adminReports.description")}
         </Typography>
 
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              sm: "1fr 1fr",
+            },
+            gap: 2,
+            width: "100%",
+          }}
+        >
           <TextField
+            fullWidth
             type="date"
             label={t("adminReports.from")}
             value={startDate}
@@ -97,12 +108,14 @@ export default function AdminReports() {
           />
 
           <TextField
+            fullWidth
             type="date"
             label={t("adminReports.to")}
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
+
         </Box>
 
         <Button
