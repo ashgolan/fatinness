@@ -78,9 +78,11 @@ export default function Login() {
       // ✅ السيرفر يعيد user جاهز
       if (data?.user) {
         setUser(data.user);
-        // 🔔 محاولة تسجيل الإشعارات (غير إجباري)
-        // 🔔 تفعيل الإشعارات (اختياري + ذكي)
-        // 🔔 محاولة تفعيل الإشعارات (بدون إزعاج)
+        if (data.accessToken) {
+          localStorage.setItem("accessToken", data.accessToken);
+        }
+
+
         setTimeout(() => {
           registerFcmToken({ silent: true });
         }, 500);
@@ -90,13 +92,7 @@ export default function Login() {
           registerFcmToken({ silent: true });
         }, 3000);
 
-        // 🔄 تحديث بيانات المستخدم بدون await
 
-        // const lang = localStorage.getItem("appLanguage") || "he";
-
-        // if (data.user?.preferredLanguage !== lang) {
-        //   Api.put("/auth/language", { preferredLanguage: lang }).catch(() => { });
-        // }
 
         navigate(data.user.role === "admin" ? "/admin/control" : from, {
           replace: true,
