@@ -111,10 +111,12 @@ export default function App() {
   // ✅ check-first-run فقط إذا يوجد Token
   useEffect(() => {
 
+    if (!user?._id) return;
     Api.get("/auth/check-first-run")
       .then((res) => setNeedsSetup(res.data.needsSetup))
       .catch(() => setNeedsSetup(false));
   }, []);
+
 
 
   const isSplash = location.pathname === "/";

@@ -11,11 +11,16 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const init = async () => {
       try {
-        // 🔐 السيرفر يقرر إن كنت مسجّل دخول
+        // 🧠 الحل الذكي: لا نطلب /users/me إلا إذا يوجد Cookie
+        const hasCookie = document.cookie.includes("JWT=");
+        if (!hasCookie) {
+          setLoadingUser(false);
+          return;
+        }
+
         const { data } = await Api.get("/users/me");
         setUser(data);
       } catch (err) {
-        // ❌ غير مسجّل أو التوكن منتهي
         setUser(null);
       } finally {
         setLoadingUser(false);
@@ -24,12 +29,13 @@ export function UserProvider({ children }) {
 
     init();
   }, []);
-useEffect(() => {
-  if (!user || !user._id) return;
 
-  // 🔔 تسجيل FCM تلقائي بعد login
-  registerFcmToken({ silent: true });
-}, [user?._id]);
+  useEffect(() => {
+    if (!user || !user._id) return;
+
+    // 🔔 تسجيل FCM تلقائي بعد login
+    registerFcmToken({ silent: true });
+  }, [user?._id]);
 
   const value = useMemo(
     () => ({ user, setUser, loadingUser }),
