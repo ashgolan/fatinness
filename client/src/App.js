@@ -90,6 +90,8 @@ export default function App() {
   const location = useLocation();
   const [needsSetup, setNeedsSetup] = useState(false);
 
+
+
   // ✅ تحميل اللغة مرة واحدة فقط
   useEffect(() => {
     const savedLang = localStorage.getItem("appLanguage") || "ar";

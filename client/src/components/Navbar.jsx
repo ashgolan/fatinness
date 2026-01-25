@@ -73,7 +73,7 @@ export default function Navbar() {
     console.log("🗣️ current preferredLanguage:", user?.preferredLanguage);
 
     // 2️⃣ مزامنة مع السيرفر فقط إذا المستخدم مسجّل دخول
-    if (!user?.id) {
+    if (!user?._id) {
       console.warn("⚠️ No user logged in → skip server sync");
       return;
     }
@@ -116,7 +116,7 @@ export default function Navbar() {
   const fallbackLogo = "/brand/DEFAULT_LOGO.png";
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
   const location = useLocation();
-  const minimalNavbarRoutes = ["/login", "/register", "/super-admin-register"];
+  const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
   const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
 
   useEffect(() => {
@@ -148,15 +148,7 @@ export default function Navbar() {
       navigate("/login");
     }
   };
-  useEffect(() => {
-    if (!user?.preferredLanguage) return;
 
-    i18n.changeLanguage(user.preferredLanguage);
-    localStorage.setItem("appLanguage", user.preferredLanguage);
-
-    document.documentElement.dir =
-      user.preferredLanguage === "en" ? "ltr" : "rtl";
-  }, [user]);
 
   const isAdmin = user?.role === "admin";
 
