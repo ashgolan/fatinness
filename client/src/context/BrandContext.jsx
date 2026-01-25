@@ -3,8 +3,8 @@ import { Api } from "../api/Api";
 import useServerError from "../hooks/useServerError";
 
 const BrandContext = createContext();
-const DEFAULT_LOGO = "/brand/fatiness_logo.png";
-const DEFAULT_CARD = "/brand/gym-cover.jpg";
+const DEFAULT_LOGO = "/brand/DEFAULT_LOGO.png";
+const DEFAULT_CARD = "/brand/DEFAULT_CARD.jpg";
 
 export function BrandProvider({ children }) {
   const handleServerError = useServerError();

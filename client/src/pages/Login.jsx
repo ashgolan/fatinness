@@ -48,17 +48,7 @@ export default function Login() {
 
   // شعار افتراضي
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
-  // useEffect(() => {
-  //   Api.get("/auth/check-first-run")
-  //     .then((res) => {
-  //       if (res.data?.needsSetup) {
-  //         navigate("/register-superadmin", { replace: true });
-  //       }
-  //     })
-  //     .catch(() => {
-  //       // تجاهل الخطأ (مثلاً لو السيرفر غير متاح)
-  //     });
-  // }, [navigate]);
+
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
