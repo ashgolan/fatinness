@@ -159,6 +159,7 @@
     }
   },
   "bookingsHub": {
+    "defaultTitle": "Training Session",
     "loading": "Loading data...",
     "errors": {
       "fetch": "Failed to load data",
@@ -348,6 +349,8 @@
     "noPermission": "This page is available to super admin only"
   },
   "adminSchedule": {
+    "slotTitle": "Session Title",
+    "slotTitlePlaceholder": "Example: Yoga – Cardio – HIIT",
     "title": "Sessions Schedule",
     "subtitle": "Manage sessions for the current and upcoming week",
     "currentWeek": "Current week",

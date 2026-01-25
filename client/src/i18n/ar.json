@@ -159,6 +159,7 @@
     }
   },
   "bookingsHub": {
+    "defaultTitle": "حصة تدريب",
     "loading": "جاري تحميل البيانات...",
     "errors": {
       "fetch": "فشل تحميل البيانات",

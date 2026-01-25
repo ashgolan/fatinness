@@ -159,6 +159,7 @@
     }
   },
   "bookingsHub": {
+    "defaultTitle": "אימון",
     "loading": "טוען נתונים...",
     "errors": {
       "fetch": "טעינת הנתונים נכשלה",
@@ -348,6 +349,8 @@
     "noPermission": "דף זה זמין לסופר אדמין בלבד"
   },
   "adminSchedule": {
+    "slotTitle": "כותרת האימון",
+    "slotTitlePlaceholder": "לדוגמה: יוגה – קרדיו – HIIT",
     "title": "לוח אימונים",
     "subtitle": "ניהול אימוני השבוע הנוכחי והבא",
     "currentWeek": "השבוע הנוכחי",
