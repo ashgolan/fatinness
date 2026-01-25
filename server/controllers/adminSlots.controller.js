@@ -161,7 +161,7 @@ export const adminGetWeekSlots = async (req, res) => {
 // =====================================================
 export const adminCreateSlot = async (req, res) => {
   try {
-    const { date, startTime, endTime, capacity = 20 } = req.body;
+    const { title, date, startTime, endTime, capacity = 20 } = req.body;
 
     if (!date || !startTime || !endTime) {
       return res.status(400).json({ code: "ADMIN_SLOT_MISSING_FIELDS" });
@@ -184,6 +184,8 @@ export const adminCreateSlot = async (req, res) => {
     }
 
     const slot = await Slot.create({
+      title: title?.trim() || "",      // ⭐ هذا هو السطر الناقص
+
       date: startAtUTC.startOf("day").toJSDate(),
       startAt: startAtUTC.toJSDate(),
       endAt: endAtUTC.toJSDate(),
@@ -364,6 +366,7 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 
       // ✅ إنشاء الحصة
       const slot = await Slot.create({
+        title: it.title?.trim() || "",   // ⭐ السطر الجديد
         date: startAtUTC.startOf("day").toJSDate(),
         startAt: startAtUTC.toJSDate(),
         endAt: endAtUTC.toJSDate(),

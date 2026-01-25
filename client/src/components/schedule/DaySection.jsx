@@ -153,20 +153,56 @@ export default function DaySection({
                   sx={{
                     width: "100%",
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
+                    justifyContent: "space-between",
+                    flexWrap: "nowrap",          // ⭐ يمنع التقسيم
+                    gap: 1,
+                    overflow: "hidden",          // ⭐ يمنع النزول
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography
+                    <Box
                       sx={{
-                        fontWeight: 700,
-                        color: colors.text,
-                        fontSize: 15,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        flexWrap: "nowrap",
+                        overflow: "hidden",
+                        minWidth: 0,                // ⭐ مهم جدًا مع ellipsis
                       }}
                     >
-                      {fmtTime(slot.startAt)} - {fmtTime(slot.endAt)}
-                    </Typography>
+                      {/* ⏰ الوقت */}
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: 15,
+                          whiteSpace: "nowrap",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {fmtTime(slot.startAt)} – {fmtTime(slot.endAt)}
+                      </Typography>
+
+                      {/* ✨ العنوان */}
+                      {slot.title && (
+                        <Typography
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: 13,
+                            color: "#EC4899",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            maxWidth: 120,             // ⭐ حتى لا يزاحم الأزرار
+                          }}
+                        >
+                          ✨ {slot.title}
+                        </Typography>
+                      )}
+
+                    </Box>
+
+
 
                     {isDeleted && (
                       <Typography
@@ -182,47 +218,42 @@ export default function DaySection({
                     )}
 
                   </Box>
-
-                  {/* 🔥 زر الحذف فقط إذا لم تنتهِ الحصة */}
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-                    {/* ♻️ زر إعادة التفعيل */}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      flexShrink: 0,              // ⭐ لا تنكمش أبدًا
+                    }}
+                  >
+                    {/* ♻️ إعادة تفعيل */}
                     {isDeleted && !isSlotPast(slot) && (
                       <Tooltip title={t("adminSchedule.reactivate")} arrow>
                         <IconButton
                           size="small"
                           onClick={() => onReactivateExisting(slot._id)}
-                          sx={{ color: "#10b981" }} // أخضر
+                          sx={{ color: "#10b981" }}
                         >
                           <ReplayIcon fontSize="small" />
                         </IconButton>
                       </Tooltip>
                     )}
 
-                    {/* ❌ زر الحذف */}
+                    {/* 🗑️ حذف */}
                     {!isSlotPast(slot) && (
-                      <Tooltip
-                        title={
-                          isDeleted
-                            ? t("adminSchedule.cancelled")
-                            : t("schedule.delete")
-                        }
-                        arrow
-                      >
-                        <span>
-                          <IconButton
-                            disabled={isDeleted}
-                            size="small"
-                            onClick={() => onDeleteExisting(slot._id)}
-                            sx={{
-                              color: isDeleted ? "#9ca3af" : "#ef4444",
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </span>
+                      <Tooltip title={t("schedule.delete")} arrow>
+                        <IconButton
+                          size="small"
+                          disabled={isDeleted}
+                          onClick={() => onDeleteExisting(slot._id)}
+                          sx={{ color: isDeleted ? "#9ca3af" : "#ef4444" }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
                       </Tooltip>
                     )}
                   </Box>
+
 
                 </Box>
               </Paper>
@@ -268,6 +299,16 @@ export default function DaySection({
               gap: 1,
             }}
           >
+            <TextField
+              label={t("adminSchedule.slotTitle")}
+              placeholder={t("adminSchedule.slotTitlePlaceholder")}
+              value={slot.title || ""}
+              onChange={(e) => onUpdateNew(idx, "title", e.target.value)}
+              fullWidth
+              InputLabelProps={{ shrink: true }}
+              sx={{ mb: 1 }}
+            />
+
             <TextField
               label={t("schedule.from")}
               type="time"

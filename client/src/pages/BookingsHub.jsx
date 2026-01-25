@@ -693,13 +693,42 @@ function AvailableView({
                   >
                     <div
                       style={{
-                        fontWeight: 700,
-                        fontSize: "16px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                         marginBottom: 8,
+                        gap: 8,
                       }}
                     >
-                      🕒 {formatTimeRange(slot.startAt, slot.endAt, t)}
+                      {/* 🟣 عنوان الحصة */}
+                      <div
+                        style={{
+                          fontWeight: 800,
+                          fontSize: 15,
+                          color: BRAND.gold,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: "60%",
+                        }}
+                      >
+                        {slot.title || t("bookingsHub.defaultTitle")}
+                      </div>
+
+                      {/* 🕒 الوقت */}
+                      <div
+                        style={{
+                          fontWeight: 700,
+                          fontSize: 15,
+                          color: mode === "dark" ? "#e5e7eb" : "#111",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        🕒 {formatTimeRange(slot.startAt, slot.endAt, t)}
+                      </div>
                     </div>
+
+
 
                     <div
                       style={{
@@ -865,6 +894,9 @@ function MyBookingsView({
                     month: "2-digit",
                     day: "2-digit",
                   })}
+                </div>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>
+                  {b.slot.title}
                 </div>
 
                 <div style={{ opacity: 0.8, marginBottom: 12 }}>

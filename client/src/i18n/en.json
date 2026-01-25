@@ -1,6 +1,6 @@
 {
   "footer": {
-    "subtitle": "Women's Fitness Studio"
+    "subtitle": "Fitness Studio"
   },
   "navbar": {
     "admin_panel": "Admin Panel",
@@ -17,7 +17,7 @@
   "common": {
     "cancel": "Cancel",
     "save": "Save",
-    "developedBy": "Developed by A.Sh1aalan Tech"
+    "developedBy": "Developed by A.Shaalan Tech"
   },
   "weekdays": {
     "sunday": "Sunday",
@@ -811,7 +811,8 @@
       "UNAUTHORIZED_NO_TOKEN": "You must be logged in to continue",
       "UNAUTHORIZED_INVALID_TOKEN": "Your session is invalid, please log in again",
       "UNAUTHORIZED_USER_NOT_FOUND": "User not found or has been deleted",
-      "ADMIN_ONLY_ACCESS": "This action is restricted to administrators only"
+      "ADMIN_ONLY_ACCESS": "This action is restricted to administrators only",
+      "SLOT_ALREADY_STARTED": "❌ This action cannot be performed because the session has already started"
     },
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",

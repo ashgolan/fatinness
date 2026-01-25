@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const SlotSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    trim: true,
+    default: "", // اختياري
+  },
   date: { type: Date, required: true },
   startAt: { type: Date, required: true },
   endAt: { type: Date, required: true },

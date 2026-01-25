@@ -196,7 +196,7 @@ export default function AdminSchedule() {
       ...prev,
       [key]: [
         ...(prev[key] || []),
-        { startTime: "", endTime: "", capacity: "20" },
+        { title: "", startTime: "", endTime: "", capacity: "20" }
       ],
     }));
   };
@@ -242,6 +242,7 @@ export default function AdminSchedule() {
         .filter((s) => s.startTime && s.endTime)
         .map((s) => ({
           date: fmt(addDays(serverNextWeekStart, d.dayOffset)),
+          title: s.title || "",
           startTime: s.startTime,
           endTime: s.endTime,
           capacity: Number(s.capacity) || 20,
@@ -281,7 +282,12 @@ export default function AdminSchedule() {
         Object.entries(currentEdits).forEach(([date, slots]) => {
           slots.forEach(s => {
             if (isValidSlot(s)) {
-              changes.push({ date, ...s, capacity: Number(s.capacity) || 20 });
+              changes.push({
+                date, ...s, title: s.title || "",
+                startTime: s.startTime,
+                endTime: s.endTime,
+                capacity: Number(s.capacity) || 20
+              });
             }
           });
         });
@@ -356,7 +362,8 @@ export default function AdminSchedule() {
   // ===================== إدارة الأسبوع القادم =====================
   const addNextSlot = (dayIndex) => {
     const copy = [...nextWeek];
-    copy[dayIndex].items.push({ startTime: "", endTime: "", capacity: "20" });
+    copy[dayIndex].items.push({ title: "", startTime: "", endTime: "", capacity: "20" }
+    );
     setNextWeek(copy);
   };
 

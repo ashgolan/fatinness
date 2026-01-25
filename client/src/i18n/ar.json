@@ -1,6 +1,6 @@
 {
   "footer": {
-    "subtitle": "استوديو اللياقة النسائي"
+    "subtitle": "استوديو اللياقة"
   },
   "navbar": {
     "admin_panel": "لوحة الإدارة",
@@ -30,14 +30,14 @@
   },
   "dashboard": {
     "dir": "rtl",
-    "welcome": "مرحبًا بكِ في Fatinness 💜",
-    "subtitle": "ناديكِ الرياضي المفضل يبدأ من هنا ✨",
+    "welcome": "مرحبًا بك في Fatinness 💜",
+    "subtitle": "ناديك الرياضي المفضل يبدأ من هنا ✨",
     "profile_title": "الملف الشخصي",
     "profile_desc": "عرض بياناتك وتطور الوزن",
     "booking_title": "مركز الحجوزات",
-    "booking_desc": "احجزي المواعيد وتابعي حجوزاتك السابقة والقادمة",
-    "enter_now": "ادخلي الآن 🚀",
-    "keep_going": "استمري في التقدم نحو أهدافك!"
+    "booking_desc": "احجز المواعيد وتابع حجوزاتك السابقة والقادمة",
+    "enter_now": "ادخل الآن 🚀",
+    "keep_going": "استمر في التقدم نحو أهدافك!"
   },
   "login": {
     "title": "Fatinness Studio",
@@ -48,7 +48,7 @@
     "button": "تسجيل الدخول",
     "buttonLoading": "جارٍ تسجيل الدخول...",
     "noAccount": "ليس لديكِ حساب؟",
-    "createAccount": "أنشئي حسابًا جديدًا",
+    "createAccount": "أنشئ حسابًا جديدًا",
     "contactAdmin": "يرجى التواصل مع الإدارة لإنشاء حساب جديد 🙏",
     "success": {
       "login": "تم تسجيل الدخول بنجاح 🎉",
@@ -63,7 +63,7 @@
   },
   "register": {
     "title": "إنشاء حساب جديد",
-    "subtitle": "المدير فقط يمكنه إضافة مشتركات أو مديرات جديدة 👑",
+    "subtitle": "المدير فقط يمكنه إضافة مشتركين أو مدراء جدد 👑",
     "submit": "إنشاء الحساب",
     "submitting": "جارٍ إنشاء الحساب...",
     "success": "تم إنشاء الحساب بنجاح",
@@ -79,7 +79,7 @@
       "role": "نوع الحساب",
       "roleUser": "مشتركة",
       "roleAdmin": "مديرة",
-      "roleHelper": "اختاري ما إذا كانت مشتركة أو مديرة",
+      "roleHelper": "اختار ما إذا كانت مشترك أو مدير",
       "height": "الطول (سم)",
       "weight": "الوزن (كغ)",
       "age": "العمر",
@@ -165,7 +165,7 @@
       "notFoundToCancel": "لم يتم العثور على الحجز لإلغائه",
       "weeklyLimitReached": "لقد وصلت إلى الحد الأقصى للحجوزات هذا الأسبوع"
     },
-    "confirmCancel": "هل أنتِ متأكدة من إلغاء هذا الحجز؟",
+    "confirmCancel": "هل أنت متأكد من إلغاء هذا الحجز؟",
     "stats": {
       "upcoming": "القادمة",
       "past": "المنتهية",
@@ -188,9 +188,9 @@
     },
     "buttons": {
       "processing": "⏳ جاري التنفيذ...",
-      "booked": "✅ محجوز - اضغطي للإلغاء",
+      "booked": "✅ محجوز - اضغط للإلغاء",
       "full": "🔒 ممتلئة",
-      "bookNow": "🎯 احجزي الآن",
+      "bookNow": "🎯 احجز الآن",
       "cancelBooking": "🗑️ إلغاء الحجز",
       "rebook": "🔁 إعادة الحجز"
     },
@@ -206,7 +206,7 @@
   },
   "myBookings": {
     "title": "📅 حجوزاتي",
-    "subtitle": "استعرضي حجوزاتك القادمة، السابقة، أو الملغاة",
+    "subtitle": "استعرض حجوزاتك القادمة، السابقة، أو الملغاة",
     "filters": {
       "upcoming": "📆 القادمة",
       "past": "✅ السابقة",
@@ -265,16 +265,16 @@
   },
   "adminDashboard": {
     "welcomeTitle": "👋 مرحبًا",
-    "welcomeMessage": "لديكِ اليوم {{sessions}} جلسات نشطة و {{newUsers}} مشتركات جديدات 💪",
+    "welcomeMessage": "لديك اليوم {{sessions}} جلسات نشطة و {{newUsers}} مستخدمين جدد 💪",
     "mainTitle": "📊 لوحة الإحصاءات العامة",
     "noData": "لا توجد بيانات متاحة حالياً.",
     "errors": {
       "fetchStats": "فشل تحميل الإحصاءات"
     },
     "cards": {
-      "totalUsers": "إجمالي المشتركات",
-      "activeUsers": "المشتركات النشِطات",
-      "blockedUsers": "المشتركات المحظورات",
+      "totalUsers": "إجمالي المشتركين",
+      "activeUsers": "الاشتراكات النشطه",
+      "blockedUsers": "الاشتراكات المحظوره",
       "totalBookings": "إجمالي الحجوزات",
       "activeBookings": "الحجوزات النشطة",
       "completedBookings": "الحجوزات المنجزة",
@@ -294,11 +294,11 @@
   },
   "controlCenter": {
     "title": "🎛️ مركز التحكم الإداري",
-    "subtitle": "اختاري القسم الذي ترغبين بإدارته من القائمة أدناه 👇",
+    "subtitle": "اختار القسم الذي ترغب بإدارته من القائمة أدناه 👇",
     "sections": {
-      "newUser": "إضافة مشتركة جديدة",
+      "newUser": "إضافة مشترك جديد",
       "dashboard": "لوحة الإحصاءات العامة",
-      "users": "قائمة المشتركات",
+      "users": "قائمة المشتركين",
       "bookings": "الحجوزات",
       "weeklySlots": "الجدول الأسبوعي",
       "templates": "القوالب الأسبوعية",
@@ -348,6 +348,8 @@
     "noPermission": "هذه الصفحة متاحة فقط للسوبر أدمن"
   },
   "adminSchedule": {
+    "slotTitle": "عنوان الحصة",
+    "slotTitlePlaceholder": "مثال: يوغا – كارديو – HIIT",
     "title": "جدول الحصص",
     "subtitle": "إدارة حصص الأسبوع الحالي والقادم",
     "currentWeek": "الأسبوع الحالي",
@@ -447,17 +449,17 @@
     }
   },
   "usersAdmin": {
-    "title": "إدارة المشتركات",
-    "subtitle": "عرض وإدارة حسابات المشتركات والصلاحيات",
-    "editUser": "تعديل بيانات المشتركة",
+    "title": "إدارة المستخدمين",
+    "subtitle": "عرض وإدارة حسابات المستخدمين والصلاحيات",
+    "editUser": "تعديل بيانات المشترك",
     "noResults": "لا توجد نتائج مطابقة",
     "search": {
       "placeholder": "ابحث بالاسم، البريد الإلكتروني أو الهاتف"
     },
     "totalBookings": "عدد الحجوزات",
     "card": {
-      "active": "نشطة",
-      "blocked": "محظورة"
+      "active": "نشط",
+      "blocked": "محظور"
     },
     "fields": {
       "name": "الاسم",
@@ -480,8 +482,8 @@
       "male": "ذكر"
     },
     "roles": {
-      "user": "مستخدمة",
-      "admin": "مديرة"
+      "user": "مستخدم",
+      "admin": "مدير"
     },
     "buttons": {
       "edit": "تعديل",
@@ -494,28 +496,28 @@
       "updated": "تم تحديث إعداد الحجز الإضافي"
     },
     "messages": {
-      "updated": "تم تحديث بيانات المشتركة بنجاح",
-      "deleted": "تم حذف المشتركة بنجاح",
-      "blocked": "تم حظر المشتركة",
-      "unblocked": "تم إلغاء حظر المشتركة",
+      "updated": "تم تحديث بيانات المشترك بنجاح",
+      "deleted": "تم حذف المشترك بنجاح",
+      "blocked": "تم حظر المشترك",
+      "unblocked": "تم إلغاء حظر المشترك",
       "tempAdmin": "تم تغيير الدور مؤقتًا، لا تنسَ حفظ التغييرات"
     },
     "errors": {
-      "cannotBlockAdmin": "لا يمكن حظر المديرات",
+      "cannotBlockAdmin": "لا يمكن حظر المدراء",
       "cannotDeleteSuperAdmin": "لا يمكن حذف المدير الرئيسي",
-      "onlySuperAdminCanPromote": "فقط المدير الرئيسي يمكنه ترقية مستخدمة إلى مديرة"
+      "onlySuperAdminCanPromote": "فقط المدير الرئيسي يمكنه ترقية مستخدم إلى مدير"
     },
     "confirm": {
-      "block": "هل أنت متأكد من حظر هذه المشتركة؟",
-      "unblock": "هل تريد إلغاء حظر هذه المشتركة؟",
-      "deleteUser": "هل أنت متأكد من حذف هذه المشتركة؟",
+      "block": "هل أنت متأكد من حظر هذا المشترك؟",
+      "unblock": "هل تريد إلغاء حظر هذا المشترك؟",
+      "deleteUser": "هل أنت متأكد من حذف هذا المشترك؟",
       "deleteTitle": "تأكيد الحذف"
     },
     "confirmRole": {
-      "promoteTitle": "ترقية إلى مديرة",
-      "demoteTitle": "إرجاع إلى مستخدمة",
-      "promoteText": "هل أنت متأكد من ترقية هذه المشتركة إلى مديرة؟",
-      "demoteText": "هل أنت متأكد من إزالة صلاحيات الإدارة من هذه المشتركة؟",
+      "promoteTitle": "ترقية إلى مدير",
+      "demoteTitle": "إرجاع إلى مستخدم",
+      "promoteText": "هل أنت متأكد من ترقية هذا المشترك إلى مدير؟",
+      "demoteText": "هل أنت متأكد من إزالة صلاحيات الإدارة من هذا المشترك؟",
       "demoteWarning": "سيتم فقدان جميع صلاحيات الإدارة فورًا",
       "confirm": "تأكيد"
     }
@@ -530,7 +532,7 @@
       "cancelled": "ملغاة"
     },
     "columns": {
-      "user": "المشتركة",
+      "user": "المشترك",
       "active": "نشطة",
       "cancelled": "ملغاة",
       "completed": "مكتملة",
@@ -560,7 +562,7 @@
       "date": "التاريخ",
       "time": "الوقت",
       "status": "الحالة",
-      "noBookings": "لا توجد حجوزات لهذه المشتركة"
+      "noBookings": "لا توجد حجوزات لهذا المشترك"
     },
     "stats": {
       "active": "نشطة",
@@ -587,7 +589,7 @@
       "total": "الإجمالي"
     },
     "filters": {
-      "selectWeek": "اختاري أسبوع العرض",
+      "selectWeek": "اختر أسبوع العرض",
       "active": "النشطة",
       "ended": "المنتهية",
       "blocked": "المعطلة",
@@ -607,19 +609,19 @@
     },
     "dialog": {
       "title": "تفاصيل الحصة",
-      "membersTitle": "المشتركات المسجلات ({{count}})",
+      "membersTitle": "المشتركين المسجلين ({{count}})",
       "sendNotification": "إرسال إشعار",
       "status": {
         "booked": "محجوزة",
         "cancelled": "ملغاة"
       },
-      "noMembers": "لا توجد مشتركات في هذه الحصة",
+      "noMembers": "لا يوجد مشتركين في هذه الحصة",
       "close": "إغلاق",
       "activate": "تفعيل الحصة",
       "deactivate": "تعطيل الحصة"
     },
     "notify": {
-      "title": "إرسال إشعار للمشتركات",
+      "title": "إرسال إشعار للمشتركين",
       "notificationTitle": "عنوان الإشعار",
       "notificationBody": "محتوى الإشعار",
       "cancel": "إلغاء",
@@ -811,8 +813,10 @@
       "UNAUTHORIZED_NO_TOKEN": "يجب تسجيل الدخول للمتابعة",
       "UNAUTHORIZED_INVALID_TOKEN": "جلسة تسجيل الدخول غير صالحة، يرجى تسجيل الدخول مرة أخرى",
       "UNAUTHORIZED_USER_NOT_FOUND": "المستخدم غير موجود أو تم حذفه",
-      "ADMIN_ONLY_ACCESS": "هذا الإجراء مخصص للمشرفين فقط"
+      "ADMIN_ONLY_ACCESS": "هذا الإجراء مخصص للمشرفين فقط",
+      "SLOT_ALREADY_STARTED": "❌ لا يمكن تنفيذ العملية، الحصة قد بدأت بالفعل"
     },
+    "ADMIN_REPORT_NO_DATA": "لا توجد حجوزات في هذا النطاق الزمني",
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",
     "WEEK_TEMPLATE_CREATE_SUCCESS": "تم إنشاء قالب الأسبوع بنجاح.",
@@ -820,12 +824,12 @@
     "WEEK_TEMPLATE_NOT_FOUND": "القالب غير موجود.",
     "WEEK_TEMPLATE_APPLY_SUCCESS": "تم تطبيق القالب بنجاح.",
     "WEEK_TEMPLATE_APPLY_ERROR": "حدث خطأ أثناء تطبيق القالب.",
-    "USER_NOT_FOUND": "المستخدمة غير موجودة.",
-    "USER_UPDATE_SUCCESS": "تم تحديث بيانات المشتركة بنجاح.",
-    "USER_UPDATE_ERROR": "تعذر تحديث بيانات المشتركة.",
+    "USER_NOT_FOUND": "المستخدم غير موجود.",
+    "USER_UPDATE_SUCCESS": "تم تحديث بيانات المشترك بنجاح.",
+    "USER_UPDATE_ERROR": "تعذر تحديث بيانات المشترك.",
     "CSV_NO_DATA": "لا توجد بيانات لتصديرها.",
-    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "تم حظر المشتركة بنجاح.",
-    "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "تم إلغاء الحظر عن المشتركة.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "تم حظر المشترك بنجاح.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "تم إلغاء الحظر عن المشترك.",
     "ADMIN_NOTIFICATION_DELETE_SUCCESS": "تم حذف الإشعار.",
     "ADMIN_NOTIFICATION_CLEAR_SUCCESS": "تم مسح سجل الإشعارات بالكامل.",
     "SETTINGS_UPDATE_SUCCESS": "تم تحديث الإعدادات بنجاح.",
@@ -844,8 +848,8 @@
     "ADMIN_RESET_HARD_SUCCESS": "تم تنفيذ إعادة الضبط القوية بنجاح.",
     "ADMIN_RESET_FACTORY_SUCCESS": "تم تنفيذ إعادة ضبط المصنع بنجاح.",
     "ADMIN_NOTIFICATION_SENT": "تم إرسال الإشعار بنجاح.",
-    "ADMIN_NOTIFICATION_SLOT_INFO": "إشعار لجميع مشتركات الجلسة",
-    "ADMIN_NOTIFICATION_SLOT_SENT": "تم إرسال الإشعار لجميع المشتركات في الجلسة.",
+    "ADMIN_NOTIFICATION_SLOT_INFO": "إشعار لجميع مشتركي الجلسة",
+    "ADMIN_NOTIFICATION_SLOT_SENT": "تم إرسال الإشعار لجميع المشتركين في الجلسة.",
     "ADMIN_DELETE_SUCCESS": "تم حذف المستخدم بنجاح."
   }
 }

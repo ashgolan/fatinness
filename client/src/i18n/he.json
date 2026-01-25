@@ -1,6 +1,6 @@
 {
   "footer": {
-    "subtitle": "סטודיו כושר לנשים"
+    "subtitle": "סטודיו כושר"
   },
   "navbar": {
     "admin_panel": "לוח ניהול",
@@ -30,20 +30,19 @@
   },
   "dashboard": {
     "dir": "rtl",
-    "welcome": "ברוכה הבאה ל-Fatinness 💜",
-    "subtitle": "מועדון הכושר המועדף עלייך מתחיל כאן ✨",
+    "welcome": "ברוכים הבאים ל-Fatinness 💜",
+    "subtitle": "מועדון הכושר שלכם מתחיל כאן ✨",
     "profile_title": "פרופיל",
     "profile_desc": "צפייה בנתונים ובהתקדמות המשקל",
     "booking_title": "מרכז הזמנות",
     "booking_desc": "הזמיני אימונים ועקבי אחרי ההזמנות הקודמות והבאות שלך",
-    "enter_now": "היכנסי עכשיו 🚀",
-    "keep_going": "המשיכי להתקדם לעבר המטרות שלך!"
+    "enter_now": "כניסה 🚀",
+    "keep_going": "המשיכו להתקדם לעבר המטרות שלכם!"
   },
   "login": {
     "title": "Fatinness Studio",
     "identifier": "שם משתמש או מספר טלפון",
     "welcome": "שמחות לראותך שוב 💪",
-    "email": "דוא״ל",
     "password": "סיסמה",
     "button": "התחברות",
     "buttonLoading": "מתבצעת התחברות...",
@@ -56,14 +55,15 @@
     },
     "errors": {
       "status": "שגיאה {{status}}",
-      "network": "לא ניתן להתחבר לשרת. בדקי את חיבור האינטרנט או הגדרות CORS.",
+      "network": "בדקי את חיבור האינטרנט",
+      "email": "דוא״ל",
       "unexpected": "אירעה שגיאה בלתי צפויה.",
       "loginFailed": "ההתחברות נכשלה"
     }
   },
   "register": {
     "title": "יצירת חשבון חדש",
-    "subtitle": "רק מנהל יכול להוסיף מנויים או מנהלות חדשות 👑",
+    "subtitle": "רק מנהל יכול להוסיף מנויים או מנהלים חדשים 👑",
     "submit": "יצירת חשבון",
     "submitting": "יוצר חשבון...",
     "success": "החשבון נוצר בהצלחה",
@@ -77,9 +77,9 @@
       "female": "נקבה",
       "male": "זכר",
       "role": "סוג חשבון",
-      "roleUser": "מנויה",
-      "roleAdmin": "מנהלת",
-      "roleHelper": "בחרי אם מנויה או מנהלת",
+      "roleUser": "מנוי",
+      "roleAdmin": "מנהל",
+      "roleHelper": "בחר אם מנוי או מנהל",
       "height": "גובה (ס״מ)",
       "weight": "משקל (ק״ג)",
       "age": "גיל",
@@ -165,7 +165,7 @@
       "notFoundToCancel": "לא נמצאה הזמנה לביטול",
       "weeklyLimitReached": "הגעת למספר המרבי של הזמנות לשבוע זה"
     },
-    "confirmCancel": "האם את בטוחה שברצונך לבטל הזמנה זו?",
+    "confirmCancel": "האם ברצונך לבטל הזמנה זו?",
     "stats": {
       "upcoming": "עתידיות",
       "past": "הסתיימו",
@@ -188,9 +188,9 @@
     },
     "buttons": {
       "processing": "⏳ מתבצע...",
-      "booked": "✅ הוזמן – לחצי לביטול",
+      "booked": "✅ הוזמן – לחץ לביטול",
       "full": "🔒 מלא",
-      "bookNow": "🎯 הזמיני עכשיו",
+      "bookNow": "🎯 להזמנה",
       "cancelBooking": "🗑️ ביטול הזמנה",
       "rebook": "🔁 הזמנה מחדש"
     },
@@ -265,16 +265,16 @@
   },
   "adminDashboard": {
     "welcomeTitle": "👋 שלום",
-    "welcomeMessage": "היום יש לך {{sessions}} אימונים פעילים ו-{{newUsers}} מנויות חדשות 💪",
+    "welcomeMessage": "היום יש {{sessions}} אימונים פעילים ו-{{newUsers}} משתמשים חדשים 💪",
     "mainTitle": "📊 לוח סטטיסטיקות כללי",
     "noData": "אין נתונים זמינים כרגע.",
     "errors": {
       "fetchStats": "טעינת הסטטיסטיקות נכשלה"
     },
     "cards": {
-      "totalUsers": "סה״כ מנויות",
-      "activeUsers": "מנויות פעילות",
-      "blockedUsers": "מנויות חסומות",
+      "totalUsers": "סה״כ מנויים",
+      "activeUsers": "מנויים פעילים",
+      "blockedUsers": "מנויים חסומים",
       "totalBookings": "סה״כ הזמנות",
       "activeBookings": "הזמנות פעילות",
       "completedBookings": "הזמנות שהושלמו",
@@ -296,9 +296,9 @@
     "title": "🎛️ מרכז בקרה ניהולי",
     "subtitle": "בחרי את החלק שברצונך לנהל מהרשימה למטה 👇",
     "sections": {
-      "newUser": "הוספת מנויה חדשה",
+      "newUser": "הוספת מנוי חדש",
       "dashboard": "לוח סטטיסטיקות כללי",
-      "users": "רשימת מנויות",
+      "users": "רשימת מנויים",
       "bookings": "הזמנות",
       "weeklySlots": "לוח שבועי",
       "templates": "תבניות שבועיות",
@@ -317,7 +317,7 @@
     "notificationTitle": "כותרת ההתראה",
     "notificationBody": "תוכן ההתראה",
     "target": "קהל יעד",
-    "allUsers": "כל המנויות",
+    "allUsers": "כל המנויים",
     "send": "🔔 שליחת התראה",
     "fetchError": "טעינת הנתונים נכשלה",
     "emptyFields": "נא להזין כותרת ותוכן לפני השליחה.",
@@ -447,8 +447,8 @@
     }
   },
   "usersAdmin": {
-    "title": "ניהול מנויות",
-    "subtitle": "צפייה וניהול חשבונות מנויות והרשאות",
+    "title": "ניהול משתמשים",
+    "subtitle": "צפייה וניהול חשבונות משתמשים והרשאות",
     "editUser": "עריכת פרטי מנויה",
     "noResults": "לא נמצאו תוצאות תואמות",
     "search": {
@@ -480,8 +480,8 @@
       "male": "זכר"
     },
     "roles": {
-      "user": "משתמשת",
-      "admin": "מנהלת"
+      "user": "משתמש",
+      "admin": "מנהל"
     },
     "buttons": {
       "edit": "עריכה",
@@ -494,28 +494,28 @@
       "updated": "הגדרת הזמנה נוספת עודכנה"
     },
     "messages": {
-      "updated": "פרטי המנויה עודכנו בהצלחה",
-      "deleted": "המנויה נמחקה בהצלחה",
-      "blocked": "המנויה נחסמה",
-      "unblocked": "החסימה הוסרה מהמנויה",
+      "updated": "נתוני המשתמש עודכנו בהצלחה",
+      "deleted": "המשתמש נמחק בהצלחה",
+      "blocked": "המשתמש נחסם",
+      "unblocked": "החסימה הוסרה",
       "tempAdmin": "התפקיד שונה זמנית, אל תשכחי לשמור את השינויים"
     },
     "errors": {
       "cannotBlockAdmin": "לא ניתן לחסום מנהלות",
       "cannotDeleteSuperAdmin": "לא ניתן למחוק את המנהלת הראשית",
-      "onlySuperAdminCanPromote": "רק המנהלת הראשית יכולה לקדם מנויה למנהלת"
+      "onlySuperAdminCanPromote": "רק המנהלת הראשית יכולה לקדם מנוי למנהל"
     },
     "confirm": {
-      "block": "האם את בטוחה שברצונך לחסום מנויה זו?",
+      "block": "האם את בטוח שברצונך לחסום מנוי זו?",
       "unblock": "האם ברצונך לבטל את החסימה?",
-      "deleteUser": "האם את בטוחה שברצונך למחוק מנויה זו?",
+      "deleteUser": "האם אתה בטוח שברצונך למחוק מנוי זה?",
       "deleteTitle": "אישור מחיקה"
     },
     "confirmRole": {
       "promoteTitle": "קידום למנהלת",
       "demoteTitle": "החזרה למשתמשת",
-      "promoteText": "האם את בטוחה שברצונך לקדם מנויה זו למנהלת?",
-      "demoteText": "האם את בטוחה שברצונך להסיר הרשאות ניהול ממנויה זו?",
+      "promoteText": "האם את בטוח שברצונך לקדם מנוי זה למנהל?",
+      "demoteText": "האם אתה בטוח שברצונך להסיר הרשאות ניהול ממנוי זה?",
       "demoteWarning": "כל הרשאות הניהול יאבדו באופן מיידי",
       "confirm": "אישור"
     }
@@ -560,7 +560,7 @@
       "date": "תאריך",
       "time": "שעה",
       "status": "סטטוס",
-      "noBookings": "אין הזמנות למנויה זו"
+      "noBookings": "אין הזמנות למנוי זה"
     },
     "stats": {
       "active": "פעילות",
@@ -607,19 +607,22 @@
     },
     "dialog": {
       "title": "פרטי האימון",
-      "membersTitle": "מנויות רשומות ({{count}})",
+      "membersTitle": "משתתפים רשומים ({{count}})",
+      "noMembers": "אין משתתפים באימון זה",
+      "notify": {
+        "title": "שליחת התראה למשתתפים"
+      },
       "sendNotification": "שליחת התראה",
       "status": {
         "booked": "שמורה",
         "cancelled": "בוטלה"
       },
-      "noMembers": "אין מנויות באימון זה",
       "close": "סגירה",
       "activate": "הפעלת אימון",
       "deactivate": "השבתת אימון"
     },
     "notify": {
-      "title": "שליחת התראה למנויות",
+      "title": "שליחת התראה למנוי",
       "notificationTitle": "כותרת ההתראה",
       "notificationBody": "תוכן ההתראה",
       "cancel": "ביטול",
@@ -678,16 +681,16 @@
     }
   },
   "registerSuperAdmin": {
-    "title": "יצירת מנהלת ראשית",
+    "title": "יצירת מנהל ראשי",
     "username": "שם משתמש",
     "email": "דוא״ל",
     "phone": "מספר טלפון",
     "pin": "קוד PIN",
     "confirmPin": "אימות קוד PIN",
-    "submit": "יצירת המנהלת הראשית",
+    "submit": "יצירת המנהל הראשי",
     "pinTooShort": "קוד ה־PIN חייב להכיל לפחות 4 ספרות.",
     "pinMismatch": "קוד ה־PIN אינו תואם.",
-    "success": "המנהלת הראשית נוצרה בהצלחה!"
+    "success": "המנהל הראשי נוצר בהצלחה!"
   },
   "superAdminRegister": {
     "title": "יצירת סופר אדמין",
@@ -729,7 +732,7 @@
   },
   "about": {
     "title": "אודות אפליקציית Fatinness",
-    "description1": "Fatinness היא מערכת משולבת לניהול מרכז כושר, המסייעת לחברות, למאמנות ולהנהלה לעבוד בצורה מסודרת וחלקה.",
+    "description1": "Fatinness היא מערכת משולבת לניהול מרכז כושר, המסייעת לחברים, למאמנים ולהנהלה לעבוד בצורה מסודרת וחלקה.",
     "description2": "האפליקציה כוללת: לוח אימונים, מערכת הזמנות, התראות, תזכורות, מעקב משקל, ניהול מנויים ועוד.",
     "developedBy": "פותח על־ידי A.Shaalan Tech",
     "email": "alaa.t.shaalan@gmail.com",
@@ -785,8 +788,8 @@
       "ADMIN_RESET_HARD_ERROR": "אירעה שגיאה במהלך איפוס חזק.",
       "ADMIN_RESET_FACTORY_ERROR": "אירעה שגיאה במהלך איפוס יצרן.",
       "ADMIN_NOTIFICATION_MISSING_FIELDS": "נא להזין כותרת ותוכן.",
-      "ADMIN_NOTIFICATION_USER_NOT_FOUND": "המנויה לא נמצאה.",
-      "ADMIN_NOTIFICATION_NO_TARGETS": "לא נמצאו מנויות יעד.",
+      "ADMIN_NOTIFICATION_USER_NOT_FOUND": "המנוי לא נמצא.",
+      "ADMIN_NOTIFICATION_NO_TARGETS": "לא נמצאו המנויים יעד.",
       "ADMIN_NOTIFICATION_SEND_ERROR": "אירעה שגיאה בשליחת ההתראה.",
       "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "ההתראה לא נמצאה.",
       "ADMIN_NOTIFICATION_CLEAR_ERROR": "נכשל ניקוי היסטוריית ההתראות.",
@@ -811,7 +814,8 @@
       "UNAUTHORIZED_NO_TOKEN": "יש להתחבר כדי להמשיך",
       "UNAUTHORIZED_INVALID_TOKEN": "ההתחברות אינה תקפה, נא להתחבר מחדש",
       "UNAUTHORIZED_USER_NOT_FOUND": "המשתמש לא נמצא או נמחק",
-      "ADMIN_ONLY_ACCESS": "גישה זו מיועדת למנהלים בלבד"
+      "ADMIN_ONLY_ACCESS": "גישה זו מיועדת למנהלים בלבד",
+      "SLOT_ALREADY_STARTED": "❌ לא ניתן לבצע את הפעולה, השיעור כבר התחיל"
     },
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "שם התבנית והאימונים נדרשים.",
@@ -820,11 +824,11 @@
     "WEEK_TEMPLATE_NOT_FOUND": "התבנית לא נמצאה.",
     "WEEK_TEMPLATE_APPLY_SUCCESS": "התבנית הוחלה בהצלחה.",
     "WEEK_TEMPLATE_APPLY_ERROR": "אירעה שגיאה בהחלת התבנית.",
-    "USER_NOT_FOUND": "המנויה לא נמצאה.",
-    "USER_UPDATE_SUCCESS": "נתוני המנויה עודכנו בהצלחה.",
+    "USER_NOT_FOUND": "המנוי לא נמצא.",
+    "USER_UPDATE_SUCCESS": "נתוני המנוי עודכנו בהצלחה.",
     "USER_UPDATE_ERROR": "לא ניתן היה לעדכן את נתוני המנויה.",
     "CSV_NO_DATA": "אין נתונים לייצוא.",
-    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "המנויה נחסמה בהצלחה.",
+    "ADMIN_TOGGLE_BLOCK_SUCCESS_BLOCK": "המנוי נחסם בהצלחה.",
     "ADMIN_TOGGLE_BLOCK_SUCCESS_UNBLOCK": "החסימה הוסרה מהמנויה.",
     "ADMIN_NOTIFICATION_DELETE_SUCCESS": "ההתראה נמחקה.",
     "ADMIN_NOTIFICATION_CLEAR_SUCCESS": "היסטוריית ההתראות נוקתה במלואה.",
@@ -844,8 +848,8 @@
     "ADMIN_RESET_HARD_SUCCESS": "איפוס חזק בוצע בהצלחה.",
     "ADMIN_RESET_FACTORY_SUCCESS": "איפוס יצרן בוצע בהצלחה.",
     "ADMIN_NOTIFICATION_SENT": "ההתראה נשלחה בהצלחה.",
-    "ADMIN_NOTIFICATION_SLOT_INFO": "התראה לכל מנויות האימון",
-    "ADMIN_NOTIFICATION_SLOT_SENT": "ההתראה נשלחה לכל מנויות האימון.",
+    "ADMIN_NOTIFICATION_SLOT_INFO": "התראה לכל משתתפי האימון",
+    "ADMIN_NOTIFICATION_SLOT_SENT": "ההתראה נשלחה לכל מנויי האימון.",
     "ADMIN_DELETE_SUCCESS": "המשתמש נמחק בהצלחה."
   }
 }
