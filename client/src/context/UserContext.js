@@ -11,24 +11,21 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const init = async () => {
       try {
-        // 🧠 الحل الذكي: لا نطلب /users/me إلا إذا يوجد Cookie
-        const hasCookie = document.cookie.includes("JWT=");
-        if (!hasCookie) {
-          setLoadingUser(false);
-          return;
-        }
-
+        // ✅ السيرفر هو مصدر الحقيقة
         const { data } = await Api.get("/users/me");
         setUser(data);
       } catch (err) {
+        // ❌ غير مسجّل دخول أو انتهت الجلسة
         setUser(null);
       } finally {
+        // ⭐ مهم جدًا: نُنهي التحميل دائمًا
         setLoadingUser(false);
       }
     };
 
     init();
   }, []);
+
 
   useEffect(() => {
     if (!user || !user._id) return;
