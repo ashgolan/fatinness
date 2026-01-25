@@ -134,21 +134,33 @@ export default function DaySection({
             return (
               <Paper
                 key={slot._id}
+                elevation={0}
                 sx={{
-                  p: 1.5,
+                  p: 1.4,
                   mb: 1,
                   borderRadius: 2,
-                  background: isDeleted
-                    ? "rgba(148,163,184,0.15)"
-                    : colors.card,
+                  background: "transparent",
+                  // ✅ بدون خلفية
                   border: isDeleted
                     ? "1px dashed rgba(148,163,184,0.6)"
                     : isDark
-                      ? "1px solid #555"
-                      : "1px solid rgba(0,0,0,0.1)",
-                  opacity: isDeleted ? 0.6 : 1,
+                      ? "1px solid rgba(148,163,184,0.25)"
+                      : "1px solid rgba(15,23,42,0.12)",
+                  transition: "all 0.2s ease",
+                  opacity: isDeleted ? 0.55 : 1,
+                  "&:hover": !isDeleted
+                    ? {
+                      borderColor: "#EC4899",
+                      boxShadow: isDark
+                        ? "0 0 0 1px rgba(236,72,153,0.4)"
+                        : "0 0 0 1px rgba(236,72,153,0.35)",
+                    }
+                    : {},
+                  borderLeft: `3px solid ${slot.bookedCount >= slot.capacity ? "#ef4444" : "#6bd391"
+                    }`,
                 }}
               >
+
                 <Box
                   sx={{
                     width: "100%",
@@ -166,24 +178,63 @@ export default function DaySection({
                         display: "flex",
                         alignItems: "center",
                         gap: 1,
-                        flexWrap: "nowrap",
                         overflow: "hidden",
-                        minWidth: 0,                // ⭐ مهم جدًا مع ellipsis
+                        minWidth: 0,
                       }}
                     >
-                      {/* ⏰ الوقت */}
-                      <Typography
+                      {/* ⏰ الوقت + العدد (عمود) */}
+                      <Box
                         sx={{
-                          fontWeight: 800,
-                          fontSize: 15,
-                          whiteSpace: "nowrap",
-                          flexShrink: 0,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center", // ⭐ يجعل 0/20 بالمنتصف تحت الساعة
+                          minWidth: 72,         // ⭐ يحافظ على ثبات المحاذاة
                         }}
                       >
-                        {fmtTime(slot.startAt)} – {fmtTime(slot.endAt)}
-                      </Typography>
+                        <Typography
+                          sx={{
+                            fontWeight: 800,
+                            fontSize: 15,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {fmtTime(slot.startAt)} – {fmtTime(slot.endAt)}
+                        </Typography>
 
-                      {/* ✨ العنوان */}
+                        {/* 🔢 عدد الحجوزات */}
+                        {/* 🔢 عدد الحجوزات */}
+                        <Typography
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.4,
+                            fontSize: 11,
+                            fontWeight: 800,
+                            mt: 0.1,
+                            color:
+                              slot.bookedCount >= slot.capacity
+                                ? "#ef4444"        // 🔴 ممتلئة
+                                : slot.bookedCount >= slot.capacity * 0.8
+                                  ? "#f59e0b"      // 🟠 شبه ممتلئة
+                                  : "#30b561",     // 🟢 متاحة
+                            letterSpacing: 0.3,
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: "50%",
+                              backgroundColor: "currentColor",
+                              boxShadow: "0 0 6px currentColor",
+                            }}
+                          />
+                          {slot.bookedCount}/{slot.capacity}
+                        </Typography>
+
+                      </Box>
+
+                      {/* ✨ العنوان (يبقى في السطر نفسه) */}
                       {slot.title && (
                         <Typography
                           sx={{
@@ -193,7 +244,7 @@ export default function DaySection({
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            maxWidth: 120,             // ⭐ حتى لا يزاحم الأزرار
+                            maxWidth: 140,
                           }}
                         >
                           ✨ {slot.title}
