@@ -820,6 +820,7 @@
       "ADMIN_ONLY_ACCESS": "גישה זו מיועדת למנהלים בלבד",
       "SLOT_ALREADY_STARTED": "❌ לא ניתן לבצע את הפעולה, השיעור כבר התחיל"
     },
+    "ADMIN_REPORT_NO_DATA": "לא קיימות הזמנות בטווח התאריכים שנבחר",
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "שם התבנית והאימונים נדרשים.",
     "WEEK_TEMPLATE_CREATE_SUCCESS": "תבנית השבוע נוצרה בהצלחה.",

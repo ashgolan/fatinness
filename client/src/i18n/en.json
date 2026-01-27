@@ -817,6 +817,7 @@
       "ADMIN_ONLY_ACCESS": "This action is restricted to administrators only",
       "SLOT_ALREADY_STARTED": "❌ This action cannot be performed because the session has already started"
     },
+    "ADMIN_REPORT_NO_DATA": "There are no bookings in the selected date range",
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "Template name and sessions are required.",
     "WEEK_TEMPLATE_CREATE_SUCCESS": "Weekly template created successfully.",

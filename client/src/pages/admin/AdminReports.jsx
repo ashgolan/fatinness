@@ -70,6 +70,19 @@ export default function AdminReports() {
 
       toast.success(t("adminReports.success"));
     } catch (err) {
+      if (err.response?.data instanceof Blob) {
+        try {
+          const text = await err.response.data.text();
+          const parsed = JSON.parse(text);
+
+          if (parsed?.code === "ADMIN_REPORT_NO_DATA") {
+            toast.info(t("server.ADMIN_REPORT_NO_DATA"));
+            return;
+          }
+        } catch (e) {
+          // تجاهل parsing errors
+        }
+      }
       handleServerError(err);
     } finally {
       setLoading(false);
