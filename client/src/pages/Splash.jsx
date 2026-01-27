@@ -67,28 +67,51 @@ export default function Splash() {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "70%",
-          height: "70%",
-          overflow: "hidden",
+
+          width: {
+            xs: "95%",
+            sm: "85%",
+            md: "65%",
+            lg: "45%",
+          },
+          maxWidth: 520,
+          aspectRatio: "9 / 16",
+
           borderRadius: "22px",
+          overflow: "hidden",
           boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
+          backgroundColor: "#fbd555",
         }}
       >
-        <video
+        <Box
+          component="video"
           src="/videos/splash1.mp4"
           autoPlay
           muted
           playsInline
           onEnded={handleVideoEnd}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
           onLoadedMetadata={(e) => {
             e.target.playbackRate = 1.25;
           }}
+          sx={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            backgroundColor: "#fbd555",
+
+            transform: {
+              xs: "scale(1.35)",
+              sm: "scale(1.22)",
+              md: "scale(1.12)",
+              lg: "scale(1.05)",
+            },
+
+            transition: "transform 0.4s ease",
+            display: "block",
+          }}
         />
+
+
       </Box>
 
       {/* شعار المطوّر يظهر بعد انتهاء الفيديو */}
