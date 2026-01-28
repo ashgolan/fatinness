@@ -5,3 +5,6 @@ client/build
 .env
 server/config/firebase-key.json
 gitHubToken.txt
+# Android Studio
+.idea/
+*.iml
