@@ -113,33 +113,37 @@ export default function Splash() {
 
 
       </Box>
+{showLogo && (
+  <Box
+    sx={{
+      position: "absolute",
+      bottom: { xs: 10, sm: 14 },
+      left: "50%",
+      transform: "translateX(-50%)",
 
-      {/* شعار المطوّر يظهر بعد انتهاء الفيديو */}
-      {showLogo && (
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "9%", // كان 8% — الآن أكثر تحت بـ 2 سم تقريبًا
-            left: "50%",
-            transform: "translateX(-50%)",
-            opacity: showLogo ? 1 : 0,
-            transition: "opacity 0.6s ease-in-out",
-            textAlign: "center",
-          }}
-        >
-          {/* نص تحت الشعار (اختياري) */}
+      px: 1.6,
+      py: 0.6,
+      borderRadius: "16px",
 
-          <div
-            style={{
-              marginTop: 6,
-              fontSize: "0.75rem",
-              color: "rgba(0,0,0,0.5)",
-            }}
-          >
-            {t("common.developedBy")}
-          </div>
-        </Box>
-      )}
+      background: "rgba(0,0,0,0.45)",
+      backdropFilter: "blur(6px)",
+
+      fontSize: { xs: "0.65rem", sm: "0.7rem" },
+      fontWeight: 600,
+      letterSpacing: "0.3px",
+      color: "#fff",
+
+      opacity: 1,
+      transition: "opacity 0.6s ease",
+      pointerEvents: "none",
+      zIndex: 5,
+      whiteSpace: "nowrap",
+    }}
+  >
+    {t("common.developedBy")}
+  </Box>
+)}
+
     </Box>
   );
 }
