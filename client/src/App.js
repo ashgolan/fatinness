@@ -1,46 +1,45 @@
 // App.jsx
 import "./i18n/i18n";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 
-import { useContext } from "react";
+// ================= Context =================
 import { UserContext } from "./context/UserContext";
+import { ThemeModeProvider, useThemeMode } from "./context/ThemeContext";
+import { DirectionProvider, useDirection } from "./context/DirectionContext";
 
+// ================= MUI =================
+import { CssBaseline, GlobalStyles } from "@mui/material";
+import { ThemeProvider } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
-// 🔹 MUI
-import { CssBaseline, GlobalStyles } from "@mui/material";
-import { ThemeProvider } from "@mui/material/styles";
-
-// 🔹 RTL
+// ================= RTL =================
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
 import rtlPlugin from "stylis-plugin-rtl";
 
-// 🔹 Context
-import { ThemeModeProvider, useThemeMode } from "./context/ThemeContext";
-import { DirectionProvider, useDirection } from "./context/DirectionContext";
-// 🔹 Layout
+// ================= Layout =================
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
-// 🔹 Pages
+// ================= Pages =================
+import Splash from "./pages/Splash";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import RegisterSuperAdmin from "./pages/RegisterSuperAdmin";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Booking from "./pages/Booking";
 import MyBookings from "./pages/MyBookings";
 import Subscription from "./pages/Subscription";
 import BookingsHub from "./pages/BookingsHub";
-import Splash from "./pages/Splash";
 import Gallery from "./pages/Gallery";
 import About from "./pages/About";
 import DebugApi from "./pages/DebugApi";
-import RegisterSuperAdmin from "./pages/RegisterSuperAdmin";
 
-// 🔹 Admin
+// ================= Admin =================
+import ControlCenter from "./pages/admin/ControlCenter";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import BookingsAdmin from "./pages/admin/BookingsAdmin";
 import UsersAdmin from "./pages/admin/UsersAdmin";
@@ -48,20 +47,18 @@ import SlotsAdmin from "./pages/admin/SlotsAdmin";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import AdminReports from "./pages/admin/AdminReports";
 import AdminSettings from "./pages/admin/AdminSettings";
-import ControlCenter from "./pages/admin/ControlCenter";
 import AdminSchedule from "./pages/admin/AdminSchedule";
 import AdminSystemReset from "./pages/admin/AdminSystemReset";
 import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
 
-// 🔹 Tools
+// ================= Tools =================
 import PrivateRoute from "./utils/PrivateRoute";
 import { Api } from "./api/Api";
 import i18n from "./i18n/i18n";
-import { registerFcmToken } from "./firebase/registerFcmToken";
 
-// ================================
+// ======================================================
 // RTL / LTR Wrapper
-// ================================
+// ======================================================
 function DirectionWrapper({ children }) {
   const { direction } = useDirection();
   const { theme } = useThemeMode();
@@ -83,46 +80,76 @@ function DirectionWrapper({ children }) {
   );
 }
 
-// ================================
+// ======================================================
 // 🚀 App
-// ================================
+// ======================================================
 export default function App() {
   const location = useLocation();
-  const [needsSetup, setNeedsSetup] = useState(false);
+  const { user } = useContext(UserContext);
 
+  // 🔥 أهم State
+  const [needsSetup, setNeedsSetup] = useState(null); // null = loading
 
-
-  // ✅ تحميل اللغة مرة واحدة فقط
+  // ======================================================
+  // 🌍 تحميل اللغة من التخزين
+  // ======================================================
   useEffect(() => {
     const savedLang = localStorage.getItem("appLanguage") || "ar";
     i18n.changeLanguage(savedLang);
+    document.documentElement.dir = savedLang === "en" ? "ltr" : "rtl";
   }, []);
 
-  const { user } = useContext(UserContext);
-
+  // ======================================================
+  // 🌍 مزامنة اللغة من المستخدم
+  // ======================================================
   useEffect(() => {
     if (!user?.preferredLanguage) return;
 
     i18n.changeLanguage(user.preferredLanguage);
     localStorage.setItem("appLanguage", user.preferredLanguage);
-
     document.documentElement.dir =
       user.preferredLanguage === "en" ? "ltr" : "rtl";
   }, [user]);
 
-  // ✅ check-first-run فقط إذا يوجد Token
+  // ======================================================
+  // 🔐 فحص first-run (دائمًا – بدون Token)
+  // ======================================================
   useEffect(() => {
-
-    if (!user?._id) return;
     Api.get("/auth/check-first-run")
       .then((res) => setNeedsSetup(res.data.needsSetup))
       .catch(() => setNeedsSetup(false));
   }, []);
 
+  // ======================================================
+  // ⏳ أثناء الفحص لا نعرض Routes
+  // ======================================================
+  if (needsSetup === null) {
+    return null; // أو Loader إذا حاب
+  }
 
+  // ======================================================
+  // 🚨 النظام بحاجة تهيئة (Super Admin)
+  // ======================================================
+  if (needsSetup) {
+    return (
+      <Routes>
+        <Route
+          path="/register-superadmin"
+          element={<RegisterSuperAdmin />}
+        />
+        <Route
+          path="*"
+          element={<Navigate to="/register-superadmin" replace />}
+        />
+      </Routes>
+    );
+  }
 
   const isSplash = location.pathname === "/";
 
+  // ======================================================
+  // ✅ التطبيق الطبيعي
+  // ======================================================
   return (
     <ThemeModeProvider>
       <DirectionProvider>
@@ -131,7 +158,8 @@ export default function App() {
             <GlobalStyles
               styles={{
                 "input:-webkit-autofill": {
-                  WebkitBoxShadow: "0 0 1000px transparent inset !important",
+                  WebkitBoxShadow:
+                    "0 0 1000px transparent inset !important",
                   WebkitTextFillColor: "inherit !important",
                 },
               }}
@@ -151,11 +179,6 @@ export default function App() {
               <div style={{ flex: 1, padding: isSplash ? 0 : "16px" }}>
                 <Routes>
                   <Route path="/" element={<Splash />} />
-                  <Route
-                    path="/register-superadmin"
-                    element={<RegisterSuperAdmin />}
-                  />
-
                   <Route path="/login" element={<Login />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/debug-api" element={<DebugApi />} />
@@ -167,20 +190,27 @@ export default function App() {
                     <Route path="/gallery" element={<Gallery />} />
                     <Route path="/bookings" element={<Booking />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
-                    <Route path="/bookings-hub" element={<BookingsHub />} />
-                    <Route path="/subscription" element={<Subscription />} />
+                    <Route
+                      path="/bookings-hub"
+                      element={<BookingsHub />}
+                    />
+                    <Route
+                      path="/subscription"
+                      element={<Subscription />}
+                    />
                   </Route>
 
                   {/* Admin */}
                   <Route element={<PrivateRoute role="admin" />}>
                     <Route path="/register" element={<Register />} />
-                    <Route path="/admin/control" element={<ControlCenter />} />
+                    <Route
+                      path="/admin/control"
+                      element={<ControlCenter />}
+                    />
                     <Route
                       path="/admin/dashboard"
                       element={<AdminDashboard />}
                     />
-                    <Route path="reports" element={<AdminReports />} />
-
                     <Route
                       path="/admin/system-reset"
                       element={<AdminSystemReset />}
@@ -189,16 +219,34 @@ export default function App() {
                       path="/admin/subscriptions-report"
                       element={<SubscriptionsReport />}
                     />
-                    <Route path="/admin/bookings" element={<BookingsAdmin />} />
-                    <Route path="/admin/schedule" element={<AdminSchedule />} />
-                    <Route path="/admin/users" element={<UsersAdmin />} />
-                    <Route path="/admin/slots" element={<SlotsAdmin />} />
+                    <Route
+                      path="/admin/bookings"
+                      element={<BookingsAdmin />}
+                    />
+                    <Route
+                      path="/admin/schedule"
+                      element={<AdminSchedule />}
+                    />
+                    <Route
+                      path="/admin/users"
+                      element={<UsersAdmin />}
+                    />
+                    <Route
+                      path="/admin/slots"
+                      element={<SlotsAdmin />}
+                    />
                     <Route
                       path="/admin/notifications"
                       element={<AdminNotifications />}
                     />
-                    <Route path="/admin/reports" element={<AdminReports />} />
-                    <Route path="/admin/settings" element={<AdminSettings />} />
+                    <Route
+                      path="/admin/reports"
+                      element={<AdminReports />}
+                    />
+                    <Route
+                      path="/admin/settings"
+                      element={<AdminSettings />}
+                    />
                   </Route>
 
                   <Route path="*" element={<Navigate to="/" replace />} />

@@ -88,8 +88,9 @@ const AdminSystemReset = () => {
       setResetType(null);
 
       if (selectedOption.key === "factory") {
-        navigate("/login", { replace: true });
+        window.location.href = "/register-superadmin";
       }
+
     } catch (err) {
       handleServerError(err);
       setConfirmOpen(false);

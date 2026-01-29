@@ -73,57 +73,45 @@ export default function RegisterSuperAdmin() {
     check();
   }, []);
 
-  // 🚦 إعادة التوجيه بعد معرفة القيمة الحقيقية only
-  useEffect(() => {
-    if (needsSetup === false) {
-      navigate("/login");
-    }
-  }, [needsSetup, navigate]);
-
   // 👇 انتظار القيمة الحقيقية — لا نعرض الصفحة قبل ذلك
   if (needsSetup === undefined) return null;
+
+  // 🔒 حماية: إذا النظام مهيأ، لا نسمح بدخول هذه الصفحة
+  if (needsSetup === false) {
+    return null; // App.jsx سيتكفل بالتوجيه
+  }
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const onSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+    e.preventDefault();
+    if (loading) return;
 
-  try {
-    const cleanForm = {
-      ...form,
-      height: form.height ? Number(form.height) : null,
-      weight: form.weight ? Number(form.weight) : null,
-      age: form.age ? Number(form.age) : null,
-      role: "superAdmin",
-    };
+    setLoading(true);
 
-    await Api.post("/auth/register-superadmin", cleanForm);
-
-    toast.success(t("superAdminRegister.success"));
-
-    // 🔥 1) تسجيل خروج من السيرفر (اختياري لكنه نظيف)
     try {
-      await Api.post("/auth/logout");
+      const payload = {
+        ...form,
+        height: form.height ? Number(form.height) : null,
+        weight: form.weight ? Number(form.weight) : null,
+        age: form.age ? Number(form.age) : null,
+        role: "superAdmin",
+      };
+
+      await Api.post("/auth/register-superadmin", payload);
+
+      toast.success(t("superAdminRegister.success"));
+
+      // 🔁 إعادة تهيئة التطبيق لإعادة تقييم first-run
+      window.location.reload();
     } catch (err) {
-      console.log("Logout skipped", err);
+      console.error("Register super admin failed:", err);
+      toast.error(t("superAdminRegister.error"));
+    } finally {
+      setLoading(false);
     }
-
-    // 🔥 2) حذف كعكة الجلسة القديمة
-    document.cookie =
-      "JWT=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax";
-
-    // 🔥 3) إعادة التوجيه إلى تسجيل الدخول
-    setTimeout(() => {
-      navigate("/login");
-    }, 500);
-  } catch (err) {
-    toast.error(t("superAdminRegister.error"));
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
 
   const textFieldStyle = {
@@ -194,9 +182,8 @@ export default function RegisterSuperAdmin() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: 1,
-                background: `linear-gradient(135deg, ${
-                  mode === "dark" ? BRAND.gold : BRAND.purple
-                }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+                background: `linear-gradient(135deg, ${mode === "dark" ? BRAND.gold : BRAND.purple
+                  }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
                 backgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
