@@ -9,6 +9,7 @@ import {
   InputAdornment,
   IconButton,
 } from "@mui/material";
+import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
@@ -45,9 +46,33 @@ export default function Login() {
   const from = location.state?.from?.pathname || "/dashboard";
 
   const [identifier, setIdentifier] = useState("");
+  const [showNotificationBtn, setShowNotificationBtn] = useState(false);
 
   // شعار افتراضي
   const [imgSrc, setImgSrc] = useState(fallbackLogo);
+  const handleEnableNotifications = async () => {
+    try {
+      const token = await registerFcmToken({ silent: false });
+
+      // ✅ أخفِ الزر فور نجاح التفعيل
+      if (token && Notification.permission === "granted") {
+        setShowNotificationBtn(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (!("Notification" in window)) return;
+
+    if (Notification.permission === "default") {
+      setShowNotificationBtn(true);
+    } else {
+      setShowNotificationBtn(false);
+    }
+  }, []);
+
 
 
   useEffect(() => {
@@ -312,26 +337,52 @@ export default function Login() {
           />
 
           {/* زر الدخول */}
-          <Button
-            type="submit"
-            fullWidth
-            disabled={loading}
-            startIcon={<LoginIcon />}
-            sx={{
-              mt: 1,
-              py: 1.4,
-              fontSize: "1.05rem",
-              fontWeight: 700,
-              borderRadius: "10px",
-              background: `linear-gradient(135deg, ${isDark ? BRAND.gold : BRAND.purple
-                }, ${isDark ? BRAND.purple : BRAND.gold})`,
-              color: "#fff",
-              textTransform: "none",
-              gap: "10px",
-            }}
-          >
-            {loading ? t("login.buttonLoading") : t("login.button")}
-          </Button>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "stretch" }}>
+            {/* زر تسجيل الدخول */}
+            <Button
+              type="submit"
+              fullWidth
+              disabled={loading}
+              startIcon={<LoginIcon />}
+              sx={{
+                py: 1.4,
+                fontSize: "1.05rem",
+                fontWeight: 700,
+                borderRadius: "10px",
+                background: `linear-gradient(135deg, ${isDark ? BRAND.gold : BRAND.purple
+                  }, ${isDark ? BRAND.purple : BRAND.gold})`,
+                color: "#fff",
+                textTransform: "none",
+                gap: "10px",
+              }}
+            >
+              {loading ? t("login.buttonLoading") : t("login.button")}
+            </Button>
+
+            {/* زر تفعيل الإشعارات */}
+            {showNotificationBtn && (
+              <IconButton
+                onClick={handleEnableNotifications}
+                sx={{
+                  borderRadius: "10px",
+                  px: 1.5,
+                  background: isDark
+                    ? "rgba(251,192,45,0.15)"
+                    : "rgba(160,24,96,0.12)",
+                  color: isDark ? BRAND.gold : BRAND.purple,
+                  "&:hover": {
+                    background: isDark
+                      ? "rgba(251,192,45,0.25)"
+                      : "rgba(160,24,96,0.2)",
+                  },
+                }}
+              >
+                <NotificationsActiveIcon />
+              </IconButton>
+            )}
+
+          </Box>
+
 
           {/* إنشاء حساب */}
           <Typography

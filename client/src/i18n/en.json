@@ -515,11 +515,14 @@
       "deleteTitle": "Delete confirmation"
     },
     "confirmRole": {
-      "promoteTitle": "Promote to admin",
-      "demoteTitle": "Demote to member",
-      "promoteText": "Are you sure you want to promote this member to admin?",
-      "demoteText": "Are you sure you want to remove admin privileges from this member?",
-      "demoteWarning": "All admin privileges will be lost immediately",
+      "title": "Confirm Role Change",
+      "text": "Are you sure you want to change this user's role?",
+      "note": "This change will take effect immediately and cannot be undone.",
+      "promoteTitle": "Promote to Admin",
+      "demoteTitle": "Revert to User",
+      "promoteText": "Are you sure you want to promote this user to admin?",
+      "demoteText": "Are you sure you want to remove admin privileges from this user?",
+      "demoteWarning": "All admin privileges will be removed immediately",
       "confirm": "Confirm"
     }
   },

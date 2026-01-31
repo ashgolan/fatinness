@@ -27,11 +27,23 @@ export function UserProvider({ children }) {
   }, []);
 
 
+  // useEffect(() => {
+  //   if (loadingUser) return;
+  //   if (!user || !user._id) return;
+
+  //   registerFcmToken({ silent: true });
+  // }, [loadingUser]);
   useEffect(() => {
     if (loadingUser) return;
     if (!user || !user._id) return;
 
-    registerFcmToken({ silent: true });
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (!isIOS) {
+      // ✅ Android / Desktop → تسجيل تلقائي
+      registerFcmToken({ silent: true });
+    }
+    // ❌ iPhone → ننتظر تفاعل المستخدم (زر)
   }, [loadingUser]);
 
 
