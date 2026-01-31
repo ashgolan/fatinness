@@ -28,11 +28,12 @@ export function UserProvider({ children }) {
 
 
   useEffect(() => {
+    if (loadingUser) return;
     if (!user || !user._id) return;
 
-    // 🔔 تسجيل FCM تلقائي بعد login
     registerFcmToken({ silent: true });
-  }, [user?._id]);
+  }, [loadingUser]);
+
 
   const value = useMemo(
     () => ({ user, setUser, loadingUser }),
