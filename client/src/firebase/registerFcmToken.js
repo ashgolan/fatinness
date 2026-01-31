@@ -63,19 +63,19 @@ export async function registerFcmToken({ silent = false } = {}) {
     await Api.post("/users/fcm", { fcmToken: token });
 
     // 6️⃣ 🔥 الاستماع لتغيير التوكن (مرة واحدة فقط)
-    // if (!refreshListenerAttached) {
-    //   refreshListenerAttached = true;
+    if (!refreshListenerAttached) {
+      refreshListenerAttached = true;
 
-    //   onTokenRefresh(messaging, async (newToken) => {
-    //     console.log("🔄 FCM TOKEN REFRESHED:", newToken);
+      onTokenRefresh(messaging, async (newToken) => {
+        console.log("🔄 FCM TOKEN REFRESHED:", newToken);
 
-    //     try {
-    //       await Api.post("/users/fcm", { fcmToken: newToken });
-    //     } catch (e) {
-    //       console.error("❌ Failed to sync refreshed token", e);
-    //     }
-    //   });
-    // }
+        try {
+          await Api.post("/users/fcm", { fcmToken: newToken });
+        } catch (e) {
+          console.error("❌ Failed to sync refreshed token", e);
+        }
+      });
+    }
 
     if (!silent) {
       toast.success(i18n.t("fcm.success"));

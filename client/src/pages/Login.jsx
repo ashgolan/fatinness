@@ -72,15 +72,10 @@ export default function Login() {
           localStorage.setItem("accessToken", data.accessToken);
         }
 
+        setTimeout(() => {
+          registerFcmToken({ silent: true });
+        }, 800);
 
-        // setTimeout(() => {
-        //   registerFcmToken({ silent: true });
-        // }, 500);
-
-        // // 🔁 محاولة ثانية احتياطية (مهمة جداً للموبايل)
-        // setTimeout(() => {
-        //   registerFcmToken({ silent: true });
-        // }, 3000);
 
 
 
