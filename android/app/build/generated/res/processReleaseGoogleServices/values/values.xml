@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">282672405307</string>
+    <string name="google_api_key" translatable="false">AIzaSyBxYVULpZCS-ua1EF7668aWbg2L8UlXR5s</string>
+    <string name="google_app_id" translatable="false">1:282672405307:android:25190d79e5f2c2a77d351e</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyBxYVULpZCS-ua1EF7668aWbg2L8UlXR5s</string>
+    <string name="google_storage_bucket" translatable="false">fateness-364c3.firebasestorage.app</string>
+    <string name="project_id" translatable="false">fateness-364c3</string>
+</resources>

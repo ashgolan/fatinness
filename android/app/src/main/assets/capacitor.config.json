@@ -1,0 +1,6 @@
+{
+	"appId": "com.fatinness.app",
+	"appName": "Fatinness",
+	"webDir": "client/build",
+	"bundledWebRuntime": false
+}
