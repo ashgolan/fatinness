@@ -62,6 +62,15 @@ export default function Splash() {
     >
       {/* الفيديو */}
       <Box
+        component="video"
+        src="/videos/splash1.mp4"
+        autoPlay
+        muted
+        playsInline
+        onEnded={handleVideoEnd}
+        onLoadedMetadata={(e) => {
+          e.target.playbackRate = 1.25;
+        }}
         sx={{
           position: "absolute",
           top: "50%",
@@ -78,71 +87,46 @@ export default function Splash() {
           aspectRatio: "9 / 16",
 
           borderRadius: "22px",
-          overflow: "hidden",
           boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
           backgroundColor: "#fbd555",
+
+          objectFit: "contain",
+
+          // ❗ مهم جدًا
+          display: "block",
         }}
-      >
+      />
+
+      {showLogo && (
         <Box
-          component="video"
-          src="/videos/splash1.mp4"
-          autoPlay
-          muted
-          playsInline
-          onEnded={handleVideoEnd}
-          onLoadedMetadata={(e) => {
-            e.target.playbackRate = 1.25;
-          }}
           sx={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-            backgroundColor: "#fbd555",
+            position: "absolute",
+            bottom: { xs: 10, sm: 14 },
+            left: "50%",
+            transform: "translateX(-50%)",
 
-            transform: {
-              xs: "scale(1.35)",
-              sm: "scale(1.22)",
-              md: "scale(1.12)",
-              lg: "scale(1.05)",
-            },
+            px: 1.6,
+            py: 0.6,
+            borderRadius: "16px",
 
-            transition: "transform 0.4s ease",
-            display: "block",
+            background: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(6px)",
+
+            fontSize: { xs: "0.65rem", sm: "0.7rem" },
+            fontWeight: 600,
+            letterSpacing: "0.3px",
+            color: "#fff",
+
+            opacity: 1,
+            transition: "opacity 0.6s ease",
+            pointerEvents: "none",
+            zIndex: 5,
+            whiteSpace: "nowrap",
           }}
-        />
-
-
-      </Box>
-{showLogo && (
-  <Box
-    sx={{
-      position: "absolute",
-      bottom: { xs: 10, sm: 14 },
-      left: "50%",
-      transform: "translateX(-50%)",
-
-      px: 1.6,
-      py: 0.6,
-      borderRadius: "16px",
-
-      background: "rgba(0,0,0,0.45)",
-      backdropFilter: "blur(6px)",
-
-      fontSize: { xs: "0.65rem", sm: "0.7rem" },
-      fontWeight: 600,
-      letterSpacing: "0.3px",
-      color: "#fff",
-
-      opacity: 1,
-      transition: "opacity 0.6s ease",
-      pointerEvents: "none",
-      zIndex: 5,
-      whiteSpace: "nowrap",
-    }}
-  >
-    {t("common.developedBy")}
-  </Box>
-)}
+        >
+          {t("common.developedBy")}
+        </Box>
+      )}
 
     </Box>
   );
