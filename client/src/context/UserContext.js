@@ -36,22 +36,17 @@ export function UserProvider({ children }) {
   // ===============================
   // 🔔 تسجيل FCM Token (ذكي)
   // ===============================
-  useEffect(() => {
-    if (loadingUser) return;
-    if (!user || !user._id) return;
+useEffect(() => {
+  if (loadingUser) return;
+  if (!user?._id) return;
 
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isIOS) return;
 
-    if (isIOS) {
-      // ❌ iOS Safari/PWA
-      // لا نطلب إذن ولا نسجل تلقائيًا
-      // التسجيل يتم فقط بعد تفاعل المستخدم (زر داخل التطبيق)
-      return;
-    }
+  // 🔥 مهم: يُستدعى عند كل دخول
+  registerFcmToken({ silent: true });
+}, [loadingUser, user?._id]);
 
-    // ✅ Android + Desktop
-    registerFcmToken({ silent: true });
-  }, [loadingUser, user]);
 
   const value = useMemo(
     () => ({ user, setUser, loadingUser }),
