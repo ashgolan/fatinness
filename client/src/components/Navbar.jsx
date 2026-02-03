@@ -125,13 +125,15 @@ export default function Navbar() {
     if (
       user &&
       typeof Notification !== "undefined" &&
-      Notification.permission === "default"
+      Notification.permission === "default" &&
+      !localStorage.getItem("fcmEnabled")
     ) {
       setShowNotificationBanner(true);
     } else {
       setShowNotificationBanner(false);
     }
   }, [user]);
+
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
@@ -317,6 +319,8 @@ export default function Navbar() {
                 const token = await registerFcmToken({ silent: false });
 
                 if (token && Notification.permission === "granted") {
+                  localStorage.setItem("fcmEnabled", "1"); // ✅ هنا بالضبط
+
                   toast.success(t("notifications.enabled"));
                   setShowNotificationBanner(false);
                 } else if (Notification.permission === "denied") {
@@ -326,6 +330,7 @@ export default function Navbar() {
                 console.error(e);
               }
             }}
+
             sx={{
               backgroundColor: "#000",
               color: "#fff",
