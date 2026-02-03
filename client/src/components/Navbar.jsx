@@ -38,6 +38,7 @@ import { Api } from "../api/Api";
 import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 import { useTranslation } from "react-i18next";
+import { registerFcmToken } from "../firebase/registerFcmToken";
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
