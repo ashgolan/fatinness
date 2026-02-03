@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import LanguageIcon from "@mui/icons-material/Language";
 import StarHalfIcon from "@mui/icons-material/StarHalf";
+import { toast } from "react-toastify";
 
 import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
 
@@ -44,6 +45,7 @@ export default function Navbar() {
   const { user, setUser, loadingUser } = useContext(UserContext);
   const { mode, toggleMode, BRAND } = useThemeMode();
   const { logoUrl, loading: loadingBrand } = useBrand();
+  const [showNotificationBanner, setShowNotificationBanner] = useState(false);
 
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -118,6 +120,17 @@ export default function Navbar() {
   const location = useLocation();
   const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
   const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
+  useEffect(() => {
+    if (
+      user &&
+      typeof Notification !== "undefined" &&
+      Notification.permission === "default"
+    ) {
+      setShowNotificationBanner(true);
+    } else {
+      setShowNotificationBanner(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!loadingBrand) setImgSrc(logoUrl || fallbackLogo);
@@ -244,6 +257,91 @@ export default function Navbar() {
             : t("navbar.reminder_system_off")}
         </Box>
       )}
+      {showNotificationBanner && (
+        <Box
+          sx={{
+            width: "100%",
+            backgroundColor: "#f59e0b",
+            color: "#000",
+            px: { xs: 1.5, sm: 2 },
+            py: { xs: 1, sm: 1.2 },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            fontSize: { xs: "0.8rem", sm: "0.9rem" },
+            fontWeight: 600,
+            flexWrap: "wrap",
+          }}
+        >
+          {/* 📝 النص */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 0.25,
+              minWidth: 0,
+              flex: 1,
+            }}
+          >
+            <Typography
+              component="div"
+              sx={{
+                fontWeight: 800,
+                fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                lineHeight: 1.2,
+              }}
+            >
+              {t("notifications.title")}
+            </Typography>
+
+            <Typography
+              component="div"
+              sx={{
+                fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                opacity: 0.85,
+                lineHeight: 1.3,
+              }}
+            >
+              {t("notifications.description")}
+            </Typography>
+          </Box>
+
+          {/* 🔘 زر التفعيل */}
+          <Button
+            size="small"
+            variant="contained"
+            onClick={async () => {
+              try {
+                const token = await registerFcmToken({ silent: false });
+
+                if (token && Notification.permission === "granted") {
+                  toast.success(t("notifications.enabled"));
+                  setShowNotificationBanner(false);
+                } else if (Notification.permission === "denied") {
+                  toast.info(t("notifications.denied"));
+                }
+              } catch (e) {
+                console.error(e);
+              }
+            }}
+            sx={{
+              backgroundColor: "#000",
+              color: "#fff",
+              fontWeight: 800,
+              borderRadius: "999px",
+              px: { xs: 1.8, sm: 2.2 },
+              py: 0.6,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              "&:hover": { backgroundColor: "#111" },
+            }}
+          >
+            {t("notifications.enable")}
+          </Button>
+        </Box>
+      )}
+
 
       <AppBar
         position="sticky"

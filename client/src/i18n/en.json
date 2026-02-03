@@ -742,7 +742,12 @@
     "version": "Version 1.0.0"
   },
   "notifications": {
-    "admin": "Management"
+    "admin": "Management",
+    "title": "Enable Notifications",
+    "description": "Allow us to send you important notifications about bookings and reminders.",
+    "enable": "Enable",
+    "enabled": "Notifications have been enabled successfully",
+    "denied": "Notifications were not allowed. You can enable them later from your browser settings."
   },
   "server": {
     "errors": {

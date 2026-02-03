@@ -1,3 +1,4 @@
+// client/src/context/UserContext.jsx
 import React, { createContext, useEffect, useState, useMemo } from "react";
 import { Api } from "../api/Api";
 import { registerFcmToken } from "../firebase/registerFcmToken";
@@ -8,17 +9,23 @@ export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
+  // ===============================
+  // 👤 تحميل المستخدم (المصدر: السيرفر)
+  // ===============================
   useEffect(() => {
     const init = async () => {
       try {
-        // ✅ السيرفر هو مصدر الحقيقة
+        const hasCookie = document.cookie.includes("JWT=");
+        if (!hasCookie) {
+          setUser(null);
+          return;
+        }
+
         const { data } = await Api.get("/users/me");
         setUser(data);
       } catch (err) {
-        // ❌ غير مسجّل دخول أو انتهت الجلسة
         setUser(null);
       } finally {
-        // ⭐ مهم جدًا: نُنهي التحميل دائمًا
         setLoadingUser(false);
       }
     };
@@ -26,26 +33,25 @@ export function UserProvider({ children }) {
     init();
   }, []);
 
-
-  // useEffect(() => {
-  //   if (loadingUser) return;
-  //   if (!user || !user._id) return;
-
-  //   registerFcmToken({ silent: true });
-  // }, [loadingUser]);
+  // ===============================
+  // 🔔 تسجيل FCM Token (ذكي)
+  // ===============================
   useEffect(() => {
     if (loadingUser) return;
     if (!user || !user._id) return;
 
     const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
-    if (!isIOS) {
-      // ✅ Android / Desktop → تسجيل تلقائي
-      registerFcmToken({ silent: true });
+    if (isIOS) {
+      // ❌ iOS Safari/PWA
+      // لا نطلب إذن ولا نسجل تلقائيًا
+      // التسجيل يتم فقط بعد تفاعل المستخدم (زر داخل التطبيق)
+      return;
     }
-    // ❌ iPhone → ننتظر تفاعل المستخدم (زر)
-  }, [loadingUser]);
 
+    // ✅ Android + Desktop
+    registerFcmToken({ silent: true });
+  }, [loadingUser, user]);
 
   const value = useMemo(
     () => ({ user, setUser, loadingUser }),
