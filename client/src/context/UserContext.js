@@ -33,19 +33,6 @@ export function UserProvider({ children }) {
     init();
   }, []);
 
-  // ===============================
-  // 🔔 تسجيل FCM Token (ذكي)
-  // ===============================
-useEffect(() => {
-  if (loadingUser) return;
-  if (!user?._id) return;
-
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  if (isIOS) return;
-
-  // 🔥 مهم: يُستدعى عند كل دخول
-  registerFcmToken({ silent: true });
-}, [loadingUser, user?._id]);
 
 
   const value = useMemo(

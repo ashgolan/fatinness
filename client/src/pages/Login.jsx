@@ -25,6 +25,7 @@ import { useBrand } from "../context/BrandContext";
 
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
+import { registerFcmToken } from "../firebase/registerFcmToken";
 
 export default function Login() {
   const handleServerError = useServerError();
@@ -72,10 +73,9 @@ export default function Login() {
           localStorage.setItem("accessToken", data.accessToken);
         }
 
-        // setTimeout(() => {
-        //   registerFcmToken({ silent: true });
-        // }, 800);
-
+   setTimeout(() => {
+    registerFcmToken({ silent: true });
+  }, 600);
 
 
 
