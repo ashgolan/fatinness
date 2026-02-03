@@ -316,20 +316,31 @@ export default function Navbar() {
             variant="contained"
             onClick={async () => {
               try {
-                const token = await registerFcmToken({ silent: false });
+                if (typeof Notification === "undefined") return;
 
-                if (token && Notification.permission === "granted") {
-                  localStorage.setItem("fcmEnabled", "1"); // ✅ هنا بالضبط
+                // ✅ لازم يكون أول شيء داخل الضغط
+                const perm = await Notification.requestPermission();
 
+                if (perm !== "granted") {
+                  toast.info(t("notifications.denied"));
+                  return;
+                }
+
+                const token = await registerFcmToken({
+                  silent: false,
+                  assumePermissionGranted: true, // 👈 سنضيفها بالدالة
+                });
+
+                if (token) {
+                  localStorage.setItem("fcmEnabled", "1");
                   toast.success(t("notifications.enabled"));
                   setShowNotificationBanner(false);
-                } else if (Notification.permission === "denied") {
-                  toast.info(t("notifications.denied"));
                 }
               } catch (e) {
                 console.error(e);
               }
             }}
+
 
             sx={{
               backgroundColor: "#000",
