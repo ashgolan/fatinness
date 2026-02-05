@@ -524,6 +524,12 @@
       "demoteText": "Are you sure you want to remove admin privileges from this user?",
       "demoteWarning": "All admin privileges will be removed immediately",
       "confirm": "Confirm"
+    },
+    "password": {
+      "label": "New password",
+      "placeholder": "Enter a new password",
+      "hint": "Leave this field empty if you do not want to change the password. The current password cannot be displayed for security reasons.",
+      "resetButton": "Set new password"
     }
   },
   "bookingsAdmin": {
@@ -747,7 +753,11 @@
     "description": "Allow us to send you important notifications about bookings and reminders.",
     "enable": "Enable",
     "enabled": "Notifications have been enabled successfully",
-    "denied": "Notifications were not allowed. You can enable them later from your browser settings."
+    "denied": "Notifications were not allowed. You can enable them later from your browser settings.",
+    "passwordChanged": {
+      "title": "🔐 Account security",
+      "body": "Your account password has been changed. If you did not request this change, please contact support immediately."
+    }
   },
   "server": {
     "errors": {

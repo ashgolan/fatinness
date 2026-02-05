@@ -16,6 +16,8 @@ import { ZONE } from "../utils/time.js";
 import fs from "fs";
 import { hasOverlap } from "./adminSlots.controller.js";
 import { agenda } from "../config/agenda.js";
+import bcrypt from "bcrypt";
+import { NOTIFICATION_MESSAGES } from "../utils/notificationMessages.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -845,6 +847,8 @@ export const uploadLogo = async (req, res) => {
 // =======================
 // ✏️ تعديل بيانات مشتركة
 // =======================
+
+
 export const updateUserByAdmin = async (req, res) => {
   try {
     const admin = req.user;
@@ -863,7 +867,8 @@ export const updateUserByAdmin = async (req, res) => {
       weight,
       age,
       role,
-      subscriptionEnd, // ⭐ جديد
+      subscriptionEnd,
+      password, // ⭐ كلمة المرور الجديدة
     } = req.body;
 
     const user = await User.findById(id);
@@ -874,7 +879,6 @@ export const updateUserByAdmin = async (req, res) => {
     // 🔒 لا يمكن خفض رتبة آخر أدمين
     if (user.role === "admin" && role === "user") {
       const adminCount = await User.countDocuments({ role: "admin" });
-
       if (adminCount <= 1) {
         return res.status(400).json({ code: "ADMIN_LAST_ADMIN_ERROR" });
       }
@@ -882,9 +886,7 @@ export const updateUserByAdmin = async (req, res) => {
 
     // 🟦 تحديث الحقول العادية
     if (username !== undefined) user.username = username;
-    if (email !== undefined && email.trim() !== "") {
-      user.email = email.trim();
-    }
+    if (email !== undefined && email.trim() !== "") user.email = email.trim();
     if (phone !== undefined) user.phone = phone;
     if (gender !== undefined) user.gender = gender;
     if (height !== undefined) user.height = height;
@@ -895,25 +897,55 @@ export const updateUserByAdmin = async (req, res) => {
       user.role = role;
     }
 
-    // ⭐⭐⭐ أهم جزء — تجديد الاشتراك
+    // ⭐ تجديد الاشتراك
     if (subscriptionEnd !== undefined && subscriptionEnd !== null) {
       user.subscriptionEnd = new Date(subscriptionEnd);
-
-      // 🟢 عند التجديد → إلغاء الحظر تلقائيًا
       user.isBlocked = false;
+    }
+
+    // 🔐 تغيير كلمة المرور
+    let passwordChanged = false;
+
+    if (password && password.trim().length >= 6) {
+      const salt = await bcrypt.genSalt(10);
+      user.passwordHash = await bcrypt.hash(password.trim(), salt);
+      passwordChanged = true;
     }
 
     await user.save();
 
+    // 🔔 إرسال إشعار عند تغيير كلمة المرور فقط
+    if (passwordChanged) {
+      const lang = user.preferredLanguage || "he";
+
+      const message =
+        NOTIFICATION_MESSAGES.passwordChanged[lang] ||
+        NOTIFICATION_MESSAGES.passwordChanged.ar;
+
+      await sendSmartNotification({
+        user,
+        title: message.title,
+        body: message.body,
+        channel: "push",
+        type: "SECURITY_ALERT",
+        url: "/profile",
+      });
+    }
+
+
+    const safeUser = user.toObject();
+    delete safeUser.passwordHash;
+
     res.json({
       code: "ADMIN_USER_UPDATE_SUCCESS",
-      user,
+      user: safeUser,
     });
   } catch (err) {
     console.error("❌ Update User Error:", err);
     res.status(500).json({ code: "ADMIN_SERVER_ERROR" });
   }
 };
+
 
 // =======================
 // 📌 تلخيص الحجوزات

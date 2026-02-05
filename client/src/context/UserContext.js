@@ -15,11 +15,6 @@ export function UserProvider({ children }) {
   useEffect(() => {
     const init = async () => {
       try {
-        const hasCookie = document.cookie.includes("JWT=");
-        if (!hasCookie) {
-          setUser(null);
-          return;
-        }
 
         const { data } = await Api.get("/users/me");
         setUser(data);

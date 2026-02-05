@@ -672,28 +672,42 @@ export default function UsersAdmin() {
             />
 
             {currentUser?.isSuperAdmin && (
-              <TextField
-                label={t("usersAdmin.fields.newPassword")}
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={editData.password}
-                onChange={handleChange}
-                placeholder={t("usersAdmin.placeholders.newPassword")}
-                sx={textFieldStyle}
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={() => setShowPassword((p) => !p)}
-                        edge="end"
-                      >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              <Box sx={{ display: "grid", gap: 0.5 }}>
+                <TextField
+                  label={t("usersAdmin.password.label")}
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={editData.password}
+                  onChange={handleChange}
+                  placeholder={t("usersAdmin.password.placeholder")}
+                  sx={textFieldStyle}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword((p) => !p)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "text.secondary",
+                    px: 1,
+                    lineHeight: 1.4,
+                  }}
+                >
+                  ⚠️ {t("usersAdmin.password.hint")}
+                </Typography>
+              </Box>
             )}
+
 
             <TextField
               label={t("usersAdmin.fields.height")}

@@ -94,16 +94,20 @@ export default function App() {
   // 🌍 تحميل اللغة من التخزين
   // ======================================================
   useEffect(() => {
-    const savedLang = localStorage.getItem("appLanguage") || "ar";
+    const savedLang = localStorage.getItem("appLanguage");
+    if (!savedLang) return;
+
     i18n.changeLanguage(savedLang);
     document.documentElement.dir = savedLang === "en" ? "ltr" : "rtl";
   }, []);
+
 
   // ======================================================
   // 🌍 مزامنة اللغة من المستخدم
   // ======================================================
   useEffect(() => {
     if (!user?.preferredLanguage) return;
+    if (i18n.language === user.preferredLanguage) return;
 
     i18n.changeLanguage(user.preferredLanguage);
     localStorage.setItem("appLanguage", user.preferredLanguage);

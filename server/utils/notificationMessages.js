@@ -112,4 +112,39 @@ export const NOTIFICATION_MESSAGES = {
       body: "Your subscription has expired. Booking is disabled.",
     },
   },
+  // =========================
+  // 🔐 تغيير كلمة المرور
+  // =========================
+  passwordChanged: {
+    ar: {
+      title: "🔐 أمان الحساب",
+      body:
+        "تم تغيير كلمة المرور الخاصة بحسابك. إذا لم تقومي بهذا الإجراء، يرجى التواصل مع الإدارة فورًا.",
+    },
+    he: {
+      title: "🔐 אבטחת חשבון",
+      body:
+        "סיסמת החשבון שלך שונתה. אם לא ביקשת שינוי זה, אנא פני לתמיכה בהקדם.",
+    },
+    en: {
+      title: "🔐 Account security",
+      body:
+        "Your account password has been changed. If you did not request this change, please contact support immediately.",
+    },
+  },
+  slotCustom: {
+    ar: {
+      title: "📩 رسالة من الإدارة",
+      body: ({ body }) => body,
+    },
+    he: {
+      title: "📩 הודעה מהנהלה",
+      body: ({ body }) => body,
+    },
+    en: {
+      title: "📩 Message from management",
+      body: ({ body }) => body,
+    },
+  },
+
 };
