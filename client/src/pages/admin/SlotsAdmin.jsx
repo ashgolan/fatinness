@@ -313,14 +313,15 @@ export default function SlotsAdmin() {
     }
 
     const confirmMsg = selectedSlot.isBlocked
-      ? t("slotsAdmin.dialog.confirmActivate")
-      : t("slotsAdmin.dialog.confirmDeactivate");
+      ? t("adminSchedule.confirm.activateSlot")
+      : t("adminSchedule.confirm.blockSlot");
+
 
     if (!window.confirm(confirmMsg)) return;
 
     try {
       const { data } = await Api.put(`/admin/slots/${selectedSlot._id}/block`);
-      toast.success(data.message);
+toast.success(t("adminSchedule.success.slotUpdated"));
       setOpen(false);
       fetchSlots();
     } catch (err) {

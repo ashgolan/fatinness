@@ -351,53 +351,55 @@
   "adminSchedule": {
     "slotTitle": "Session Title",
     "slotTitlePlaceholder": "Example: Yoga – Cardio – HIIT",
-    "title": "Sessions Schedule",
-    "subtitle": "Manage sessions for the current and upcoming week",
-    "currentWeek": "Current week",
-    "nextWeek": "Next week",
+    "title": "Class Schedule",
+    "subtitle": "Manage current and upcoming week sessions",
+    "currentWeek": "Current Week",
+    "nextWeek": "Next Week",
     "current": "Current",
-    "next": "Upcoming",
-    "unsavedChanges": "You have unsaved changes",
-    "saveNow": "Save now",
+    "next": "Next",
     "savingLabel": "Saving...",
     "creatingLabel": "Creating...",
     "capacity": "Capacity",
-    "addSlot": "Add session",
-    "saveAll": "Save changes",
-    "saveNextWeek": "Create next week's schedule",
-    "blocked": "Disabled",
-    "expand": "Expanded view",
+    "addSlot": "Add Session",
+    "saveNow": "Save Now",
+    "unsavedChanges": "You have unsaved changes",
+    "saveAll": "Save Changes",
+    "saveNextWeek": "Create Next Week Schedule",
+    "blocked": "Session Disabled",
+    "expand": "Expanded View",
     "partialSave": "Saved {{count}} sessions, but an error occurred with the rest.",
     "confirm": {
-      "deleteSlot": "Do you want to delete this session?",
-      "reactivateSlot": "Are you sure you want to reactivate this session?"
+      "blockSlot": "Do you want to disable this session? Participants will be notified.",
+      "activateSlot": "Do you want to activate this session again?"
     },
     "success": {
-      "deleted": "Session deleted",
+      "slotUpdated": "Session status updated successfully",
       "savedAllDetailed": "Changes saved successfully (Current week: {{current}}, Next week: {{next}}) ✅",
-      "savedAll": "All changes were saved successfully ✅",
+      "savedAll": "All changes saved successfully ✅",
       "createdNext": "{{count}} sessions created for next week",
       "createdSlots": "{{count}} new sessions added successfully"
     },
     "errors": {
-      "fetchCurrent": "Failed to fetch current week data",
+      "fetchCurrent": "Failed to load current week data",
       "saveFailed": "Failed to save changes",
-      "deleteFailed": "Failed to delete session",
+      "toggleFailed": "Failed to update session status",
       "createNextFailed": "Failed to create next week"
     },
     "warning": {
-      "overlapSkipped": "⚠️ {{count}} sessions were skipped due to time overlap",
-      "duplicateSkipped": "ℹ️ {{count}} duplicate sessions were skipped"
+      "overlapSkipped": "⚠️ {{count}} sessions skipped due to time conflicts",
+      "duplicateSkipped": "ℹ️ {{count}} duplicate sessions skipped"
     },
     "info": {
       "noValidChanges": "No valid changes to save",
-      "addValid": "Add valid sessions first"
+      "addValid": "Please add valid sessions first"
     },
-    "noDeletePast": "Cannot delete a session in a past day",
-    "cancelled": "⛔ Session Cancelled",
-    "reactivate": "♻️ Reactivate Session",
-    "reactivatedSuccess": "✅ Session reactivated successfully",
-    "reactivateError": "❌ Failed to reactivate the session"
+    "noTogglePast": "Cannot disable or activate a past session",
+    "notify": {
+      "blockedTitle": "Session Disabled",
+      "blockedBody": "We would like to inform you that this session has been temporarily disabled. We apologize for the inconvenience.",
+      "activatedTitle": "Session Activated",
+      "activatedBody": "We are happy to inform you that this session has been activated again."
+    }
   },
   "adminSettings": {
     "title": "General Club Settings",

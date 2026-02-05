@@ -349,55 +349,57 @@
     "noPermission": "דף זה זמין לסופר אדמין בלבד"
   },
   "adminSchedule": {
-    "slotTitle": "כותרת האימון",
+    "slotTitle": "כותרת השיעור",
     "slotTitlePlaceholder": "לדוגמה: יוגה – קרדיו – HIIT",
-    "title": "לוח אימונים",
-    "subtitle": "ניהול אימוני השבוע הנוכחי והבא",
+    "title": "לוח שיעורים",
+    "subtitle": "ניהול שיעורי השבוע הנוכחי והבא",
     "currentWeek": "השבוע הנוכחי",
     "nextWeek": "השבוע הבא",
     "current": "נוכחי",
-    "next": "בא",
+    "next": "הבא",
     "savingLabel": "שומר...",
     "creatingLabel": "יוצר...",
     "capacity": "קיבולת",
-    "addSlot": "הוספת אימון",
+    "addSlot": "הוספת שיעור",
     "saveNow": "שמור עכשיו",
     "unsavedChanges": "יש שינויים שלא נשמרו",
-    "saveAll": "שמירת שינויים",
-    "saveNextWeek": "יצירת לוח לשבוע הבא",
-    "blocked": "מושבת",
+    "saveAll": "שמור שינויים",
+    "saveNextWeek": "צור לוח לשבוע הבא",
+    "blocked": "השיעור מושבת",
     "expand": "תצוגה מורחבת",
     "partialSave": "נשמרו {{count}} שיעורים, אך אירעה שגיאה בשאר.",
     "confirm": {
-      "deleteSlot": "האם ברצונך למחוק אימון זה?",
-      "reactivateSlot": "האם אתה בטוח שברצונך להפעיל מחדש את האימון?"
+      "blockSlot": "האם ברצונך להשבית את השיעור? המשתתפים יקבלו הודעה.",
+      "activateSlot": "האם ברצונך להפעיל את השיעור מחדש?"
     },
     "success": {
-      "deleted": "האימון נמחק",
-      "savedAllDetailed": "השינויים נשמרו בהצלחה (שבוע נוכחי: {{current}}, שבוע הבא: {{next}}) ✅",
+      "slotUpdated": "סטטוס השיעור עודכן בהצלחה",
+      "savedAllDetailed": "כל השינויים נשמרו (שבוע נוכחי: {{current}}, שבוע הבא: {{next}}) ✅",
       "savedAll": "כל השינויים נשמרו בהצלחה ✅",
-      "createdNext": "נוצרו {{count}} אימונים לשבוע הבא",
-      "createdSlots": "נוספו {{count}} אימונים חדשים בהצלחה"
+      "createdNext": "נוצרו {{count}} שיעורים לשבוע הבא",
+      "createdSlots": "נוספו {{count}} שיעורים חדשים בהצלחה"
     },
     "errors": {
       "fetchCurrent": "טעינת נתוני השבוע הנוכחי נכשלה",
       "saveFailed": "שמירת השינויים נכשלה",
-      "deleteFailed": "מחיקת האימון נכשלה",
+      "toggleFailed": "עדכון סטטוס השיעור נכשל",
       "createNextFailed": "יצירת השבוע הבא נכשלה"
     },
     "warning": {
-      "overlapSkipped": "⚠️ {{count}} אימונים נדחו עקב חפיפה בזמנים",
-      "duplicateSkipped": "ℹ️ {{count}} אימונים כפולים נדחו"
+      "overlapSkipped": "⚠️ {{count}} שיעורים דולגו עקב חפיפה בזמנים",
+      "duplicateSkipped": "ℹ️ {{count}} שיעורים כפולים דולגו"
     },
     "info": {
-      "noValidChanges": "אין שינויים תקינים לשמירה",
-      "addValid": "נא להוסיף אימונים תקינים תחילה"
+      "noValidChanges": "אין שינויים תקפים לשמירה",
+      "addValid": "אנא הוסף שיעורים תקפים תחילה"
     },
-    "noDeletePast": "לא ניתן למחוק אימון ביום שעבר",
-    "cancelled": "⛔ אימון מבוטל",
-    "reactivate": "♻️ הפעלת האימון מחדש",
-    "reactivatedSuccess": "✅ האימון הופעל מחדש בהצלחה",
-    "reactivateError": "❌ לא ניתן להפעיל את האימון מחדש"
+    "noTogglePast": "לא ניתן להשבית או להפעיל שיעור בתאריך עבר",
+    "notify": {
+      "blockedTitle": "השיעור בוטל",
+      "blockedBody": "ברצוננו לעדכן שהשיעור הושבת זמנית. מתנצלים על אי הנוחות.",
+      "activatedTitle": "השיעור הופעל מחדש",
+      "activatedBody": "שמחים לעדכן שהשיעור הופעל מחדש."
+    }
   },
   "adminSettings": {
     "title": "הגדרות כלליות של המועדון",

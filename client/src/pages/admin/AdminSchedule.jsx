@@ -373,6 +373,48 @@ export default function AdminSchedule() {
     setNextWeek(copy);
   };
 
+
+  const onToggleBlockExisting = async (slot) => {
+    const action = slot.isBlocked ? "activate" : "block";
+
+    const confirmed = window.confirm(
+      slot.isBlocked
+        ? t("adminSchedule.confirm.activateSlot")
+        : t("adminSchedule.confirm.blockSlot")
+    );
+
+    if (!confirmed) return;
+
+    try {
+      // 🔥 1) تغيير حالة الحصة
+      await Api.put(`/admin/slots/${slot._id}/block`);
+
+      // 🔔 2) إرسال إشعار للمحجوزين (إن وجدوا)
+      if (slot.bookedCount > 0) {
+        await Api.post("/admin/notify", {
+          target: `slot:${slot._id}`,
+          title: slot.isBlocked
+            ? t("adminSchedule.notify.activatedTitle")
+            : t("adminSchedule.notify.blockedTitle"),
+          body: slot.isBlocked
+            ? t("adminSchedule.notify.activatedBody")
+            : t("adminSchedule.notify.blockedBody"),
+        });
+      }
+
+      toast.success(t("adminSchedule.success.slotUpdated"));
+
+      // 🔄 3) إعادة تحميل الأسبوعين
+      await Promise.all([
+        fetchCurrentWeek(),
+        fetchNextWeek(),
+      ]);
+    } catch (err) {
+      handleServerError(err);
+    }
+  };
+
+
   const removeNextSlot = (dayIndex, idx) => {
     const copy = [...nextWeek];
     copy[dayIndex].items.splice(idx, 1);
@@ -765,9 +807,8 @@ export default function AdminSchedule() {
                             updateSlot(key, idx, field, value)
                           }
                           onRemoveNew={(idx) => removeSlot(key, idx)}
-                          onDeleteExisting={deleteSlot}
+                          onToggleBlockExisting={onToggleBlockExisting}
                           onReactivateExisting={onReactivateExisting}
-
                         />
                       </Grid>
                     );
@@ -869,7 +910,7 @@ export default function AdminSchedule() {
                         updateNextSlot(i, idx, field, value)
                       }
                       onRemoveNew={(idx) => removeNextSlot(i, idx)}
-                      onDeleteExisting={deleteSlot}
+                      onToggleBlockExisting={onToggleBlockExisting}
                       onReactivateExisting={onReactivateExisting}
 
                     />

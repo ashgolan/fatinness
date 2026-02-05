@@ -10,10 +10,12 @@ import {
   Tooltip,
   Divider,
 } from "@mui/material";
-import ReplayIcon from "@mui/icons-material/Replay";
 
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+
 import { useThemeMode } from "../../context/ThemeContext";
 
 export default function DaySection({
@@ -26,9 +28,7 @@ export default function DaySection({
   onAddSlot,
   onUpdateNew,
   onRemoveNew,
-  onDeleteExisting,
-  onReactivateExisting, // ✅ جديد
-
+  onToggleBlockExisting,
 }) {
   function fmtTime(date) {
     if (!date) return "";
@@ -45,7 +45,6 @@ export default function DaySection({
 
   const colors = {
     bg: isDark ? "#1f1f1f" : "#fff",
-    card: isDark ? "#2a2a2a" : "#F3F4F6",
     text: isDark ? "#e5e7eb" : "#111827",
     subtext: isDark ? "#9ca3af" : "rgba(0,0,0,0.6)",
     border: isDark ? "1px solid #444" : "1px solid rgba(0,0,0,0.08)",
@@ -55,7 +54,7 @@ export default function DaySection({
     newSlotBorder: isDark ? "1px solid #5c4666" : "1px solid #f3c1df",
   };
 
-  // 🔥 تحديد انتهاء الحصة بناءً على تاريخ ووقت النهاية
+  // ✅ الحصة منتهية؟
   function isSlotPast(slot) {
     if (!slot?.endAt) return false;
     return new Date(slot.endAt) < new Date();
@@ -79,12 +78,6 @@ export default function DaySection({
             : colors.border,
         opacity: isPast ? 0.7 : 1,
         transition: "all 0.25s ease",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: isDark
-            ? "0 8px 24px rgba(0,0,0,0.4)"
-            : "0 8px 24px rgba(0,0,0,0.1)",
-        },
       }}
     >
       {/* ===== عنوان اليوم ===== */}
@@ -129,7 +122,7 @@ export default function DaySection({
           </Typography>
 
           {existingSlots.map((slot) => {
-            const isDeleted = slot.isDeleted === true;
+            const blocked = slot.isBlocked === true;
 
             return (
               <Paper
@@ -140,177 +133,111 @@ export default function DaySection({
                   mb: 1,
                   borderRadius: 2,
                   background: "transparent",
-                  // ✅ بدون خلفية
-                  border: isDeleted
-                    ? "1px dashed rgba(148,163,184,0.6)"
+                  border: blocked
+                    ? "1px dashed rgba(245,158,11,0.75)"
                     : isDark
                       ? "1px solid rgba(148,163,184,0.25)"
                       : "1px solid rgba(15,23,42,0.12)",
-                  transition: "all 0.2s ease",
-                  opacity: isDeleted ? 0.55 : 1,
-                  "&:hover": !isDeleted
-                    ? {
-                      borderColor: "#EC4899",
-                      boxShadow: isDark
-                        ? "0 0 0 1px rgba(236,72,153,0.4)"
-                        : "0 0 0 1px rgba(236,72,153,0.35)",
-                    }
-                    : {},
+                  opacity: blocked ? 0.6 : 1,
                   borderLeft: `3px solid ${slot.bookedCount >= slot.capacity ? "#ef4444" : "#6bd391"
                     }`,
                 }}
               >
-
                 <Box
                   sx={{
                     width: "100%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    flexWrap: "nowrap",          // ⭐ يمنع التقسيم
                     gap: 1,
-                    overflow: "hidden",          // ⭐ يمنع النزول
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box
+                  {/* يسار: الوقت والعنوان */}
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        overflow: "hidden",
-                        minWidth: 0,
+                        fontWeight: 800,
+                        fontSize: 15,
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {/* ⏰ الوقت + العدد (عمود) */}
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center", // ⭐ يجعل 0/20 بالمنتصف تحت الساعة
-                          minWidth: 72,         // ⭐ يحافظ على ثبات المحاذاة
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontWeight: 800,
-                            fontSize: 15,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {fmtTime(slot.startAt)} – {fmtTime(slot.endAt)}
-                        </Typography>
+                      {fmtTime(slot.startAt)} – {fmtTime(slot.endAt)}
+                    </Typography>
 
-                        {/* 🔢 عدد الحجوزات */}
-                        {/* 🔢 عدد الحجوزات */}
-                        <Typography
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 0.4,
-                            fontSize: 11,
-                            fontWeight: 800,
-                            mt: 0.1,
-                            color:
-                              slot.bookedCount >= slot.capacity
-                                ? "#ef4444"        // 🔴 ممتلئة
-                                : slot.bookedCount >= slot.capacity * 0.8
-                                  ? "#f59e0b"      // 🟠 شبه ممتلئة
-                                  : "#30b561",     // 🟢 متاحة
-                            letterSpacing: 0.3,
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              width: 6,
-                              height: 6,
-                              borderRadius: "50%",
-                              backgroundColor: "currentColor",
-                              boxShadow: "0 0 6px currentColor",
-                            }}
-                          />
-                          {slot.bookedCount}/{slot.capacity}
-                        </Typography>
+                    {/* عدد الحجوزات */}
+                    <Typography
+                      sx={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        mt: 0.2,
+                        color:
+                          slot.bookedCount >= slot.capacity
+                            ? "#ef4444"
+                            : slot.bookedCount >= slot.capacity * 0.8
+                              ? "#f59e0b"
+                              : "#30b561",
+                      }}
+                    >
+                      {slot.bookedCount}/{slot.capacity}
+                    </Typography>
 
-                      </Box>
-
-                      {/* ✨ العنوان (يبقى في السطر نفسه) */}
-                      {slot.title && (
-                        <Typography
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: 13,
-                            color: "#EC4899",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            maxWidth: 140,
-                          }}
-                        >
-                          ✨ {slot.title}
-                        </Typography>
-                      )}
-
-                    </Box>
-
-
-
-                    {isDeleted && (
+                    {slot.title && (
                       <Typography
-                        variant="caption"
                         sx={{
-                          color: "#6b7280",
                           fontWeight: 700,
-                          ml: 1,
+                          fontSize: 13,
+                          color: "#EC4899",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          maxWidth: 160,
                         }}
                       >
-                        {t("adminSchedule.cancelled")}
+                        ✨ {slot.title}
                       </Typography>
                     )}
 
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 0.5,
-                      flexShrink: 0,              // ⭐ لا تنكمش أبدًا
-                    }}
-                  >
-                    {/* ♻️ إعادة تفعيل */}
-                    {isDeleted && !isSlotPast(slot) && (
-                      <Tooltip title={t("adminSchedule.reactivate")} arrow>
-                        <IconButton
-                          size="small"
-                          onClick={() => onReactivateExisting(slot._id)}
-                          sx={{ color: "#10b981" }}
-                        >
-                          <ReplayIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    {blocked && (
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "#f59e0b", fontWeight: 800 }}
+                      >
+                        {t("slotsAdmin.status.blocked")}
+                      </Typography>
                     )}
+                  </Box>
 
-                    {/* 🗑️ حذف */}
+                  {/* يمين: الأزرار */}
+                  <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                    {/* ✅ زر تعطيل/تفعيل */}
                     {!isSlotPast(slot) && (
-                      <Tooltip title={t("schedule.delete")} arrow>
+                      <Tooltip
+                        title={
+                          slot.isBlocked
+                            ? t("slotsAdmin.dialog.activate")
+                            : t("slotsAdmin.dialog.deactivate")
+                        }
+                        arrow
+                      >
                         <IconButton
                           size="small"
-                          disabled={isDeleted}
-                          onClick={() => onDeleteExisting(slot._id)}
-                          sx={{ color: isDeleted ? "#9ca3af" : "#ef4444" }}
+                          onClick={() => onToggleBlockExisting(slot)}
+                          sx={{ color: slot.isBlocked ? "#10b981" : "#ef4444" }}
                         >
-                          <DeleteIcon fontSize="small" />
+                          {slot.isBlocked ? (
+                            <CheckCircleIcon fontSize="small" />
+                          ) : (
+                            <BlockIcon fontSize="small" />
+                          )}
                         </IconButton>
                       </Tooltip>
                     )}
+
                   </Box>
-
-
                 </Box>
               </Paper>
             );
           })}
-
 
           <Divider sx={{ my: 2, borderColor: isDark ? "#444" : "#ddd" }} />
         </>
@@ -342,14 +269,7 @@ export default function DaySection({
             boxSizing: "border-box",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              width: "100%",
-              gap: 1,
-            }}
-          >
+          <Box sx={{ display: "flex", flexWrap: "wrap", width: "100%", gap: 1 }}>
             <TextField
               label={t("adminSchedule.slotTitle")}
               placeholder={t("adminSchedule.slotTitlePlaceholder")}
@@ -386,25 +306,17 @@ export default function DaySection({
             fullWidth
             sx={{ mt: 1 }}
             InputLabelProps={{ shrink: true }}
-            inputProps={{
-              min: 1,     // ⛔ يمنع 0 بالسهم
-              step: 1,
-            }}
+            inputProps={{ min: 1, step: 1 }}
             onChange={(e) => {
               const val = Number(e.target.value);
-              if (val < 1) return; // ⛔ يمنع 0 والسلبي
+              if (val < 1) return;
               onUpdateNew(idx, "capacity", val);
             }}
           />
 
-
           <Box sx={{ width: "100%", textAlign: "right", mt: 1 }}>
             <Tooltip title={t("schedule.delete")} arrow>
-              <IconButton
-                color="error"
-                size="small"
-                onClick={() => onRemoveNew(idx)}
-              >
+              <IconButton color="error" size="small" onClick={() => onRemoveNew(idx)}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Tooltip>
@@ -416,13 +328,7 @@ export default function DaySection({
       {!isPast && (
         <Box sx={{ textAlign: "center", mt: 2 }}>
           <Tooltip title={t("schedule.add")} arrow>
-            <IconButton
-              onClick={onAddSlot}
-              sx={{
-                color: "#9B6FD6",
-                "&:hover": { color: "#7C3AED" },
-              }}
-            >
+            <IconButton onClick={onAddSlot} sx={{ color: "#9B6FD6" }}>
               <AddCircleIcon sx={{ fontSize: 32 }} />
             </IconButton>
           </Tooltip>

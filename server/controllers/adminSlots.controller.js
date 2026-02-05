@@ -570,6 +570,7 @@ export const adminDeleteSlot = async (req, res) => {
     );
 
     // 🗑️ Soft delete للحصة
+    slot.isBlocked = true
     slot.isDeleted = true;
     slot.deletedAt = new Date();
     slot.deletedBy = req.user._id;
@@ -641,6 +642,7 @@ export const adminReactivateSlot = async (req, res) => {
     }
 
     // ♻️ إعادة التفعيل
+    slot.isBlocked = false;
     slot.isDeleted = false;
     slot.deletedAt = null;
     slot.deletedBy = null;
