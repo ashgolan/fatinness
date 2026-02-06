@@ -321,7 +321,7 @@ export default function SlotsAdmin() {
 
     try {
       const { data } = await Api.put(`/admin/slots/${selectedSlot._id}/block`);
-toast.success(t("adminSchedule.success.slotUpdated"));
+      toast.success(t("adminSchedule.success.slotUpdated"));
       setOpen(false);
       fetchSlots();
     } catch (err) {
@@ -344,6 +344,19 @@ toast.success(t("adminSchedule.success.slotUpdated"));
         `;
   const isSlotEnded = (slot) =>
     getSlotStatus(slot).type === "ended";
+
+
+  const buildAutoNotificationTitle = (slot) => {
+    if (!slot) return "";
+
+    const dayName = new Date(slot.date).toLocaleDateString(
+      i18n.language,
+      { weekday: "long" }
+    );
+
+    return `${dayName} – ${slot.startTime}`;
+  };
+
   return (
     <Box
       dir={dir}
@@ -1311,7 +1324,11 @@ toast.success(t("adminSchedule.success.slotUpdated"));
               bookings.length > 0 &&
               !isSlotEnded(selectedSlot) && (
                 <Button
-                  onClick={() => setNotifyOpen(true)}
+                  onClick={() => {
+                    const autoTitle = buildAutoNotificationTitle(selectedSlot);
+                    setNotifyTitle(autoTitle);
+                    setNotifyOpen(true);
+                  }}
                   sx={{
                     textTransform: "none",
                     background: `linear-gradient(135deg, ${BRAND.gold}, ${BRAND.purple})`,
@@ -1326,6 +1343,7 @@ toast.success(t("adminSchedule.success.slotUpdated"));
                 >
                   📩 {t("slotsAdmin.dialog.sendNotification")}
                 </Button>
+
               )}
 
 
