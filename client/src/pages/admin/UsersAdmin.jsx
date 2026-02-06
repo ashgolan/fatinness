@@ -69,6 +69,7 @@ export default function UsersAdmin() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [deleteUser, setDeleteUser] = useState(null);
   const { user: currentUser } = useContext(UserContext);
+  const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
 
   const openDeleteConfirm = (user) => {
     // منع حذف المدير الرئيسي
@@ -819,7 +820,7 @@ export default function UsersAdmin() {
 
             <Button
               variant="contained"
-              onClick={handleSave}
+              onClick={() => setConfirmSaveOpen(true)}
               sx={{
                 backgroundColor: "#1976d2",
                 "&:hover": { backgroundColor: "#1565c0" },
@@ -828,6 +829,7 @@ export default function UsersAdmin() {
             >
               {t("common.save")}
             </Button>
+
           </DialogActions>
         </Dialog>
 
@@ -957,6 +959,63 @@ export default function UsersAdmin() {
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+          open={confirmSaveOpen}
+          onClose={() => setConfirmSaveOpen(false)}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+        >
+          <DialogTitle
+            sx={{
+              fontWeight: 700,
+              color: "#1976d2",
+              textAlign: "center",
+            }}
+          >
+            {t("usersAdmin.confirmSave.title")}
+          </DialogTitle>
+
+          <DialogContent>
+            <Typography align="center" sx={{ mb: 1 }}>
+              {t("usersAdmin.confirmSave.text")}
+            </Typography>
+
+            <Typography
+              align="center"
+              variant="body2"
+              sx={{ color: "text.secondary" }}
+            >
+              {editUser?.username}
+            </Typography>
+          </DialogContent>
+
+          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={() => setConfirmSaveOpen(false)}
+              sx={{ color: "#555", borderColor: "#bbb" }}
+            >
+              {t("common.cancel")}
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={async () => {
+                setConfirmSaveOpen(false);
+                await handleSave();
+              }}
+              sx={{
+                fontWeight: 600,
+                backgroundColor: "#1976d2",
+                "&:hover": { backgroundColor: "#1565c0" },
+              }}
+            >
+              {t("common.confirm")}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
       </Box>
     </Box>
   );

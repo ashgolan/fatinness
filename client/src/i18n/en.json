@@ -17,6 +17,7 @@
   "common": {
     "cancel": "Cancel",
     "save": "Save",
+    "confirm": "Confirm",
     "developedBy": "Developed by A.Shaalan Tech"
   },
   "weekdays": {
@@ -532,6 +533,10 @@
       "placeholder": "Enter a new password",
       "hint": "Leave this field empty if you do not want to change the password. The current password cannot be displayed for security reasons.",
       "resetButton": "Set new password"
+    },
+    "confirmSave": {
+      "title": "Confirm Save",
+      "text": "Are you sure you want to save the changes for this user?"
     }
   },
   "bookingsAdmin": {
