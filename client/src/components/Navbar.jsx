@@ -104,32 +104,24 @@ export default function Navbar() {
       return;
     }
 
-    // إذا سبق تفعيل الإشعارات بنجاح
+    // ✅ الحالة الوحيدة التي نعتبرها "مفعّل"
     if (localStorage.getItem("fcmEnabled") === "1") {
       setNotificationState("enabled");
       setShowNotificationBanner(false);
       return;
     }
 
-    // إذا رفض المستخدم الإشعارات
+    // ❌ رفض صريح
     if (Notification.permission === "denied") {
       setNotificationState("denied");
       setShowNotificationBanner(false);
       return;
     }
 
-    // الحالة الوحيدة التي نُظهر فيها البانر
-    if (Notification.permission === "default") {
-      setNotificationState("pending");
-      setShowNotificationBanner(true);
-      return;
-    }
+    // 🔔 كل الحالات الأخرى → نعرض البانر
+    setNotificationState("pending");
+    setShowNotificationBanner(true);
 
-    // granted بدون تسجيل token
-    if (Notification.permission === "granted") {
-      setNotificationState("pending");
-      setShowNotificationBanner(true);
-    }
   }, [user]);
 
 
@@ -327,7 +319,7 @@ export default function Navbar() {
 
                 const token = await registerFcmToken({
                   silent: false,
-                  assumePermissionGranted: true,
+                  assumePermissionGranted: false,
                 });
 
                 if (token) {
