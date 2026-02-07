@@ -91,9 +91,9 @@ export async function registerFcmToken({ silent = false,
       });
     }
 
-    if (!silent) {
-      toast.success(i18n.t("fcm.success"));
-    }
+    // if (!silent) {
+    //   toast.success(i18n.t("fcm.success"));
+    // }
 
     return token;
   } catch (err) {

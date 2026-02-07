@@ -125,11 +125,11 @@ export default function Navbar() {
       return;
     }
 
-    // granted بدون تسجيل token
-    if (Notification.permission === "granted") {
-      setNotificationState("pending");
-      setShowNotificationBanner(true);
-    }
+    // // granted بدون تسجيل token
+    // if (Notification.permission === "granted") {
+    //   setNotificationState("pending");
+    //   setShowNotificationBanner(true);
+    // }
   }, [user]);
 
 
@@ -314,10 +314,7 @@ export default function Navbar() {
             variant="contained"
             onClick={async () => {
               try {
-                if (localStorage.getItem("fcmEnabled") === "1") {
-                  setShowNotificationBanner(false);
-                  return;
-                }
+      
 
                 if (typeof Notification === "undefined") return;
 
