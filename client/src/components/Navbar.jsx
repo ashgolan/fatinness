@@ -47,6 +47,8 @@ export default function Navbar() {
   const { mode, toggleMode, BRAND } = useThemeMode();
   const { logoUrl, loading: loadingBrand } = useBrand();
   const [showNotificationBanner, setShowNotificationBanner] = useState(false);
+  const [notificationState, setNotificationState] = useState("unknown");
+  // possible values: "unknown" | "enabled" | "denied" | "pending"
 
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -60,59 +62,6 @@ export default function Navbar() {
     { code: "en", label: "English", flag: "🇺🇸", dir: "ltr" },
   ];
   const drawerAnchor = i18n.dir() === "rtl" ? "right" : "left";
-  // const changeLanguage = async (lang) => {
-  //   console.log("🌍 changeLanguage clicked:", lang);
-
-  //   // 1️⃣ تغيير الواجهة فورًا
-  //   i18n.changeLanguage(lang);
-  //   localStorage.setItem("appLanguage", lang);
-
-  //   const selected = LANGUAGES.find((l) => l.code === lang);
-  //   document.documentElement.dir = selected?.dir || "ltr";
-
-  //   setLangMenuAnchor(null);
-
-  //   console.log("👤 current user:", user);
-  //   console.log("🗣️ current preferredLanguage:", user?.preferredLanguage);
-
-  //   // 2️⃣ مزامنة مع السيرفر فقط إذا المستخدم مسجّل دخول
-  //   if (!user?._id) {
-  //     console.warn("⚠️ No user logged in → skip server sync");
-  //     return;
-  //   }
-
-
-  //   if (user.preferredLanguage === lang) {
-  //     console.warn("ℹ️ Same language, no need to update server");
-  //     return;
-  //   }
-
-  //   console.log("📡 Sending PUT /auth/language", {
-  //     preferredLanguage: lang,
-  //   });
-
-  //   try {
-  //     const { data } = await Api.put("/auth/language", {
-  //       preferredLanguage: lang,
-  //     });
-
-  //     console.log("✅ Server responded:", data);
-
-  //     // 3️⃣ تحديث الـ context (مهم)
-  //     setUser((prev) => {
-  //       const updated = prev
-  //         ? { ...prev, preferredLanguage: data.preferredLanguage }
-  //         : prev;
-
-  //       console.log("🔄 Updated user in context:", updated);
-  //       return updated;
-  //     });
-  //   } catch (e) {
-  //     console.error("❌ Failed to sync language with server");
-  //     console.error("status:", e?.response?.status);
-  //     console.error("data:", e?.response?.data);
-  //   }
-  // };
 
   const changeLanguage = async (lang) => {
     console.log("🌍 changeLanguage clicked:", lang);
@@ -150,15 +99,36 @@ export default function Navbar() {
   const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
   const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
   useEffect(() => {
-    if (
-      user &&
-      typeof Notification !== "undefined" &&
-      Notification.permission === "default" &&
-      !localStorage.getItem("fcmEnabled")
-    ) {
-      setShowNotificationBanner(true);
-    } else {
+    if (!user || typeof Notification === "undefined") {
       setShowNotificationBanner(false);
+      return;
+    }
+
+    // إذا سبق تفعيل الإشعارات بنجاح
+    if (localStorage.getItem("fcmEnabled") === "1") {
+      setNotificationState("enabled");
+      setShowNotificationBanner(false);
+      return;
+    }
+
+    // إذا رفض المستخدم الإشعارات
+    if (Notification.permission === "denied") {
+      setNotificationState("denied");
+      setShowNotificationBanner(false);
+      return;
+    }
+
+    // الحالة الوحيدة التي نُظهر فيها البانر
+    if (Notification.permission === "default") {
+      setNotificationState("pending");
+      setShowNotificationBanner(true);
+      return;
+    }
+
+    // granted بدون تسجيل token
+    if (Notification.permission === "granted") {
+      setNotificationState("pending");
+      setShowNotificationBanner(true);
     }
   }, [user]);
 
@@ -346,28 +316,33 @@ export default function Navbar() {
               try {
                 if (typeof Notification === "undefined") return;
 
-                // ✅ لازم يكون أول شيء داخل الضغط
                 const perm = await Notification.requestPermission();
 
                 if (perm !== "granted") {
+                  setNotificationState("denied");
                   toast.info(t("notifications.denied"));
+                  setShowNotificationBanner(false);
                   return;
                 }
 
                 const token = await registerFcmToken({
                   silent: false,
-                  assumePermissionGranted: true, // 👈 سنضيفها بالدالة
+                  assumePermissionGranted: true,
                 });
 
                 if (token) {
                   localStorage.setItem("fcmEnabled", "1");
+
+                  setNotificationState("enabled");   // ⭐ مهم
+                  setShowNotificationBanner(false);  // ⭐ يختفي فورًا
+
                   toast.success(t("notifications.enabled"));
-                  setShowNotificationBanner(false);
                 }
               } catch (e) {
                 console.error(e);
               }
             }}
+
 
 
             sx={{
