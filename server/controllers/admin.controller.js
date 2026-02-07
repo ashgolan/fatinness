@@ -706,23 +706,22 @@ export const sendCustomNotification = async (req, res) => {
     // ==========================================
     // Save to notifications history
     // ==========================================
-    await Notification.create({
-      title,
-      body,
+    const isSlotNotification = target?.startsWith("slot:");
 
-      targetType:
-        target === "all" ? "all" : target.startsWith("slot:") ? "slot" : "user",
+    if (!isSlotNotification) {
+      await Notification.create({
+        title,
+        body,
 
-      targetUser:
-        target === "all" || target.startsWith("slot:") ? null : target,
+        targetType: target === "all" ? "all" : "user",
+        targetUser: target === "all" ? null : target,
 
-      targetSlot: target.startsWith("slot:") ? target.split(":")[1] : null,
-
-      sentBy: adminUser,
-      successCount: totalSuccess,
-      failureCount: totalFail,
-      channel: "push",
-    });
+        sentBy: adminUser,
+        successCount: totalSuccess,
+        failureCount: totalFail,
+        channel: "push",
+      });
+    }
 
     // ==========================================
     // Response
