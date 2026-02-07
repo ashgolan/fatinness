@@ -22,27 +22,8 @@ const messaging = firebase.messaging();
   ✔ لكن نحتاج دعم الضغط على الإشعار فقط
 */
 
-// messaging.onBackgroundMessage((payload) => {
-//   console.log("📩 Background message received:", payload);
-
-//   const title = payload.data?.title || "⏰ תזכורת";
-
-//   const options = {
-//     body: payload.data?.body || "",
-//     icon: "/logo192x192.png",
-//     data: {
-//       url: payload.data?.url || "/",
-//     },
-//   };
-
-//   self.registration.showNotification(title, options);
-// });
-
 messaging.onBackgroundMessage((payload) => {
-  // ⭐ إذا كان النظام سيعرض الإشعار، لا نعرض يدوي
-  if (payload.notification) {
-    return;
-  }
+  console.log("📩 Background message received:", payload);
 
   const title = payload.data?.title || "⏰ תזכורת";
 
@@ -56,6 +37,7 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(title, options);
 });
+
 
 
 /* فتح الرابط عند الضغط */
