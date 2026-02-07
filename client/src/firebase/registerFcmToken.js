@@ -120,16 +120,46 @@ onMessage(messaging, (payload) => {
 
   if (payload?.data?.type !== "BOOKING_REMINDER") return;
 
-  toast.info(
-    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-      <span style={{ fontSize: 22 }}>⏰</span>
+  toast(
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        alignItems: "flex-start",
+        padding: "12px 14px",
+      }}
+    >
+      {/* أيقونة */}
+      <div
+        style={{
+          fontSize: 22,
+          lineHeight: "22px",
+        }}
+      >
+        ⏰
+      </div>
 
-      <div>
-        <div style={{ fontWeight: 700, marginBottom: 4 }}>
+      {/* النص */}
+      <div style={{ flex: 1 }}>
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: 14,
+            marginBottom: 4,
+            color: "#fff",
+          }}
+        >
           {payload.data.title}
         </div>
 
-        <div style={{ fontSize: 14, opacity: 0.85 }}>
+        <div
+          style={{
+            fontSize: 13,
+            opacity: 0.85,
+            color: "#eaeaea",
+            lineHeight: 1.4,
+          }}
+        >
           {payload.data.body}
         </div>
       </div>
@@ -138,7 +168,13 @@ onMessage(messaging, (payload) => {
       containerId: "fcm",
       autoClose: false,
       closeOnClick: true,
+      style: {
+        background: "rgba(18,18,18,0.92)", // أسود شفاف راقي
+        borderRadius: 14,
+        boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
+        borderInlineStart: "4px solid #9c27b0", // بنفسجي الهوية
+        padding: 0,
+      },
     }
   );
-
 });
