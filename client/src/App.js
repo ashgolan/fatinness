@@ -13,6 +13,7 @@ import { CssBaseline, GlobalStyles } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import "react-toastify/dist/ReactToastify.css";
 
 // ================= RTL =================
 import { CacheProvider } from "@emotion/react";
@@ -55,6 +56,7 @@ import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
 import PrivateRoute from "./utils/PrivateRoute";
 import { Api } from "./api/Api";
 import i18n from "./i18n/i18n";
+import { ToastContainer } from "react-toastify";
 
 // ======================================================
 // RTL / LTR Wrapper
@@ -162,13 +164,30 @@ export default function App() {
             <GlobalStyles
               styles={{
                 "input:-webkit-autofill": {
-                  WebkitBoxShadow:
-                    "0 0 1000px transparent inset !important",
+                  WebkitBoxShadow: "0 0 1000px transparent inset !important",
                   WebkitTextFillColor: "inherit !important",
                 },
               }}
             />
+
             <CssBaseline />
+
+            {/* 🔔 FCM Toast – Full Width Banner */}
+            <ToastContainer
+              containerId="fcm"
+              position="top-center"
+              newestOnTop
+              closeButton={false}
+              draggable={false}
+              limit={1}
+              toastStyle={{
+                width: "100%",
+                margin: 0,
+                borderRadius: 0,
+                padding: 0,
+              }}
+            />
+
 
             <div
               className="app-container"
