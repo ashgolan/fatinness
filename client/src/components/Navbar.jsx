@@ -98,36 +98,7 @@ export default function Navbar() {
   const location = useLocation();
   const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
   const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
-
   useEffect(() => {
-    // ⛔ انتظر حتى نعرف حالة المستخدم
-    if (loadingUser) return;
-    if (!user) return;
-    if (typeof Notification === "undefined") return;
-
-    // ✅ إذا الإذن موجود ولم نربط الجهاز بعد → نربط بصمت
-    if (
-      Notification.permission === "granted" &&
-      localStorage.getItem("fcmEnabled") !== "1"
-    ) {
-      registerFcmToken({ silent: true }).then((token) => {
-        if (token) {
-          localStorage.setItem("fcmEnabled", "1");
-          setNotificationState("enabled");
-        }
-      });
-    }
-  }, [user, loadingUser]);
-
-
-
-  useEffect(() => {
-
-    if (loadingUser) {
-      setShowNotificationBanner(false);
-      return;
-    }
-
     if (!user || typeof Notification === "undefined") {
       setShowNotificationBanner(false);
       return;
@@ -154,12 +125,12 @@ export default function Navbar() {
       return;
     }
 
-    // // granted بدون تسجيل token
-    // if (Notification.permission === "granted") {
-    //   setNotificationState("pending");
-    //   setShowNotificationBanner(true);
-    // }
-  }, [user,loadingUser]);
+    // granted بدون تسجيل token
+    if (Notification.permission === "granted") {
+      setNotificationState("pending");
+      setShowNotificationBanner(true);
+    }
+  }, [user]);
 
 
   useEffect(() => {
@@ -343,7 +314,10 @@ export default function Navbar() {
             variant="contained"
             onClick={async () => {
               try {
-
+                if (localStorage.getItem("fcmEnabled") === "1") {
+                  setShowNotificationBanner(false);
+                  return;
+                }
 
                 if (typeof Notification === "undefined") return;
 
