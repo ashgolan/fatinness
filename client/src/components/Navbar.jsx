@@ -99,6 +99,12 @@ export default function Navbar() {
   const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
   const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
   useEffect(() => {
+
+    if (loadingUser) {
+      setShowNotificationBanner(false);
+      return;
+    }
+
     if (!user || typeof Notification === "undefined") {
       setShowNotificationBanner(false);
       return;
@@ -314,7 +320,7 @@ export default function Navbar() {
             variant="contained"
             onClick={async () => {
               try {
-      
+
 
                 if (typeof Notification === "undefined") return;
 
