@@ -314,6 +314,11 @@ export default function Navbar() {
             variant="contained"
             onClick={async () => {
               try {
+                if (localStorage.getItem("fcmEnabled") === "1") {
+                  setShowNotificationBanner(false);
+                  return;
+                }
+
                 if (typeof Notification === "undefined") return;
 
                 const perm = await Notification.requestPermission();
