@@ -99,30 +99,43 @@ export default function Navbar() {
   const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
   const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
   useEffect(() => {
-    if (!user || typeof Notification === "undefined") {
+    // 🚫 لا مستخدم → لا إشعارات
+    if (!user?._id) {
       setShowNotificationBanner(false);
       return;
     }
 
-    // ✅ الحالة الوحيدة التي نعتبرها "مفعّل"
+    // 🚫 صفحات تسجيل الدخول
+    if (isMinimalNavbar) {
+      setShowNotificationBanner(false);
+      return;
+    }
+
+    // 🚫 المتصفح لا يدعم
+    if (typeof Notification === "undefined") {
+      setShowNotificationBanner(false);
+      return;
+    }
+
+    // ✅ مفعّل سابقًا
     if (localStorage.getItem("fcmEnabled") === "1") {
       setNotificationState("enabled");
       setShowNotificationBanner(false);
       return;
     }
 
-    // ❌ رفض صريح
+    // ❌ مرفوض
     if (Notification.permission === "denied") {
       setNotificationState("denied");
       setShowNotificationBanner(false);
       return;
     }
 
-    // 🔔 كل الحالات الأخرى → نعرض البانر
+    // 🔔 فقط هنا نعرضه
     setNotificationState("pending");
     setShowNotificationBanner(true);
 
-  }, [user]);
+  }, [user?._id, isMinimalNavbar]);
 
 
   useEffect(() => {
@@ -305,6 +318,10 @@ export default function Navbar() {
             size="small"
             variant="contained"
             onClick={async () => {
+              if (!user?._id) {
+                toast.error(t("notifications.login_required"));
+                return;
+              }
               try {
                 if (typeof Notification === "undefined") return;
 

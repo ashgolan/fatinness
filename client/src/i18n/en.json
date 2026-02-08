@@ -764,7 +764,9 @@
     "passwordChanged": {
       "title": "🔐 Account security",
       "body": "Your account password has been changed. If you did not request this change, please contact support immediately."
-    }
+    },
+      "login_required": "Please log in first to enable notifications"
+
   },
   "server": {
     "errors": {
