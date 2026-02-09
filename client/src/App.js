@@ -58,6 +58,9 @@ import { Api } from "./api/Api";
 import i18n from "./i18n/i18n";
 import { ToastContainer } from "react-toastify";
 
+import InAppNotificationBanner from "./components/InAppNotificationBanner";
+import { FCM_EVENT } from "./firebase/registerFcmToken";
+
 // ======================================================
 // RTL / LTR Wrapper
 // ======================================================
@@ -101,6 +104,21 @@ export default function App() {
 
     i18n.changeLanguage(savedLang);
     document.documentElement.dir = savedLang === "en" ? "ltr" : "rtl";
+  }, []);
+
+
+  const [inAppNotification, setInAppNotification] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      setInAppNotification(e.detail);
+
+      // ⏳ يختفي تلقائيًا
+      setTimeout(() => setInAppNotification(null), 8000);
+    };
+
+    window.addEventListener(FCM_EVENT, handler);
+    return () => window.removeEventListener(FCM_EVENT, handler);
   }, []);
 
 
@@ -171,6 +189,20 @@ export default function App() {
             />
 
             <CssBaseline />
+            <ToastContainer
+              containerId="fcm"
+              position="top-center"
+              newestOnTop
+              closeButton={false}
+              draggable={false}
+              limit={1}
+              toastStyle={{
+                width: "100%",
+                margin: 0,
+                borderRadius: 0,
+                padding: 0,
+              }}
+            />
 
             {/* 🔔 FCM Toast – Full Width Banner */}
             <ToastContainer
