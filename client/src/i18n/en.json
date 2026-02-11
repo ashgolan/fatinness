@@ -765,8 +765,21 @@
       "title": "🔐 Account security",
       "body": "Your account password has been changed. If you did not request this change, please contact support immediately."
     },
-      "login_required": "Please log in first to enable notifications"
-
+    "login_required": "Please log in first to enable notifications"
+  },
+  "notificationsPage": {
+    "title": "My Notifications",
+    "empty": "No notifications available",
+    "new": "New",
+    "markAll": "Mark all as read",
+    "refresh": "Refresh",
+    "filterAll": "All",
+    "filterUnread": "Unread",
+    "filterRead": "Read",
+    "loadError": "Failed to load notifications",
+    "updateError": "Error updating notification",
+    "updateAllError": "Error updating notifications",
+    "allMarked": "All notifications marked as read"
   },
   "server": {
     "errors": {
