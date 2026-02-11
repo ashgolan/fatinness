@@ -7,6 +7,7 @@ import slotsRoutes from "./slots.routes.js";
 import paymentsRoutes from "./payments.routes.js";
 import bookingsRoutes from "./bookings.routes.js";
 import internalRoutes from "./internal.routes.js";
+import userNotifications from "./userNotifications.routes.js";
 // import googleRoutes from "./google.routes.js";
 
 const router = express.Router();
@@ -20,5 +21,7 @@ router.use("/bookings", bookingsRoutes);
 router.use("/payments", paymentsRoutes);
 router.use("/internal", internalRoutes);
 // router.use("/google", googleRoutes);
+
+router.use("/notifications",userNotifications);
 
 export default router;

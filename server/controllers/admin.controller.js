@@ -18,6 +18,7 @@ import { hasOverlap } from "./adminSlots.controller.js";
 import { agenda } from "../config/agenda.js";
 import bcrypt from "bcrypt";
 import { NOTIFICATION_MESSAGES } from "../utils/notificationMessages.js";
+import { createUserInboxFromNotification } from "../services/notificationCenter.service.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -709,7 +710,7 @@ export const sendCustomNotification = async (req, res) => {
     const isSlotNotification = target?.startsWith("slot:");
 
     if (!isSlotNotification) {
-      await Notification.create({
+      const notification = await Notification.create({
         title,
         body,
 
@@ -721,6 +722,8 @@ export const sendCustomNotification = async (req, res) => {
         failureCount: totalFail,
         channel: "push",
       });
+      await createUserInboxFromNotification(notification);
+
     }
 
     // ==========================================
@@ -734,6 +737,8 @@ export const sendCustomNotification = async (req, res) => {
     });
   } catch (error) {
     console.error("Error sending notification:", error);
+    console.error("⚠️ Inbox mirror failed:", e.message);
+
     return res.status(500).json({
       code: "ADMIN_NOTIFICATION_ERROR",
     });
