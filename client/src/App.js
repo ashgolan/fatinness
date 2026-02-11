@@ -1,7 +1,7 @@
 // App.jsx
 import "./i18n/i18n";
 import React, { useEffect, useState, useContext } from "react";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 
 // ================= Context =================
 import { UserContext } from "./context/UserContext";
@@ -60,6 +60,7 @@ import { ToastContainer } from "react-toastify";
 
 import InAppNotificationBanner from "./components/InAppNotificationBanner";
 import { FCM_EVENT } from "./firebase/registerFcmToken";
+import Notifications from "./pages/Notifications";
 
 // ======================================================
 // RTL / LTR Wrapper
@@ -91,6 +92,7 @@ function DirectionWrapper({ children }) {
 export default function App() {
   const location = useLocation();
   const { user } = useContext(UserContext);
+const navigate = useNavigate();
 
   // 🔥 أهم State
   const [needsSetup, setNeedsSetup] = useState(null); // null = loading
@@ -106,6 +108,17 @@ export default function App() {
     document.documentElement.dir = savedLang === "en" ? "ltr" : "rtl";
   }, []);
 
+useEffect(() => {
+  const handler = () => {
+    navigate("/notifications");
+  };
+
+  window.addEventListener("open-notifications", handler);
+
+  return () => {
+    window.removeEventListener("open-notifications", handler);
+  };
+}, [navigate]);
 
   const [inAppNotification, setInAppNotification] = useState(null);
 
@@ -245,6 +258,8 @@ export default function App() {
                     <Route path="/gallery" element={<Gallery />} />
                     <Route path="/bookings" element={<Booking />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
+                    <Route path="/notifications" element={<Notifications />} />
+
                     <Route
                       path="/bookings-hub"
                       element={<BookingsHub />}

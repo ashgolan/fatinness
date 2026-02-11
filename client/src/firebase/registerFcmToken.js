@@ -287,7 +287,7 @@ onMessage(messaging, (payload) => {
   if (!payload?.data) return;
 
   toast(
-    <div style={{ display: "flex", gap: 12, padding: "12px 14px" }}>
+    <div style={{ display: "flex", gap: 12, padding: "12px 14px", cursor: "pointer" }}>
       <div style={{ fontSize: 22 }}>⏰</div>
       <div>
         <div style={{ fontWeight: 700 }}>
@@ -302,10 +302,15 @@ onMessage(messaging, (payload) => {
       containerId: "fcm",
       autoClose: false,
       closeOnClick: true,
+      onClick: () => {
+        window.dispatchEvent(
+          new CustomEvent("open-notifications")
+        );
+      },
     }
   );
 
-  // 🟣 أرسل الحدث للتطبيق
+  // 🟣 الحدث الحالي يبقى كما هو
   window.dispatchEvent(
     new CustomEvent(FCM_EVENT, { detail: payload.data })
   );
