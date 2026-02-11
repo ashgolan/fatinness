@@ -92,7 +92,7 @@ function DirectionWrapper({ children }) {
 export default function App() {
   const location = useLocation();
   const { user } = useContext(UserContext);
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // 🔥 أهم State
   const [needsSetup, setNeedsSetup] = useState(null); // null = loading
@@ -108,17 +108,17 @@ const navigate = useNavigate();
     document.documentElement.dir = savedLang === "en" ? "ltr" : "rtl";
   }, []);
 
-useEffect(() => {
-  const handler = () => {
-    navigate("/notifications");
-  };
+  useEffect(() => {
+    const handler = () => {
+      navigate("/notifications");
+    };
 
-  window.addEventListener("open-notifications", handler);
+    window.addEventListener("open-notifications", handler);
 
-  return () => {
-    window.removeEventListener("open-notifications", handler);
-  };
-}, [navigate]);
+    return () => {
+      window.removeEventListener("open-notifications", handler);
+    };
+  }, [navigate]);
 
   const [inAppNotification, setInAppNotification] = useState(null);
 
@@ -126,13 +126,16 @@ useEffect(() => {
     const handler = (e) => {
       setInAppNotification(e.detail);
 
-      // ⏳ يختفي تلقائيًا
+      // 🔥 أضف هذا السطر
+      window.dispatchEvent(new Event("refresh-unread-count"));
+
       setTimeout(() => setInAppNotification(null), 8000);
     };
 
     window.addEventListener(FCM_EVENT, handler);
     return () => window.removeEventListener(FCM_EVENT, handler);
   }, []);
+
 
 
   // ======================================================

@@ -31,8 +31,9 @@ messaging.onBackgroundMessage((payload) => {
     body: payload.data?.body || "",
     icon: "/logo192x192.png",
     data: {
-      url: payload.data?.url || "/",
+      url: "/notifications",
     },
+
   };
 
   self.registration.showNotification(title, options);
@@ -44,20 +45,21 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification?.data?.url || "/";
+  const targetUrl = "/notifications";
 
   event.waitUntil(
-    clients.matchAll({ type: "window" }).then((clientList) => {
-      // إذا هناك نافذة مفتوحة → نستخدمها
-      for (const client of clientList) {
-        if (client.url === url && "focus" in client) {
-          return client.focus();
+    clients.matchAll({ type: "window", includeUncontrolled: true })
+      .then((clientList) => {
+        for (const client of clientList) {
+          if ("focus" in client) {
+            client.navigate(targetUrl);
+            return client.focus();
+          }
         }
-      }
-      // وإلا → افتح صفحة جديدة
-      if (clients.openWindow) {
-        return clients.openWindow(url);
-      }
-    })
+
+        if (clients.openWindow) {
+          return clients.openWindow(targetUrl);
+        }
+      })
   );
 });

@@ -39,6 +39,9 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 import { useTranslation } from "react-i18next";
 import { registerFcmToken } from "../firebase/registerFcmToken";
+import Badge from "@mui/material/Badge";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import useUnreadNotifications from "../hooks/useUnreadNotifications";
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -54,7 +57,6 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
-
   const [langMenuAnchor, setLangMenuAnchor] = useState(null);
   const LANGUAGES = [
     { code: "ar", label: "العربية", flag: "🇸🇦", dir: "rtl" },
@@ -62,6 +64,16 @@ export default function Navbar() {
     { code: "en", label: "English", flag: "🇺🇸", dir: "ltr" },
   ];
   const drawerAnchor = i18n.dir() === "rtl" ? "right" : "left";
+  const [pulse, setPulse] = useState(false);
+
+  const fallbackLogo = "/brand/DEFAULT_LOGO.png";
+  const [imgSrc, setImgSrc] = useState(fallbackLogo);
+  const location = useLocation();
+  const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
+  const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
+
+  const unreadCount = useUnreadNotifications();
+
 
   const changeLanguage = async (lang) => {
     console.log("🌍 changeLanguage clicked:", lang);
@@ -92,12 +104,6 @@ export default function Navbar() {
     }
   };
 
-
-  const fallbackLogo = "/brand/DEFAULT_LOGO.png";
-  const [imgSrc, setImgSrc] = useState(fallbackLogo);
-  const location = useLocation();
-  const minimalNavbarRoutes = ["/login", "/register", "/register-superadmin"];
-  const isMinimalNavbar = minimalNavbarRoutes.includes(location.pathname);
   useEffect(() => {
     // 🚫 لا مستخدم → لا إشعارات
     if (!user?._id) {
@@ -473,6 +479,34 @@ export default function Navbar() {
                 fontSize: 22,
               }}
             />
+            {/* 🔔 Notifications Icon */}
+            <IconButton
+              onClick={() => navigate("/notifications")}
+              sx={{
+                color: mode === "dark" ? BRAND.textDark : "#555",
+                transition: "all 0.2s ease",
+                animation: pulse ? "pulse 0.6s ease-in-out 0s 3" : "none",
+                "@keyframes pulse": {
+                  "0%": { transform: "scale(1)" },
+                  "50%": { transform: "scale(1.25)" },
+                  "100%": { transform: "scale(1)" },
+                },
+                "&:hover": {
+                  transform: "scale(1.1)",
+                  color: mode === "dark" ? BRAND.gold : BRAND.purple,
+                },
+              }}
+            >
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                overlap="circular"
+                invisible={unreadCount === 0}
+              >
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+
 
             {/* 🌐 LANGUAGE ICON — DESKTOP */}
             <IconButton
@@ -488,6 +522,8 @@ export default function Navbar() {
               }}
 
             >
+
+
               <LanguageIcon />
             </IconButton>
 
