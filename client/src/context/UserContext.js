@@ -10,14 +10,19 @@ export function UserProvider({ children }) {
   const [loadingUser, setLoadingUser] = useState(true);
 
   // ===============================
-  // 👤 تحميل المستخدم (المصدر: السيرفر)
+  // 👤 تحميل المستخدم (السيرفر هو المصدر)
   // ===============================
   useEffect(() => {
     const init = async () => {
       try {
-
         const { data } = await Api.get("/users/me");
         setUser(data);
+
+        // 🔔 بعد التأكد أن المستخدم موجود → نسجل FCM
+        if (data) {
+          registerFcmToken({ silent: true });
+        }
+
       } catch (err) {
         setUser(null);
       } finally {
@@ -27,8 +32,6 @@ export function UserProvider({ children }) {
 
     init();
   }, []);
-
-
 
   const value = useMemo(
     () => ({ user, setUser, loadingUser }),
