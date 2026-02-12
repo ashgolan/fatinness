@@ -126,6 +126,14 @@ export default function App() {
       setInAppNotification(e.detail);
 
       window.dispatchEvent(new Event("refresh-unread-count"));
+
+      // 📳 اهتزاز الهاتف (إن وجد)
+      if (navigator.vibrate) {
+        navigator.vibrate([100, 50, 100]);
+      }
+
+      // 🔔 تحريك الجرس
+      window.dispatchEvent(new Event("bell-pulse"));
     };
 
     window.addEventListener(FCM_EVENT, handler);
@@ -225,7 +233,7 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/debug-api" element={<DebugApi />} />
-                    <Route path="/notifications" element={<Notifications />} />
+                  <Route path="/notifications" element={<Notifications />} />
 
                   {/* User */}
                   <Route element={<PrivateRoute role="user" />}>

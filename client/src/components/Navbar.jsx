@@ -174,6 +174,21 @@ export default function Navbar() {
     }
   };
 
+  useEffect(() => {
+    const handleBellPulse = () => {
+      setPulse(true);
+
+      setTimeout(() => {
+        setPulse(false);
+      }, 800);
+    };
+
+    window.addEventListener("bell-pulse", handleBellPulse);
+
+    return () => {
+      window.removeEventListener("bell-pulse", handleBellPulse);
+    };
+  }, []);
 
   const isAdmin = user?.role === "admin";
 
@@ -477,11 +492,16 @@ export default function Navbar() {
               sx={{
                 color: mode === "dark" ? BRAND.textDark : "#555",
                 transition: "all 0.2s ease",
-                animation: pulse ? "pulse 0.6s ease-in-out 0s 3" : "none",
-                "@keyframes pulse": {
-                  "0%": { transform: "scale(1)" },
-                  "50%": { transform: "scale(1.25)" },
-                  "100%": { transform: "scale(1)" },
+                animation: pulse ? "ring 0.6s ease-in-out" : "none",
+
+                "@keyframes ring": {
+                  "0%": { transform: "rotate(0deg)" },
+                  "15%": { transform: "rotate(15deg)" },
+                  "30%": { transform: "rotate(-12deg)" },
+                  "45%": { transform: "rotate(10deg)" },
+                  "60%": { transform: "rotate(-8deg)" },
+                  "75%": { transform: "rotate(5deg)" },
+                  "100%": { transform: "rotate(0deg)" },
                 },
                 "&:hover": {
                   transform: "scale(1.1)",
