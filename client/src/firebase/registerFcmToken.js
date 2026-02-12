@@ -105,29 +105,7 @@ const messaging = getMessaging(app);
 onMessage(messaging, (payload) => {
   if (!payload?.data) return;
 
-  toast(
-    <div style={{ display: "flex", gap: 12, padding: "12px 14px", cursor: "pointer" }}>
-      <div style={{ fontSize: 22 }}>⏰</div>
-      <div>
-        <div style={{ fontWeight: 700 }}>
-          {payload.data.title}
-        </div>
-        <div style={{ fontSize: 13, opacity: 0.85 }}>
-          {payload.data.body}
-        </div>
-      </div>
-    </div>,
-    {
-      containerId: "fcm",
-      autoClose: false,
-      closeOnClick: true,
-      onClick: () => {
-        window.dispatchEvent(
-          new CustomEvent("open-notifications")
-        );
-      },
-    }
-  );
+
 
   // 🟣 الحدث الحالي يبقى كما هو
   window.dispatchEvent(

@@ -56,11 +56,10 @@ import SubscriptionsReport from "./pages/admin/SubscriptionsReport";
 import PrivateRoute from "./utils/PrivateRoute";
 import { Api } from "./api/Api";
 import i18n from "./i18n/i18n";
-import { ToastContainer } from "react-toastify";
 
-import InAppNotificationBanner from "./components/InAppNotificationBanner";
 import { FCM_EVENT } from "./firebase/registerFcmToken";
 import Notifications from "./pages/Notifications";
+import InAppCenterNotification from "./components/InAppCenterNotification";
 
 // ======================================================
 // RTL / LTR Wrapper
@@ -126,10 +125,7 @@ export default function App() {
     const handler = (e) => {
       setInAppNotification(e.detail);
 
-      // 🔥 أضف هذا السطر
       window.dispatchEvent(new Event("refresh-unread-count"));
-
-      setTimeout(() => setInAppNotification(null), 8000);
     };
 
     window.addEventListener(FCM_EVENT, handler);
@@ -205,35 +201,11 @@ export default function App() {
             />
 
             <CssBaseline />
-            <ToastContainer
-              containerId="fcm"
-              position="top-center"
-              newestOnTop
-              closeButton={false}
-              draggable={false}
-              limit={1}
-              toastStyle={{
-                width: "100%",
-                margin: 0,
-                borderRadius: 0,
-                padding: 0,
-              }}
-            />
-
-            {/* 🔔 FCM Toast – Full Width Banner */}
-            <ToastContainer
-              containerId="fcm"
-              position="top-center"
-              newestOnTop
-              closeButton={false}
-              draggable={false}
-              limit={1}
-              toastStyle={{
-                width: "100%",
-                margin: 0,
-                borderRadius: 0,
-                padding: 0,
-              }}
+            <InAppCenterNotification
+              open={!!inAppNotification}
+              notification={inAppNotification}
+              onClose={() => setInAppNotification(null)}
+              onOpenNotifications={() => navigate("/notifications")}
             />
 
 
