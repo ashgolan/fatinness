@@ -121,7 +121,7 @@ agenda.define("check-subscriptions-daily", async () => {
 
       // الفرق بالأيام (تقريبي)
       const diffDays = Math.floor(endUTC.diff(now, "days").days);
-      const lang = user.preferredLanguage || "ar";
+      const lang = user.preferredLanguage || "he";
 
       // ===============================
       // 🔔 تذكير قبل 5 أيام

@@ -1,4 +1,5 @@
 import Booking from "../models/Booking.js";
+import UserNotification from "../models/UserNotification.js";
 import admin from "../utils/fcm.js"; // أو firebaseAdmin عندك
 import { getNotificationText } from "../utils/getNotificationText.js";
 
@@ -49,12 +50,23 @@ export const internalSendBookingReminder = async (req, res) => {
             return res.json({ skipped: true, reason: "SLOT_CANCELLED" });
         }
         console.log("📤 SENDING REMINDER NOW");
+
         const { title, body } = getNotificationText(
             "bookingReminder",
             booking.user?.preferredLanguage
         );
 
-        // 🔔 إرسال الإشعار
+        // 📝 1️⃣ حفظ إشعار النظام في قاعدة البيانات
+        await UserNotification.create({
+            user: booking.user._id,
+            title,
+            body,
+            type: "system",
+            targetType: "slot",
+            targetSlot: booking.slot?._id || null,
+        });
+
+        // 🔔 2️⃣ إرسال Push (كما هو بدون تغيير)
         await admin.messaging().send({
             token: userFcmToken,
 
@@ -76,7 +88,6 @@ export const internalSendBookingReminder = async (req, res) => {
                 },
             },
         });
-
 
 
         console.log("✅ Reminder sent", bookingId);

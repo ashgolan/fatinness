@@ -7,8 +7,8 @@ import Slot from "../models/Slot.js";
 import { DateTime } from "luxon";
 import { ZONE } from "../utils/time.js";
 import mongoose from "mongoose";
-import { sendSmartNotification } from "../utils/notify.js";
 import { getNotificationText } from "../utils/getNotificationText.js";
+import { sendGroupNotification } from "../utils/notifyGroup.js";
 
 /**
  * Checks if a slot overlaps with existing ones
@@ -390,16 +390,10 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 };
 
 
-
-/**
- * 🔔 Notify all users who had a booking on a deleted slot
- * Used ONLY after slot deletion
- */export async function notifySlotDeletedUsers({ slotId }) {
-  // 0️⃣ جلب الحصة
+export async function notifySlotDeletedUsers({ slotId }) {
   const slot = await Slot.findById(slotId);
   if (!slot) return;
 
-  // 1️⃣ جلب جميع الحجوزات (حتى الملغاة)
   const bookings = await Booking.find({
     slot: slotId,
     status: { $in: ["booked", "cancelled"] },
@@ -407,64 +401,247 @@ export const adminCreateNextWeekBulk = async (req, res) => {
 
   if (!bookings.length) return;
 
-  // 2️⃣ تجميع المستخدمين بدون تكرار
-  const userMap = new Map();
-  for (const b of bookings) {
-    if (b.user && b.user._id) {
-      userMap.set(b.user._id.toString(), b.user);
+  // 🔹 إزالة التكرار
+  const usersMap = new Map();
+  bookings.forEach((b) => {
+    if (b.user?._id) {
+      usersMap.set(b.user._id.toString(), b.user);
     }
-  }
+  });
 
-  const users = Array.from(userMap.values());
+  const users = Array.from(usersMap.values());
   if (!users.length) return;
 
-  // 3️⃣ تجهيز وقت الحصة مرة واحدة
   const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
 
-  // 4️⃣ إرسال الإشعارات
-  for (const user of users) {
-    try {
-      const lang = user.preferredLanguage || "ar";
+  // 🔹 تقسيم حسب اللغة (احترافي جدًا)
+  const usersByLang = {
+    ar: [],
+    he: [],
+    en: [],
+  };
 
-      const formattedDateTime =
-        lang === "ar"
-          ? dt.toFormat("dd/LL - HH:mm")
-          : lang === "he"
-            ? dt.toFormat("dd/LL HH:mm")
-            : dt.toFormat("dd/MM HH:mm");
+  users.forEach((u) => {
+    const lang = ["ar", "he", "en"].includes(u.preferredLanguage)
+      ? u.preferredLanguage
+      : "he";
 
-      // ✅ getNotificationText الآن يرجع نصوص جاهزة
-      const { title, body } = getNotificationText(
-        "slotCancelled",
-        lang,
-        { dateTime: formattedDateTime }
-      );
+    usersByLang[lang].push(u);
+  });
 
-      await sendSmartNotification({
-        user,
-        title,
-        body,
-        channel: "push",
-        data: {
-          type: "SLOT_CANCELLED",
-          slotId,
-          startAt: slot.startAt.toISOString(),
-        },
-      });
-    } catch (e) {
-      console.error(
-        `⚠️ Failed to notify user ${user._id} about deleted slot`,
-        e.message
-      );
-    }
+
+  // 🔹 إرسال لكل لغة مرة واحدة
+  for (const lang of Object.keys(usersByLang)) {
+    if (!usersByLang[lang].length) continue;
+
+    const formattedDateTime =
+      lang === "ar"
+        ? dt.toFormat("dd/LL - HH:mm")
+        : lang === "he"
+          ? dt.toFormat("dd/LL HH:mm")
+          : dt.toFormat("dd/MM HH:mm");
+
+    const { title, body } = getNotificationText(
+      "slotCancelled",
+      lang,
+      { dateTime: formattedDateTime }
+    );
+
+    await sendGroupNotification({
+      users: usersByLang[lang],
+      title,
+      body,
+      type: "system",
+      targetType: "slot",
+      targetSlot: slotId,
+    });
   }
 }
+
+
+
+ // 🔔 Notify all users who had a booking on a deleted slot
+ // Used ONLY after slot deletion
+//export async function notifySlotDeletedUsers({ slotId }) {
+  //   // 0️⃣ جلب الحصة
+  //   const slot = await Slot.findById(slotId);
+  //   if (!slot) return;
+
+  //   // 1️⃣ جلب جميع الحجوزات (حتى الملغاة)
+  //   const bookings = await Booking.find({
+  //     slot: slotId,
+  //     status: { $in: ["booked", "cancelled"] },
+  //   }).populate("user");
+
+  //   if (!bookings.length) return;
+
+  //   // 2️⃣ تجميع المستخدمين بدون تكرار
+  //   const userMap = new Map();
+  //   for (const b of bookings) {
+  //     if (b.user && b.user._id) {
+  //       userMap.set(b.user._id.toString(), b.user);
+  //     }
+  //   }
+
+  //   const users = Array.from(userMap.values());
+  //   if (!users.length) return;
+
+  //   // 3️⃣ تجهيز وقت الحصة مرة واحدة
+  //   const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
+
+  //   // 4️⃣ إرسال الإشعارات
+  //   // for (const user of users) {
+  //   //   try {
+  //   //     const lang = user.preferredLanguage || "ar";
+
+  //   //     const formattedDateTime =
+  //   //       lang === "ar"
+  //   //         ? dt.toFormat("dd/LL - HH:mm")
+  //   //         : lang === "he"
+  //   //           ? dt.toFormat("dd/LL HH:mm")
+  //   //           : dt.toFormat("dd/MM HH:mm");
+
+  //   //     // ✅ getNotificationText الآن يرجع نصوص جاهزة
+  //   //     const { title, body } = getNotificationText(
+  //   //       "slotCancelled",
+  //   //       lang,
+  //   //       { dateTime: formattedDateTime }
+  //   //     );
+
+  //   //     await sendSmartNotification({
+  //   //       user,
+  //   //       title,
+  //   //       body,
+  //   //       channel: "push",
+  //   //       data: {
+  //   //         type: "SLOT_CANCELLED",
+  //   //         slotId,
+  //   //         startAt: slot.startAt.toISOString(),
+  //   //       },
+  //   //     });
+  //   //   } catch (e) {
+  //   //     console.error(
+  //   //       `⚠️ Failed to notify user ${user._id} about deleted slot`,
+  //   //       e.message
+  //   //     );
+  //   //   }
+  //   // }
+  //   await Promise.allSettled(
+  //   users.map(async (user) => {
+  //     try {
+  //       const lang = user.preferredLanguage || "he";
+
+  //       const formattedDateTime =
+  //         lang === "ar"
+  //           ? dt.toFormat("dd/LL - HH:mm")
+  //           : lang === "he"
+  //           ? dt.toFormat("dd/LL HH:mm")
+  //           : dt.toFormat("dd/MM HH:mm");
+
+  //       const { title, body } = getNotificationText(
+  //         "slotCancelled",
+  //         lang,
+  //         { dateTime: formattedDateTime }
+  //       );
+
+  //       // 📝 حفظ في DB
+  //       await UserNotification.create({
+  //         user: user._id,
+  //         title,
+  //         body,
+  //         type: "system",
+  //         targetType: "slot",
+  //         targetSlot: slotId,
+  //       });
+
+  //       // 🔔 Push
+  //       await sendSmartNotification({
+  //         user,
+  //         title,
+  //         body,
+  //         url: "/notifications",
+  //       });
+
+  //     } catch (e) {
+  //       console.error(
+  //         `⚠️ Failed to notify user ${user._id}`,
+  //         e.message
+  //       );
+  //     }
+  //   })
+  // );
+
+//}
+// export async function notifySlotReactivatedUsers({ slotId }) {
+//   // 0️⃣ جلب الحصة
+//   const slot = await Slot.findById(slotId);
+//   if (!slot) return;
+
+//   // 1️⃣ جلب جميع الحجوزات (حتى الملغاة)
+//   const bookings = await Booking.find({
+//     slot: slotId,
+//     status: { $in: ["booked", "cancelled"] },
+//   }).populate("user");
+
+//   if (!bookings.length) return;
+
+//   // 2️⃣ تجميع المستخدمين بدون تكرار
+//   const userMap = new Map();
+//   for (const b of bookings) {
+//     if (b.user && b.user._id) {
+//       userMap.set(b.user._id.toString(), b.user);
+//     }
+//   }
+
+//   const users = Array.from(userMap.values());
+//   if (!users.length) return;
+
+//   // 3️⃣ تجهيز وقت الحصة مرة واحدة
+//   const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
+
+//   // 4️⃣ إرسال الإشعارات
+//   for (const user of users) {
+//     try {
+//       const lang = user.preferredLanguage || "he";
+
+//       const formattedDateTime =
+//         lang === "ar"
+//           ? dt.toFormat("dd/LL - HH:mm")
+//           : lang === "he"
+//             ? dt.toFormat("dd/LL HH:mm")
+//             : dt.toFormat("dd/MM HH:mm");
+
+//       // ✅ getNotificationText يرجع title/body كنصوص جاهزة
+//       const { title, body } = getNotificationText(
+//         "slotReactivated",
+//         lang,
+//         { dateTime: formattedDateTime }
+//       );
+
+//       await sendSmartNotification({
+//         user,
+//         title,
+//         body,
+//         channel: "push",
+//         data: {
+//           type: "SLOT_REACTIVATED",
+//           slotId,
+//           startAt: slot.startAt.toISOString(),
+//         },
+//       });
+//     } catch (e) {
+//       console.error(
+//         `⚠️ Failed to notify user ${user._id} about reactivated slot`,
+//         e.message
+//       );
+//     }
+//   }
+// }
+
 export async function notifySlotReactivatedUsers({ slotId }) {
-  // 0️⃣ جلب الحصة
   const slot = await Slot.findById(slotId);
   if (!slot) return;
 
-  // 1️⃣ جلب جميع الحجوزات (حتى الملغاة)
   const bookings = await Booking.find({
     slot: slotId,
     status: { $in: ["booked", "cancelled"] },
@@ -472,59 +649,55 @@ export async function notifySlotReactivatedUsers({ slotId }) {
 
   if (!bookings.length) return;
 
-  // 2️⃣ تجميع المستخدمين بدون تكرار
-  const userMap = new Map();
-  for (const b of bookings) {
-    if (b.user && b.user._id) {
-      userMap.set(b.user._id.toString(), b.user);
+  const usersMap = new Map();
+  bookings.forEach((b) => {
+    if (b.user?._id) {
+      usersMap.set(b.user._id.toString(), b.user);
     }
-  }
+  });
 
-  const users = Array.from(userMap.values());
+  const users = Array.from(usersMap.values());
   if (!users.length) return;
 
-  // 3️⃣ تجهيز وقت الحصة مرة واحدة
   const dt = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
 
-  // 4️⃣ إرسال الإشعارات
-  for (const user of users) {
-    try {
-      const lang = user.preferredLanguage || "ar";
+  const usersByLang = {
+    ar: [],
+    he: [],
+    en: [],
+  };
 
-      const formattedDateTime =
-        lang === "ar"
-          ? dt.toFormat("dd/LL - HH:mm")
-          : lang === "he"
-            ? dt.toFormat("dd/LL HH:mm")
-            : dt.toFormat("dd/MM HH:mm");
+  users.forEach((u) => {
+    const lang = u.preferredLanguage || "he";
+    usersByLang[lang]?.push(u);
+  });
 
-      // ✅ getNotificationText يرجع title/body كنصوص جاهزة
-      const { title, body } = getNotificationText(
-        "slotReactivated",
-        lang,
-        { dateTime: formattedDateTime }
-      );
+  for (const lang of Object.keys(usersByLang)) {
+    if (!usersByLang[lang].length) continue;
 
-      await sendSmartNotification({
-        user,
-        title,
-        body,
-        channel: "push",
-        data: {
-          type: "SLOT_REACTIVATED",
-          slotId,
-          startAt: slot.startAt.toISOString(),
-        },
-      });
-    } catch (e) {
-      console.error(
-        `⚠️ Failed to notify user ${user._id} about reactivated slot`,
-        e.message
-      );
-    }
+    const formattedDateTime =
+      lang === "ar"
+        ? dt.toFormat("dd/LL - HH:mm")
+        : lang === "he"
+          ? dt.toFormat("dd/LL HH:mm")
+          : dt.toFormat("dd/MM HH:mm");
+
+    const { title, body } = getNotificationText(
+      "slotReactivated",
+      lang,
+      { dateTime: formattedDateTime }
+    );
+
+    await sendGroupNotification({
+      users: usersByLang[lang],
+      title,
+      body,
+      type: "system",
+      targetType: "slot",
+      targetSlot: slotId,
+    });
   }
 }
-
 
 
 export const adminDeleteSlot = async (req, res) => {
@@ -551,12 +724,12 @@ export const adminDeleteSlot = async (req, res) => {
     }
 
     // 🧾 جلب الحجوزات
-    const bookings = await Booking.find({
-      slot: id,
-      status: "booked",
-    })
-      .populate("user", "fcmTokens preferredLanguage")
-      .session(session);
+    // const bookings = await Booking.find({
+    //   slot: id,
+    //   status: "booked",
+    // })
+    //   .populate("user", "fcmTokens preferredLanguage")
+    //   .session(session);
 
     // ❌ إلغاء الحجوزات
     await Booking.updateMany(

@@ -218,69 +218,101 @@ export default function Notifications() {
             )}
 
             {/* ================= LIST ================= */}
-            {filteredNotifications.map((n) => (
-                <Fade in key={n._id}>
-                    <Paper
-                        onClick={() => !n.isRead && markAsRead(n._id)}
-                        sx={{
-                            p: 2.5,
-                            mb: 2,
-                            cursor: "pointer",
-                            backgroundColor: n.isRead
-                                ? "background.paper"
-                                : "rgba(25,118,210,0.06)",
-                            borderInlineStart: n.isRead
-                                ? "4px solid transparent"
-                                : "4px solid #1976d2",
-                            borderRadius: 3,
-                            transition: "all 0.25s ease",
-                            "&:hover": {
-                                transform: "translateY(-2px)",
-                                boxShadow: 4,
-                            },
-                        }}
-                    >
-                        <Box
+            {filteredNotifications.map((n) => {
+
+                const typeStyles = {
+                    system: {
+                        color: "#9c27b0",
+                        bg: "rgba(156,39,176,0.08)",
+                        label: "SYSTEM"
+                    },
+                    admin: {
+                        color: "#1976d2",
+                        bg: "rgba(25,118,210,0.08)",
+                        label: "ADMIN"
+                    },
+                    security: {
+                        color: "#d32f2f",
+                        bg: "rgba(211,47,47,0.08)",
+                        label: "SECURITY"
+                    },
+                };
+
+                const currentType = typeStyles[n.type] || typeStyles.system;
+
+                return (
+                    <Fade in key={n._id}>
+                        <Paper
+                            onClick={() => !n.isRead && markAsRead(n._id)}
                             sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                mb: 1,
+                                p: 2.5,
+                                mb: 2,
+                                cursor: "pointer",
+                                backgroundColor: n.isRead
+                                    ? "background.paper"
+                                    : currentType.bg,
+                                borderInlineStart: `4px solid ${currentType.color}`,
+                                borderRadius: 3,
+                                transition: "all 0.25s ease",
+                                "&:hover": {
+                                    transform: "translateY(-2px)",
+                                    boxShadow: 4,
+                                },
                             }}
                         >
-                            <Typography fontWeight={700}>
-                                {n.title}
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    mb: 1,
+                                }}
+                            >
+                                <Typography fontWeight={700}>
+                                    {n.title}
+                                </Typography>
+
+                                <Box sx={{ display: "flex", gap: 1 }}>
+                                    <Chip
+                                        label={currentType.label}
+                                        size="small"
+                                        sx={{
+                                            backgroundColor: currentType.color,
+                                            color: "white",
+                                            fontWeight: 600,
+                                        }}
+                                    />
+
+                                    {!n.isRead && (
+                                        <Chip
+                                            label={t("notificationsPage.new")}
+                                            size="small"
+                                            color="primary"
+                                        />
+                                    )}
+                                </Box>
+                            </Box>
+
+                            <Typography variant="body2" sx={{ mb: 1, opacity: 0.85 }}>
+                                {n.body}
                             </Typography>
 
-                            {!n.isRead && (
-                                <Chip
-                                    label={t("notificationsPage.new")}
-                                    size="small"
-                                    color="primary"
-                                />
-                            )}
-                        </Box>
+                            <Divider sx={{ my: 1 }} />
 
-                        <Typography
-                            variant="body2"
-                            sx={{ mb: 1, opacity: 0.85 }}
-                        >
-                            {n.body}
-                        </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {new Date(n.createdAt).toLocaleString(
+                                    i18n.language === "he"
+                                        ? "he-IL"
+                                        : i18n.language === "en"
+                                            ? "en-US"
+                                            : "ar-EG"
+                                )}
+                            </Typography>
+                        </Paper>
+                    </Fade>
+                );
+            })}
 
-                        <Divider sx={{ my: 1 }} />
-
-                        <Typography variant="caption" color="text.secondary">
-                            {new Date(n.createdAt).toLocaleString(
-                                i18n.language === "he"
-                                    ? "he-IL"
-                                    : i18n.language === "en"
-                                        ? "en-US"
-                                        : "ar-EG"
-                            )}
-                        </Typography>
-                    </Paper>
-                </Fade>
-            ))}
         </Box>
     );
 }

@@ -19,6 +19,7 @@ import { agenda } from "../config/agenda.js";
 import bcrypt from "bcrypt";
 import { NOTIFICATION_MESSAGES } from "../utils/notificationMessages.js";
 import { createUserInboxFromNotification } from "../services/notificationCenter.service.js";
+import UserNotification from "../models/UserNotification.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -689,20 +690,18 @@ export const sendCustomNotification = async (req, res) => {
     // ==========================================
     // Send notifications
     // ==========================================
-    let totalSuccess = 0;
-    let totalFail = 0;
+    const result = await sendGroupNotification({
+      users,
+      title,
+      body,
+      type: "admin",            // 🔥 مهم جداً
+      targetType: target === "all" ? "all" : "user",
+      targetUser: target === "all" ? null : target,
+    });
 
-    for (const u of users) {
-      const result = await sendSmartNotification({
-        user: u,
-        title,
-        body,
-        channel: "push",
-      });
+    const totalSuccess = result.successCount || 0;
+    const totalFail = result.failureCount || 0;
 
-      totalSuccess += result.successCount || 0;
-      totalFail += result.failureCount || 0;
-    }
 
     // ==========================================
     // Save to notifications history
@@ -737,7 +736,7 @@ export const sendCustomNotification = async (req, res) => {
     });
   } catch (error) {
     console.error("Error sending notification:", error);
-    console.error("⚠️ Inbox mirror failed:", e.message);
+    console.error("⚠️ Inbox mirror failed:", error.message);
 
     return res.status(500).json({
       code: "ADMIN_NOTIFICATION_ERROR",
@@ -926,15 +925,24 @@ export const updateUserByAdmin = async (req, res) => {
         NOTIFICATION_MESSAGES.passwordChanged[lang] ||
         NOTIFICATION_MESSAGES.passwordChanged.ar;
 
+      // 📝 حفظ إشعار النظام
+      await UserNotification.create({
+        user: user._id,
+        title: message.title,
+        body: message.body,
+        type: "security",
+        targetType: "all",
+      });
+
+      // 🔔 إرسال Push (كما كان)
       await sendSmartNotification({
         user,
         title: message.title,
         body: message.body,
-        channel: "push",
-        type: "SECURITY_ALERT",
         url: "/profile",
       });
     }
+
 
 
     const safeUser = user.toObject();

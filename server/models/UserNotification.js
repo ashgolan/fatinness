@@ -12,7 +12,11 @@ const userNotificationSchema = new mongoose.Schema(
     // UI state
     isRead: { type: Boolean, default: false },
     readAt: { type: Date, default: null },
-
+    type: {
+      type: String,
+      enum: ["system", "admin", "security"],
+      default: "system",
+    },
     // اختياري: يساعد بالـ deep link
     targetType: { type: String, enum: ["all", "user", "slot"], default: "all" },
     targetSlot: { type: mongoose.Schema.Types.ObjectId, ref: "Slot", default: null },
