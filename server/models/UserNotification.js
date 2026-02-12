@@ -6,7 +6,7 @@ const userNotificationSchema = new mongoose.Schema(
     notification: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Notification",
-      required: true,
+      // required: true,
     },
 
     // UI state

@@ -779,7 +779,12 @@
     "loadError": "Failed to load notifications",
     "updateError": "Error updating notification",
     "updateAllError": "Error updating notifications",
-    "allMarked": "All notifications marked as read"
+    "allMarked": "All notifications marked as read",
+    "types": {
+      "system": "System",
+      "admin": "Admin",
+      "security": "Security"
+    }
   },
   "server": {
     "errors": {

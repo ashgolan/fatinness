@@ -782,7 +782,12 @@
     "loadError": "שגיאה בטעינת ההתראות",
     "updateError": "שגיאה בעדכון ההתראה",
     "updateAllError": "שגיאה בעדכון ההתראות",
-    "allMarked": "כל ההתראות סומנו כנקראו"
+    "allMarked": "כל ההתראות סומנו כנקראו",
+    "types": {
+      "system": "מערכת",
+      "admin": "מנהל",
+      "security": "אבטחה"
+    }
   },
   "server": {
     "errors": {

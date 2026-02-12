@@ -20,6 +20,7 @@ import bcrypt from "bcrypt";
 import { NOTIFICATION_MESSAGES } from "../utils/notificationMessages.js";
 import { createUserInboxFromNotification } from "../services/notificationCenter.service.js";
 import UserNotification from "../models/UserNotification.js";
+import { sendGroupNotification } from "../utils/notifyGroup.js";
 
 // =======================
 // 📸 رفع الشعار (multer)
@@ -940,6 +941,7 @@ export const updateUserByAdmin = async (req, res) => {
         title: message.title,
         body: message.body,
         url: "/profile",
+        type : "admin"
       });
     }
 

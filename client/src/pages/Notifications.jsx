@@ -126,7 +126,6 @@ export default function Notifications() {
             </Box>
         );
     }
-
     return (
         <Box
             dir={i18n.dir()}
@@ -219,22 +218,18 @@ export default function Notifications() {
 
             {/* ================= LIST ================= */}
             {filteredNotifications.map((n) => {
-
                 const typeStyles = {
                     system: {
                         color: "#9c27b0",
-                        bg: "rgba(156,39,176,0.08)",
-                        label: "SYSTEM"
+                        label: t("notificationsPage.types.system"),
                     },
                     admin: {
                         color: "#1976d2",
-                        bg: "rgba(25,118,210,0.08)",
-                        label: "ADMIN"
+                        label: t("notificationsPage.types.admin"),
                     },
                     security: {
                         color: "#d32f2f",
-                        bg: "rgba(211,47,47,0.08)",
-                        label: "SECURITY"
+                        label: t("notificationsPage.types.security"),
                     },
                 };
 
@@ -248,9 +243,7 @@ export default function Notifications() {
                                 p: 2.5,
                                 mb: 2,
                                 cursor: "pointer",
-                                backgroundColor: n.isRead
-                                    ? "background.paper"
-                                    : currentType.bg,
+                                backgroundColor: "background.paper",
                                 borderInlineStart: `4px solid ${currentType.color}`,
                                 borderRadius: 3,
                                 transition: "all 0.25s ease",
@@ -264,7 +257,7 @@ export default function Notifications() {
                                 sx={{
                                     display: "flex",
                                     justifyContent: "space-between",
-                                    alignItems: "center",
+                                    alignItems: "flex-start",
                                     mb: 1,
                                 }}
                             >
@@ -272,34 +265,60 @@ export default function Notifications() {
                                     {n.title}
                                 </Typography>
 
-                                <Box sx={{ display: "flex", gap: 1 }}>
-                                    <Chip
-                                        label={currentType.label}
-                                        size="small"
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "flex-end",
+                                    }}
+                                >
+                                    {/* نوع الإشعار */}
+                                    <Typography
+                                        variant="caption"
                                         sx={{
-                                            backgroundColor: currentType.color,
-                                            color: "white",
-                                            fontWeight: 600,
+                                            color: currentType.color,
+                                            fontWeight: 700,
+                                            position: "relative",
+                                            pb: 0.5,
+                                            "&::after": {
+                                                content: '""',
+                                                position: "absolute",
+                                                bottom: 0,
+                                                left: 0,
+                                                right: 0,
+                                                height: "2px",
+                                                backgroundColor: currentType.color,
+                                                borderRadius: "2px",
+                                            },
                                         }}
-                                    />
+                                    >
+                                        {currentType.label}
+                                    </Typography>
 
                                     {!n.isRead && (
                                         <Chip
                                             label={t("notificationsPage.new")}
                                             size="small"
                                             color="primary"
+                                            sx={{ mt: 0.5 }}
                                         />
                                     )}
                                 </Box>
                             </Box>
 
-                            <Typography variant="body2" sx={{ mb: 1, opacity: 0.85 }}>
+                            <Typography
+                                variant="body2"
+                                sx={{ mb: 1, opacity: 0.85 }}
+                            >
                                 {n.body}
                             </Typography>
 
                             <Divider sx={{ my: 1 }} />
 
-                            <Typography variant="caption" color="text.secondary">
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                            >
                                 {new Date(n.createdAt).toLocaleString(
                                     i18n.language === "he"
                                         ? "he-IL"
@@ -312,7 +331,6 @@ export default function Notifications() {
                     </Fade>
                 );
             })}
-
         </Box>
     );
 }

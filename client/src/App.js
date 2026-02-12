@@ -109,6 +109,7 @@ export default function App() {
 
   useEffect(() => {
     const handler = () => {
+      if (!user) return;
       navigate("/notifications");
     };
 
@@ -233,7 +234,9 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/debug-api" element={<DebugApi />} />
-                  <Route path="/notifications" element={<Notifications />} />
+                  <Route element={<PrivateRoute />}>
+                    <Route path="/notifications" element={<Notifications />} />
+                  </Route>
 
                   {/* User */}
                   <Route element={<PrivateRoute role="user" />}>
