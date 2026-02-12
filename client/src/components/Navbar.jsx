@@ -449,36 +449,22 @@ export default function Navbar() {
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1,
-              mr: 2,
+              gap: 0.5,
+              mr: 1,
             }}
           >
-            <LightModeIcon
+            <IconButton
+              onClick={toggleMode}
               sx={{
-                color: mode === "dark" ? "#777" : BRAND.gold,
-                fontSize: 22,
-              }}
-            />
-            <Switch
-              checked={mode === "dark"}
-              onChange={toggleMode}
-              sx={{
-                "& .MuiSwitch-switchBase.Mui-checked": { color: BRAND.gold },
-                "& .MuiSwitch-track": {
-                  background:
-                    mode === "dark"
-                      ? "linear-gradient(90deg, #FBC02D, #E6C87A)"
-                      : "linear-gradient(90deg, #A01860, #FBC02D)",
+                color: mode === "dark" ? BRAND.gold : BRAND.purple,
+                transition: "all 0.25s ease",
+                "&:hover": {
+                  transform: "scale(1.15)",
                 },
-
               }}
-            />
-            <DarkModeIcon
-              sx={{
-                color: mode === "dark" ? BRAND.gold : "#777",
-                fontSize: 22,
-              }}
-            />
+            >
+              {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
             {/* 🔔 Notifications Icon */}
             <IconButton
               onClick={() => navigate("/notifications")}
