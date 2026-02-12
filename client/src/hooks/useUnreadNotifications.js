@@ -17,20 +17,23 @@ export default function useUnreadNotifications() {
     }
   };
 
-  // عند دخول صفحة الإشعارات → صفر
+  // 🔥 عند تحميل التطبيق أول مرة
+  useEffect(() => {
+    fetchUnreadCount();
+  }, []);
+
+  // 🔥 إذا دخل صفحة الإشعارات → اجلب العدد الحقيقي من السيرفر
   useEffect(() => {
     if (location.pathname === "/notifications") {
-      setUnreadCount(0);
+      fetchUnreadCount();
     }
   }, [location.pathname]);
 
-  // 🔥 الاستماع الحقيقي لإشعار FCM
+  // 🔔 عند وصول إشعار جديد
   useEffect(() => {
     const handler = () => {
-      // زد فورًا
       setUnreadCount((prev) => prev + 1);
 
-      // مزامنة بعد قليل
       setTimeout(() => {
         fetchUnreadCount();
       }, 500);
@@ -40,6 +43,19 @@ export default function useUnreadNotifications() {
 
     return () => {
       window.removeEventListener(FCM_EVENT, handler);
+    };
+  }, []);
+
+  // 🔁 عند عمل mark all أو mark single
+  useEffect(() => {
+    const handleRefresh = () => {
+      fetchUnreadCount();
+    };
+
+    window.addEventListener("refresh-unread-count", handleRefresh);
+
+    return () => {
+      window.removeEventListener("refresh-unread-count", handleRefresh);
     };
   }, []);
 
