@@ -225,6 +225,7 @@ export default function App() {
                   <Route path="/login" element={<Login />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/debug-api" element={<DebugApi />} />
+                    <Route path="/notifications" element={<Notifications />} />
 
                   {/* User */}
                   <Route element={<PrivateRoute role="user" />}>
@@ -233,7 +234,6 @@ export default function App() {
                     <Route path="/gallery" element={<Gallery />} />
                     <Route path="/bookings" element={<Booking />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
-                    <Route path="/notifications" element={<Notifications />} />
 
                     <Route
                       path="/bookings-hub"

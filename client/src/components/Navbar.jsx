@@ -467,7 +467,13 @@ export default function Navbar() {
             </IconButton>
             {/* 🔔 Notifications Icon */}
             <IconButton
-              onClick={() => navigate("/notifications")}
+              onClick={() => {
+                if (location.pathname === "/notifications") {
+                  window.dispatchEvent(new Event("force-notifications-refresh"));
+                } else {
+                  navigate("/notifications");
+                }
+              }}
               sx={{
                 color: mode === "dark" ? BRAND.textDark : "#555",
                 transition: "all 0.2s ease",
