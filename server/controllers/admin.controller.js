@@ -941,7 +941,7 @@ export const updateUserByAdmin = async (req, res) => {
         title: message.title,
         body: message.body,
         url: "/profile",
-        type : "admin"
+        type: "admin"
       });
     }
 
@@ -1222,6 +1222,8 @@ export const resetLight = async (req, res) => {
       Notification.deleteMany({}),
       Slot.deleteMany({}),
       WeekTemplate.deleteMany({}),
+      UserNotification.deleteMany({})
+
     ]);
 
     await restartAgenda();
@@ -1251,6 +1253,7 @@ export const resetMedium = async (req, res) => {
       WeekTemplate.deleteMany({}),
       Setting.deleteMany({}),
       User.deleteMany({ _id: { $ne: superAdminId } }),
+      UserNotification.deleteMany({})
     ]);
 
     await restartAgenda();
@@ -1280,6 +1283,8 @@ export const resetHard = async (req, res) => {
       WeekTemplate.deleteMany({}),
       Setting.deleteMany({}),
       User.deleteMany({ _id: { $ne: superAdminId } }),
+      UserNotification.deleteMany({})
+
     ]);
 
     // 🗑️ حذف الملفات من uploads
