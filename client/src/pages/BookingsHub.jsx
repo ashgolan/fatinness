@@ -404,7 +404,7 @@ export default function BookingsHub() {
                 handleRebook,
                 t,
                 myBookings, // ✅ هذا هو السطر الناقص
-
+                locale
               }}
             />
           )}
@@ -805,6 +805,7 @@ function MyBookingsView({
   handleCancel,
   handleRebook,
   t,
+  locale
 
 }) {
   const now = new Date();
@@ -889,11 +890,10 @@ function MyBookingsView({
               >
                 <div style={{ fontWeight: 700, marginBottom: 8 }}>
                   📅{" "}
-                  {new Date(b.slot.startAt).toLocaleDateString("ar-EG", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}
+                  {DateTime.fromISO(b.slot.startAt, { zone: "utc" })
+                    .setZone("local")
+                    .setLocale(locale)
+                    .toFormat("dd/MM/yyyy")}
                 </div>
                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
                   {b.slot.title}
