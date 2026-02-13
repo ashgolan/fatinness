@@ -109,7 +109,11 @@ export default function App() {
 
   useEffect(() => {
     const handler = () => {
-      if (!user) return;
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
       navigate("/notifications");
     };
 
@@ -118,7 +122,8 @@ export default function App() {
     return () => {
       window.removeEventListener("open-notifications", handler);
     };
-  }, [navigate]);
+  }, [navigate, user]);
+
 
   const [inAppNotification, setInAppNotification] = useState(null);
 
