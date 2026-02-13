@@ -18,6 +18,9 @@ cd client
 npm install
 
 echo "🏗 build client"
+echo "🔢 updating version"
+echo "{ \"version\": \"$(date +%s)\" }" > client/public/version.json
+
 npm run build
 
 cd ..

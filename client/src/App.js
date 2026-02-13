@@ -160,6 +160,43 @@ export default function App() {
     document.documentElement.dir =
       user.preferredLanguage === "en" ? "ltr" : "rtl";
   }, [user]);
+  // ======================================================
+  // 🔄 Version Auto Update (only on app reopen)
+  // ======================================================
+  useEffect(() => {
+    let currentVersion = null;
+
+    const checkVersion = async () => {
+      try {
+        const res = await fetch("/version.json", { cache: "no-store" });
+        const data = await res.json();
+
+        if (!currentVersion) {
+          currentVersion = data.version;
+        } else if (currentVersion !== data.version) {
+          console.log("🔄 New version detected — reloading...");
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error("Version check failed", err);
+      }
+    };
+
+    // أول تحميل
+    checkVersion();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        checkVersion();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   // ======================================================
   // 🔐 فحص first-run (دائمًا – بدون Token)
