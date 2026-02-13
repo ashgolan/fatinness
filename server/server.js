@@ -52,6 +52,8 @@ app.use(
         "http://localhost:5173",
         "https://fateness.onrender.com",
         "https://api.fatinness.cloud",
+  "https://fatinness.com",
+
       ];
 
       if (allowedOrigins.includes(origin)) {
