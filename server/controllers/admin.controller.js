@@ -306,9 +306,9 @@ export const exportAttendanceReport = async (req, res) => {
         : "—";
 
       let statusStr = "—";
-      if (b.status === "booked") statusStr = "نشط ✅";
-      else if (b.status === "cancelled") statusStr = "ملغى ❌";
-      else if (b.status === "completed") statusStr = "منجز ✅";
+      if (b.status === "booked") statusStr = "פעיל ✅";
+      else if (b.status === "cancelled") statusStr = "מבוטל ❌";
+      else if (b.status === "completed") statusStr = "מושלם ✅";
 
       return {
         username: b.user?.username || "—",

@@ -29,17 +29,18 @@ ChartJS.register(
 
 // 🎯 البطاقات
 const cards = [
-  { key: "totalUsers", label: "إجمالي المشتركات", icon: "💖" },
-  { key: "activeUsers", label: "المشتركات النشِطات", icon: "🌸" },
-  { key: "blockedUsers", label: "المشتركات المحظورات", icon: "🚷" },
-  { key: "totalBookings", label: "إجمالي الحجوزات", icon: "📅" },
-  { key: "activeBookings", label: "الحجوزات النشطة", icon: "💪" },
-  { key: "completedBookings", label: "الحجوزات المنجزة", icon: "🏆" },
-  { key: "cancelled", label: "الحجوزات الملغاة", icon: "💔" },
-  { key: "totalSlots", label: "عدد الجلسات", icon: "🧘‍♀️" },
-  { key: "todaySessions", label: "جلسات اليوم", icon: "☀️" },
-  { key: "upcomingWeekSessions", label: "جلسات الأسبوع القادم", icon: "🌈" },
+  { key: "totalUsers", icon: "💖" },
+  { key: "activeUsers", icon: "🌸" },
+  { key: "blockedUsers", icon: "🚷" },
+  { key: "totalBookings", icon: "📅" },
+  { key: "activeBookings", icon: "💪" },
+  { key: "completedBookings", icon: "🏆" },
+  { key: "cancelled", icon: "💔" },
+  { key: "totalSlots", icon: "🧘‍♀️" },
+  { key: "todaySessions", icon: "☀️" },
+  { key: "upcomingWeekSessions", icon: "🌈" },
 ];
+
 
 export default function AdminDashboard() {
   const handleServerError = useServerError();
@@ -113,40 +114,40 @@ export default function AdminDashboard() {
     i18n.language === "he"
       ? "he-IL"
       : i18n.language === "en"
-      ? "en-US"
-      : "ar-EG";
+        ? "en-US"
+        : "ar-EG";
 
   // 🎨 الرسم البياني
   const chartData = stats?.dailyBookings
     ? {
-        labels: stats.dailyBookings.map((d) =>
-          new Date(d.date).toLocaleDateString(chartLocale, {
-            weekday: "short",
-          })
-        ),
-        datasets: [
-          {
-            label: t("adminDashboard.chart.activeBookingsLabel"),
-            data: stats.dailyBookings.map((d) => d.active),
-            borderColor: isDark ? "#ab47bc" : "#ab47bc",
-            backgroundColor: isDark
-              ? "rgba(206, 147, 216, 0.25)"
-              : "rgba(244, 143, 177, 0.25)",
-            tension: 0.4,
-            fill: true,
-          },
-          {
-            label: t("adminDashboard.chart.cancelledBookingsLabel"),
-            data: stats.dailyBookings.map((d) => d.cancelled),
-            borderColor: isDark ? "#ffb74d" : "#ffb74d",
-            backgroundColor: isDark
-              ? "rgba(244,143,177,0.25)"
-              : "rgba(255,183,77,0.25)",
-            tension: 0.4,
-            fill: true,
-          },
-        ],
-      }
+      labels: stats.dailyBookings.map((d) =>
+        new Date(d.date).toLocaleDateString(chartLocale, {
+          weekday: "short",
+        })
+      ),
+      datasets: [
+        {
+          label: t("adminDashboard.chart.activeBookingsLabel"),
+          data: stats.dailyBookings.map((d) => d.active),
+          borderColor: isDark ? "#ab47bc" : "#ab47bc",
+          backgroundColor: isDark
+            ? "rgba(206, 147, 216, 0.25)"
+            : "rgba(244, 143, 177, 0.25)",
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: t("adminDashboard.chart.cancelledBookingsLabel"),
+          data: stats.dailyBookings.map((d) => d.cancelled),
+          borderColor: isDark ? "#ffb74d" : "#ffb74d",
+          backgroundColor: isDark
+            ? "rgba(244,143,177,0.25)"
+            : "rgba(255,183,77,0.25)",
+          tension: 0.4,
+          fill: true,
+        },
+      ],
+    }
     : null;
 
   const chartOptions = {
