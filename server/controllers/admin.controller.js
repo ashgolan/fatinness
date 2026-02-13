@@ -700,8 +700,8 @@ export const sendCustomNotification = async (req, res) => {
       targetUser: target === "all" ? null : target,
     });
 
-    const totalSuccess = result.successCount || 0;
-    const totalFail = result.failureCount || 0;
+    const totalSuccess = result?.successCount ?? 0;
+    const totalFail = result?.failureCount ?? 0;
 
 
     // ==========================================

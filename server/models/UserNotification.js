@@ -29,6 +29,6 @@ const userNotificationSchema = new mongoose.Schema(
 );
 
 // مهم: يمنع تكرار نفس الإشعار لنفس المستخدم
-userNotificationSchema.index({ user: 1, notification: 1 }, { unique: true });
+userNotificationSchema.index({ user: 1 });
 
 export default mongoose.model("UserNotification", userNotificationSchema);
