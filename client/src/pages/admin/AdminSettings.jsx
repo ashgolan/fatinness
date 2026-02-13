@@ -50,23 +50,31 @@ export default function AdminSettings() {
   // =============================
   const fetchSettings = async () => {
     try {
-      const { data } = await Api.get("/admin/settings");
+      const [{ data: settingsData }, { data: galleryData }] =
+        await Promise.all([
+          Api.get("/admin/settings"),
+          Api.get("/gallery"),
+        ]);
 
-      const settingsData = Array.isArray(data)
-        ? data[0]
-        : data.settings || data;
+      const settingsNormalized = Array.isArray(settingsData)
+        ? settingsData[0]
+        : settingsData.settings || settingsData;
 
       const normalized = {
-        ...settingsData,
-        logoUrl: settingsData.logoUrl || settingsData.LogoUrl || DEFAULT_LOGO,
-        cardUrl: settingsData.cardUrl || settingsData.CardUrl || DEFAULT_CARD,
-        galleryImages: settingsData.galleryImages || [], // ✅ مهم جدًا
+        ...settingsNormalized,
+        logoUrl:
+          settingsNormalized.logoUrl ||
+          settingsNormalized.LogoUrl ||
+          DEFAULT_LOGO,
+        cardUrl:
+          settingsNormalized.cardUrl ||
+          settingsNormalized.CardUrl ||
+          DEFAULT_CARD,
+        galleryImages: galleryData || [], // 🔥 هنا الحل الحقيقي
       };
 
-      // const [{ data: settingsData2 }, { data: galleryData }] =
-        // await Promise.all([Api.get("/admin/settings"), Api.get("/gallery")]);
-
       setSettings(normalized);
+
     } catch (err) {
       handleServerError(err);
     } finally {
@@ -130,7 +138,7 @@ export default function AdminSettings() {
 
         setSettings((prev) => ({
           ...prev,
-galleryImages: [...(prev.galleryImages || []), data],
+          galleryImages: [...(prev.galleryImages || []), data],
         }));
 
         toast.success(t("adminSettings.gallery.uploadSuccess"));
@@ -221,7 +229,7 @@ galleryImages: [...(prev.galleryImages || []), data],
     }
   };
 
-if (loading || !settings)
+  if (loading || !settings)
     return (
       <Box sx={{ textAlign: "center", mt: 5 }}>
         <CircularProgress />
