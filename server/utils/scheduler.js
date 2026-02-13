@@ -4,6 +4,7 @@ import Booking from "../models/Booking.js";
 import User from "../models/User.js";
 import { sendSmartNotification } from "../utils/notify.js";
 import { ZONE } from "../utils/time.js";
+import UserNotification from "../models/UserNotification.js";
 
 // ======================================================
 // 🔧 إنشاء المجدول (كما كان)
@@ -35,73 +36,6 @@ agenda.on("ready", async () => {
   await agenda.every("0 2 * * *", "check-subscriptions-daily");
 });
 
-// ======================================================
-// 🔔 تذكير قبل ساعتين
-// ======================================================
-// agenda.define("send-reminder", async (job) => {
-//   const { bookingId } = job.attrs.data;
-
-//   const booking = await Booking.findById(bookingId).populate("user slot");
-//   if (!booking || booking.status !== "booked") return;
-//   if (booking.reminderSent) return;
-
-//   const lang = booking.user.preferredLanguage || "ar";
-//   const locale = getLocale(lang);
-
-//   const startUTC = DateTime.fromJSDate(booking.slot.startAt, { zone: "utc" });
-
-//   const dateStr = startUTC
-//     .setZone(ZONE)
-//     .toLocaleString(DateTime.DATE_FULL, { locale });
-
-//   const timeStr = startUTC.setZone(ZONE).toFormat("HH:mm");
-
-//   await sendSmartNotification({
-//     user: booking.user,
-//     title: NOTIFICATION_TITLE,
-//     body:
-//       lang === "en"
-//         ? `You have training today ${dateStr} at ${timeStr}`
-//         : lang === "he"
-//         ? `יש לך אימון היום ${dateStr} בשעה ${timeStr}`
-//         : `لديكِ تدريب اليوم ${dateStr} الساعة ${timeStr}`,
-//   });
-
-//   booking.reminderSent = true;
-//   await booking.save();
-
-//   console.log("🔔 Reminder sent");
-// });
-
-// ======================================================
-// 🏁 إنهاء الحصة
-// ======================================================
-// agenda.define("mark-completed", async (job) => {
-//   const { bookingId } = job.attrs.data;
-
-//   const booking = await Booking.findById(bookingId).populate("user slot");
-//   if (!booking || booking.status !== "booked") return;
-
-//   const nowUTC = DateTime.utc();
-//   const endUTC = DateTime.fromJSDate(booking.slot.endAt, { zone: "utc" });
-//   if (nowUTC < endUTC) return;
-
-//   booking.status = "completed";
-//   await booking.save();
-
-//   const lang = booking.user.preferredLanguage || "ar";
-
-//   await sendSmartNotification({
-//     user: booking.user,
-//     title: NOTIFICATION_TITLE,
-//     body:
-//       lang === "en"
-//         ? "You completed your training 💪"
-//         : lang === "he"
-//         ? "סיימת את האימון שלך 💪"
-//         : "لقد أنهيتِ تدريبك 💪",
-//   });
-// });
 
 // ======================================================
 // ⭐ فحص الاشتراكات
@@ -132,13 +66,27 @@ agenda.define("check-subscriptions-daily", async () => {
           lang
         );
 
+        // 📝 حفظ في Inbox
+        await UserNotification.create({
+          user: user._id,
+          title,
+          body,
+          type: "subscription",
+          targetType: "user",
+        });
+
+        // 🔔 إرسال Push
         await sendSmartNotification({
           user,
           title,
           body,
           channel: "push",
-          data: { type: "SUBSCRIPTION_EXPIRING_5_DAYS" },
+          data: {
+            type: "subscription",
+            event: "SUBSCRIPTION_EXPIRING_5_DAYS",
+          },
         });
+
 
         user.notified5Days = true;
         await user.save();
@@ -154,13 +102,25 @@ agenda.define("check-subscriptions-daily", async () => {
           lang
         );
 
+        await UserNotification.create({
+          user: user._id,
+          title,
+          body,
+          type: "subscription",
+          targetType: "user",
+        });
+
         await sendSmartNotification({
           user,
           title,
           body,
           channel: "push",
-          data: { type: "SUBSCRIPTION_EXPIRING_2_DAYS" },
+          data: {
+            type: "subscription",
+            event: "SUBSCRIPTION_EXPIRING_2_DAYS",
+          },
         });
+
 
         user.notified2Days = true;
         await user.save();
@@ -185,13 +145,25 @@ agenda.define("check-subscriptions-daily", async () => {
           lang
         );
 
+        await UserNotification.create({
+          user: user._id,
+          title,
+          body,
+          type: "subscription",
+          targetType: "user",
+        });
+
         await sendSmartNotification({
           user,
           title,
           body,
           channel: "push",
-          data: { type: "SUBSCRIPTION_EXPIRED" },
+          data: {
+            type: "subscription",
+            event: "SUBSCRIPTION_EXPIRED",
+          },
         });
+
       }
     } catch (err) {
       console.error(
@@ -204,35 +176,6 @@ agenda.define("check-subscriptions-daily", async () => {
   console.log("✅ Daily subscription check completed");
 });
 
-
-// ======================================================
-// 🕒 جدولة الحجز (✨ التحسين الوحيد ✨)
-// ======================================================
-// export const scheduleReminder = async (bookingId, startAt, endAt) => {
-//   await agenda.cancel({ "data.bookingId": bookingId });
-
-//   const startUTC = DateTime.fromJSDate(startAt, { zone: "utc" });
-//   const endUTC = DateTime.fromJSDate(endAt, { zone: "utc" });
-//   const reminderAt = startUTC.minus({ hours: 2 });
-//   const now = DateTime.utc();
-
-//   // ⭐ التحسين المهم
-//   if (reminderAt <= now) {
-//     await agenda.now("send-reminder", { bookingId });
-//   } else {
-//     await agenda.schedule(reminderAt.toJSDate(), "send-reminder", {
-//       bookingId,
-//     });
-//   }
-
-//   await agenda.schedule(
-//     endUTC.plus({ minutes: 1 }).toJSDate(),
-//     "mark-completed",
-//     { bookingId }
-//   );
-
-//   console.log("⏱ Scheduler set for booking:", bookingId);
-// };
 
 // ======================================================
 // 🚀 بدء المجدول (كما كان)

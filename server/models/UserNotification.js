@@ -14,7 +14,7 @@ const userNotificationSchema = new mongoose.Schema(
     readAt: { type: Date, default: null },
     type: {
       type: String,
-      enum: ["system", "admin", "security"],
+      enum: ["system", "admin", "security", "subscription"],
       default: "system",
     },
     // اختياري: يساعد بالـ deep link
