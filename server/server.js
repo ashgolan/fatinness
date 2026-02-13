@@ -24,19 +24,6 @@ import { startScheduler } from "./utils/scheduler.js";
 import { exec } from "child_process";
 const app = express();
 
-
-app.use((req, res, next) => {
-  const oldDomain = "fateness.onrender.com";
-  const newDomain = "fatinness.com";
-
-  if (req.hostname === oldDomain) {
-    return res.redirect(301, `https://${newDomain}${req.originalUrl}`);
-  }
-
-  next();
-});
-
-
 // GitHub webhook raw body
 // app.use("/deploy", express.raw({ type: "application/json" }));
 
