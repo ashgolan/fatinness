@@ -10,12 +10,30 @@ git fetch origin
 echo "🔁 git reset --hard origin/main"
 git reset --hard origin/main
 
-echo "📦 install deps"
+# ======================
+# 🟣 CLIENT BUILD
+# ======================
+echo "📦 install client deps"
+cd client
+npm install
+
+echo "🏗 build client"
+npm run build
+
+cd ..
+
+# ======================
+# 🟢 SERVER
+# ======================
+echo "📦 install server deps"
 cd server
 npm install --production
 cd ..
 
 echo "♻️ restart pm2"
 pm2 restart fatinness
+
+echo "🔄 reload nginx"
+sudo systemctl reload nginx
 
 echo "✅ deploy finished"
