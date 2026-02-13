@@ -260,7 +260,8 @@ export default function AdminNotifications() {
 
               {users.map((u) => (
                 <MenuItem key={u._id} value={u._id}>
-                  👩 {u.username}
+                  {u.gender === "female" ? "👩" : u.gender === "male" ? "👨" : "👤"}{" "}
+                  {u.username}
                 </MenuItem>
               ))}
             </Select>
@@ -349,11 +350,10 @@ export default function AdminNotifications() {
               >
                 {/* النص */}
                 <ListItemText
-                  primary={`${n.title} (${
-                    n.targetType === "all"
+                  primary={`${n.title} (${n.targetType === "all"
                       ? t("adminNotifications.allUsers")
                       : n.targetUser?.username
-                  })`}
+                    })`}
                   secondary={
                     <>
                       <Typography sx={{ color: BRAND.sub }}>
@@ -367,8 +367,8 @@ export default function AdminNotifications() {
                             i18n.language === "he"
                               ? "he-IL"
                               : i18n.language === "en"
-                              ? "en-US"
-                              : "ar-EG"
+                                ? "en-US"
+                                : "ar-EG"
                           )
                         )}
                         {" — "}

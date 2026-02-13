@@ -36,7 +36,7 @@
     "profile_title": "פרופיל",
     "profile_desc": "צפייה בנתונים ובהתקדמות המשקל",
     "booking_title": "מרכז הזמנות",
-    "booking_desc": "הזמיני אימונים ועקבי אחרי ההזמנות הקודמות והבאות שלך",
+    "booking_desc": "הזמן אימונים ועקבי אחרי ההזמנות הקודמות והבאות שלך",
     "enter_now": "כניסה 🚀",
     "keep_going": "המשיכו להתקדם לעבר המטרות שלכם!"
   },
@@ -56,10 +56,11 @@
     },
     "errors": {
       "status": "שגיאה {{status}}",
-      "network": "בדקי את חיבור האינטרנט",
+      "network": "בדק את חיבור האינטרנט",
       "email": "דוא״ל",
       "unexpected": "אירעה שגיאה בלתי צפויה.",
-      "loginFailed": "ההתחברות נכשלה"
+      "loginFailed": "ההתחברות נכשלה",
+      "tooManyAttempts": "יותר מדי ניסיונות התחברות. נסה שוב בעוד 15 דקות."
     }
   },
   "register": {
@@ -92,8 +93,8 @@
       "user": "משתמש"
     },
     "roles": {
-      "admin": "מנהלת",
-      "member": "מנויה"
+      "admin": "מנהל",
+      "member": "מנוי"
     },
     "stats": {
       "currentWeight": "משקל נוכחי",
@@ -124,7 +125,7 @@
     "notifications": {
       "title": "התראות",
       "description": "ההתראות מופעלות במכשיר אחר. ניתן להעביר אותן למכשיר זה.",
-      "confirmTransfer": "האם את בטוחה שברצונך להעביר את ההתראות למכשיר זה?",
+      "confirmTransfer": "האם אתה בטוח שברצונך להעביר את ההתראות למכשיר זה?",
       "transferButton": "העברת התראות למכשיר זה",
       "transferring": "מעביר התראות...",
       "transferredSuccess": "ההתראות הועברו בהצלחה 🔔",
@@ -508,8 +509,8 @@
     },
     "errors": {
       "cannotBlockAdmin": "לא ניתן לחסום מנהלות",
-      "cannotDeleteSuperAdmin": "לא ניתן למחוק את המנהלת הראשית",
-      "onlySuperAdminCanPromote": "רק המנהלת הראשית יכולה לקדם מנוי למנהל"
+      "cannotDeleteSuperAdmin": "לא ניתן למחוק את המנהל הראשי",
+      "onlySuperAdminCanPromote": "רק המנהל הראשי יכול לקדם מנוי למנהל"
     },
     "confirm": {
       "block": "האם את בטוח שברצונך לחסום מנוי זו?",
@@ -688,15 +689,15 @@
     },
     "medium": {
       "title": "איפוס בינוני",
-      "desc": "מוחק את כל מה שב־Light + מחיקת כל המשתמשים והמנהלות הרגילות. נשארת רק המנהלת הראשית."
+      "desc": "מוחק את כל מה שב־Light + מחיקת כל המשתמשים והמנהלים הרגילים. נשארת רק המנהל הראשי."
     },
     "hard": {
       "title": "איפוס חזק",
-      "desc": "מחיקת כמעט הכול מלבד המנהלת הראשית. כולל מחיקת תמונות והגדרות."
+      "desc": "מחיקת כמעט הכול מלבד המנהל הראשי. כולל מחיקת תמונות והגדרות."
     },
     "factory": {
       "title": "איפוס יצרן",
-      "desc": "מחיקת מסד הנתונים כולו. בכניסה הבאה תופיע יצירת מנהלת ראשית חדשה."
+      "desc": "מחיקת מסד הנתונים כולו. בכניסה הבאה תופיע יצירת מנהל ראשי חדש."
     }
   },
   "registerSuperAdmin": {
@@ -830,7 +831,7 @@
       "WEIGHT_HISTORY_FETCH_ERROR": "שגיאה באחזור היסטוריית המשקלים.",
       "FCM_TOKEN_MISSING": "אסימון FCM חסר.",
       "SUB_RENEW_ERROR": "שגיאה בחידוש המנוי.",
-      "ADMIN_RESET_NOT_ALLOWED": "רק המנהלת הראשית יכולה לבצע איפוס.",
+      "ADMIN_RESET_NOT_ALLOWED": "רק המנהל הראשי יכול לבצע איפוס.",
       "ADMIN_RESET_LIGHT_ERROR": "אירעה שגיאה במהלך איפוס קל.",
       "ADMIN_RESET_MEDIUM_ERROR": "אירעה שגיאה במהלך איפוס בינוני.",
       "ADMIN_RESET_HARD_ERROR": "אירעה שגיאה במהלך איפוס חזק.",
@@ -842,14 +843,14 @@
       "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "ההתראה לא נמצאה.",
       "ADMIN_NOTIFICATION_CLEAR_ERROR": "נכשל ניקוי היסטוריית ההתראות.",
       "ADMIN_DELETE_USER_NOT_FOUND": "המשתמש לא נמצא.",
-      "ADMIN_DELETE_NOT_ALLOWED": "רק המנהלת הראשית יכולה למחוק.",
-      "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "לא ניתן למחוק את המנהלת הראשית.",
+      "ADMIN_DELETE_NOT_ALLOWED": "רק המנהל הראשי יכול למחוק.",
+      "ADMIN_DELETE_SUPERADMIN_FORBIDDEN": "לא ניתן למחוק את המנהל הראשי.",
       "ADMIN_DELETE_SELF_FORBIDDEN": "אין באפשרותך למחוק את עצמך.",
       "ADMIN_DELETE_ERROR": "אירעה שגיאה במחיקה.",
       "SUBSCRIPTION_EXPIRED": "המנוי שלך פג תוקף, נא לחדש כדי להמשיך 💳",
       "ADMIN_NOTIFICATION_FIELDS_REQUIRED": "יש להזין כותרת וטקסט להתראה.",
       "ADMIN_NOTIFICATION_ERROR": "אירעה שגיאה בשליחת ההתראה.",
-      "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "לא ניתן לחסום מנהלת מערכת.",
+      "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "לא ניתן לחסום מנהל מערכת.",
       "ADMIN_TOGGLE_BLOCK_ERROR": "אירעה שגיאה בשינוי מצב החסימה.",
       "CSV_EXPORT_ERROR": "ייצוא הדוח נכשל.",
       "BOOKING_SLOT_ID_REQUIRED": "לא נבחרה חוגה להזמנה ❌",

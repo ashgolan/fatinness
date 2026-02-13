@@ -48,7 +48,7 @@
     "password": "كلمة المرور",
     "button": "تسجيل الدخول",
     "buttonLoading": "جارٍ تسجيل الدخول...",
-    "noAccount": "ليس لديكِ حساب؟",
+    "noAccount": "ليس لديك حساب؟",
     "createAccount": "أنشئ حسابًا جديدًا",
     "contactAdmin": "يرجى التواصل مع الإدارة لإنشاء حساب جديد 🙏",
     "success": {
@@ -57,9 +57,10 @@
     },
     "errors": {
       "status": "خطأ {{status}}",
-      "network": "تعذّر الاتصال بالخادم. تحققي من الإنترنت أو إعدادات CORS.",
+      "network": "تعذّر الاتصال بالخادم. تحقق من الإنترنت أو إعدادات CORS.",
       "unexpected": "حدث خطأ غير متوقع.",
-      "loginFailed": "فشل تسجيل الدخول"
+      "loginFailed": "فشل تسجيل الدخول",
+      "tooManyAttempts": "تم تجاوز عدد المحاولات. حاول مرة أخرى بعد 15 دقيقة."
     }
   },
   "register": {
@@ -78,7 +79,7 @@
       "female": "أنثى",
       "male": "ذكر",
       "role": "نوع الحساب",
-      "roleUser": "مشتركة",
+      "roleUser": "مشترك",
       "roleAdmin": "مديرة",
       "roleHelper": "اختار ما إذا كانت مشترك أو مدير",
       "height": "الطول (سم)",
@@ -93,7 +94,7 @@
     },
     "roles": {
       "admin": "مدير",
-      "member": "مشتركة"
+      "member": "مشترك"
     },
     "stats": {
       "currentWeight": "الوزن الحالي",
@@ -763,7 +764,7 @@
     "denied": "لم يتم السماح بالإشعارات. يمكنك تفعيلها من إعدادات المتصفح لاحقًا.",
     "passwordChanged": {
       "title": "🔐 أمان الحساب",
-      "body": "تم تغيير كلمة المرور الخاصة بحسابك. إذا لم تقومي بهذا الإجراء، يرجى التواصل مع الإدارة فورًا."
+      "body": "تم تغيير كلمة المرور الخاصة بحسابك. إذا لم تقوم بهذا الإجراء، يرجى التواصل مع الإدارة فورًا."
     },
     "login_required": "يجب تسجيل الدخول أولًا لتفعيل الإشعارات"
   },
@@ -812,7 +813,7 @@
       "AUTH_LOGIN_BLOCKED": "تم حظر هذا الحساب مؤقتًا 🚫",
       "BOOKING_SLOT_NOT_AVAILABLE": "هذه الحصة غير متاحة.",
       "BOOKING_SLOT_PAST": "هذه الحصة قد انتهت أو بدأت بالفعل.",
-      "BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأسبوعي للحجوزات.",
+      "BOOKING_WEEKLY_LIMIT": "لقد وصلت إلى الحد الأسبوعي للحجوزات.",
       "BOOKING_SLOT_FULL": "هذه الحصة ممتلئة.",
       "BOOKING_CREATE_ERROR": "حدث خطأ أثناء إنشاء الحجز.",
       "BOOKING_CANCEL_NOT_FOUND": "الحجز غير موجود.",
@@ -833,7 +834,7 @@
       "ADMIN_RESET_HARD_ERROR": "حدث خطأ أثناء إعادة الضبط القوية.",
       "ADMIN_RESET_FACTORY_ERROR": "حدث خطأ أثناء إعادة ضبط المصنع.",
       "ADMIN_NOTIFICATION_MISSING_FIELDS": "الرجاء إدخال العنوان والمحتوى.",
-      "ADMIN_NOTIFICATION_USER_NOT_FOUND": "لم يتم العثور على المشتركة.",
+      "ADMIN_NOTIFICATION_USER_NOT_FOUND": "لم يتم العثور على المشترك.",
       "ADMIN_NOTIFICATION_NO_TARGETS": "لا توجد مشتركات مستهدفات.",
       "ADMIN_NOTIFICATION_SEND_ERROR": "حدث خطأ أثناء إرسال الإشعار.",
       "ADMIN_NOTIFICATION_DELETE_NOT_FOUND": "الإشعار غير موجود.",

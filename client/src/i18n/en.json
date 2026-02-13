@@ -57,9 +57,10 @@
     },
     "errors": {
       "status": "Error {{status}}",
-      "network": "Unable to connect to the server. Check your internet connection or CORS settings.",
+      "network": "Unable to connect to the server. Please check your internet connection.",
       "unexpected": "An unexpected error occurred.",
-      "loginFailed": "Login failed"
+      "loginFailed": "Login failed",
+      "tooManyAttempts": "Too many login attempts. Please try again in 15 minutes."
     }
   },
   "register": {

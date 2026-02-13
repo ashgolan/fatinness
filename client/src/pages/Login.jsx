@@ -73,9 +73,9 @@ export default function Login() {
           localStorage.setItem("accessToken", data.accessToken);
         }
 
-   setTimeout(() => {
-    registerFcmToken({ silent: true });
-  }, 600);
+        setTimeout(() => {
+          registerFcmToken({ silent: true });
+        }, 600);
 
 
 
@@ -86,8 +86,24 @@ export default function Login() {
         toast.error(t("login.errors.loginFailed"));
       }
     } catch (err) {
+      const status = err.response?.status;
+
+      // 🔐 تجاوز عدد المحاولات
+      if (status === 429) {
+        toast.error(t("login.errors.tooManyAttempts"));
+        return;
+      }
+
+      // ❌ كلمة مرور أو اسم خاطئ
+      if (status === 401) {
+        toast.error(t("login.errors.invalidCredentials"));
+        return;
+      }
+
+      // ⚠️ أي خطأ آخر
       handleServerError(err);
-    } finally {
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -334,7 +350,7 @@ export default function Login() {
               {loading ? t("login.buttonLoading") : t("login.button")}
             </Button>
 
-  
+
 
           </Box>
 
