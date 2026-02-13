@@ -17,10 +17,10 @@ echo "📦 install client deps"
 cd client
 npm install
 
-echo "🏗 build client"
 echo "🔢 updating version"
-echo "{ \"version\": \"$(date +%s)\" }" > client/public/version.json
+echo "{ \"version\": \"$(date +%s)\" }" > /var/www/fatinness/client/public/version.json
 
+echo "🏗 build client"
 npm run build
 
 cd ..
