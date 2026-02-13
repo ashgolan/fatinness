@@ -158,14 +158,8 @@ export default function Notifications() {
                 >
                     <NotificationsIcon />
                     {t("notificationsPage.title")}
-                    {unreadCount > 0 && (
-                        <Chip
-                            label={unreadCount}
-                            color="error"
-                            size="small"
-                            sx={{ ml: 1 }}
-                        />
-                    )}
+
+
                 </Typography>
 
                 <Box sx={{ display: "flex", gap: 1 }}>
@@ -177,11 +171,27 @@ export default function Notifications() {
 
                     {unreadCount > 0 && (
                         <Tooltip title={t("notificationsPage.markAll")}>
-                            <IconButton onClick={markAllAsRead}>
+                            <IconButton
+                                onClick={markAllAsRead}
+                                sx={{
+                                    color: "primary.main",
+                                    animation: "tiltBounce 1.2s ease-in-out infinite",
+                                    "@keyframes tiltBounce": {
+                                        "0%": { transform: "translateY(0) rotate(0deg)" },
+                                        "20%": { transform: "translateY(-3px) rotate(-8deg)" },
+                                        "40%": { transform: "translateY(0) rotate(8deg)" },
+                                        "60%": { transform: "translateY(-2px) rotate(-6deg)" },
+                                        "80%": { transform: "translateY(0) rotate(6deg)" },
+                                        "100%": { transform: "translateY(0) rotate(0deg)" },
+                                    },
+                                }}
+
+                            >
                                 <MarkEmailReadIcon />
                             </IconButton>
                         </Tooltip>
                     )}
+
                 </Box>
             </Box>
 
