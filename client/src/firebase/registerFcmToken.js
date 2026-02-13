@@ -43,9 +43,17 @@ export async function registerFcmToken({
     if (Notification.permission !== "granted") return null;
 
     // 3️⃣ Service Worker
-    let registration =
-      (await navigator.serviceWorker.getRegistration("/")) ||
-      (await navigator.serviceWorker.register("/firebase-messaging-sw.js"));
+    // 3️⃣ Service Worker
+    let registration = await navigator.serviceWorker.getRegistration();
+
+    if (!registration) {
+      registration = await navigator.serviceWorker.register(
+        "/firebase-messaging-sw.js"
+      );
+    }
+
+    // تأكد أن الـ SW جاهز بالكامل
+    await navigator.serviceWorker.ready;
 
     // انتظر تفعيل الـ SW
     if (!registration.active) {
