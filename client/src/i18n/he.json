@@ -790,6 +790,10 @@
       "security": "אבטחה"
     }
   },
+  "inAppNotification": {
+    "close": "סגור",
+    "viewNotifications": "הצג התראות"
+  },
   "server": {
     "errors": {
       "ADMIN_SLOT_OVERLAP": "קיים חפיפה בין הזמנים ⛔",

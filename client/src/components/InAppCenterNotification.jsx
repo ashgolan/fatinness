@@ -8,6 +8,7 @@ import {
   Fade,
 } from "@mui/material";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
+import { useTranslation } from "react-i18next";
 
 export default function InAppCenterNotification({
   open,
@@ -15,6 +16,8 @@ export default function InAppCenterNotification({
   onClose,
   onOpenNotifications,
 }) {
+  const { t, i18n } = useTranslation();
+
   if (!notification) return null;
 
   return (
@@ -48,7 +51,7 @@ export default function InAppCenterNotification({
 
         <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
           <Button variant="outlined" onClick={onClose}>
-            إغلاق
+            {t("inAppNotification.close")}
           </Button>
 
           <Button
@@ -62,7 +65,7 @@ export default function InAppCenterNotification({
               fontWeight: 700,
             }}
           >
-            عرض الإشعارات
+            {t("inAppNotification.viewNotifications")}
           </Button>
         </Box>
       </DialogContent>

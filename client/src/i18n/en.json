@@ -787,6 +787,10 @@
       "security": "Security"
     }
   },
+  "inAppNotification": {
+    "close": "Close",
+    "viewNotifications": "View Notifications"
+  },
   "server": {
     "errors": {
       "ADMIN_SLOT_OVERLAP": "There is a time conflict ⛔",

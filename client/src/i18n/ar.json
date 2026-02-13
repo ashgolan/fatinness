@@ -787,6 +787,10 @@
       "security": "أمني"
     }
   },
+  "inAppNotification": {
+    "close": "إغلاق",
+    "viewNotifications": "عرض الإشعارات"
+  },
   "server": {
     "errors": {
       "ADMIN_SLOT_OVERLAP": "يوجد تعارض بين المواعيد ⛔",
