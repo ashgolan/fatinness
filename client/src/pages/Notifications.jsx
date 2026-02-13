@@ -241,7 +241,12 @@ export default function Notifications() {
                         color: "#d32f2f",
                         label: t("notificationsPage.types.security"),
                     },
+                    subscription: {
+                        color: "#2e7d32", // أخضر احترافي
+                        label: t("notificationsPage.types.subscription"),
+                    },
                 };
+
 
                 const currentType = typeStyles[n.type] || typeStyles.system;
 

@@ -784,7 +784,8 @@
     "types": {
       "system": "System",
       "admin": "Admin",
-      "security": "Security"
+      "security": "Security",
+      "subscription": "Subscription"
     }
   },
   "inAppNotification": {

@@ -784,7 +784,8 @@
     "types": {
       "system": "النظام",
       "admin": "الإدارة",
-      "security": "أمني"
+      "security": "أمني",
+      "subscription": "اشتراك"
     }
   },
   "inAppNotification": {

@@ -787,7 +787,8 @@
     "types": {
       "system": "מערכת",
       "admin": "מנהל",
-      "security": "אבטחה"
+      "security": "אבטחה",
+      "subscription": "מנוי"
     }
   },
   "inAppNotification": {
