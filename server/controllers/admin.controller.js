@@ -902,10 +902,18 @@ export const updateUserByAdmin = async (req, res) => {
     }
 
     // ⭐ تجديد الاشتراك
+    // ⭐ تجديد الاشتراك
     if (subscriptionEnd !== undefined && subscriptionEnd !== null) {
       user.subscriptionEnd = new Date(subscriptionEnd);
+      user.subscriptionStart = new Date(); // اختياري إن أردت
+      user.subscriptionStatus = "active";
+
+      user.notified5Days = false;
+      user.notified2Days = false;
+
       user.isBlocked = false;
     }
+
 
     // 🔐 تغيير كلمة المرور
     let passwordChanged = false;
