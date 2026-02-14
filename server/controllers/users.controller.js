@@ -51,6 +51,11 @@ export const getUserProfile = async (req, res) => {
       isSuperAdmin: user.isSuperAdmin || false,
       allowExtraBookings: user.allowExtraBookings || false,
       notificationsOwned,
+
+      subscriptionStart: user.subscriptionStart || null,
+      subscriptionEnd: user.subscriptionEnd || null,
+      subscriptionStatus: user.subscriptionStatus || "active",
+
       stats: {
         completedBookings,
         cancelledBookings,

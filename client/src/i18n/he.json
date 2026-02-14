@@ -250,7 +250,15 @@
     },
     "toasts": {
       "renewSuccess": "המנוי חודש בהצלחה ✅ תועברי לדף ההזמנות..."
-    }
+    },
+    "expiresOn": "מסתיים בתאריך",
+    "daysRemaining_zero": "המנוי הסתיים",
+    "daysRemaining_one": "נותר יום אחד",
+    "daysRemaining_two": "נותרו יומיים",
+    "daysRemaining_few": "נותרו {{count}} ימים",
+    "daysRemaining_many": "נותרו {{count}} ימים",
+    "daysRemaining_other": "נותרו {{count}} ימים",
+    "expired": "המנוי הסתיים"
   },
   "gallery": {
     "title": "גלריית המועדון",

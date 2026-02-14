@@ -230,7 +230,6 @@
     "cancelling": "جاري الإلغاء..."
   },
   "subscription": {
-    "title": "💳 اشتراكك الشهري",
     "status": "الحالة",
     "active": "نشط ✅",
     "inactive": "منتهي ❌",
@@ -250,7 +249,15 @@
     },
     "toasts": {
       "renewSuccess": "تم تجديد الاشتراك بنجاح ✅ سيتم تحويلك إلى صفحة الحجز..."
-    }
+    },
+    "expiresOn": "ينتهي في",
+    "daysRemaining_zero": "انتهى الاشتراك",
+    "daysRemaining_one": "متبقي يوم واحد",
+    "daysRemaining_two": "متبقي يومان",
+    "daysRemaining_few": "متبقي {{count}} أيام",
+    "daysRemaining_many": "متبقي {{count}} يوم",
+    "daysRemaining_other": "متبقي {{count}} يوم",
+    "expired": "انتهى الاشتراك"
   },
   "gallery": {
     "title": "ألبوم صور النادي",

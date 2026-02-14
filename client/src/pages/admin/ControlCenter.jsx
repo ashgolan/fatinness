@@ -16,12 +16,17 @@ import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import DashboardCustomizeIcon from "@mui/icons-material/DashboardCustomize";
 import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import SubscriptionStatusCard from "../../components/SubscriptionStatusCard";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
+
 
 export default function ControlCenter() {
   const navigate = useNavigate();
   const { mode, BRAND } = useThemeMode();
   const { t, i18n } = useTranslation();
 
+  const { user } = useContext(UserContext);
   const isDark = mode === "dark";
 
   const sections = [
@@ -117,6 +122,7 @@ export default function ControlCenter() {
       iconColor: "#d50000",
     }
   ];
+console.log("USER:", user);
 
   return (
     <Box
@@ -162,6 +168,18 @@ export default function ControlCenter() {
             {t("controlCenter.subtitle")}
           </Typography>
         </Box>
+        {/* Subscription Status (Admin only, not SuperAdmin) */}
+        {user && !user.isSuperAdmin && (
+          <Box sx={{ maxWidth: 600, mx: "auto", mb: 6 }}>
+            <SubscriptionStatusCard
+              subscriptionStart={user.subscriptionStart}
+              subscriptionEnd={user.subscriptionEnd}
+              isDark={isDark}
+              brandColors={BRAND}
+            />
+          </Box>
+        )}
+
 
         {/* Cards */}
         <Box

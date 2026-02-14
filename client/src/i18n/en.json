@@ -250,7 +250,15 @@
     },
     "toasts": {
       "renewSuccess": "Subscription renewed successfully ✅ Redirecting you to the booking page..."
-    }
+    },
+    "expiresOn": "Expires on",
+    "daysRemaining_zero": "Subscription expired",
+    "daysRemaining_one": "1 day remaining",
+    "daysRemaining_two": "2 days remaining",
+    "daysRemaining_few": "{{count}} days remaining",
+    "daysRemaining_many": "{{count}} days remaining",
+    "daysRemaining_other": "{{count}} days remaining",
+    "expired": "Subscription expired"
   },
   "gallery": {
     "title": "Club Gallery",

@@ -21,10 +21,14 @@ import { useThemeMode } from "../context/ThemeContext";
 import { useBrand } from "../context/BrandContext";
 
 import { useTranslation } from "react-i18next";
+import SubscriptionStatusCard from "../components/SubscriptionStatusCard";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
+
 
 const float = keyframes`
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+0%, 100% { transform: translateY(0px); }
+50% { transform: translateY(-10px); }
 `;
 
 export default function Dashboard() {
@@ -38,7 +42,8 @@ export default function Dashboard() {
 
   const fallbackCard = "/uploads/DEFAULT_CARD.jpg";
   const imgSrc = loadingBrand ? null : cardUrl || fallbackCard;
-  
+
+  const { user } = useContext(UserContext);
 
   // 🔹 الاختصارات مع الترجمة
   const shortcuts = [
@@ -107,7 +112,7 @@ export default function Dashboard() {
           animationDelay: "1s",
         }}
       />
-      
+
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
         {/* صورة الغلاف */}
@@ -197,6 +202,16 @@ export default function Dashboard() {
             </>
           )}
         </Box>
+
+
+        {user && !user.isSuperAdmin && (
+          <SubscriptionStatusCard
+            subscriptionStart={user.subscriptionStart}
+            subscriptionEnd={user.subscriptionEnd}
+            isDark={isDark}
+          />
+        )}
+
 
         {/* البطاقات */}
         <Box
