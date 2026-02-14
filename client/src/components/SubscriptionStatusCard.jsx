@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 
 const pulse = keyframes`
   0% { transform: scale(1); }
-  50% { transform: scale(1.02); }
+  50% { transform: scale(1.015); }
   100% { transform: scale(1); }
 `;
 
@@ -24,7 +24,9 @@ export default function SubscriptionStatusCard({
 
   const remainingDays = Math.ceil(end.diff(now, "days").days);
 
-  // لو انتهى
+  // =========================
+  // ⛔ إذا انتهى الاشتراك
+  // =========================
   if (remainingDays <= 0) {
     return (
       <Paper
@@ -33,7 +35,11 @@ export default function SubscriptionStatusCard({
           mb: 4,
           borderRadius: 4,
           textAlign: "center",
-          background: "#ECEFF1",
+          background: isDark ? "#2a1e2e" : "#ECEFF1",
+          color: isDark ? "#ff8a80" : "#c62828",
+          boxShadow: isDark
+            ? "0 4px 20px rgba(0,0,0,0.4)"
+            : "0 4px 15px rgba(0,0,0,0.08)",
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -43,12 +49,31 @@ export default function SubscriptionStatusCard({
     );
   }
 
-  // نعتبر أول يوم هو 100%
-  const maxDays = remainingDays;
-  const progressValue =
-    remainingDays > 0
-      ? Math.min(100, (remainingDays / maxDays) * 100)
-      : 0;
+  // =========================
+  // 🎨 تحديد الخلفية حسب الحالة
+  // =========================
+  let background;
+  let barGradient;
+
+  if (remainingDays > 5) {
+    background = isDark ? "#231a2f" : "#F3E5F5";
+    barGradient = isDark
+      ? "linear-gradient(90deg,#9c27b0,#ce93d8)"
+      : "linear-gradient(90deg,#ab47bc,#ce93d8)";
+  } else if (remainingDays > 2) {
+    background = isDark ? "#332515" : "#FFF3E0";
+    barGradient = isDark
+      ? "linear-gradient(90deg,#ff9800,#ffb74d)"
+      : "linear-gradient(90deg,#ffa726,#fb8c00)";
+  } else {
+    background = isDark ? "#3a1c1c" : "#FFEBEE";
+    barGradient = isDark
+      ? "linear-gradient(90deg,#ef5350,#e53935)"
+      : "linear-gradient(90deg,#e53935,#b71c1c)";
+  }
+
+  // حالياً البروجريس بصري فقط (100%)
+  const progressValue = 100;
 
   return (
     <Paper
@@ -57,19 +82,12 @@ export default function SubscriptionStatusCard({
         mb: 4,
         borderRadius: 4,
         textAlign: "center",
-        background:
-          remainingDays > 5
-            ? isDark
-              ? "#2b2139"
-              : "#F3E5F5"
-            : remainingDays > 2
-            ? "#FFF3E0"
-            : "#FFEBEE",
-        animation:
-          remainingDays <= 5
-            ? `${pulse} 1.8s infinite`
-            : "none",
+        background,
+        animation: remainingDays <= 5 ? `${pulse} 1.8s infinite` : "none",
         transition: "all 0.3s ease",
+        boxShadow: isDark
+          ? "0 6px 25px rgba(0,0,0,0.4)"
+          : "0 6px 20px rgba(0,0,0,0.08)",
       }}
     >
       <Typography
@@ -85,7 +103,13 @@ export default function SubscriptionStatusCard({
         {t("subscription.expiresOn")} {end.toFormat("dd/MM/yyyy")}
       </Typography>
 
-      <Typography variant="body2" sx={{ mb: 2 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          mb: 2,
+          color: isDark ? "#ddd" : "#444",
+        }}
+      >
         {t("subscription.daysRemaining", { count: remainingDays })}
       </Typography>
 
@@ -95,14 +119,9 @@ export default function SubscriptionStatusCard({
         sx={{
           height: 10,
           borderRadius: 10,
-          backgroundColor: isDark ? "#3a2d4f" : "#e0e0e0",
+          backgroundColor: isDark ? "#2f2438" : "#e0e0e0",
           "& .MuiLinearProgress-bar": {
-            background:
-              remainingDays > 5
-                ? "linear-gradient(90deg,#ab47bc,#ce93d8)"
-                : remainingDays > 2
-                ? "linear-gradient(90deg,#ffa726,#fb8c00)"
-                : "linear-gradient(90deg,#e53935,#b71c1c)",
+            background: barGradient,
             borderRadius: 10,
           },
         }}
