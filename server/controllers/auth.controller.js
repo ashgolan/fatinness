@@ -68,7 +68,7 @@ export const registerUser = async (req, res) => {
 
     // 3️⃣ تحقق أساسي
     if (!username || !password) {
-      return res.status(400).json({ code: "ADMIN_AUTH_MISSING_FIELDS" });
+      return res.status(400).json({ code: "AUTH_REGISTER_MISSING_FIELDS" });
     }
 
     const exists = await User.findOne({
@@ -83,7 +83,7 @@ export const registerUser = async (req, res) => {
       if (exists.phone === phone) {
         return res.status(409).json({ code: "PHONE_ALREADY_EXISTS" });
       }
-      return res.status(409).json({ code: "ADMIN_AUTH_USER_EXISTS" });
+      return res.status(409).json({ code: "AUTH_REGISTER_USER_EXISTS" });
     }
 
 
