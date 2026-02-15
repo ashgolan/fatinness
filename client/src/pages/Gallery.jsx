@@ -58,9 +58,8 @@ export default function Gallery() {
           fontWeight: 700,
           mb: 3,
           textAlign: "center",
-          background: `linear-gradient(90deg, ${
-            mode === "dark" ? BRAND.gold : BRAND.purple
-          }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
+          background: `linear-gradient(90deg, ${mode === "dark" ? BRAND.gold : BRAND.purple
+            }, ${mode === "dark" ? BRAND.purple : BRAND.gold})`,
           WebkitBackgroundClip: "text",
           WebkitTextFillColor: "transparent",
         }}
@@ -131,6 +130,7 @@ export default function Gallery() {
         PaperProps={{
           sx: {
             backgroundColor: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(6px)",   // 👈 أضف هنا
             boxShadow: "none",
           },
         }}
@@ -158,17 +158,40 @@ export default function Gallery() {
           </IconButton>
 
           {/* الصورة المكبرة */}
-          <img
-            src={selectedImg}
-            alt="Preview"
-            style={{
-              width: "100%",
-              maxWidth: "900px",
-              maxHeight: "90vh",
-              objectFit: "contain",
-              borderRadius: "8px",
+          {/* الصورة المكبرة */}
+          <Box
+            sx={{
+              background:
+                mode === "dark"
+                  ? "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))"
+                  : "rgba(255,255,255,0.95)",
+              px: 0.3,   // 👈 جانبي أقل
+              py: 0.3,   // 👈 الأعلى والأسفل يبقى جميل
+              borderRadius: "14px",
+              boxShadow:
+                mode === "dark"
+                  ? `0 0 40px ${BRAND.gold}33`
+                  : `0 0 30px ${BRAND.purple}33`,
+              border: `2px solid ${mode === "dark" ? BRAND.gold : BRAND.purple
+                }55`,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
-          />
+          >
+            <img
+              src={selectedImg}
+              alt="Preview"
+              style={{
+                width: "100%",
+                maxWidth: "900px",
+                maxHeight: "90vh",
+                objectFit: "contain",
+                borderRadius: "10px",
+              }}
+            />
+          </Box>
+
         </DialogContent>
       </Dialog>
     </Box>
