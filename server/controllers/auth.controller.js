@@ -200,7 +200,9 @@ export const loginUser = async (req, res) => {
         role: user.role,
         isSuperAdmin: user.isSuperAdmin,
         preferredLanguage: user.preferredLanguage, // ✅
-
+        subscriptionStart: user.subscriptionStart,
+        subscriptionEnd: user.subscriptionEnd,
+        subscription: user.subscription,
       },
     });
 
