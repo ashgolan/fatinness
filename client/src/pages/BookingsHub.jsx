@@ -12,6 +12,8 @@ import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
 import { formatTimeRange } from "../utils/timeFormatting";
 import { DateTime } from "luxon";
+import { useContext } from "react";
+import { UserContext } from "../context/UserContext";
 
 const toLocalKey = (dateOrISO) =>
   DateTime.fromJSDate(
@@ -54,6 +56,12 @@ export default function BookingsHub() {
 
   const bookingLockRef = useRef(false);
 
+  const { user } = useContext(UserContext);
+
+  const isSubscriptionExpired =
+    user?.subscriptionStatus === "expired" ||
+    (user?.subscriptionEnd &&
+      new Date(user.subscriptionEnd) < new Date());
 
 
   const dayNames = [
@@ -104,8 +112,6 @@ export default function BookingsHub() {
 
       setSlotsByDay(filtered);
 
-      setSlotsByDay(filtered);
-
       const myActive = bookingsRes.data
         .filter((b) => b.status === "booked")
         .map((b) => b.slot._id);
@@ -126,6 +132,13 @@ export default function BookingsHub() {
 
   const handleBook = useCallback(
     async (slotId) => {
+
+      // 🔒 منع الحجز إذا الاشتراك منتهي
+      if (isSubscriptionExpired) {
+        toast.error(t("subscription.expired"));
+        return;
+      }
+
       if (bookingLockRef.current) return;
       bookingLockRef.current = true;
 
@@ -137,14 +150,14 @@ export default function BookingsHub() {
         toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
-        handleServerError(err); // 👈 يعتمد فقط على السيرفر
+        handleServerError(err);
       } finally {
         bookingLockRef.current = false;
         setBookingId(null);
         setBookingInProgress(false);
       }
     },
-    [fetchData, t]
+    [fetchData, t, isSubscriptionExpired] // ✅ مهم جداً إضافته هنا
   );
 
 
@@ -387,6 +400,8 @@ export default function BookingsHub() {
                 locale,
                 // ⬇️ نمرر المرجع
                 slotsRef,
+                isSubscriptionExpired, // ✅ أضف هذا فقط
+
               }}
             />
           )}
@@ -439,6 +454,8 @@ function AvailableView({
   locale,
   // ⬇️ المرجع القادم من الأعلى
   slotsRef,
+  isSubscriptionExpired, // ✅ أضف هذا
+
 }) {
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
@@ -745,10 +762,12 @@ function AvailableView({
                         isBooked ? handleCancel(slot._id) : handleBook(slot._id)
                       }
                       disabled={
+                        isSubscriptionExpired ||
                         isProcessing ||
                         bookingInProgress ||
                         (isFull && !isBooked)
                       }
+
                       style={{
                         width: "100%",
                         padding: "10px 0",
