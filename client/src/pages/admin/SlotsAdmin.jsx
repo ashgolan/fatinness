@@ -272,20 +272,25 @@ export default function SlotsAdmin() {
     });
   }, [slots, filter, now, mode]);
 
+  const dateFormatter = useMemo(() => {
+    return new Intl.DateTimeFormat(i18n.language, {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  }, [i18n.language]);
+
   // Group by day
   const groupedByDay = useMemo(() => {
     return filteredSlots.reduce((acc, slot) => {
-      const dayKey = new Date(slot.date).toLocaleDateString(t("locale"), {
-        weekday: "long",
-        month: "short",
-        day: "numeric",
-      });
+      const dayKey = dateFormatter.format(new Date(slot.date));
 
       if (!acc[dayKey]) acc[dayKey] = [];
       acc[dayKey].push(slot);
+
       return acc;
     }, {});
-  }, [filteredSlots, i18n.language]);
+  }, [filteredSlots, dateFormatter]);
 
   // Dialog open handler
   const handleSlotClick = async (slot) => {
