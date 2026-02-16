@@ -911,6 +911,9 @@ export const updateUserByAdmin = async (req, res) => {
       user.notified5Days = false;
       user.notified2Days = false;
 
+      user.expiredNotified = false; // ⭐ مهم جداً
+
+
       user.isBlocked = false;
     }
 

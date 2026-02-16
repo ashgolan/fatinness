@@ -511,13 +511,10 @@ agenda.define("check-subscriptions-hourly", async () => {
       // ======================================================
       // ⛔ انتهاء الاشتراك
       // ======================================================
-      if (
-        realNow >= endDate &&
-        user.subscriptionStatus !== "expired"
-      ) {
-        user.subscriptionStatus = "expired";
-        await user.save();
-
+      if (realNow >= endDate && !user.expiredNotified) {
+        if (user.subscriptionStatus !== "expired") {
+          user.subscriptionStatus = "expired";
+        }
         const { title, body } = getNotificationText(
           "subscriptionExpired",
           lang
@@ -542,6 +539,8 @@ agenda.define("check-subscriptions-hourly", async () => {
           },
         });
 
+        user.expiredNotified = true;
+        await user.save();
         console.log("⛔ Subscription expired for:", user._id);
       }
     } catch (err) {

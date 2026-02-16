@@ -41,6 +41,7 @@ const userSchema = new mongoose.Schema(
       enum: ["active", "expired"],
       default: "active",
     },
+    expiredNotified: { type: Boolean, default: false },
 
     notified5Days: {
       type: Boolean,
