@@ -320,6 +320,12 @@
       "reports": "Reports",
       "reportsHint": "Export attendance reports"
     },
+    "missingFcm": {
+      "title": "Users Without Notifications",
+      "message": "{{count}} users do not have notifications enabled",
+      "view": "View Names",
+      "close": "Close"
+    },
     "footerTitle": "Comprehensive control panel for managing Fatinness Studio",
     "footerText": "You can return to this page anytime to manage all aspects of the system from one place."
   },

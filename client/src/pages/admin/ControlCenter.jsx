@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useThemeMode } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
@@ -19,7 +19,15 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import SubscriptionStatusCard from "../../components/SubscriptionStatusCard";
 import { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
-
+import { Api } from "../../api/Api";
+import {
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  Divider
+} from "@mui/material";
 
 export default function ControlCenter() {
   const navigate = useNavigate();
@@ -28,6 +36,28 @@ export default function ControlCenter() {
 
   const { user } = useContext(UserContext);
   const isDark = mode === "dark";
+
+  const [missingFcm, setMissingFcm] = useState([]);
+  const [loadingFcm, setLoadingFcm] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
+  useEffect(() => {
+    const fetchMissingFcm = async () => {
+      try {
+        const { data } = await Api.get("/admin/users/missing-fcm");
+        console.log("Missing FCM:", data);
+
+        setMissingFcm(data.users || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingFcm(false);
+      }
+    };
+
+    fetchMissingFcm();
+  }, []);
+
+
 
   const sections = [
     {
@@ -122,7 +152,7 @@ export default function ControlCenter() {
       iconColor: "#d50000",
     }
   ];
-console.log("USER:", user);
+  console.log("USER:", user);
 
   return (
     <Box
@@ -137,6 +167,28 @@ console.log("USER:", user);
         transition: "all 0.4s ease",
       }}
     >
+
+      {!loadingFcm && missingFcm.length > 0 && (
+        <Alert
+          severity="warning"
+          sx={{ mb: 2 }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => setOpenDialog(true)}
+            >
+              {t("controlCenter.missingFcm.view")}
+            </Button>
+          }
+        >
+          {t("controlCenter.missingFcm.message", { count: missingFcm.length })}
+
+        </Alert>
+      )}
+
+
+
       <Box sx={{ maxWidth: 1400, mx: "auto" }}>
         {/* Title */}
         <Box sx={{ textAlign: "center", mb: { xs: 4, sm: 6, md: 8 }, px: 2 }}>
@@ -291,6 +343,52 @@ console.log("USER:", user);
           </Paper>
         </Box>
       </Box>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>{t("controlCenter.missingFcm.title")}
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 0 }}>
+          <List>
+            {missingFcm.map((user, index) => (
+              <React.Fragment key={user._id}>
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar
+                      sx={{
+                        bgcolor:
+                       "#ffffff",
+                        fontSize: 25
+                      }}
+                    >
+                      {user.gender === "male" ? "🧑‍🦰" : "👩‍🦰"}
+                    </Avatar>
+
+                  </ListItemAvatar>
+
+                  <ListItemText
+                    primary={user.username}
+                    secondary={user.phone || ""}
+                    primaryTypographyProps={{
+                      fontWeight: 600,
+                    }}
+                    secondaryTypographyProps={{
+                      fontSize: "0.85rem",
+                      color: "text.secondary",
+                    }}
+                  />
+                </ListItem>
+
+                {index < missingFcm.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </List>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)}>{t("controlCenter.missingFcm.close")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }

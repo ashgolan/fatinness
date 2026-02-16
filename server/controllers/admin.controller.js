@@ -1340,3 +1340,30 @@ export const resetFactory = async (req, res) => {
     res.status(500).json({ code: "ADMIN_RESET_FACTORY_ERROR" });
   }
 };
+
+export const getUsersMissingFcm = async (req, res) => {
+  try {
+    const admin = req.user;
+
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ code: "ADMIN_UNAUTHORIZED" });
+    }
+
+    const users = await User.find({
+      role: "user",
+      $or: [
+        { fcmTokens: { $exists: false } },
+        { fcmTokens: { $size: 0 } }
+      ]
+    }).select("username phone preferredLanguage");
+
+    res.json({
+      count: users.length,
+      users
+    });
+
+  } catch (err) {
+    console.error("Missing FCM Error:", err);
+    res.status(500).json({ code: "SERVER_ERROR" });
+  }
+};
