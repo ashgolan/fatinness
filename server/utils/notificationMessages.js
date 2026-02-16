@@ -146,5 +146,21 @@ export const NOTIFICATION_MESSAGES = {
       body: ({ body }) => body,
     },
   },
-
+  adminSubscriptionExpired: {
+    ar: {
+      title: "انتهاء اشتراك مديرة",
+      body: ({ name }) =>
+        `انتهى اشتراك المديرة ${name}. يرجى مراجعة الحالة واتخاذ الإجراء المناسب.`,
+    },
+    he: {
+      title: "פג תוקף המנוי של מנהלת",
+      body: ({ name }) =>
+        `המנוי של המנהלת ${name} הסתיים. נא לבדוק ולטפל בהתאם.`,
+    },
+    en: {
+      title: "Admin Subscription Expired",
+      body: ({ name }) =>
+        `The subscription of admin ${name} has expired. Please review and take action.`,
+    },
+  },
 };

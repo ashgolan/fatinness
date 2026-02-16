@@ -512,9 +512,13 @@ agenda.define("check-subscriptions-hourly", async () => {
       // ⛔ انتهاء الاشتراك
       // ======================================================
       if (realNow >= endDate && !user.expiredNotified) {
+
+        // تحديث الحالة إذا لم تكن expired
         if (user.subscriptionStatus !== "expired") {
           user.subscriptionStatus = "expired";
         }
+
+        // 🔔 إشعار للمستخدم نفسه
         const { title, body } = getNotificationText(
           "subscriptionExpired",
           lang
@@ -539,10 +543,52 @@ agenda.define("check-subscriptions-hourly", async () => {
           },
         });
 
+        // ======================================================
+        // 👑 إذا كانت مديرة → إشعار للسوبر أدمن
+        // ======================================================
+        if (user.role === "admin") {
+          const superAdmin = await User.findOne({ isSuperAdmin: true });
+
+          if (superAdmin) {
+            const superLang = superAdmin.preferredLanguage || "ar";
+
+            const alertText = getNotificationText(
+              "adminSubscriptionExpired",
+              superLang,
+              { name: user.username }
+            );
+
+            await UserNotification.create({
+              user: superAdmin._id,
+              title: alertText.title,
+              body: alertText.body,
+              type: "system",
+              targetType: "user",
+            });
+
+            await sendSmartNotification({
+              user: superAdmin,
+              title: alertText.title,
+              body: alertText.body,
+              channel: "push",
+              data: {
+                type: "admin-subscription-alert",
+                event: "ADMIN_SUBSCRIPTION_EXPIRED",
+                adminId: user._id.toString(),
+              },
+            });
+          }
+        }
+
+        // ======================================================
+        // 🧾 نضع الفلاغ بعد نجاح الإرسال
+        // ======================================================
         user.expiredNotified = true;
         await user.save();
+
         console.log("⛔ Subscription expired for:", user._id);
       }
+
     } catch (err) {
       console.error(
         `⚠️ Subscription check failed for user ${user._id}`,
