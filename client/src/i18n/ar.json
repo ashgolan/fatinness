@@ -523,7 +523,9 @@
     "errors": {
       "cannotBlockAdmin": "لا يمكن حظر المدراء",
       "cannotDeleteSuperAdmin": "لا يمكن حذف المدير الرئيسي",
-      "onlySuperAdminCanPromote": "فقط المدير الرئيسي يمكنه ترقية مستخدم إلى مدير"
+      "onlySuperAdminCanPromote": "فقط المدير الرئيسي يمكنه ترقية مستخدم إلى مدير",
+      "cannotBlockSelf": "You cannot block your own account."
+
     },
     "confirm": {
       "block": "هل أنت متأكد من حظر هذا المشترك؟",

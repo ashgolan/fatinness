@@ -524,7 +524,9 @@
     "errors": {
       "cannotBlockAdmin": "Admins cannot be blocked",
       "cannotDeleteSuperAdmin": "The main admin cannot be deleted",
-      "onlySuperAdminCanPromote": "Only the main admin can promote a member to admin"
+      "onlySuperAdminCanPromote": "Only the main admin can promote a member to admin",
+      "cannotBlockSelf": "You cannot block your own account."
+
     },
     "confirm": {
       "block": "Are you sure you want to block this member?",

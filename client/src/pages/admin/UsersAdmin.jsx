@@ -170,6 +170,10 @@ export default function UsersAdmin() {
       toast.error(t("usersAdmin.errors.cannotBlockAdmin"));
       return;
     }
+    if (user._id === currentUser?.id) {
+      toast.error(t("usersAdmin.errors.cannotBlockSelf"));
+      return;
+    }
 
     const confirmMsg = user.isBlocked
       ? t("usersAdmin.confirm.unblock")

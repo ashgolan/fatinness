@@ -595,32 +595,48 @@ export const getAllUsers = async (req, res) => {
 // =======================
 export const toggleUserBlock = async (req, res) => {
   try {
+    const admin = req.user;
+
+    // 🔐 تحقق صلاحية
+    if (!admin || admin.role !== "admin") {
+      return res.status(403).json({ code: "ADMIN_UNAUTHORIZED" });
+    }
+
     const user = await User.findById(req.params.id);
+
     if (!user) {
       return res.status(404).json({ code: "ADMIN_USER_NOT_FOUND" });
     }
 
-    if (user.role === "admin") {
+    // 🚫 منع حظر نفسك
+    if (admin._id.toString() === user._id.toString()) {
+      return res.status(400).json({ code: "ADMIN_CANNOT_BLOCK_SELF" });
+    }
+
+    // 🚫 منع حظر سوبر أدمن
+    if (user.isSuperAdmin) {
+      return res.status(403).json({ code: "ADMIN_CANNOT_BLOCK_SUPERADMIN" });
+    }
+
+    // 🚫 منع حظر admin عادي إلا إذا كان سوبر أدمن
+    if (user.role === "admin" && !admin.isSuperAdmin) {
       return res.status(403).json({ code: "ADMIN_CANNOT_BLOCK_ADMIN" });
     }
 
     const newStatus = !user.isBlocked;
-
-    await User.updateOne({ _id: user._id }, { $set: { isBlocked: newStatus } });
-
-    const updatedUser = await User.findById(user._id).select(
-      "username email phone allowExtraBookings role isBlocked createdAt height weight age gender subscriptionEnd subscriptionStart"
-    );
+    user.isBlocked = newStatus;
+    await user.save();
 
     res.json({
       code: newStatus ? "ADMIN_BLOCK_SUCCESS" : "ADMIN_UNBLOCK_SUCCESS",
-      user: updatedUser,
+      user,
     });
   } catch (error) {
     console.error("❌ toggleUserBlock error:", error);
     res.status(500).json({ code: "ADMIN_BLOCK_ERROR" });
   }
 };
+
 
 // =======================
 // 📩 إرسال إشعار مخصّص (Push فقط)

@@ -524,7 +524,9 @@
     "errors": {
       "cannotBlockAdmin": "לא ניתן לחסום מנהלות",
       "cannotDeleteSuperAdmin": "לא ניתן למחוק את המנהל הראשי",
-      "onlySuperAdminCanPromote": "רק המנהל הראשי יכול לקדם מנוי למנהל"
+      "onlySuperAdminCanPromote": "רק המנהל הראשי יכול לקדם מנוי למנהל",
+      "cannotBlockSelf": "אינך יכול לחסום את החשבון שלך."
+
     },
     "confirm": {
       "block": "האם את בטוח שברצונך לחסום מנוי זו?",
