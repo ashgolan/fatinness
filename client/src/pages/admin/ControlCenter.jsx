@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useThemeMode } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
@@ -28,6 +28,7 @@ import {
   Avatar,
   Divider
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function ControlCenter() {
   const navigate = useNavigate();
@@ -173,14 +174,15 @@ export default function ControlCenter() {
           severity="warning"
           sx={{ mb: 2 }}
           action={
-            <Button
+            <IconButton
               color="inherit"
               size="small"
               onClick={() => setOpenDialog(true)}
             >
-              {t("controlCenter.missingFcm.view")}
-            </Button>
+              <SearchIcon />
+            </IconButton>
           }
+
         >
           {t("controlCenter.missingFcm.message", { count: missingFcm.length })}
 
@@ -343,10 +345,42 @@ export default function ControlCenter() {
           </Paper>
         </Box>
       </Box>
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{t("controlCenter.missingFcm.title")}
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: isDark ? BRAND.paperDark : "#ffffff",
+            color: isDark ? "#ffffff" : "#000000",
+            borderRadius: 3,
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            backdropFilter: "blur(6px)",
+            backgroundColor: isDark
+              ? "rgba(0,0,0,0.6)"
+              : "rgba(0,0,0,0.3)"
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#eee"}`
+          }}
+        >
+          {t("controlCenter.missingFcm.title")}
         </DialogTitle>
-        <DialogContent dividers sx={{ p: 0 }}>
+        <DialogContent
+          dividers
+          sx={{
+            p: 0,
+            background: isDark ? BRAND.paperDark : "#fff"
+          }}
+        >
           <List>
             {missingFcm.map((user, index) => (
               <React.Fragment key={user._id}>
@@ -354,8 +388,9 @@ export default function ControlCenter() {
                   <ListItemAvatar>
                     <Avatar
                       sx={{
-                        bgcolor:
-                       "#ffffff",
+                        bgcolor: isDark
+                          ? "rgba(255,255,255,0.08)"
+                          : "rgba(0,0,0,0.05)",
                         fontSize: 25
                       }}
                     >
@@ -377,7 +412,14 @@ export default function ControlCenter() {
                   />
                 </ListItem>
 
-                {index < missingFcm.length - 1 && <Divider />}
+                {index < missingFcm.length - 1 && <Divider
+                  sx={{
+                    borderColor: isDark
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(0,0,0,0.08)"
+                  }}
+                />
+                }
               </React.Fragment>
             ))}
           </List>
