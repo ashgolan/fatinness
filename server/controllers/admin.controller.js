@@ -501,6 +501,15 @@ export const getDashboardStats = async (req, res) => {
     // =======================
     // 📤 Response
     // =======================
+
+    const newUsersToday = await User.countDocuments({
+      createdAt: {
+        $gte: startOfDayUTC,
+        $lte: endOfDayUTC,
+      },
+      isSuperAdmin: { $ne: true },
+    });
+
     res.json({
       totalUsers,
       activeUsers: totalUsers - blockedUsers,
@@ -513,6 +522,8 @@ export const getDashboardStats = async (req, res) => {
       todaySessions,
       upcomingWeekSessions,
       dailyBookings,
+      newUsersToday, // ⭐ أضف هذا
+
     });
   } catch (error) {
     console.error("❌ Error in getDashboardStats:", error);
