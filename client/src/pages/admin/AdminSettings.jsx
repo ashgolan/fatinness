@@ -15,7 +15,7 @@ import {
   Dialog,
   DialogContent,
 } from "@mui/material";
-
+import { useTheme } from "@mui/material";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import BuildIcon from "@mui/icons-material/Build";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -32,8 +32,9 @@ export default function AdminSettings() {
   const DEFAULT_CARD = "/brand/DEFAULT_CARD.jpg";
 
   const handleServerError = useServerError();
-
   const { t, i18n } = useTranslation();
+  const theme = useTheme();
+  const mode = theme.palette.mode;
   const { updateBrand } = useBrand();
 
   const [settings, setSettings] = useState(null);
@@ -329,8 +330,16 @@ export default function AdminSettings() {
           startIcon={<AddPhotoAlternateIcon />}
           onClick={uploadGalleryImage}
           disabled={uploading || settings.galleryImages.length >= 10}
-          sx={{ mb: 3 }}
-        >
+          sx={{
+            mb: 3,
+            borderColor: mode === "dark" ? "#FFD93D" : undefined,
+            color: mode === "dark" ? "#FFD93D" : undefined,
+            "&:hover": {
+              borderColor: mode === "dark" ? "#FFC300" : undefined,
+              backgroundColor:
+                mode === "dark" ? "rgba(255,217,61,0.08)" : undefined,
+            },
+          }}        >
           {uploading ? (
             <CircularProgress size={22} />
           ) : (
@@ -368,8 +377,16 @@ export default function AdminSettings() {
         <Button
           variant="outlined"
           onClick={() => handleImageUpload("card")}
-          sx={{ mb: 4 }}
-        >
+          sx={{
+            mb: 4,
+            borderColor: mode === "dark" ? "#FFD93D" : undefined,
+            color: mode === "dark" ? "#FFD93D" : undefined,
+            "&:hover": {
+              borderColor: mode === "dark" ? "#FFC300" : undefined,
+              backgroundColor:
+                mode === "dark" ? "rgba(255,217,61,0.08)" : undefined,
+            },
+          }}        >
           {t("adminSettings.card.change")}
         </Button>
 
@@ -392,8 +409,16 @@ export default function AdminSettings() {
         <Button
           variant="outlined"
           onClick={() => handleImageUpload("logo")}
-          sx={{ mb: 4 }}
-        >
+          sx={{
+            mb: 4,
+            borderColor: mode === "dark" ? "#FFD93D" : undefined,
+            color: mode === "dark" ? "#FFD93D" : undefined,
+            "&:hover": {
+              borderColor: mode === "dark" ? "#FFC300" : undefined,
+              backgroundColor:
+                mode === "dark" ? "rgba(255,217,61,0.08)" : undefined,
+            },
+          }}        >
           {t("adminSettings.logo.change")}
         </Button>
 
@@ -442,6 +467,15 @@ export default function AdminSettings() {
                   allowExtraBookingsByDefault: e.target.checked,
                 })
               }
+              sx={{
+                "& .MuiSwitch-switchBase.Mui-checked": {
+                  color: theme.palette.mode === "dark" ? "#FFD93D" : undefined,
+                },
+                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                  backgroundColor:
+                    theme.palette.mode === "dark" ? "#FFD93D" : undefined,
+                },
+              }}
             />
           }
           label={t("adminSettings.fields.allowExtraBookings")}
@@ -454,7 +488,14 @@ export default function AdminSettings() {
           sx={{
             mb: 2,
             fontWeight: 700,
-            color: maintenance ? "#d32f2f" : "#2e7d32",
+            color:
+              theme.palette.mode === "dark"
+                ? maintenance
+                  ? "#ff6b6b"
+                  : "#FFD93D"
+                : maintenance
+                  ? "#d32f2f"
+                  : "#2e7d32",
           }}
         >
           {maintenance
@@ -483,7 +524,18 @@ export default function AdminSettings() {
             variant="outlined"
             onClick={handleSave}
             disabled={saving}
-            sx={{ px: 4, py: 1.2, fontWeight: 800 }}
+            sx={{
+              px: 4,
+              py: 1.2,
+              fontWeight: 800,
+              borderColor: mode === "dark" ? "#FFD93D" : undefined,
+              color: mode === "dark" ? "#FFD93D" : undefined,
+              "&:hover": {
+                borderColor: mode === "dark" ? "#FFC300" : undefined,
+                backgroundColor:
+                  mode === "dark" ? "rgba(255,217,61,0.08)" : undefined,
+              },
+            }}
           >
             {saving ? (
               <CircularProgress size={22} />
