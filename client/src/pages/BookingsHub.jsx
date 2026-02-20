@@ -10,17 +10,19 @@ import { toast } from "react-toastify";
 import { useThemeMode } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import useServerError from "../hooks/useServerError";
-import { formatTimeRange } from "../utils/timeFormatting";
+import { FIXED_ZONE, formatTimeRange } from "../utils/timeFormatting";
 import { DateTime } from "luxon";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 
 const toLocalKey = (dateOrISO) =>
-  DateTime.fromJSDate(
-    typeof dateOrISO === "string" ? new Date(dateOrISO) : dateOrISO,
+  DateTime.fromISO(
+    typeof dateOrISO === "string"
+      ? dateOrISO
+      : DateTime.fromJSDate(dateOrISO).toISO(),
     { zone: "utc" }
   )
-    .setZone("local")
+    .setZone(FIXED_ZONE)
     .toFormat("yyyy-MM-dd");
 
 export default function BookingsHub() {
@@ -90,18 +92,19 @@ export default function BookingsHub() {
 
       Object.keys(rawGrouped).forEach((utcKey) => {
         const localKey = DateTime.fromISO(utcKey, { zone: "utc" })
-          .setZone("local")
+          .setZone(FIXED_ZONE)
           .toFormat("yyyy-MM-dd");
 
         grouped[localKey] = rawGrouped[utcKey];
       });
       const filtered = {}; // ✅ هذا السطر كان ناقصًا
 
-      const now = DateTime.utc();
-
+      const now = DateTime.utc().setZone(FIXED_ZONE);
       Object.keys(grouped).forEach((dateKey) => {
         const validSlots = grouped[dateKey].filter((slot) => {
-          const slotEnd = DateTime.fromISO(slot.endAt, { zone: "utc" });
+          const slotEnd = DateTime.fromISO(slot.endAt, { zone: "utc" })
+            .setZone(FIXED_ZONE);
+
           return slotEnd > now;
         });
 
@@ -217,12 +220,18 @@ export default function BookingsHub() {
     }
   };
 
-  const now = DateTime.utc();
-  const localNow = now.setZone("local");
-
-  const todayKey = toLocalKey(new Date());
-
-  const today = DateTime.now().setZone("local").startOf("day");
+  const nowFixed = DateTime.utc().setZone(FIXED_ZONE);
+  useEffect(() => {
+    console.log("🧪 TIME DIAGNOSTIC", {
+      browserTZ: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      nowUTC: DateTime.utc().toFormat("yyyy-MM-dd HH:mm"),
+      nowFixed: nowFixed.toFormat("yyyy-MM-dd HH:mm"),
+      localNow: DateTime.now().toFormat("yyyy-MM-dd HH:mm"),
+      fixedZone: FIXED_ZONE,
+    });
+  }, []);
+  const todayKey = nowFixed.toFormat("yyyy-MM-dd");
+  const today = DateTime.now().setZone(FIXED_ZONE).startOf("day");
 
   const calendarDates = [...Array(30)].map((_, i) =>
     today.plus({ days: i }).toJSDate()
@@ -233,8 +242,7 @@ export default function BookingsHub() {
   // const now = DateTime.utc();
 
   // 🟢 بداية الأسبوع (الأحد)
-  const startOfWeek = localNow.startOf("week");
-
+  const startOfWeek = nowFixed.startOf("week");
   const startOfSundayWeek = startOfWeek.minus({ days: 1 });
 
   // 🟢 تواريخ الأسبوع (Date عادي للعرض)
@@ -260,20 +268,27 @@ export default function BookingsHub() {
 
     return Array.from(map.values());
   }, [allBookings]);
+  const upcomingBookings = uniqueBookingsBySlot.filter((b) => {
+    const slotStart = DateTime.fromISO(b.slot.startAt, { zone: "utc" })
+      .setZone(FIXED_ZONE);
 
-  const upcomingBookings = uniqueBookingsBySlot.filter(
-    (b) =>
-      new Date(b.slot.startAt) >= now &&
+    return (
+      slotStart >= nowFixed &&
       b.status === "booked" &&
       !b.slot.isBlocked
-  );
+    );
+  });
 
-  const pastBookings = uniqueBookingsBySlot.filter(
-    (b) =>
-      new Date(b.slot.startAt) < now &&
+  const pastBookings = uniqueBookingsBySlot.filter((b) => {
+    const slotStart = DateTime.fromISO(b.slot.startAt, { zone: "utc" })
+      .setZone(FIXED_ZONE);
+
+    return (
+      slotStart < nowFixed &&
       b.status !== "cancelled" &&
       !b.slot.isBlocked
-  );
+    );
+  });
 
   const cancelledBookings = uniqueBookingsBySlot.filter(
     (b) => b.status === "cancelled" || b.slot.isBlocked
@@ -455,7 +470,7 @@ function AvailableView({
   // ⬇️ المرجع القادم من الأعلى
   slotsRef,
   isSubscriptionExpired, // ✅ أضف هذا
-
+  lang
 }) {
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
@@ -665,7 +680,7 @@ function AvailableView({
                   fontSize: "clamp(18px, 4vw, 22px)",
                 }}
               >
-                {DateTime.fromISO(selectedDate, { zone: "local" })
+                {DateTime.fromISO(selectedDate, { zone: FIXED_ZONE })
                   .setLocale(locale)
                   .toFormat("cccc dd/MM")}
 
@@ -689,7 +704,16 @@ function AvailableView({
                 const isBooked = myBookings.includes(slot._id);
                 const isFull = slot.bookedCount >= slot.capacity;
                 const isProcessing = bookingId === slot._id;
+                const debugStartUTC = DateTime.fromISO(slot.startAt, { zone: "utc" });
+                const debugFixed = debugStartUTC.setZone(FIXED_ZONE);
+                const debugLocal = DateTime.fromISO(slot.startAt);
 
+                console.log("🕒 SLOT DEBUG", {
+                  raw: slot.startAt,
+                  utc: debugStartUTC.toFormat("yyyy-MM-dd HH:mm"),
+                  fixed: debugFixed.toFormat("yyyy-MM-dd HH:mm"),
+                  localBrowser: debugLocal.toFormat("yyyy-MM-dd HH:mm"),
+                });
                 return (
                   <div
                     key={slot._id}
@@ -741,7 +765,7 @@ function AvailableView({
                           whiteSpace: "nowrap",
                         }}
                       >
-                        🕒 {formatTimeRange(slot.startAt, slot.endAt, t)}
+                        🕒 {formatTimeRange(slot.startAt, slot.endAt, lang)}
                       </div>
                     </div>
 
@@ -827,8 +851,7 @@ function MyBookingsView({
   locale
 
 }) {
-  const now = new Date();
-
+  const nowFixed = DateTime.utc().setZone(FIXED_ZONE);
   return (
     <div style={{ animation: "fadeInUp 0.5s ease forwards" }}>
       {/* الفلاتر */}
@@ -891,8 +914,10 @@ function MyBookingsView({
           {filteredBookings.map((b) => {
 
             const isCancelled = b.status === "cancelled" || b.slot.isBlocked;
-            const isPast = new Date(b.slot.startAt) < now;
 
+            const isPast =
+              DateTime.fromISO(b.slot.startAt, { zone: "utc" })
+                .setZone(FIXED_ZONE) < nowFixed;
             return (
               <div
                 key={b._id}
@@ -910,8 +935,7 @@ function MyBookingsView({
                 <div style={{ fontWeight: 700, marginBottom: 8 }}>
                   📅{" "}
                   {DateTime.fromISO(b.slot.startAt, { zone: "utc" })
-                    .setZone("local")
-                    .setLocale(locale)
+                    .setZone(FIXED_ZONE).setLocale(locale)
                     .toFormat("dd/MM/yyyy")}
                 </div>
                 <div style={{ fontWeight: 700, marginBottom: 6 }}>
@@ -919,7 +943,7 @@ function MyBookingsView({
                 </div>
 
                 <div style={{ opacity: 0.8, marginBottom: 12 }}>
-                  🕒 {formatTimeRange(b.slot.startAt, b.slot.endAt, t)}
+                  🕒 {formatTimeRange(b.slot.startAt, b.slot.endAt, lang)}
                 </div>
 
                 {!isPast && !isCancelled && (

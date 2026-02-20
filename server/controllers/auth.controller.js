@@ -3,13 +3,23 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { maintenanceMode } from "./maintenance.controller.js";
+import { DateTime } from "luxon";
 
 // =====================================================
 // 🔐 JWT helpers
 // =====================================================
-const TOKEN_EXPIRES_IN = "12h";
-const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+const TOKEN_EXPIRES_IN = "12h";
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
+const isProd = process.env.NODE_ENV === "production";
+function setAuthCookie(res, token) {
+  res.cookie("JWT", token, {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    maxAge: COOKIE_MAX_AGE,
+  });
+}
 function generateToken(user) {
   return jwt.sign(
     {
@@ -22,17 +32,6 @@ function generateToken(user) {
   );
 }
 
-const isProd = process.env.NODE_ENV === "production";
-
-function setAuthCookie(res, token) {
-  res.cookie("JWT", token, {
-    httpOnly: true,
-    secure: true,        // HTTPS
-    sameSite: "none",    // 🔥 Cross-Domain
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
-}
 
 
 // =====================================================
@@ -103,14 +102,15 @@ export const registerUser = async (req, res) => {
       weight: weight ?? null,
       age: age ?? null,
       role,
-      subscriptionStart: new Date(),
-      subscriptionEnd: subscriptionEnd ? new Date(subscriptionEnd) : null,
-      subscription: {
-        active: false,
-        planId: null,
-        provider: null,
-        providerCustomerId: null,
-      },
+      subscriptionStart: DateTime.utc().toJSDate(),
+      subscriptionEnd: subscriptionEnd
+        ? DateTime.fromISO(subscriptionEnd, { zone: "utc" }).toJSDate()
+        : null, subscription: {
+          active: false,
+          planId: null,
+          provider: null,
+          providerCustomerId: null,
+        },
     });
 
     const token = generateToken(user);
