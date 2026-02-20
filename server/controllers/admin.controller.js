@@ -1402,3 +1402,46 @@ export const getUsersMissingFcm = async (req, res) => {
     res.status(500).json({ code: "SERVER_ERROR" });
   }
 };
+export const updateSlotCapacity = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { capacity } = req.body;
+
+    const newCapacity = Number(capacity);
+
+    if (!newCapacity || newCapacity < 1) {
+      return res.status(400).json({
+        code: "INVALID_CAPACITY",
+      });
+    }
+
+    const slot = await Slot.findById(id);
+
+    if (!slot) {
+      return res.status(404).json({
+        code: "SLOT_NOT_FOUND",
+      });
+    }
+
+    // ❌ لا نسمح بتقليل السعة أقل من عدد المحجوزين
+    if (newCapacity < slot.bookedCount) {
+      return res.status(400).json({
+        code: "CAPACITY_LESS_THAN_BOOKED",
+        bookedCount: slot.bookedCount,
+      });
+    }
+
+    slot.capacity = newCapacity;
+    await slot.save();
+
+    return res.json({
+      code: "SLOT_CAPACITY_UPDATED",
+      capacity: slot.capacity,
+    });
+  } catch (error) {
+    console.error("Update slot capacity error:", error);
+    return res.status(500).json({
+      code: "UPDATE_SLOT_CAPACITY_FAILED",
+    });
+  }
+};

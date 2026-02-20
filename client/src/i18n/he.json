@@ -384,6 +384,8 @@
     "blocked": "השיעור מושבת",
     "expand": "תצוגה מורחבת",
     "partialSave": "נשמרו {{count}} שיעורים, אך אירעה שגיאה בשאר.",
+    "editCapacity": "עריכת קיבולת",
+    "capacityUpdated": "הקיבולת עודכנה בהצלחה",
     "confirm": {
       "blockSlot": "האם ברצונך להשבית את השיעור? המשתתפים יקבלו הודעה.",
       "activateSlot": "האם ברצונך להפעיל את השיעור מחדש?"
@@ -399,7 +401,9 @@
       "fetchCurrent": "טעינת נתוני השבוע הנוכחי נכשלה",
       "saveFailed": "שמירת השינויים נכשלה",
       "toggleFailed": "עדכון סטטוס השיעור נכשל",
-      "createNextFailed": "יצירת השבוע הבא נכשלה"
+      "createNextFailed": "יצירת השבוע הבא נכשלה",
+      "invalidCapacity": "ערך הקיבולת אינו תקין",
+      "capacityTooSmall": "לא ניתן להגדיר קיבולת נמוכה ממספר הנרשמים"
     },
     "warning": {
       "overlapSkipped": "⚠️ {{count}} שיעורים דולגו עקב חפיפה בזמנים",

@@ -384,6 +384,8 @@
     "blocked": "Session Disabled",
     "expand": "Expanded View",
     "partialSave": "Saved {{count}} sessions, but an error occurred with the rest.",
+    "editCapacity": "Edit capacity",
+    "capacityUpdated": "Capacity updated successfully",
     "confirm": {
       "blockSlot": "Do you want to disable this session? Participants will be notified.",
       "activateSlot": "Do you want to activate this session again?"
@@ -399,7 +401,9 @@
       "fetchCurrent": "Failed to load current week data",
       "saveFailed": "Failed to save changes",
       "toggleFailed": "Failed to update session status",
-      "createNextFailed": "Failed to create next week"
+      "createNextFailed": "Failed to create next week",
+      "invalidCapacity": "Invalid capacity value",
+      "capacityTooSmall": "Capacity cannot be less than booked members"
     },
     "warning": {
       "overlapSkipped": "⚠️ {{count}} sessions skipped due to time conflicts",

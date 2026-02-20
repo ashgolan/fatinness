@@ -10,14 +10,14 @@ import {
   Tooltip,
   Divider,
 } from "@mui/material";
-
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BlockIcon from "@mui/icons-material/Block";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import { useThemeMode } from "../../context/ThemeContext";
-
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 export default function DaySection({
   dayName,
   date,
@@ -29,6 +29,7 @@ export default function DaySection({
   onUpdateNew,
   onRemoveNew,
   onToggleBlockExisting,
+  onUpdateExistingCapacity
 }) {
   function fmtTime(date) {
     if (!date) return "";
@@ -42,7 +43,7 @@ export default function DaySection({
   const { mode } = useThemeMode();
   const isDark = mode === "dark";
   const { t } = useTranslation();
-
+  const [editingId, setEditingId] = React.useState(null);
   const colors = {
     bg: isDark ? "#1f1f1f" : "#fff",
     text: isDark ? "#e5e7eb" : "#111827",
@@ -59,6 +60,27 @@ export default function DaySection({
     if (!slot?.endAt) return false;
     return new Date(slot.endAt) < new Date();
   }
+
+  const handleSaveCapacity = (value, slot) => {
+    const newVal = Number(value);
+
+    if (!newVal || newVal < 1) {
+      return toast.error(t("adminSchedule.errors.invalidCapacity"));
+    }
+
+    if (newVal < slot.bookedCount) {
+      return toast.error(t("adminSchedule.errors.capacityTooSmall"));
+    }
+
+    onUpdateExistingCapacity(
+      slot._id,
+      newVal,
+      slot.bookedCount
+    );
+
+    setEditingId(null);
+  };
+
 
   return (
     <Paper
@@ -165,21 +187,94 @@ export default function DaySection({
                     </Typography>
 
                     {/* عدد الحجوزات */}
-                    <Typography
-                      sx={{
-                        fontSize: 11,
-                        fontWeight: 800,
-                        mt: 0.2,
-                        color:
-                          slot.bookedCount >= slot.capacity
-                            ? "#ef4444"
-                            : slot.bookedCount >= slot.capacity * 0.8
-                              ? "#f59e0b"
-                              : "#30b561",
-                      }}
-                    >
-                      {slot.bookedCount}/{slot.capacity}
-                    </Typography>
+                    {/* عدد الحجوزات */}
+                    {editingId !== slot._id && (
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Typography
+                          sx={{
+                            fontSize: 11,
+                            fontWeight: 800,
+                            color:
+                              slot.bookedCount >= slot.capacity
+                                ? "#ef4444"
+                                : slot.bookedCount >= slot.capacity * 0.8
+                                  ? "#f59e0b"
+                                  : "#30b561",
+                          }}
+                        >
+                          {slot.bookedCount}/{slot.capacity}
+                        </Typography>
+
+                        {!isSlotPast(slot) && !blocked && (
+                          <Tooltip title={t("adminSchedule.editCapacity")} arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => setEditingId(slot._id)}
+                              sx={{
+                                background: "rgba(155,111,214,0.12)",
+                                "&:hover": {
+                                  background: "rgba(155,111,214,0.25)",
+                                },
+                                width: 28,
+                                height: 28,
+                              }}
+                            >
+                              <EditRoundedIcon sx={{ fontSize: 16, color: "#9B6FD6" }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    )}
+
+                    {/* وضع التعديل */}
+                    {editingId === slot._id && (
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+
+                        <TextField
+                          size="small"
+                          type="number"
+                          autoFocus
+                          defaultValue={slot.capacity}
+                          inputProps={{
+                            min: slot.bookedCount || 1,
+                            style: { width: 60, textAlign: "center" }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSaveCapacity(e.target.value, slot);
+                            }
+                          }}
+                        />
+
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            const input = e.currentTarget.parentElement.querySelector("input");
+                            handleSaveCapacity(input.value, slot);
+                          }}
+                          sx={{ color: "#10b981" }}
+                        >
+                          <CheckCircleIcon fontSize="small" />
+                        </IconButton>
+
+                        <IconButton
+                          size="small"
+                          onClick={() => setEditingId(null)}
+                          sx={{
+                            color: "#ef4444",
+                            background: "rgba(239,68,68,0.08)",
+                            "&:hover": {
+                              background: "rgba(239,68,68,0.18)",
+                            },
+                            width: 28,
+                            height: 28,
+                          }}
+                        >
+                          <CloseRoundedIcon sx={{ fontSize: 16 }} />
+                        </IconButton>
+
+                      </Box>
+                    )}
 
                     {slot.title && (
                       <Typography

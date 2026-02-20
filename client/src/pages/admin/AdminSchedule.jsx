@@ -435,6 +435,44 @@ export default function AdminSchedule() {
     nextWeek.some(d => d.items.some(isValidSlot))
     , [currentEdits, nextWeek]);
 
+
+  const updateExistingCapacity = async (slotId, newCapacity, bookedCount = 0) => {
+    const capacity = Number(newCapacity);
+
+    if (!capacity || capacity < 1) {
+      return toast.error(t("adminSchedule.errors.invalidCapacity"));
+    }
+
+    if (capacity < bookedCount) {
+      return toast.error(
+        t("adminSchedule.errors.capacityTooSmall")
+      );
+    }
+
+    try {
+      await Api.put(`/admin/slots/${slotId}/capacity`, {
+        capacity,
+      });
+
+      toast.success(t("adminSchedule.capacityUpdated"));
+
+      await Promise.all([
+        fetchCurrentWeek(),
+        fetchNextWeek(),
+      ]);
+
+    } catch (err) {
+      // 👇 تعامل ذكي مع خطأ السيرفر
+      if (err.response?.data?.code === "CAPACITY_LESS_THAN_BOOKED") {
+        return toast.error(
+          t("adminSchedule.errors.capacityTooSmall")
+        );
+      }
+
+      handleServerError(err);
+    }
+  };
+
   // ===================== واجهة الصفحة =====================
   return (
     <Box
@@ -809,6 +847,7 @@ export default function AdminSchedule() {
                           onRemoveNew={(idx) => removeSlot(key, idx)}
                           onToggleBlockExisting={onToggleBlockExisting}
                           onReactivateExisting={onReactivateExisting}
+                          onUpdateExistingCapacity={updateExistingCapacity}
                         />
                       </Grid>
                     );
@@ -912,7 +951,7 @@ export default function AdminSchedule() {
                       onRemoveNew={(idx) => removeNextSlot(i, idx)}
                       onToggleBlockExisting={onToggleBlockExisting}
                       onReactivateExisting={onReactivateExisting}
-
+                      onUpdateExistingCapacity={updateExistingCapacity}
                     />
                   </Grid>
                 );

@@ -383,6 +383,8 @@
     "blocked": "الحصة معطّلة",
     "expand": "عرض موسّع",
     "partialSave": "تم حفظ {{count}} من الحصص، لكن حدث خطأ في البقية.",
+    "editCapacity": "تعديل السعة",
+    "capacityUpdated": "تم تحديث السعة بنجاح",
     "confirm": {
       "blockSlot": "هل تريد تعطيل هذه الحصة؟ سيتم إشعار المشتركين.",
       "activateSlot": "هل تريد تفعيل هذه الحصة من جديد؟"
@@ -398,7 +400,9 @@
       "fetchCurrent": "فشل جلب بيانات الأسبوع الحالي",
       "saveFailed": "فشل حفظ التغييرات",
       "toggleFailed": "فشل تحديث حالة الحصة",
-      "createNextFailed": "فشل إنشاء الأسبوع القادم"
+      "createNextFailed": "فشل إنشاء الأسبوع القادم",
+      "invalidCapacity": "قيمة السعة غير صحيحة",
+      "capacityTooSmall": "لا يمكن أن تكون السعة أقل من عدد المحجوزين"
     },
     "warning": {
       "overlapSkipped": "⚠️ تم تجاهل {{count}} حصة بسبب تعارض في المواعيد",

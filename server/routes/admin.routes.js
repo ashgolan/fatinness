@@ -27,6 +27,7 @@ import {
   resetFactory,
   deleteUserCompletely,
   getUsersMissingFcm,
+  updateSlotCapacity,
 } from "../controllers/admin.controller.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -107,7 +108,10 @@ router.post("/reset/factory", resetFactory);
 
 
 router.get("/subscriptions/report", getSubscriptionReport);
-
+router.put(
+  "/slots/:id/capacity",
+  updateSlotCapacity
+);
 
 router.get("/users/missing-fcm", getUsersMissingFcm);
 
