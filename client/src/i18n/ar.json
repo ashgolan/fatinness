@@ -440,7 +440,7 @@
       "clubName": "اسم النادي",
       "contactNumber": "رقم التواصل",
       "autoMessage": "الرسالة التلقائية",
-      "allowExtraBookings": "السماح بالحجوزات الإضافية بشكل افتراضي"
+      "allowExtraBookings": "تفعيل الحجز غير المحدود لكل المستخدمين"
     },
     "maintenance": {
       "enabled": "النظام في وضع الصيانة",
@@ -525,7 +525,6 @@
       "cannotDeleteSuperAdmin": "لا يمكن حذف المدير الرئيسي",
       "onlySuperAdminCanPromote": "فقط المدير الرئيسي يمكنه ترقية مستخدم إلى مدير",
       "cannotBlockSelf": "You cannot block your own account."
-
     },
     "confirm": {
       "block": "هل أنت متأكد من حظر هذا المشترك؟",

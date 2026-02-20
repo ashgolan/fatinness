@@ -837,6 +837,14 @@ export const updateSettings = async (req, res) => {
       { new: true, upsert: true }
     );
 
+    // 🔥 الجزء المهم
+    if (req.body.allowExtraBookingsByDefault !== undefined) {
+      await User.updateMany(
+        { role: "user" }, // فقط المستخدمين
+        { allowExtraBookings: req.body.allowExtraBookingsByDefault }
+      );
+    }
+
     res.json({
       code: "ADMIN_SETTINGS_UPDATE_SUCCESS",
       settings,

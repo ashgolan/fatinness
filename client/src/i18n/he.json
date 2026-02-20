@@ -441,7 +441,7 @@
       "clubName": "שם המועדון",
       "contactNumber": "מספר ליצירת קשר",
       "autoMessage": "הודעה אוטומטית",
-      "allowExtraBookings": "אפשר הזמנות נוספות כברירת מחדל"
+      "allowExtraBookings": "הפעלת הזמנות ללא הגבלה לכל המשתמשים"
     },
     "maintenance": {
       "enabled": "המערכת במצב תחזוקה",
@@ -526,7 +526,6 @@
       "cannotDeleteSuperAdmin": "לא ניתן למחוק את המנהל הראשי",
       "onlySuperAdminCanPromote": "רק המנהל הראשי יכול לקדם מנוי למנהל",
       "cannotBlockSelf": "אינך יכול לחסום את החשבון שלך."
-
     },
     "confirm": {
       "block": "האם את בטוח שברצונך לחסום מנוי זו?",
