@@ -455,14 +455,14 @@ export default function UsersAdmin() {
                           title={t("usersAdmin.card.blocked")}
                           sx={{ fontSize: 22, lineHeight: 1 }}
                         >
-                          👩‍🦰❌
+                          {user.gender === "male" ? "👨‍🦱❌" : "👩‍🦰❌"}
                         </Typography>
                       ) : (
                         <Typography
                           title={t("usersAdmin.card.active")}
                           sx={{ fontSize: 22, lineHeight: 1 }}
                         >
-                          👩‍🦰✅
+                          {user.gender === "male" ? "👨‍🦱✅" : "👩‍🦰✅"}
                         </Typography>
                       )}
                     </Box>

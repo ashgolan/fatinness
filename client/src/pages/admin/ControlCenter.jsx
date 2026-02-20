@@ -382,46 +382,53 @@ export default function ControlCenter() {
           }}
         >
           <List>
-            {missingFcm.map((user, index) => (
-              <React.Fragment key={user._id}>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar
-                      sx={{
-                        bgcolor: isDark
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.05)",
-                        fontSize: 25
+            {missingFcm.map((userItem, index) => {
+              console.log("FCM USER:", userItem);
+              console.log("GENDER VALUE:", userItem?.gender);
+
+              return (
+                <React.Fragment key={userItem._id}>
+                  <ListItem>
+                    <ListItemAvatar>
+                      <Avatar
+                        sx={{
+                          bgcolor: isDark
+                            ? "rgba(255,255,255,0.08)"
+                            : "rgba(0,0,0,0.05)",
+                          fontSize: 25
+                        }}
+                      >
+                        {userItem?.gender?.toLowerCase() === "male"
+                          ? "👨‍🦱"
+                          : "👩‍🦰"}
+                      </Avatar>
+                    </ListItemAvatar>
+
+                    <ListItemText
+                      primary={userItem.username}
+                      secondary={userItem.phone || ""}
+                      primaryTypographyProps={{
+                        fontWeight: 600,
                       }}
-                    >
-                      {user.gender === "male" ? "🧑‍🦰" : "👩‍🦰"}
-                    </Avatar>
+                      secondaryTypographyProps={{
+                        fontSize: "0.85rem",
+                        color: "text.secondary",
+                      }}
+                    />
+                  </ListItem>
 
-                  </ListItemAvatar>
-
-                  <ListItemText
-                    primary={user.username}
-                    secondary={user.phone || ""}
-                    primaryTypographyProps={{
-                      fontWeight: 600,
-                    }}
-                    secondaryTypographyProps={{
-                      fontSize: "0.85rem",
-                      color: "text.secondary",
-                    }}
-                  />
-                </ListItem>
-
-                {index < missingFcm.length - 1 && <Divider
-                  sx={{
-                    borderColor: isDark
-                      ? "rgba(255,255,255,0.08)"
-                      : "rgba(0,0,0,0.08)"
-                  }}
-                />
-                }
-              </React.Fragment>
-            ))}
+                  {index < missingFcm.length - 1 && (
+                    <Divider
+                      sx={{
+                        borderColor: isDark
+                          ? "rgba(255,255,255,0.08)"
+                          : "rgba(0,0,0,0.08)"
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </List>
         </DialogContent>
 

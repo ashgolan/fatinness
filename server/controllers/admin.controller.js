@@ -1390,7 +1390,7 @@ export const getUsersMissingFcm = async (req, res) => {
         { fcmTokens: { $exists: false } },
         { fcmTokens: { $size: 0 } }
       ]
-    }).select("username phone preferredLanguage");
+    }).select("username phone preferredLanguage gender");
 
     res.json({
       count: users.length,
