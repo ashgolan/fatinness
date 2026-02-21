@@ -318,7 +318,8 @@
       "systemReset": "איפוס מערכת",
       "subscriptionsReport": "מנויים לקראת סיום",
       "reports": "דוחות",
-      "reportsHint": "ייצוא דוחות נוכחות"
+      "reportsHint": "ייצוא דוחות נוכחות",
+      "weightProgress": "התקדמות משקל"
     },
     "missingFcm": {
       "title": "משתמשות ללא התראות",
@@ -813,6 +814,26 @@
   "inAppNotification": {
     "close": "סגור",
     "viewNotifications": "הצג התראות"
+  },
+  "weightProgress": {
+    "title": "מעקב משקל",
+    "select": "בחרי מנויה",
+    "all": "הכול",
+    "current": "משקל נוכחי",
+    "chartTitle": "מגמת משקל",
+    "weight": "משקל",
+    "note": "הערה",
+    "change": "שינוי",
+    "start": "משקל התחלתי",
+    "bmi": "מדד מסת גוף",
+    "bmiStatus": {
+      "underweight": "תת־משקל",
+      "normal": "משקל תקין",
+      "overweight": "עודף משקל",
+      "obese": "השמנה"
+    },
+    "selectPrompt": "בחרי מנויה כדי לראות התקדמות במשקל",
+"selectHint": "לאחר הבחירה תופיע הגרף והניתוח (BMI, שינוי, משקל התחלתי) כולל הערות בנקודות המשקל."
   },
   "server": {
     "errors": {

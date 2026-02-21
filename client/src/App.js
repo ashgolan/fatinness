@@ -60,6 +60,7 @@ import i18n from "./i18n/i18n";
 import { FCM_EVENT } from "./firebase/registerFcmToken";
 import Notifications from "./pages/Notifications";
 import InAppCenterNotification from "./components/InAppCenterNotification";
+import AdminWeightProgress from "./pages/admin/AdminWeightProgress";
 
 // ======================================================
 // RTL / LTR Wrapper
@@ -346,6 +347,10 @@ export default function App() {
                       element={<AdminSettings />}
                     />
                   </Route>
+                  <Route
+                    path="/admin/weight-progress"
+                    element={<AdminWeightProgress />}
+                  />
 
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

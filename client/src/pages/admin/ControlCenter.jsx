@@ -29,7 +29,9 @@ import {
   Divider
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import MonitorWeightIcon from "@mui/icons-material/MonitorWeight";
 export default function ControlCenter() {
   const navigate = useNavigate();
   const { mode, BRAND } = useThemeMode();
@@ -60,101 +62,105 @@ export default function ControlCenter() {
 
 
 
-  const sections = [
-    {
-      title: t("controlCenter.sections.newUser"),
-      icon: <PersonAddAltIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/register",
-      gradient: "linear-gradient(135deg, #A01860 0%, #FBC02D 100%)",
-      iconBg: "linear-gradient(135deg, rgba(160,24,96,0.15), rgba(251,192,45,0.15))",
-      iconColor: "#A01860",
-    },
-    {
-      title: t("controlCenter.sections.dashboard"),
-      icon: <AssessmentIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/dashboard",
-      gradient: "linear-gradient(135deg, #764ba2 0%, #667eea 100%)",
-      iconBg: "linear-gradient(135deg, rgba(118,75,162,0.15), rgba(102,126,234,0.15))",
-      iconColor: "#764ba2",
-    },
-    {
-      title: t("controlCenter.sections.users"),
-      icon: <GroupIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/users",
-      gradient: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
-      iconBg: "linear-gradient(135deg, rgba(76,175,80,0.15), rgba(46,125,50,0.15))",
-      iconColor: "#4caf50",
-    },
-    {
-      title: t("controlCenter.sections.bookings"),
-      icon: <EventNoteIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/bookings",
-      gradient: "linear-gradient(135deg, #0288d1 0%, #26c6da 100%)",
-      iconBg: "linear-gradient(135deg, rgba(2,136,209,0.15), rgba(38,198,218,0.15))",
-      iconColor: "#0288d1",
-    },
-    {
-      title: t("controlCenter.sections.weeklySlots"),
-      icon: <ScheduleIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/slots",
-      gradient: "linear-gradient(135deg, #8e24aa 0%, #ab47bc 100%)",
-      iconBg: "linear-gradient(135deg, rgba(171,71,188,0.15), rgba(142,36,170,0.15))",
-      iconColor: "#ab47bc",
-    },
-    {
-      title: t("controlCenter.sections.reports"),
-      hint: t("controlCenter.sections.reportsHint"),
-      icon: <AssessmentIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/reports",
-      gradient: "linear-gradient(135deg, #2563eb 0%, #38bdf8 100%)",
-      iconBg: "linear-gradient(135deg, rgba(37,99,235,0.15), rgba(56,189,248,0.15))",
-      iconColor: "#2563eb",
-    }
-
-    ,
-    {
-      title: t("controlCenter.sections.templates"),
-      icon: <LayersIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/schedule",
-      gradient: "linear-gradient(135deg, #00acc1 0%, #26c6da 100%)",
-      iconBg: "linear-gradient(135deg, rgba(0,172,193,0.15), rgba(38,198,218,0.15))",
-      iconColor: "#00acc1",
-    },
-    {
-      title: t("controlCenter.sections.notifications"),
-      icon: <NotificationsActiveIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/notifications",
-      gradient: "linear-gradient(135deg, #f4511e 0%, #ff7043 100%)",
-      iconBg: "linear-gradient(135deg, rgba(244,81,30,0.15), rgba(255,112,67,0.15))",
-      iconColor: "#f4511e",
-    },
-    {
-      title: t("controlCenter.sections.settings"),
-      icon: <SettingsIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/settings",
-      gradient: "linear-gradient(135deg, #546e7a 0%, #78909c 100%)",
-      iconBg: "linear-gradient(135deg, rgba(84,110,122,0.15), rgba(120,144,156,0.15))",
-      iconColor: "#546e7a",
-    },
-    {
-      title: t("controlCenter.sections.subscriptionsReport"),
-      icon: <HourglassEmptyIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/subscriptions-report",
-      gradient: "linear-gradient(135deg, #d97706 0%, #fbbf24 100%)",
-      iconBg: "linear-gradient(135deg, rgba(217,119,6,0.15), rgba(251,191,36,0.15))",
-      iconColor: "#d97706",
-    },
-    {
-      title: t("controlCenter.sections.systemReset"),
-      icon: <CleaningServicesIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
-      path: "/admin/system-reset",
-      gradient: "linear-gradient(135deg, #d50000 0%, #ff8a80 100%)",
-      iconBg: "linear-gradient(135deg, rgba(213,0,0,0.15), rgba(255,138,128,0.15))",
-      iconColor: "#d50000",
-    }
-  ];
-  console.log("USER:", user);
-
+const sections = [
+  {
+    title: t("controlCenter.sections.newUser"),
+    icon: <PersonAddAltIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/register",
+    gradient: "linear-gradient(135deg, #A01860 0%, #FBC02D 100%)",
+    iconBg: "linear-gradient(135deg, rgba(160,24,96,0.15), rgba(251,192,45,0.15))",
+    iconColor: "#A01860",
+  },
+  {
+    title: t("controlCenter.sections.dashboard"),
+    icon: <DashboardIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/dashboard",
+    gradient: "linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%)",
+    iconBg: "linear-gradient(135deg, rgba(124,58,237,0.15), rgba(79,70,229,0.15))",
+    iconColor: "#7c3aed",
+  },
+  {
+    title: t("controlCenter.sections.users"),
+    icon: <GroupIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/users",
+    gradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+    iconBg: "linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.15))",
+    iconColor: "#10b981",
+  },
+  {
+    title: t("controlCenter.sections.bookings"),
+    icon: <EventNoteIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/bookings",
+    gradient: "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+    iconBg: "linear-gradient(135deg, rgba(14,165,233,0.15), rgba(2,132,199,0.15))",
+    iconColor: "#0ea5e9",
+  },
+  {
+    title: t("controlCenter.sections.weeklySlots"),
+    icon: <ScheduleIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/slots",
+    gradient: "linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)",
+    iconBg: "linear-gradient(135deg, rgba(139,92,246,0.15), rgba(109,40,217,0.15))",
+    iconColor: "#8b5cf6",
+  },
+  {
+    title: t("controlCenter.sections.reports"),
+    hint: t("controlCenter.sections.reportsHint"),
+    icon: <BarChartIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/reports",
+    gradient: "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
+    iconBg: "linear-gradient(135deg, rgba(6,182,212,0.15), rgba(8,145,178,0.15))",
+    iconColor: "#06b6d4",
+  },
+  {
+    title: t("controlCenter.sections.templates"),
+    icon: <LayersIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/schedule",
+    gradient: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
+    iconBg: "linear-gradient(135deg, rgba(20,184,166,0.15), rgba(13,148,136,0.15))",
+    iconColor: "#14b8a6",
+  },
+  {
+    title: t("controlCenter.sections.weightProgress"),
+    icon: <MonitorWeightIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/weight-progress",
+    gradient: "linear-gradient(135deg, #fbbf24 0%, #7e22ce 100%)",
+    iconBg: "linear-gradient(135deg, rgba(251,191,36,0.18), rgba(126,34,206,0.18))",
+    iconColor: "#fbbf24",
+  },
+  {
+    title: t("controlCenter.sections.notifications"),
+    icon: <NotificationsActiveIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/notifications",
+    gradient: "linear-gradient(135deg, #6366f1 0%, #4338ca 100%)",
+    iconBg: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(67,56,202,0.15))",
+    iconColor: "#6366f1",
+  },
+  {
+    title: t("controlCenter.sections.settings"),
+    icon: <SettingsIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/settings",
+    gradient: "linear-gradient(135deg, #64748b 0%, #475569 100%)",
+    iconBg: "linear-gradient(135deg, rgba(100,116,139,0.15), rgba(71,85,105,0.15))",
+    iconColor: "#64748b",
+  },
+  {
+    title: t("controlCenter.sections.subscriptionsReport"),
+    icon: <HourglassEmptyIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/subscriptions-report",
+    gradient: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+    iconBg: "linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.15))",
+    iconColor: "#f59e0b",
+  },
+  {
+    title: t("controlCenter.sections.systemReset"),
+    icon: <CleaningServicesIcon sx={{ fontSize: { xs: 32, sm: 36, md: 40 } }} />,
+    path: "/admin/system-reset",
+    gradient: "linear-gradient(135deg, #b91c1c 0%, #ef4444 100%)",
+    iconBg: "linear-gradient(135deg, rgba(185,28,28,0.18), rgba(239,68,68,0.18))",
+    iconColor: "#b91c1c",
+  },
+];
   return (
     <Box
       dir={i18n.dir()}

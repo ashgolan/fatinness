@@ -318,7 +318,8 @@
       "systemReset": "System reset",
       "subscriptionsReport": "Subscriptions nearing expiration",
       "reports": "Reports",
-      "reportsHint": "Export attendance reports"
+      "reportsHint": "Export attendance reports",
+      "weightProgress": "Weight Progress"
     },
     "missingFcm": {
       "title": "Users Without Notifications",
@@ -810,6 +811,26 @@
   "inAppNotification": {
     "close": "Close",
     "viewNotifications": "View Notifications"
+  },
+  "weightProgress": {
+    "title": "Weight Progress",
+    "select": "Select Member",
+    "all": "All",
+    "current": "Current Weight",
+    "chartTitle": "Weight Trend",
+    "weight": "Weight",
+    "note": "Note",
+    "change": "Change",
+    "start": "Start Weight",
+    "bmi": "BMI",
+    "bmiStatus": {
+      "underweight": "Underweight",
+      "normal": "Normal",
+      "overweight": "Overweight",
+      "obese": "Obese"
+    },
+    "selectPrompt": "Select a member to view weight progress",
+"selectHint": "After selecting, you’ll see the chart and insights (BMI, change, start weight) with notes on weight points."
   },
   "server": {
     "errors": {

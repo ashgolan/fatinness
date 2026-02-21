@@ -28,6 +28,7 @@ import {
   deleteUserCompletely,
   getUsersMissingFcm,
   updateSlotCapacity,
+  getUserWeightProgress,
 } from "../controllers/admin.controller.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
@@ -115,4 +116,5 @@ router.put(
 
 router.get("/users/missing-fcm", getUsersMissingFcm);
 
+router.get("/users/:id/weight-progress", getUserWeightProgress);
 export default router;

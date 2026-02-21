@@ -317,7 +317,8 @@
       "systemReset": "إعادة ضبط النظام",
       "subscriptionsReport": "اشتراكات قرب انتهاءها",
       "reports": "التقارير",
-      "reportsHint": "تصدير تقارير الحضور"
+      "reportsHint": "تصدير تقارير الحضور",
+      "weightProgress": "تقدم الوزن"
     },
     "missingFcm": {
       "title": "مشتركات بدون إشعارات",
@@ -809,6 +810,26 @@
   "inAppNotification": {
     "close": "إغلاق",
     "viewNotifications": "عرض الإشعارات"
+  },
+  "weightProgress": {
+    "title": "تقدم الوزن",
+    "select": "اختر المشتركة",
+    "all": "الكل",
+    "current": "الوزن الحالي",
+    "chartTitle": "اتجاه الوزن",
+    "weight": "الوزن",
+    "note": "ملاحظة",
+    "change": "التغير",
+    "start": "وزن البداية",
+    "bmi": "مؤشر كتلة الجسم",
+    "bmiStatus": {
+      "underweight": "نقص في الوزن",
+      "normal": "وزن طبيعي",
+      "overweight": "زيادة في الوزن",
+      "obese": "سمنة"
+    },
+    "selectPrompt": "اختر مشتركة لعرض تقدم الوزن",
+    "selectHint": "بعد الاختيار ستظهر الرسمة البيانية والتحليل (BMI، التغير، وزن البداية) مع الملاحظات على نقاط الوزن."
   },
   "server": {
     "errors": {
