@@ -63,15 +63,10 @@ export default function AdminSettings() {
 
       const normalized = {
         ...settingsNormalized,
-        logoUrl:
-          settingsNormalized.logoUrl ||
-          settingsNormalized.LogoUrl ||
-          DEFAULT_LOGO,
-        cardUrl:
-          settingsNormalized.cardUrl ||
-          settingsNormalized.CardUrl ||
-          DEFAULT_CARD,
-        galleryImages: galleryData || [], // 🔥 هنا الحل الحقيقي
+        logoUrl: settingsNormalized.logoUrl || settingsNormalized.LogoUrl || DEFAULT_LOGO,
+        cardUrl: settingsNormalized.cardUrl || settingsNormalized.CardUrl || DEFAULT_CARD,
+        allowExtraBookingsByDefault: !!settingsNormalized.allowExtraBookingsByDefault, // ✅
+        galleryImages: galleryData || [],
       };
 
       setSettings(normalized);

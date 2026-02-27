@@ -445,7 +445,7 @@
       "clubName": "اسم النادي",
       "contactNumber": "رقم التواصل",
       "autoMessage": "الرسالة التلقائية",
-      "allowExtraBookings": "تفعيل الحجز غير المحدود لكل المستخدمين"
+      "allowExtraBookings": "تفعيل الحجز اللامحدود افتراضيًا"
     },
     "maintenance": {
       "enabled": "النظام في وضع الصيانة",
@@ -515,7 +515,7 @@
       "delete": "حذف"
     },
     "extraBooking": {
-      "label": "السماح بحجز إضافي",
+      "label": "تفعيل الحجز اللامحدود افتراضيًا",
       "updated": "تم تحديث إعداد الحجز الإضافي"
     },
     "messages": {

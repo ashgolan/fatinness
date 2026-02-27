@@ -446,7 +446,7 @@
       "clubName": "Club name",
       "contactNumber": "Contact number",
       "autoMessage": "Automatic message",
-      "allowExtraBookings": "Enable unlimited bookings for all users"
+      "allowExtraBookings": "Unlimited bookings by default (new users)"
     },
     "maintenance": {
       "enabled": "System is in maintenance mode",
@@ -516,7 +516,7 @@
       "delete": "Delete"
     },
     "extraBooking": {
-      "label": "Allow extra booking",
+      "label": "Unlimited bookings by default (new users)",
       "updated": "Extra booking setting updated"
     },
     "messages": {

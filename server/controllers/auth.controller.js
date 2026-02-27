@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import User from "../models/User.js";
 import { maintenanceMode } from "./maintenance.controller.js";
 import { DateTime } from "luxon";
+import Setting from "../models/Setting.js";
 
 // =====================================================
 // 🔐 JWT helpers
@@ -91,7 +92,12 @@ export const registerUser = async (req, res) => {
     let role = "user";
     if (isFirstUser) role = "admin";
     if (req.user?.role === "admin" && requestedRole === "admin") role = "admin";
-
+    // ✅ default allowExtraBookings for NEW users only
+    let allowExtraBookings = false;
+    const settings = await Setting.findOne().select("allowExtraBookingsByDefault");
+    if (settings && typeof settings.allowExtraBookingsByDefault === "boolean") {
+      allowExtraBookings = settings.allowExtraBookingsByDefault;
+    }
     const user = await User.create({
       username,
       passwordHash,
@@ -102,6 +108,8 @@ export const registerUser = async (req, res) => {
       weight: weight ?? null,
       age: age ?? null,
       role,
+      allowExtraBookings, // ✅ أهم سطر
+
       subscriptionStart: DateTime.utc().toJSDate(),
       subscriptionEnd: subscriptionEnd
         ? DateTime.fromISO(subscriptionEnd, { zone: "utc" }).toJSDate()
