@@ -195,7 +195,8 @@
       "full": "🔒 מלא",
       "bookNow": "🎯 להזמנה",
       "cancelBooking": "🗑️ ביטול הזמנה",
-      "rebook": "🔁 הזמנה מחדש"
+      "rebook": "🔁 הזמנה מחדש",
+      "subscriptionExpired": "⛔ המנוי הסתיים"
     },
     "emptySection": "אין הזמנות בחלק זה.",
     "toasts": {

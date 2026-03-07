@@ -791,7 +791,6 @@ function AvailableView({
                         bookingInProgress ||
                         (isFull && !isBooked)
                       }
-
                       style={{
                         width: "100%",
                         padding: "10px 0",
@@ -800,28 +799,35 @@ function AvailableView({
                         fontWeight: 700,
                         fontSize: 15,
                         color: "#fff",
-                        background: isProcessing
-                          ? "#999"
-                          : isFull && !isBooked
+                        background: isSubscriptionExpired
+                          ? "#9ca3af"
+                          : isProcessing
                             ? "#999"
-                            : isBooked
-                              ? "linear-gradient(135deg, #10b981, #059669)"
-                              : `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
+                            : isFull && !isBooked
+                              ? "#999"
+                              : isBooked
+                                ? "linear-gradient(135deg, #10b981, #059669)"
+                                : `linear-gradient(135deg, ${BRAND.purple}, ${BRAND.gold})`,
                         cursor:
-                          isProcessing || (isFull && !isBooked)
+                          isSubscriptionExpired ||
+                            isProcessing ||
+                            (isFull && !isBooked) ||
+                            bookingInProgress
                             ? "not-allowed"
                             : "pointer",
+                        opacity: isSubscriptionExpired ? 0.85 : 1,
                         transition: "all 0.3s ease",
                       }}
                     >
-                      {isProcessing
-                        ? t("bookingsHub.buttons.processing")
-                        : isBooked
-                          ? t("bookingsHub.buttons.booked")
-                          : isFull
-                            ? t("bookingsHub.buttons.full")
-                            : t("bookingsHub.buttons.bookNow")}
-
+                      {isSubscriptionExpired
+                        ? t("bookingsHub.buttons.subscriptionExpired")
+                        : isProcessing
+                          ? t("bookingsHub.buttons.processing")
+                          : isBooked
+                            ? t("bookingsHub.buttons.booked")
+                            : isFull
+                              ? t("bookingsHub.buttons.full")
+                              : t("bookingsHub.buttons.bookNow")}
                     </button>
                   </div>
                 );

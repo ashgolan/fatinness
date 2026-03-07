@@ -195,7 +195,8 @@
       "full": "🔒 ممتلئة",
       "bookNow": "🎯 احجز الآن",
       "cancelBooking": "🗑️ إلغاء الحجز",
-      "rebook": "🔁 إعادة الحجز"
+      "rebook": "🔁 إعادة الحجز",
+      "subscriptionExpired": "⛔ انتهى الاشتراك"
     },
     "emptySection": "لا توجد حجوزات في هذا القسم.",
     "toasts": {

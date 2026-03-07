@@ -195,7 +195,8 @@
       "full": "🔒 Full",
       "bookNow": "🎯 Book now",
       "cancelBooking": "🗑️ Cancel booking",
-      "rebook": "🔁 Rebook"
+      "rebook": "🔁 Rebook",
+      "subscriptionExpired": "⛔ Subscription Expired"
     },
     "emptySection": "No bookings in this section.",
     "toasts": {
@@ -830,7 +831,7 @@
       "obese": "Obese"
     },
     "selectPrompt": "Select a member to view weight progress",
-"selectHint": "After selecting, you’ll see the chart and insights (BMI, change, start weight) with notes on weight points."
+    "selectHint": "After selecting, you’ll see the chart and insights (BMI, change, start weight) with notes on weight points."
   },
   "server": {
     "errors": {
