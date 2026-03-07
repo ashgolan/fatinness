@@ -881,6 +881,124 @@ export const uploadLogo = async (req, res) => {
 // =======================
 
 
+// export const updateUserByAdmin = async (req, res) => {
+//   try {
+//     const admin = req.user;
+//     if (!admin || admin.role !== "admin") {
+//       return res.status(403).json({ code: "ADMIN_UNAUTHORIZED" });
+//     }
+
+//     const { id } = req.params;
+
+//     const {
+//       username,
+//       email,
+//       phone,
+//       gender,
+//       height,
+//       weight,
+//       age,
+//       role,
+//       subscriptionEnd,
+//       password, // ⭐ كلمة المرور الجديدة
+//     } = req.body;
+
+//     const user = await User.findById(id);
+//     if (!user) {
+//       return res.status(404).json({ code: "ADMIN_USER_NOT_FOUND" });
+//     }
+
+//     // 🔒 لا يمكن خفض رتبة آخر أدمين
+//     if (user.role === "admin" && role === "user") {
+//       const adminCount = await User.countDocuments({ role: "admin" });
+//       if (adminCount <= 1) {
+//         return res.status(400).json({ code: "ADMIN_LAST_ADMIN_ERROR" });
+//       }
+//     }
+
+//     // 🟦 تحديث الحقول العادية
+//     if (username !== undefined) user.username = username;
+//     if (email !== undefined && email.trim() !== "") user.email = email.trim();
+//     if (phone !== undefined) user.phone = phone;
+//     if (gender !== undefined) user.gender = gender;
+//     if (height !== undefined) user.height = height;
+//     if (weight !== undefined) user.weight = weight;
+//     if (age !== undefined) user.age = age;
+
+//     if (role !== undefined && ["admin", "user"].includes(role)) {
+//       user.role = role;
+//     }
+
+//     // ⭐ تجديد الاشتراك
+//     // ⭐ تجديد الاشتراك
+//     if (subscriptionEnd !== undefined && subscriptionEnd !== null) {
+//       user.subscriptionEnd = new Date(subscriptionEnd);
+//       user.subscriptionStart = new Date(); // اختياري إن أردت
+//       user.subscriptionStatus = "active";
+
+//       user.notified5Days = false;
+//       user.notified2Days = false;
+
+//       user.expiredNotified = false; // ⭐ مهم جداً
+
+
+//       user.isBlocked = false;
+//     }
+
+
+//     // 🔐 تغيير كلمة المرور
+//     let passwordChanged = false;
+
+//     if (password && password.trim().length >= 6) {
+//       const salt = await bcrypt.genSalt(10);
+//       user.passwordHash = await bcrypt.hash(password.trim(), salt);
+//       passwordChanged = true;
+//     }
+
+//     await user.save();
+
+//     // 🔔 إرسال إشعار عند تغيير كلمة المرور فقط
+//     if (passwordChanged) {
+//       const lang = user.preferredLanguage || "he";
+
+//       const message =
+//         NOTIFICATION_MESSAGES.passwordChanged[lang] ||
+//         NOTIFICATION_MESSAGES.passwordChanged.ar;
+
+//       // 📝 حفظ إشعار النظام
+//       await UserNotification.create({
+//         user: user._id,
+//         title: message.title,
+//         body: message.body,
+//         type: "security",
+//         targetType: "all",
+//       });
+
+//       // 🔔 إرسال Push (كما كان)
+//       await sendSmartNotification({
+//         user,
+//         title: message.title,
+//         body: message.body,
+//         url: "/profile",
+//         type: "admin"
+//       });
+//     }
+
+
+
+//     const safeUser = user.toObject();
+//     delete safeUser.passwordHash;
+
+//     res.json({
+//       code: "ADMIN_USER_UPDATE_SUCCESS",
+//       user: safeUser,
+//     });
+//   } catch (err) {
+//     console.error("❌ Update User Error:", err);
+//     res.status(500).json({ code: "ADMIN_SERVER_ERROR" });
+//   }
+// };
+
 export const updateUserByAdmin = async (req, res) => {
   try {
     const admin = req.user;
@@ -916,6 +1034,11 @@ export const updateUserByAdmin = async (req, res) => {
       }
     }
 
+    // ✅ حفظ تاريخ الاشتراك القديم للمقارنة
+    const oldSubscriptionEndISO = user.subscriptionEnd
+      ? new Date(user.subscriptionEnd).toISOString()
+      : null;
+
     // 🟦 تحديث الحقول العادية
     if (username !== undefined) user.username = username;
     if (email !== undefined && email.trim() !== "") user.email = email.trim();
@@ -929,22 +1052,35 @@ export const updateUserByAdmin = async (req, res) => {
       user.role = role;
     }
 
-    // ⭐ تجديد الاشتراك
-    // ⭐ تجديد الاشتراك
-    if (subscriptionEnd !== undefined && subscriptionEnd !== null) {
-      user.subscriptionEnd = new Date(subscriptionEnd);
-      user.subscriptionStart = new Date(); // اختياري إن أردت
-      user.subscriptionStatus = "active";
+    // ⭐ تحديث الاشتراك فقط إذا وصل تاريخ صالح وتغيّر فعليًا
+    if (
+      subscriptionEnd !== undefined &&
+      subscriptionEnd !== null &&
+      String(subscriptionEnd).trim() !== ""
+    ) {
+      const parsedSubscriptionEnd = new Date(subscriptionEnd);
 
-      user.notified5Days = false;
-      user.notified2Days = false;
+      // ✅ حماية من التاريخ غير الصالح
+      if (Number.isNaN(parsedSubscriptionEnd.getTime())) {
+        return res.status(400).json({ code: "ADMIN_INVALID_SUBSCRIPTION_END" });
+      }
 
-      user.expiredNotified = false; // ⭐ مهم جداً
+      const newSubscriptionEndISO = parsedSubscriptionEnd.toISOString();
+      const subscriptionChanged =
+        oldSubscriptionEndISO !== newSubscriptionEndISO;
 
+      if (subscriptionChanged) {
+        user.subscriptionEnd = parsedSubscriptionEnd;
+        user.subscriptionStart = new Date(); // اختياري إن أردت
+        user.subscriptionStatus = "active";
 
-      user.isBlocked = false;
+        user.notified5Days = false;
+        user.notified2Days = false;
+        user.expiredNotified = false;
+
+        user.isBlocked = false;
+      }
     }
-
 
     // 🔐 تغيير كلمة المرور
     let passwordChanged = false;
@@ -974,17 +1110,15 @@ export const updateUserByAdmin = async (req, res) => {
         targetType: "all",
       });
 
-      // 🔔 إرسال Push (كما كان)
+      // 🔔 إرسال Push
       await sendSmartNotification({
         user,
         title: message.title,
         body: message.body,
         url: "/profile",
-        type: "admin"
+        type: "admin",
       });
     }
-
-
 
     const safeUser = user.toObject();
     delete safeUser.passwordHash;
@@ -998,8 +1132,6 @@ export const updateUserByAdmin = async (req, res) => {
     res.status(500).json({ code: "ADMIN_SERVER_ERROR" });
   }
 };
-
-
 // =======================
 // 📌 تلخيص الحجوزات
 // =======================

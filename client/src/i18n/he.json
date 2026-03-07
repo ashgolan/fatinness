@@ -899,7 +899,7 @@
       "ADMIN_TOGGLE_BLOCK_ADMIN_ERROR": "לא ניתן לחסום מנהל מערכת.",
       "ADMIN_TOGGLE_BLOCK_ERROR": "אירעה שגיאה בשינוי מצב החסימה.",
       "CSV_EXPORT_ERROR": "ייצוא הדוח נכשל.",
-      "BOOKING_SLOT_ID_REQUIRED": "לא נבחרה חוגה להזמנה ❌",
+      "BOOKING_SLOT_ID_REQUIRED": "לא נבחר אימון להזמנה ❌",
       "ADMIN_BOOKING_CREATE_ERROR": "אירעה שגיאה בעת יצירת ההזמנה.",
       "ADMIN_BOOKING_SLOT_ID_REQUIRED": "נדרש מזהה אימון.",
       "ADMIN_BOOKING_WEEKLY_LIMIT_ERROR": "אירעה שגיאה בבדיקת המכסה השבועית.",
@@ -910,7 +910,8 @@
       "UNAUTHORIZED_INVALID_TOKEN": "ההתחברות אינה תקפה, נא להתחבר מחדש",
       "UNAUTHORIZED_USER_NOT_FOUND": "המשתמש לא נמצא או נמחק",
       "ADMIN_ONLY_ACCESS": "גישה זו מיועדת למנהלים בלבד",
-      "SLOT_ALREADY_STARTED": "❌ לא ניתן לבצע את הפעולה, השיעור כבר התחיל"
+      "SLOT_ALREADY_STARTED": "❌ לא ניתן לבצע את הפעולה, השיעור כבר התחיל",
+      "ADMIN_INVALID_SUBSCRIPTION_END": "תאריך סיום המנוי אינו תקין"
     },
     "ADMIN_REPORT_NO_DATA": "לא קיימות הזמנות בטווח התאריכים שנבחר",
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",

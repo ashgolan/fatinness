@@ -284,8 +284,8 @@
     },
     "cards": {
       "totalUsers": "إجمالي المشتركين",
-      "activeUsers": "الاشتراكات النشطه",
-      "blockedUsers": "الاشتراكات المحظوره",
+      "activeUsers": "الاشتراكات النشطة",
+      "blockedUsers": "الاشتراكات المحظورة",
       "totalBookings": "إجمالي الحجوزات",
       "activeBookings": "الحجوزات النشطة",
       "completedBookings": "الحجوزات المنجزة",
@@ -530,7 +530,7 @@
       "cannotBlockAdmin": "لا يمكن حظر المدراء",
       "cannotDeleteSuperAdmin": "لا يمكن حذف المدير الرئيسي",
       "onlySuperAdminCanPromote": "فقط المدير الرئيسي يمكنه ترقية مستخدم إلى مدير",
-      "cannotBlockSelf": "You cannot block your own account."
+      "cannotBlockSelf": "لا يمكنك حظر حسابك الخاص"
     },
     "confirm": {
       "block": "هل أنت متأكد من حظر هذا المشترك؟",
@@ -906,7 +906,8 @@
       "UNAUTHORIZED_INVALID_TOKEN": "جلسة تسجيل الدخول غير صالحة، يرجى تسجيل الدخول مرة أخرى",
       "UNAUTHORIZED_USER_NOT_FOUND": "المستخدم غير موجود أو تم حذفه",
       "ADMIN_ONLY_ACCESS": "هذا الإجراء مخصص للمشرفين فقط",
-      "SLOT_ALREADY_STARTED": "❌ لا يمكن تنفيذ العملية، الحصة قد بدأت بالفعل"
+      "SLOT_ALREADY_STARTED": "❌ لا يمكن تنفيذ العملية، الحصة قد بدأت بالفعل",
+      "ADMIN_INVALID_SUBSCRIPTION_END": "تاريخ نهاية الاشتراك غير صالح"
     },
     "ADMIN_REPORT_NO_DATA": "لا توجد حجوزات في هذا النطاق الزمني",
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
