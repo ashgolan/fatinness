@@ -55,8 +55,11 @@ export default function useServerError() {
 
       // 🧾 أي code معروف
       if (code) {
-        showError(t(`server.errors.${code}`));
-        return;
+        showError(
+          t(`server.errors.${code}`, {
+            ...data,
+          })
+        ); return;
       }
 
       showError(t("server.errors.UNKNOWN_ERROR"));

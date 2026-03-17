@@ -66,6 +66,9 @@ export default function AdminSettings() {
         logoUrl: settingsNormalized.logoUrl || settingsNormalized.LogoUrl || DEFAULT_LOGO,
         cardUrl: settingsNormalized.cardUrl || settingsNormalized.CardUrl || DEFAULT_CARD,
         allowExtraBookingsByDefault: !!settingsNormalized.allowExtraBookingsByDefault, // ✅
+        preventCloseBookings: settingsNormalized.preventCloseBookings ?? true,
+        minimumGapBetweenBookings: Number(settingsNormalized.minimumGapBetweenBookings ?? 60),
+
         galleryImages: galleryData || [],
       };
 
@@ -452,30 +455,75 @@ export default function AdminSettings() {
           sx={{ mb: 2 }}
         />
 
-        <FormControlLabel
-          control={
-            <Switch
-              checked={!!settings.allowExtraBookingsByDefault}
-              onChange={(e) =>
-                setSettings({
-                  ...settings,
-                  allowExtraBookingsByDefault: e.target.checked,
-                })
-              }
-              sx={{
-                "& .MuiSwitch-switchBase.Mui-checked": {
-                  color: theme.palette.mode === "dark" ? "#FFD93D" : undefined,
-                },
-                "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                  backgroundColor:
-                    theme.palette.mode === "dark" ? "#FFD93D" : undefined,
-                },
-              }}
-            />
-          }
-          label={t("adminSettings.fields.allowExtraBookings")}
-        />
+        <Box sx={{ mt: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!!settings.allowExtraBookingsByDefault}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    allowExtraBookingsByDefault: e.target.checked,
+                  })
+                }
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: theme.palette.mode === "dark" ? "#66BB6A" : "#4CAF50",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor:
+                      theme.palette.mode === "dark" ? "#66BB6A" : "#4CAF50",
+                  },
+                }}
+              />
+            }
+            label={t("adminSettings.fields.allowExtraBookings")}
+          />
+        </Box>
 
+        <Box sx={{ mt: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={!!settings.preventCloseBookings}
+                onChange={(e) =>
+                  setSettings({
+                    ...settings,
+                    preventCloseBookings: e.target.checked,
+                  })
+                }
+                sx={{
+                  "& .MuiSwitch-switchBase.Mui-checked": {
+                    color: theme.palette.mode === "dark" ? "#FFD54F" : "#FFC107",
+                  },
+                  "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+                    backgroundColor:
+                      theme.palette.mode === "dark" ? "#FFD54F" : "#FFC107",
+                  },
+                }}
+              />
+            }
+            label={t("adminSettings.fields.preventCloseBookings")}
+          />
+        </Box>
+
+        <Box sx={{ mt: 2 }}>
+          <TextField
+            fullWidth
+            type="number"
+            label={t("adminSettings.fields.minimumGapBetweenBookings")}
+            value={settings.minimumGapBetweenBookings ?? 60}
+            onChange={(e) =>
+              setSettings({
+                ...settings,
+                minimumGapBetweenBookings: Math.max(0, Number(e.target.value)),
+              })
+            }
+            disabled={!settings.preventCloseBookings}
+            inputProps={{ min: 0 }}
+            helperText={t("adminSettings.fields.minimumGapBetweenBookingsHelper")}
+          />
+        </Box>
         <Divider sx={{ my: 3 }} />
 
         {/* وضع الصيانة */}

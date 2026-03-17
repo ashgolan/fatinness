@@ -447,7 +447,10 @@
       "clubName": "Club name",
       "contactNumber": "Contact number",
       "autoMessage": "Automatic message",
-      "allowExtraBookings": "Unlimited bookings by default (new users)"
+      "allowExtraBookings": "Unlimited bookings by default (new users)",
+      "preventCloseBookings": "Prevent close bookings",
+      "minimumGapBetweenBookings": "Minimum gap between two bookings (minutes)",
+      "minimumGapBetweenBookingsHelper": "Example: 60 means a member cannot book two sessions with less than 60 minutes between them"
     },
     "maintenance": {
       "enabled": "System is in maintenance mode",
@@ -908,7 +911,12 @@
       "UNAUTHORIZED_USER_NOT_FOUND": "User not found or has been deleted",
       "ADMIN_ONLY_ACCESS": "This action is restricted to administrators only",
       "SLOT_ALREADY_STARTED": "❌ This action cannot be performed because the session has already started",
-      "ADMIN_INVALID_SUBSCRIPTION_END": "Invalid subscription end date"
+      "ADMIN_INVALID_SUBSCRIPTION_END": "Invalid subscription end date",
+      "ADMIN_BOOKING_SLOT_NOT_AVAILABLE": "This session is not available",
+      "ADMIN_BOOKING_SLOT_PAST": "This session has already started or passed",
+      "ADMIN_BOOKING_WEEKLY_LIMIT": "You have reached the weekly booking limit",
+      "ADMIN_BOOKING_SLOT_FULL": "This session is full",
+      "ADMIN_BOOKING_TOO_CLOSE_NOT_ALLOWED": "You cannot book two sessions too close in time. The minimum gap is {{minGap}} minutes"
     },
     "ADMIN_REPORT_NO_DATA": "There are no bookings in the selected date range",
     "UPLOAD_INVALID_IMAGE": "File must be a valid image.",

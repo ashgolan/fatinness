@@ -447,7 +447,10 @@
       "clubName": "שם המועדון",
       "contactNumber": "מספר ליצירת קשר",
       "autoMessage": "הודעה אוטומטית",
-      "allowExtraBookings": "הזמנות ללא הגבלה כברירת מחדל (למשתמשים חדשים)"
+      "allowExtraBookings": "הזמנות ללא הגבלה כברירת מחדל (למשתמשים חדשים)",
+      "preventCloseBookings": "מניעת הזמנות קרובות",
+      "minimumGapBetweenBookings": "מרווח מינימלי בין שתי הזמנות (בדקות)",
+      "minimumGapBetweenBookingsHelper": "לדוגמה: 60 פירושו שלא ניתן להזמין שני אימונים שהמרווח ביניהם קטן מ-60 דקות"
     },
     "maintenance": {
       "enabled": "המערכת במצב תחזוקה",
@@ -911,7 +914,12 @@
       "UNAUTHORIZED_USER_NOT_FOUND": "המשתמש לא נמצא או נמחק",
       "ADMIN_ONLY_ACCESS": "גישה זו מיועדת למנהלים בלבד",
       "SLOT_ALREADY_STARTED": "❌ לא ניתן לבצע את הפעולה, השיעור כבר התחיל",
-      "ADMIN_INVALID_SUBSCRIPTION_END": "תאריך סיום המנוי אינו תקין"
+      "ADMIN_INVALID_SUBSCRIPTION_END": "תאריך סיום המנוי אינו תקין",
+      "ADMIN_BOOKING_SLOT_NOT_AVAILABLE": "האימון הזה אינו זמין",
+      "ADMIN_BOOKING_SLOT_PAST": "האימון כבר התחיל או עבר",
+      "ADMIN_BOOKING_WEEKLY_LIMIT": "הגעת למכסת ההזמנות השבועית",
+      "ADMIN_BOOKING_SLOT_FULL": "האימון מלא",
+      "ADMIN_BOOKING_TOO_CLOSE_NOT_ALLOWED": "לא ניתן להזמין שני אימונים קרובים מדי בזמן. יש להמתין לפחות {{minGap}} דקות בין הזמנות"
     },
     "ADMIN_REPORT_NO_DATA": "לא קיימות הזמנות בטווח התאריכים שנבחר",
     "UPLOAD_INVALID_IMAGE": "הקובץ חייב להיות תמונה תקינה.",

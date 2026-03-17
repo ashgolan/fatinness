@@ -803,6 +803,8 @@ export const getSettings = async (req, res) => {
         contactNumber: "",
         autoMessage: "",
         allowExtraBookingsByDefault: false,
+        preventCloseBookings: true,
+        minimumGapBetweenBookings: 60,
         logoUrl: "",
         cardUrl: "",
       });
@@ -823,6 +825,8 @@ export const updateSettings = async (req, res) => {
       "contactNumber",
       "autoMessage",
       "allowExtraBookingsByDefault",
+      "preventCloseBookings",
+      "minimumGapBetweenBookings",
       "logoUrl",
       "cardUrl",
     ];
@@ -831,12 +835,19 @@ export const updateSettings = async (req, res) => {
       if (req.body[field] !== undefined) updateData[field] = req.body[field];
     }
 
+    // حماية بسيطة لقيمة الدقائق
+    if (updateData.minimumGapBetweenBookings !== undefined) {
+      updateData.minimumGapBetweenBookings = Math.max(
+        0,
+        Number(updateData.minimumGapBetweenBookings)
+      );
+    }
+
     const settings = await Setting.findOneAndUpdate(
       {},
       { $set: updateData },
       { new: true, upsert: true }
     );
-
 
     res.json({
       code: "ADMIN_SETTINGS_UPDATE_SUCCESS",

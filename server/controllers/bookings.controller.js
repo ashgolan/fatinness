@@ -12,6 +12,8 @@ import axios from "axios";
  * 🔹 إنشاء حجز جديد (UTC-safe)
  */
 import mongoose from "mongoose";
+import Setting from "../models/Setting.js";
+import { getSundayWeekRange } from "../utils/week.js";
 
 export const createBooking = async (req, res) => {
   const session = await mongoose.startSession();
@@ -20,8 +22,11 @@ export const createBooking = async (req, res) => {
     session.startTransaction();
 
     const user = req.user;
+    const settings = await Setting.findOne().session(session);
     const { slotId, paymentRef } = req.body;
-
+    const preventCloseBookings = settings?.preventCloseBookings ?? true;
+    const MIN_GAP_MINUTES = settings?.minimumGapBetweenBookings ?? 1;
+    const minGapMs = MIN_GAP_MINUTES * 60 * 1000;
     if (!slotId) {
       await session.abortTransaction();
       return res.status(400).json({ code: "BOOKING_SLOT_ID_REQUIRED" });
@@ -56,84 +61,126 @@ export const createBooking = async (req, res) => {
     // ============================
     // 📅 weekKey (الحل الذهبي)
     // ============================
-    const slotWeekKey = DateTime
-      .fromJSDate(slot.startAt)
-      .setZone(ZONE)
-      .toFormat("kkkk-'W'WW"); // مثال: 2026-W03
+    // const slotWeekKey = DateTime
+    //   .fromJSDate(slot.startAt)
+    //   .setZone(ZONE)
+    //   .toFormat("kkkk-'W'WW");
+    // مثال: 2026-W03
     // ============================
     // 📅 حدود الأسبوع (لرسالة ذكية للمستخدم)
     // ============================
-    const slotLocal = DateTime
-      .fromJSDate(slot.startAt)
-      .setZone(ZONE);
-
-    const weekStartLocal = slotLocal.startOf("week");
-    const weekEndLocal = slotLocal.endOf("week");
+    const { weekStart, weekEnd } = getSundayWeekRange(slot.startAt, ZONE);
 
     const MAX_BOOKINGS = 4;
     const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
 
 
-    const userBookingsThisWeek = await Booking.aggregate([
-      {
-        $match: {
-          user: user._id,
-          status: "booked",
-        },
-      },
-      {
-        $lookup: {
-          from: "slots",
-          localField: "slot",
-          foreignField: "_id",
-          as: "slot",
-        },
-      },
-      { $unwind: "$slot" },
-      {
-        $addFields: {
-          weekKey: {
-            $dateToString: {
-              format: "%G-W%V", // ISO week-year + week number
-              date: "$slot.startAt",
-              timezone: ZONE,
-            },
-          },
-        },
-      },
-      {
-        $match: {
-          weekKey: slotWeekKey,
-        },
-      },
-      { $count: "count" },
-    ]);
+    const userBookings = await Booking.find({
+      user: user._id,
+      status: "booked",
+    })
+      .populate("slot", "startAt endAt isDeleted")
+      .session(session);
 
-    const count = userBookingsThisWeek[0]?.count || 0;
+    const bookingsThisWeek = userBookings.filter((b) => {
+      const startAt = b.slot?.startAt;
+      if (!startAt) return false;
+      if (b.slot?.isDeleted) return false;
 
+      const bookingLocal = DateTime.fromJSDate(
+        startAt instanceof Date ? startAt : new Date(startAt),
+        { zone: ZONE }
+      );
+
+      return bookingLocal >= weekStart && bookingLocal <= weekEnd;
+    });
+
+    const count = bookingsThisWeek.length;
     if (count >= allowed) {
       await session.abortTransaction();
       return res.status(403).json({
         code: "ADMIN_BOOKING_WEEKLY_LIMIT",
         max: allowed,
-        weekStart: weekStartLocal.toISODate(), // مثال: 2026-01-21
-        weekEnd: weekEndLocal.toISODate(),     // مثال: 2026-01-27
+        weekStart: weekStart.toISODate(),
+        weekEnd: weekEnd.toISODate(),    // مثال: 2026-01-27
       });
     }
 
     // ============================
     // 🪑 سعة الحصة
     // ============================
-    const slotBookingsCount = await Booking.countDocuments(
-      { slot: slot._id, status: "booked" },
-      { session }
-    );
+    const slotBookingsCount = await Booking.countDocuments({
+      slot: slot._id,
+      status: "booked",
+    }).session(session);
 
     if (slotBookingsCount >= (slot.capacity || 9999)) {
       await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_FULL" });
     }
+    // ============================
+    // 🚫 منع الحجز المتقارب لنفس المستخدمة
+    // ============================
+    if (preventCloseBookings) {
+      const nearbyBookings = await Booking.aggregate([
+        {
+          $match: {
+            user: user._id,
+            status: "booked",
+          },
+        },
+        {
+          $lookup: {
+            from: "slots",
+            localField: "slot",
+            foreignField: "_id",
+            as: "slot",
+          },
+        },
+        { $unwind: "$slot" },
+        {
+          $match: {
+            "slot.isDeleted": false,
+          },
+        },
+        {
+          $project: {
+            slotStartAt: "$slot.startAt",
+            slotEndAt: "$slot.endAt",
+          },
+        },
+      ]).session(session);
 
+      const newStartMs = new Date(slot.startAt).getTime();
+      const newEndMs = new Date(slot.endAt).getTime();
+
+      const hasTooCloseBooking = nearbyBookings.some((b) => {
+        const existingStartMs = new Date(b.slotStartAt).getTime();
+        const existingEndMs = new Date(b.slotEndAt).getTime();
+
+        const overlaps = newStartMs < existingEndMs && newEndMs > existingStartMs;
+        if (overlaps) return true;
+
+        const gapAfterExisting = newStartMs - existingEndMs;
+        const gapBeforeExisting = existingStartMs - newEndMs;
+
+        const tooCloseAfter =
+          gapAfterExisting >= 0 && gapAfterExisting < minGapMs;
+
+        const tooCloseBefore =
+          gapBeforeExisting >= 0 && gapBeforeExisting < minGapMs;
+
+        return tooCloseAfter || tooCloseBefore;
+      });
+
+      if (hasTooCloseBooking) {
+        await session.abortTransaction();
+        return res.status(400).json({
+          code: "ADMIN_BOOKING_TOO_CLOSE_NOT_ALLOWED",
+          minGap: MIN_GAP_MINUTES,
+        });
+      }
+    }
     // ============================
     // ✅ إنشاء الحجز
     // ============================
@@ -262,7 +309,7 @@ export const getAllBookings = async (req, res) => {
 
     const bookings = await Booking.find()
       .populate("user", "username email role")
-      .populate("slot", "startAt endAt capacity isBlocked")
+      .populate("slot", "startAt endAt capacity isBlocked isDeleted")
       .sort({ createdAt: -1 });
 
     res.json(bookings);
@@ -278,7 +325,7 @@ export const getAllBookings = async (req, res) => {
 export const getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
-      .populate("slot", "startAt endAt capacity isBlocked")
+      .populate("slot", "startAt endAt capacity isBlocked isDeleted")
       .sort({ createdAt: -1 });
 
     res.json(bookings);

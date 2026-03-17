@@ -446,7 +446,10 @@
       "clubName": "اسم النادي",
       "contactNumber": "رقم التواصل",
       "autoMessage": "الرسالة التلقائية",
-      "allowExtraBookings": "تفعيل الحجز اللامحدود افتراضيًا"
+      "allowExtraBookings": "تفعيل الحجز اللامحدود افتراضيًا",
+      "preventCloseBookings": "منع الحجز المتقارب",
+      "minimumGapBetweenBookings": "الحد الأدنى للفاصل بين حجزين (بالدقائق)",
+      "minimumGapBetweenBookingsHelper": "مثال: 60 يعني لا يمكن للمشتركة حجز تمرينين بينهما أقل من 60 دقيقة"
     },
     "maintenance": {
       "enabled": "النظام في وضع الصيانة",
@@ -907,8 +910,12 @@
       "UNAUTHORIZED_USER_NOT_FOUND": "المستخدم غير موجود أو تم حذفه",
       "ADMIN_ONLY_ACCESS": "هذا الإجراء مخصص للمشرفين فقط",
       "SLOT_ALREADY_STARTED": "❌ لا يمكن تنفيذ العملية، الحصة قد بدأت بالفعل",
-      "ADMIN_INVALID_SUBSCRIPTION_END": "تاريخ نهاية الاشتراك غير صالح"
-    },
+      "ADMIN_INVALID_SUBSCRIPTION_END": "تاريخ نهاية الاشتراك غير صالح",
+      "ADMIN_BOOKING_SLOT_NOT_AVAILABLE": "هذه الحصة غير متاحة",
+      "ADMIN_BOOKING_SLOT_PAST": "هذه الحصة بدأت بالفعل أو انتهى وقتها",
+      "ADMIN_BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأسبوعي المسموح من الحجوزات",
+      "ADMIN_BOOKING_SLOT_FULL": "هذه الحصة ممتلئة",
+      "ADMIN_BOOKING_TOO_CLOSE_NOT_ALLOWED": "لا يمكن حجز تمرينين متقاربين زمنيًا. يجب أن يكون الفاصل بينهما {{minGap}} دقيقة على الأقل"    },
     "ADMIN_REPORT_NO_DATA": "لا توجد حجوزات في هذا النطاق الزمني",
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",

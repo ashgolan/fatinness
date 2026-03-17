@@ -8,6 +8,14 @@ const settingSchema = new mongoose.Schema(
     logoUrl: { type: String, default: "" },
     cardUrl: { type: String, default: "" }, // ✅ تمت إضافته هنا
     allowExtraBookingsByDefault: { type: Boolean, default: false },
+    minimumGapBetweenBookings: {
+      type: Number,
+      default: 1, // الافتراضي: منع التلاصق فقط
+    },
+    preventCloseBookings: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

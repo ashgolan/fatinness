@@ -15,16 +15,17 @@ import { DateTime } from "luxon";
 import { useContext } from "react";
 import { UserContext } from "../context/UserContext";
 
-const toLocalKey = (dateOrISO) =>
-  DateTime.fromISO(
-    typeof dateOrISO === "string"
-      ? dateOrISO
-      : DateTime.fromJSDate(dateOrISO).toISO(),
-    { zone: "utc" }
-  )
+const toFixedKey = (dateOrISO) => {
+  if (typeof dateOrISO === "string") {
+    return DateTime.fromISO(dateOrISO, { zone: "utc" })
+      .setZone(FIXED_ZONE)
+      .toFormat("yyyy-MM-dd");
+  }
+
+  return DateTime.fromJSDate(dateOrISO)
     .setZone(FIXED_ZONE)
     .toFormat("yyyy-MM-dd");
-
+};
 export default function BookingsHub() {
   const handleServerError = useServerError();
 
@@ -63,9 +64,8 @@ export default function BookingsHub() {
   const isSubscriptionExpired =
     user?.subscriptionStatus === "expired" ||
     (user?.subscriptionEnd &&
-      new Date(user.subscriptionEnd) < new Date());
-
-
+      DateTime.fromISO(user.subscriptionEnd, { zone: "utc" }).setZone(FIXED_ZONE) <
+      DateTime.now().setZone(FIXED_ZONE));
   const dayNames = [
     t("weekdays.sunday"),
     t("weekdays.monday"),
@@ -242,8 +242,8 @@ export default function BookingsHub() {
   // const now = DateTime.utc();
 
   // 🟢 بداية الأسبوع (الأحد)
-  const startOfWeek = nowFixed.startOf("week");
-  const startOfSundayWeek = startOfWeek.minus({ days: 1 });
+  const daysFromSunday = nowFixed.weekday % 7; // Sunday => 0
+  const startOfSundayWeek = nowFixed.startOf("day").minus({ days: daysFromSunday });
 
   // 🟢 تواريخ الأسبوع (Date عادي للعرض)
   const weekDates = [...Array(7)].map((_, i) =>
@@ -408,7 +408,7 @@ export default function BookingsHub() {
                 handleBook,
                 handleCancel,
                 bookingId,
-                toLocalKey,
+                toFixedKey,
                 t,
                 bookingInProgress,   // ✅ أضف هذا
                 lang, // ✅ أضف هذا
@@ -434,7 +434,8 @@ export default function BookingsHub() {
                 handleRebook,
                 t,
                 myBookings, // ✅ هذا هو السطر الناقص
-                locale
+                locale,
+                lang
               }}
             />
           )}
@@ -463,7 +464,6 @@ function AvailableView({
   handleBook,
   handleCancel,
   bookingId,
-  toLocalKey,
   t,
   bookingInProgress, // ✅ أضف هذا
   locale,
@@ -525,7 +525,8 @@ function AvailableView({
         }}
       >
         {gridDates.map((d) => {
-          const key = toLocalKey(d);
+          const dt = DateTime.fromJSDate(d).setZone(FIXED_ZONE);
+          const key = dt.toFormat("yyyy-MM-dd");
           const isToday = key === todayKey;
           const isAvailable = !!slotsByDay[key];
           const isSelected = selectedDate === key;
@@ -608,12 +609,11 @@ function AvailableView({
                   marginBottom: 4,
                 }}
               >
-                {dayNames[d.getDay()]}
+                {dayNames[dt.weekday % 7]}
               </div>
 
               <strong style={{ fontSize: 16, fontWeight: 800 }}>
-                {`${d.getDate()}/${d.getMonth() + 1}`}
-              </strong>
+                {`${dt.day}/${dt.month}`}              </strong>
 
               {isAvailable && (
                 <span
@@ -854,8 +854,8 @@ function MyBookingsView({
   handleCancel,
   handleRebook,
   t,
-  locale
-
+  locale,
+  lang
 }) {
   const nowFixed = DateTime.utc().setZone(FIXED_ZONE);
   return (
