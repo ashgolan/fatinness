@@ -48,81 +48,153 @@
 //   legacyHeaders: false,
 // });
 
-import rateLimit from "express-rate-limit";
+// import rateLimit from "express-rate-limit";
+
+// /**
+//  * 🧠 Helper: استخراج هوية المستخدم إن وُجدت (username/email/phone)
+//  */
+// const getUserIdentifier = (req) => {
+//   const raw =
+//     req.body?.identifier ??
+//     req.body?.username ??
+//     req.body?.email ??
+//     req.body?.phone ??
+//     "";
+
+//   const normalized = String(raw).trim().toLowerCase();
+//   return normalized || null;
+// };
+// /**
+//  * 🌐 API Limiter (عام)
+//  * - يحمي باقي الـ endpoints من spam
+//  * - لا يشمل /auth/login (نتركه لـ loginLimiter)
+//  */
+// export const apiLimiter = rateLimit({
+//   windowMs: 60 * 1000, // دقيقة
+//   max: 100, // 100 طلب/دقيقة لكل IP
+//   standardHeaders: true,
+//   legacyHeaders: false,
+
+//   // تجاهل preflight
+//   skip: (req) => req.method === "OPTIONS",
+
+//   message: {
+//     message: "Too many requests, please try again later.",
+//   },
+// });
+
+// /**
+//  * 🔐 Login Limiter (احترافي)
+//  * - يمنع brute force
+//  * - يعتمد على IP + هوية المستخدم إن وُجدت
+//  * - يتجاهل OPTIONS
+//  */
+// export const loginLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 دقيقة
+//   max: 10, // 10 محاولات لكل نافذة
+
+//   standardHeaders: true,
+//   legacyHeaders: false,
+//   // لا نحسب OPTIONS
+//   skip: (req) => req.method === "OPTIONS",
+//   skipSuccessfulRequests: true,
+
+//   /**
+//    * 🔑 توليد مفتاح آمن
+//    * - إن وُجد username/email → IP + identifier
+//    * - إن لم يوجد → IP فقط
+//    */
+//   keyGenerator: (req) => {
+//     const identifier = getUserIdentifier(req);
+
+//     if (identifier) {
+//       return `login:${identifier}`;
+//     }
+
+//     return `login-ip:${req.ip}`;
+//   },
+
+//   /**
+//    * 📢 رسالة الحظر
+//    */
+//   message: {
+//     message: "Too many login attempts, please try again after 15 minutes.",
+//   },
+
+//   /**
+//    * 🧾 Handler مخصص (مفيد للتتبع)
+//    */
+//   handler: (req, res, next, options) => {
+//     // يمكنك إبقاؤه أو إزالته في الإنتاج
+//     console.warn("🚫 LOGIN BLOCKED", {
+//       ip: req.ip,
+//       identifier: getUserIdentifier(req),
+//       method: req.method,
+//       path: req.originalUrl,
+//       xff: req.headers["x-forwarded-for"],
+//     });
+
+//     return res.status(options.statusCode).json(options.message);
+//   },
+// });
+
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 /**
- * 🧠 Helper: استخراج هوية المستخدم إن وُجدت (username/email/phone)
+ * 🧠 Helper: استخراج هوية المستخدم إن وُجدت
  */
 const getUserIdentifier = (req) => {
-  const u =
-    req.body?.username ||
-    req.body?.email ||
-    req.body?.phone ||
+  const raw =
+    req.body?.identifier ??
+    req.body?.username ??
+    req.body?.email ??
+    req.body?.phone ??
     "";
 
-  const normalized = String(u).trim().toLowerCase();
+  const normalized = String(raw).trim().toLowerCase();
   return normalized || null;
 };
 
 /**
  * 🌐 API Limiter (عام)
- * - يحمي باقي الـ endpoints من spam
- * - لا يشمل /auth/login (نتركه لـ loginLimiter)
  */
 export const apiLimiter = rateLimit({
-  windowMs: 60 * 1000, // دقيقة
-  max: 100, // 100 طلب/دقيقة لكل IP
+  windowMs: 60 * 1000,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
-
-  // تجاهل preflight
   skip: (req) => req.method === "OPTIONS",
-
   message: {
     message: "Too many requests, please try again later.",
   },
 });
 
 /**
- * 🔐 Login Limiter (احترافي)
- * - يمنع brute force
- * - يعتمد على IP + هوية المستخدم إن وُجدت
- * - يتجاهل OPTIONS
+ * 🔐 Login Limiter
  */
 export const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 دقيقة
-  max: 10, // 10 محاولات لكل نافذة
-
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-
-  // لا نحسب OPTIONS
   skip: (req) => req.method === "OPTIONS",
+  skipSuccessfulRequests: true,
 
-  /**
-   * 🔑 توليد مفتاح آمن
-   * - إن وُجد username/email → IP + identifier
-   * - إن لم يوجد → IP فقط
-   */
   keyGenerator: (req) => {
-    const ip = req.ip;
     const identifier = getUserIdentifier(req);
 
-    return identifier ? `${ip}_${identifier}` : ip;
+    if (identifier) {
+      return `login:${identifier}`;
+    }
+
+    return `login-ip:${ipKeyGenerator(req)}`;
   },
 
-  /**
-   * 📢 رسالة الحظر
-   */
   message: {
     message: "Too many login attempts, please try again after 15 minutes.",
   },
 
-  /**
-   * 🧾 Handler مخصص (مفيد للتتبع)
-   */
   handler: (req, res, next, options) => {
-    // يمكنك إبقاؤه أو إزالته في الإنتاج
     console.warn("🚫 LOGIN BLOCKED", {
       ip: req.ip,
       identifier: getUserIdentifier(req),
