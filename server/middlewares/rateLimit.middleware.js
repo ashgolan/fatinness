@@ -40,7 +40,7 @@ export const apiLimiter = rateLimit({
 export const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
-  keyGenerator: (req) => `${req.ip}_${req.body?.username || "unknown"}`,
+  skip: (req) => req.method === "OPTIONS",
   message: {
     message: "Too many login attempts, please try again after 15 minutes.",
   },
