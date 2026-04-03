@@ -173,8 +173,7 @@ import cookieParser from "cookie-parser";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { apiLimiter } from "./middlewares/rateLimiter.js";
-
+import { apiLimiter } from "./middlewares/rateLimit.middleware.js";
 // 🔧 Internal configs
 import "./config/firebase.js";
 import { connectDB } from "./config/db.js";
