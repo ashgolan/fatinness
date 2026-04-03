@@ -20,6 +20,7 @@ router.use("/slots", slotsRoutes);
 router.use("/bookings", bookingsRoutes);
 router.use("/payments", paymentsRoutes);
 router.use("/internal", internalRoutes);
+
 // router.use("/google", googleRoutes);
 
 router.use("/notifications",userNotifications);
