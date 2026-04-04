@@ -99,6 +99,7 @@
     "stats": {
       "currentWeight": "Current Weight",
       "height": "Height",
+      "age": "Age",
       "completed": "Completed Sessions",
       "subscription": "Subscription"
     },

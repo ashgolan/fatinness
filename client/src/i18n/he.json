@@ -99,6 +99,7 @@
     "stats": {
       "currentWeight": "משקל נוכחי",
       "height": "גובה",
+      "age": "גיל",
       "completed": "אימונים שהושלמו",
       "subscription": "מנוי"
     },

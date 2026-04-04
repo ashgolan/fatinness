@@ -99,6 +99,7 @@
     "stats": {
       "currentWeight": "الوزن الحالي",
       "height": "الطول",
+      "age": "العمر",
       "completed": "الحصص المنجزة",
       "subscription": "الاشتراك"
     },
