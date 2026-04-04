@@ -148,6 +148,7 @@
       "cm": "cm"
     },
     "bmi": {
+      "heightRequired": "Height is required to calculate BMI",
       "title": "Body Mass Index (BMI)",
       "underweight": "Underweight",
       "normal": "Normal",
@@ -158,6 +159,17 @@
     },
     "language": {
       "title": "App Language"
+    },
+    "edit": {
+      "title": "Edit Profile Info",
+      "height": "Height (cm)",
+      "age": "Age",
+      "save": "Save Profile Info",
+      "open": "Edit Profile Info",
+      "required": "Please enter height and age",
+      "success": "Profile info updated successfully",
+      "invalidHeight": "Height must be between 100 and 250 cm",
+      "invalidAge": "Age must be between 10 and 100"
     }
   },
   "bookingsHub": {

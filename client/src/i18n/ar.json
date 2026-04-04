@@ -148,6 +148,7 @@
       "cm": "سم"
     },
     "bmi": {
+      "heightRequired": "يجب إدخال الطول لحساب مؤشر BMI",
       "title": "مؤشر كتلة الجسم (BMI)",
       "underweight": "أقل من الطبيعي",
       "normal": "طبيعي",
@@ -158,6 +159,17 @@
     },
     "language": {
       "title": "لغة التطبيق"
+    },
+    "edit": {
+      "title": "تعديل المعلومات الشخصية",
+      "height": "الطول (سم)",
+      "age": "العمر",
+      "save": "حفظ المعلومات",
+      "open": "تعديل البيانات",
+      "required": "يرجى إدخال الطول والعمر",
+      "success": "تم تحديث المعلومات بنجاح",
+      "invalidHeight": "الطول يجب أن يكون بين 100 و 250 سم",
+      "invalidAge": "العمر يجب أن يكون بين 10 و 100"
     }
   },
   "bookingsHub": {
@@ -915,7 +927,8 @@
       "ADMIN_BOOKING_SLOT_PAST": "هذه الحصة بدأت بالفعل أو انتهى وقتها",
       "ADMIN_BOOKING_WEEKLY_LIMIT": "لقد وصلتِ إلى الحد الأسبوعي المسموح من الحجوزات",
       "ADMIN_BOOKING_SLOT_FULL": "هذه الحصة ممتلئة",
-      "ADMIN_BOOKING_TOO_CLOSE_NOT_ALLOWED": "لا يمكن حجز تمرينين متقاربين زمنيًا. يجب أن يكون الفاصل بينهما {{minGap}} دقيقة على الأقل"    },
+      "ADMIN_BOOKING_TOO_CLOSE_NOT_ALLOWED": "لا يمكن حجز تمرينين متقاربين زمنيًا. يجب أن يكون الفاصل بينهما {{minGap}} دقيقة على الأقل"
+    },
     "ADMIN_REPORT_NO_DATA": "لا توجد حجوزات في هذا النطاق الزمني",
     "UPLOAD_INVALID_IMAGE": "الملف يجب أن يكون صورة صالحة.",
     "WEEK_TEMPLATE_MISSING_FIELDS": "اسم القالب والحصص مطلوبة.",

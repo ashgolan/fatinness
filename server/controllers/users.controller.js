@@ -85,6 +85,23 @@ export const updateUserProfile = async (req, res) => {
       if (req.body[key] !== undefined) updates[key] = req.body[key];
     }
 
+    // ✅ convert numeric fields
+    if (updates.height !== undefined) {
+      updates.height = Number(updates.height);
+
+      if (Number.isNaN(updates.height) || updates.height < 100 || updates.height > 250) {
+        return res.status(400).json({ code: "INVALID_HEIGHT" });
+      }
+    }
+
+    if (updates.age !== undefined) {
+      updates.age = Number(updates.age);
+
+      if (Number.isNaN(updates.age) || updates.age < 5 || updates.age > 100) {
+        return res.status(400).json({ code: "INVALID_AGE" });
+      }
+    }
+
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
     }).select("-password -__v");
