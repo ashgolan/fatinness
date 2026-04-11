@@ -179,7 +179,8 @@
     "errors": {
       "fetch": "فشل تحميل البيانات",
       "notFoundToCancel": "لم يتم العثور على الحجز لإلغائه",
-      "weeklyLimitReached": "لقد وصلت إلى الحد الأقصى للحجوزات هذا الأسبوع"
+      "weeklyLimitReached": "لقد وصلت إلى الحد الأقصى للحجوزات هذا الأسبوع",
+      "subscriptionExpiresBeforeSlot": "لا يمكن إتمام الحجز لأن اشتراكك سينتهي قبل موعد الحصة"
     },
     "confirmCancel": "هل أنت متأكد من إلغاء هذا الحجز؟",
     "stats": {

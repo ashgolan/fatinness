@@ -179,7 +179,8 @@
     "errors": {
       "fetch": "טעינת הנתונים נכשלה",
       "notFoundToCancel": "לא נמצאה הזמנה לביטול",
-      "weeklyLimitReached": "הגעת למספר המרבי של הזמנות לשבוע זה"
+      "weeklyLimitReached": "הגעת למספר המרבי של הזמנות לשבוע זה",
+      "subscriptionExpiresBeforeSlot": "לא ניתן לבצע הזמנה כי המנוי שלך יסתיים לפני מועד השיעור"
     },
     "confirmCancel": "האם ברצונך לבטל הזמנה זו?",
     "stats": {

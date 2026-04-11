@@ -179,7 +179,8 @@
     "errors": {
       "fetch": "Failed to load data",
       "notFoundToCancel": "Booking not found to cancel",
-      "weeklyLimitReached": "You have reached the maximum number of bookings for this week"
+      "weeklyLimitReached": "You have reached the maximum number of bookings for this week",
+      "subscriptionExpiresBeforeSlot": "Booking cannot be completed because your subscription will expire before the session"
     },
     "confirmCancel": "Are you sure you want to cancel this booking?",
     "stats": {

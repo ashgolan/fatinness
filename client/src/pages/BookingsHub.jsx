@@ -153,6 +153,11 @@ export default function BookingsHub() {
         toast.success(t("bookingsHub.toasts.bookSuccess"));
         await fetchData();
       } catch (err) {
+        if (err?.response?.data?.code === "SUBSCRIPTION_EXPIRES_BEFORE_SLOT") {
+          toast.error(t("bookingsHub.errors.subscriptionExpiresBeforeSlot"));
+          return;
+        }
+
         handleServerError(err);
       } finally {
         bookingLockRef.current = false;

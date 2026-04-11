@@ -47,11 +47,28 @@ export const createBooking = async (req, res) => {
       _id: slotId,
       isDeleted: false,
     }).session(session);
+
+
+
+
     if (!slot || slot.isBlocked) {
       await session.abortTransaction();
       return res.status(400).json({ code: "ADMIN_BOOKING_SLOT_NOT_AVAILABLE" });
     }
+    if (user.subscriptionEnd) {
+      const subscriptionEnd = DateTime.fromJSDate(user.subscriptionEnd)
+        .setZone(ZONE)
+        .endOf("day");
 
+      const slotStart = DateTime.fromJSDate(slot.startAt).setZone(ZONE);
+
+      if (slotStart > subscriptionEnd) {
+        await session.abortTransaction();
+        return res.status(403).json({
+          code: "SUBSCRIPTION_EXPIRES_BEFORE_SLOT",
+        });
+      }
+    }
     const nowUTC = DateTime.utc().toJSDate();
     if (!slot.startAt || slot.startAt <= nowUTC) {
       await session.abortTransaction();
