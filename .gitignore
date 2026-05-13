@@ -7,4 +7,3 @@ server/config/firebase-key.json
 gitHubToken.txt
 # Android Studio
 .idea/
-*.imlserver/config/firebase-key.json
