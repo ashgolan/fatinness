@@ -4,6 +4,7 @@ server/node_modules
 client/build
 .env
 server/config/firebase-key.json
+server/.config/
 gitHubToken.txt
 # Android Studio
 .idea/
