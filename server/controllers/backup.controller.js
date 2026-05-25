@@ -24,16 +24,4 @@ export const downloadBackup = async (req, res) => {
 // ======================================================
 // 📧 إرسال نسخة احتياطية يدوياً على الإيميل
 // ======================================================
-export const sendBackupNow = async (req, res) => {
-  try {
-    const result = await runBackup();
-    return res.json({
-      code: "BACKUP_SENT_SUCCESS",
-      label: result.label,
-      sizeBytes: result.size,
-    });
-  } catch (error) {
-    console.error("❌ sendBackupNow error:", error);
-    return res.status(500).json({ code: "BACKUP_SEND_FAILED" });
-  }
-};
+

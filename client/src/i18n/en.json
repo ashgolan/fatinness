@@ -491,8 +491,7 @@
 
     "backup": {
       "title": "Backups",
-      "description": "Full database export as compressed JSON files. An automatic backup is sent every day at 1:00 AM.",
-      "download": "Download backup",
+"description": "It is recommended to download a backup to your device at least once a week.",      "download": "Download backup",
       "downloading": "Downloading...",
       "downloadSuccess": "Backup downloaded successfully ✅",
       "sendNow": "Send to email now",

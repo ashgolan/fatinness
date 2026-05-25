@@ -75,7 +75,6 @@ export default function AdminSettings() {
   const [galleryOpen, setGalleryOpen]               = useState(false);
   const [previewImage, setPreviewImage]             = useState(null);
   const [backupLoading, setBackupLoading]           = useState(false);
-  const [sendingBackup, setSendingBackup]           = useState(false);
 
   const fetchSettings = async () => {
     try {
@@ -186,15 +185,6 @@ export default function AdminSettings() {
       toast.success(t("adminSettings.backup.downloadSuccess"));
     } catch (err) { handleServerError(err); }
     finally { setBackupLoading(false); }
-  };
-
-  const handleSendBackupNow = async () => {
-    setSendingBackup(true);
-    try {
-      await Api.post("/admin/backup/send");
-      toast.success(t("adminSettings.backup.sendSuccess"));
-    } catch (err) { handleServerError(err); }
-    finally { setSendingBackup(false); }
   };
 
   if (loading || !settings)
@@ -450,49 +440,26 @@ export default function AdminSettings() {
                 {t("adminSettings.backup.description")}
               </Typography>
             </Box>
-            <Chip label="01:00 AM" size="small"
-              sx={{ background:`${PURPLE}18`, color:PURPLE, fontWeight:700, fontSize:"0.75rem" }}/>
           </Paper>
-
-          <Grid container spacing={2}>
-            {[
-              {
-                icon:   <BackupIcon sx={{ fontSize:36, color: isDark ? GOLD : "#854F0B", mb:1 }}/>,
-                title:  t("adminSettings.backup.downloadTitle"),
-                desc:   t("adminSettings.backup.downloadDesc"),
-                btn:    backupLoading ? t("adminSettings.backup.downloading") : t("adminSettings.backup.download"),
-                icon2:  backupLoading ? <CircularProgress size={16}/> : <BackupIcon/>,
-                action: handleDownloadBackup,
-                color:  isDark ? GOLD : "#854F0B",
-              },
-              {
-                icon:   <SendIcon sx={{ fontSize:36, color:PURPLE, mb:1 }}/>,
-                title:  t("adminSettings.backup.sendTitle"),
-                desc:   t("adminSettings.backup.sendDesc"),
-                btn:    sendingBackup ? t("adminSettings.backup.sending") : t("adminSettings.backup.sendNow"),
-                icon2:  sendingBackup ? <CircularProgress size={16}/> : <SendIcon/>,
-                action: handleSendBackupNow,
-                color:  PURPLE,
-              },
-            ].map((item, i) => (
-              <Grid item xs={12} sm={6} key={i}>
-                <Paper elevation={0} sx={{
-                  p: 2.5, borderRadius:"12px", textAlign:"center", border: cardBorder,
-                  height:"100%", display:"flex", flexDirection:"column", alignItems:"center",
-                }}>
-                  {item.icon}
-                  <Typography variant="body2" sx={{ fontWeight:600, mb:0.5 }}>{item.title}</Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ display:"block", mb:2 }}>{item.desc}</Typography>
-                  <Button variant="outlined" fullWidth startIcon={item.icon2}
-                    onClick={item.action}
-                    disabled={backupLoading || sendingBackup}
-                    sx={{ mt:"auto", ...outlineBtn(item.color) }}>
-                    {item.btn}
-                  </Button>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
+<Paper elevation={0} sx={{
+  p: 2.5, borderRadius:"12px", textAlign:"center", border: cardBorder,
+  display:"flex", flexDirection:"column", alignItems:"center",
+}}>
+  <BackupIcon sx={{ fontSize:36, color: isDark ? GOLD : "#854F0B", mb:1 }}/>
+  <Typography variant="body2" sx={{ fontWeight:600, mb:0.5 }}>
+    {t("adminSettings.backup.downloadTitle")}
+  </Typography>
+  <Typography variant="caption" color="text.secondary" sx={{ display:"block", mb:2 }}>
+    {t("adminSettings.backup.downloadDesc")}
+  </Typography>
+  <Button variant="outlined" fullWidth
+    startIcon={backupLoading ? <CircularProgress size={16}/> : <BackupIcon/>}
+    onClick={handleDownloadBackup}
+    disabled={backupLoading}
+    sx={outlineBtn(isDark ? GOLD : "#854F0B")}>
+    {backupLoading ? t("adminSettings.backup.downloading") : t("adminSettings.backup.download")}
+  </Button>
+</Paper>
         </Box>
       )}
 

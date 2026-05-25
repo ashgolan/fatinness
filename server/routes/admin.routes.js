@@ -30,7 +30,7 @@ import {
   updateSlotCapacity,
   getUserWeightProgress,
 } from "../controllers/admin.controller.js";
-import { downloadBackup, sendBackupNow } from "../controllers/backup.controller.js";
+import { downloadBackup } from "../controllers/backup.controller.js";
 
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { adminMiddleware } from "../middlewares/admin.middleware.js";
@@ -119,5 +119,4 @@ router.get("/users/missing-fcm", getUsersMissingFcm);
 
 router.get("/users/:id/weight-progress", getUserWeightProgress);
 router.get("/backup/download", downloadBackup);
-router.post("/backup/send", sendBackupNow);
 export default router;
