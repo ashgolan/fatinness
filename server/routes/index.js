@@ -9,6 +9,7 @@ import bookingsRoutes from "./bookings.routes.js";
 import internalRoutes from "./internal.routes.js";
 import userNotifications from "./userNotifications.routes.js";
 // import googleRoutes from "./google.routes.js";
+import emergencyRoutes from "./emergency.routes.js";
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.use("/payments", paymentsRoutes);
 router.use("/internal", internalRoutes);
 
 // router.use("/google", googleRoutes);
+router.use("/emergency", emergencyRoutes);
 
 router.use("/notifications",userNotifications);
 

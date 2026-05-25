@@ -38,6 +38,7 @@ import BookingsHub from "./pages/BookingsHub";
 import Gallery from "./pages/Gallery";
 import About from "./pages/About";
 import DebugApi from "./pages/DebugApi";
+import EmergencyRestore from "./pages/EmergencyRestore";
 
 // ================= Admin =================
 import ControlCenter from "./pages/admin/ControlCenter";
@@ -94,84 +95,51 @@ export default function App() {
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // 🔥 أهم State
-  const [needsSetup, setNeedsSetup] = useState(null); // null = loading
+  const [needsSetup, setNeedsSetup] = useState(null);
 
-  // ======================================================
-  // 🌍 تحميل اللغة من التخزين
-  // ======================================================
   useEffect(() => {
     const savedLang = localStorage.getItem("appLanguage");
     if (!savedLang) return;
-
     i18n.changeLanguage(savedLang);
     document.documentElement.dir = savedLang === "en" ? "ltr" : "rtl";
   }, []);
 
   useEffect(() => {
     const handler = () => {
-      if (!user) {
-        navigate("/login");
-        return;
-      }
-
+      if (!user) { navigate("/login"); return; }
       navigate("/notifications");
     };
-
     window.addEventListener("open-notifications", handler);
-
-    return () => {
-      window.removeEventListener("open-notifications", handler);
-    };
+    return () => window.removeEventListener("open-notifications", handler);
   }, [navigate, user]);
-
 
   const [inAppNotification, setInAppNotification] = useState(null);
 
   useEffect(() => {
     const handler = (e) => {
       setInAppNotification(e.detail);
-
       window.dispatchEvent(new Event("refresh-unread-count"));
-
-      // 📳 اهتزاز الهاتف (إن وجد)
-      if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]);
-      }
-
-      // 🔔 تحريك الجرس
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
       window.dispatchEvent(new Event("bell-pulse"));
     };
-
     window.addEventListener(FCM_EVENT, handler);
     return () => window.removeEventListener(FCM_EVENT, handler);
   }, []);
 
-
-
-  // ======================================================
-  // 🌍 مزامنة اللغة من المستخدم
-  // ======================================================
   useEffect(() => {
     if (!user?.preferredLanguage) return;
     if (i18n.language === user.preferredLanguage) return;
-
     i18n.changeLanguage(user.preferredLanguage);
     localStorage.setItem("appLanguage", user.preferredLanguage);
-    document.documentElement.dir =
-      user.preferredLanguage === "en" ? "ltr" : "rtl";
+    document.documentElement.dir = user.preferredLanguage === "en" ? "ltr" : "rtl";
   }, [user]);
-  // ======================================================
-  // 🔄 Version Auto Update (only on app reopen)
-  // ======================================================
+
   useEffect(() => {
     let currentVersion = null;
-
     const checkVersion = async () => {
       try {
         const res = await fetch("/version.json", { cache: "no-store" });
         const data = await res.json();
-
         if (!currentVersion) {
           currentVersion = data.version;
         } else if (currentVersion !== data.version) {
@@ -182,62 +150,33 @@ export default function App() {
         console.error("Version check failed", err);
       }
     };
-
-    // أول تحميل
     checkVersion();
-
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        checkVersion();
-      }
+      if (document.visibilityState === "visible") checkVersion();
     };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, []);
 
-  // ======================================================
-  // 🔐 فحص first-run (دائمًا – بدون Token)
-  // ======================================================
   useEffect(() => {
     Api.get("/auth/check-first-run")
       .then((res) => setNeedsSetup(res.data.needsSetup))
       .catch(() => setNeedsSetup(false));
   }, []);
 
-  // ======================================================
-  // ⏳ أثناء الفحص لا نعرض Routes
-  // ======================================================
-  if (needsSetup === null) {
-    return null; // أو Loader إذا حاب
-  }
+  if (needsSetup === null) return null;
 
-  // ======================================================
-  // 🚨 النظام بحاجة تهيئة (Super Admin)
-  // ======================================================
   if (needsSetup) {
     return (
       <Routes>
-        <Route
-          path="/register-superadmin"
-          element={<RegisterSuperAdmin />}
-        />
-        <Route
-          path="*"
-          element={<Navigate to="/register-superadmin" replace />}
-        />
+        <Route path="/register-superadmin" element={<RegisterSuperAdmin />} />
+        <Route path="*" element={<Navigate to="/register-superadmin" replace />} />
       </Routes>
     );
   }
 
   const isSplash = location.pathname === "/";
 
-  // ======================================================
-  // ✅ التطبيق الطبيعي
-  // ======================================================
   return (
     <ThemeModeProvider>
       <DirectionProvider>
@@ -260,99 +199,53 @@ export default function App() {
               onOpenNotifications={() => navigate("/notifications")}
             />
 
-
-            <div
-              className="app-container"
-              style={{
-                minHeight: "100vh",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
+            <div className="app-container" style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
               {!isSplash && <Navbar />}
 
               <div style={{ flex: 1, padding: isSplash ? 0 : "16px" }}>
                 <Routes>
+
+                  {/* ══ Public ══ */}
                   <Route path="/" element={<Splash />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/debug-api" element={<DebugApi />} />
+                  <Route path="/emergency-restore" element={<EmergencyRestore />} />
+
                   <Route element={<PrivateRoute />}>
                     <Route path="/notifications" element={<Notifications />} />
                   </Route>
 
-                  {/* User */}
+                  {/* ══ User ══ */}
                   <Route element={<PrivateRoute role="user" />}>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/gallery" element={<Gallery />} />
                     <Route path="/bookings" element={<Booking />} />
                     <Route path="/my-bookings" element={<MyBookings />} />
-
-                    <Route
-                      path="/bookings-hub"
-                      element={<BookingsHub />}
-                    />
-                    <Route
-                      path="/subscription"
-                      element={<Subscription />}
-                    />
+                    <Route path="/bookings-hub" element={<BookingsHub />} />
+                    <Route path="/subscription" element={<Subscription />} />
                   </Route>
 
-                  {/* Admin */}
+                  {/* ══ Admin ══ */}
                   <Route element={<PrivateRoute role="admin" />}>
                     <Route path="/register" element={<Register />} />
-                    <Route
-                      path="/admin/control"
-                      element={<ControlCenter />}
-                    />
-                    <Route
-                      path="/admin/dashboard"
-                      element={<AdminDashboard />}
-                    />
-                    <Route
-                      path="/admin/system-reset"
-                      element={<AdminSystemReset />}
-                    />
-                    <Route
-                      path="/admin/subscriptions-report"
-                      element={<SubscriptionsReport />}
-                    />
-                    <Route
-                      path="/admin/bookings"
-                      element={<BookingsAdmin />}
-                    />
-                    <Route
-                      path="/admin/schedule"
-                      element={<AdminSchedule />}
-                    />
-                    <Route
-                      path="/admin/users"
-                      element={<UsersAdmin />}
-                    />
-                    <Route
-                      path="/admin/slots"
-                      element={<SlotsAdmin />}
-                    />
-                    <Route
-                      path="/admin/notifications"
-                      element={<AdminNotifications />}
-                    />
-                    <Route
-                      path="/admin/reports"
-                      element={<AdminReports />}
-                    />
-                    <Route
-                      path="/admin/settings"
-                      element={<AdminSettings />}
-                    />
+                    <Route path="/admin/control" element={<ControlCenter />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/system-reset" element={<AdminSystemReset />} />
+                    <Route path="/admin/subscriptions-report" element={<SubscriptionsReport />} />
+                    <Route path="/admin/bookings" element={<BookingsAdmin />} />
+                    <Route path="/admin/schedule" element={<AdminSchedule />} />
+                    <Route path="/admin/users" element={<UsersAdmin />} />
+                    <Route path="/admin/slots" element={<SlotsAdmin />} />
+                    <Route path="/admin/notifications" element={<AdminNotifications />} />
+                    <Route path="/admin/reports" element={<AdminReports />} />
+                    <Route path="/admin/settings" element={<AdminSettings />} />
                   </Route>
-                  <Route
-                    path="/admin/weight-progress"
-                    element={<AdminWeightProgress />}
-                  />
 
+                  <Route path="/admin/weight-progress" element={<AdminWeightProgress />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
+
                 </Routes>
               </div>
 
