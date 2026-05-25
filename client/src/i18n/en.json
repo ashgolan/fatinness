@@ -447,7 +447,9 @@
       "deleteSuccess": "Image deleted successfully",
       "deleteFailed": "Failed to delete image",
       "confirmDelete": "Do you want to delete the image?",
-      "maxImages": "You cannot add more than 10 images"
+      "maxImages": "You cannot add more than 10 images",
+            "empty": "No photos yet"
+
     },
     "card": {
       "title": "Card image",
@@ -486,18 +488,52 @@
       "saved": "Saved successfully",
       "imageUpdated": "Image updated successfully"
     },
-    "actions": {
-      "save": "Save changes"
-    }
-  },
-  "usersAdmin": {
-    "title": "Members Management",
-    "subtitle": "View and manage members accounts and permissions",
-    "editUser": "Edit member details",
-    "noResults": "No matching results found",
-    "search": {
-      "placeholder": "Search by name, email, or phone"
-    },
+
+    "backup": {
+      "title": "Backups",
+      "description": "Full database export as compressed JSON files. An automatic backup is sent every day at 1:00 AM.",
+      "download": "Download backup",
+      "downloading": "Downloading...",
+      "downloadSuccess": "Backup downloaded successfully ✅",
+      "sendNow": "Send to email now",
+      "sending": "Sending...",
+      "sendSuccess": "Backup sent to your email ✅",
+            "autoTitle": "Daily automatic backup",
+            "downloadTitle": "Download to device",
+            "downloadDesc": "ZIP file containing all system data",
+            "sendTitle": "Send to email",
+            "sendDesc": "Send backup to your personal email now"
+            
+          },
+          "nav": {
+            "identity": "Club identity",
+            "visuals": "Visual identity",
+            "gallery": "Photo gallery",
+            "booking": "Booking settings",
+            "maintenance": "Maintenance",
+            "backup": "Backups"
+          },
+          "booking": {
+            "allowExtraBookingsSub": "Allow members to book more than one session",
+            "preventCloseBookingsSub": "Prevent back-to-back bookings"
+          },
+          "maintenanceOn": "App is in maintenance mode. Users cannot access it.",
+          "maintenanceOff": "App is running normally and accessible to all.",
+          
+          "actions": {
+            "saving": "Saving...",
+            "save": "Save changes"
+          }
+          
+        },
+        "usersAdmin": {
+          "title": "Members Management",
+          "subtitle": "View and manage members accounts and permissions",
+          "editUser": "Edit member details",
+          "noResults": "No matching results found",
+          "search": {
+            "placeholder": "Search by name, email, or phone"
+          },
     "totalBookings": "Total bookings",
     "card": {
       "active": "Active",
