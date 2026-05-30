@@ -166,14 +166,15 @@ export default function App() {
 
   if (needsSetup === null) return null;
 
-  if (needsSetup) {
-    return (
-      <Routes>
-        <Route path="/register-superadmin" element={<RegisterSuperAdmin />} />
-        <Route path="*" element={<Navigate to="/register-superadmin" replace />} />
-      </Routes>
-    );
-  }
+if (needsSetup) {
+  return (
+    <Routes>
+      <Route path="/register-superadmin" element={<RegisterSuperAdmin />} />
+      <Route path="/emergency-restore" element={<EmergencyRestore />} />
+      <Route path="*" element={<Navigate to="/register-superadmin" replace />} />
+    </Routes>
+  );
+}
 
   const isSplash = location.pathname === "/";
 
