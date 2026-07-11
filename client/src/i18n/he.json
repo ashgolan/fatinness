@@ -489,7 +489,7 @@
     },
     "backup": {
       "title": "גיבויים",
-"description": "מומלץ להוריד גיבוי למכשיר לפחות פעם בשבוע.",
+      "description": "מומלץ להוריד גיבוי למכשיר לפחות פעם בשבוע.",
       "download": "הורד גיבוי",
       "downloading": "מוריד...",
       "downloadSuccess": "הגיבוי הורד בהצלחה ✅",
@@ -518,8 +518,7 @@
     "maintenanceOff": "האפליקציה פועלת כרגיל ונגישה לכולם.",
     "actions": {
       "saving": "שומר...",
-                  "save": "שמירת שינויים"
-
+      "save": "שמירת שינויים"
     }
   },
   "usersAdmin": {
@@ -916,7 +915,7 @@
       "BOOKING_CREATE_ERROR": "אירעה שגיאה ביצירת ההזמנה.",
       "BOOKING_CANCEL_NOT_FOUND": "ההזמנה לא נמצאה.",
       "BOOKING_CANCEL_FORBIDDEN": "לא ניתן לבטל הזמנה זו.",
-      "BOOKING_CANCEL_TOO_LATE": "לא ניתן לבטל הזמנה פחות מ־12 שעות לפני המועד.",
+      "BOOKING_CANCEL_TOO_LATE": "לא ניתן לבטל את ההזמנה אם נותרה פחות משעה אחת עד מועד השיעור.",
       "BOOKING_CANCEL_ERROR": "אירעה שגיאה בביטול ההזמנה.",
       "PROFILE_NOT_FOUND": "המשתמש לא נמצא.",
       "PROFILE_UPDATE_ERROR": "אירעה שגיאה בעדכון הנתונים.",

@@ -289,7 +289,7 @@ export const cancelBooking = async (req, res) => {
 
     // 🕒 مهلة الإلغاء: 12 ساعة قبل البداية
     const cancelDeadlineUTC = DateTime.fromJSDate(booking.slot.startAt)
-      .minus({ hours: 12 })
+      .minus({ hours: 1 })
       .toUTC();
 
     if (req.user.role !== "admin" && nowUTC > cancelDeadlineUTC) {
