@@ -70,6 +70,9 @@ export default function UsersAdmin() {
   const [deleteUser, setDeleteUser] = useState(null);
   const { user: currentUser } = useContext(UserContext);
   const [confirmSaveOpen, setConfirmSaveOpen] = useState(false);
+  const [limitDialogOpen, setLimitDialogOpen] = useState(false);
+  const [limitTargetUser, setLimitTargetUser] = useState(null);
+  const [limitValue, setLimitValue] = useState(4);
 
   const openDeleteConfirm = (user) => {
     // منع حذف المدير الرئيسي
@@ -141,11 +144,12 @@ export default function UsersAdmin() {
   // ---------------------------
   // 🟢 السماح بالحجز الإضافي
   // ---------------------------
-  const toggleExtraBooking = async (user) => {
+  const applyExtraBooking = async (user, allow, weeklyLimit) => {
     try {
       const { data } = await Api.put("/admin/users/extra-booking", {
         userId: user._id,
-        allow: !user.allowExtraBookings,
+        allow,
+        ...(weeklyLimit !== undefined ? { weeklyLimit } : {}),
       });
 
       toast.success(data.message || t("usersAdmin.extraBooking.updated"));
@@ -153,13 +157,47 @@ export default function UsersAdmin() {
       setUsers((prev) =>
         prev.map((u) =>
           u._id === user._id
-            ? { ...u, allowExtraBookings: !u.allowExtraBookings }
+            ? {
+              ...u,
+              allowExtraBookings: allow,
+              weeklyBookingLimit:
+                !allow && weeklyLimit !== undefined
+                  ? Number(weeklyLimit)
+                  : u.weeklyBookingLimit,
+            }
             : u
         )
       );
     } catch (err) {
       handleServerError(err);
     }
+  };
+
+  const handleExtraBookingToggle = (user) => {
+    if (user.allowExtraBookings) {
+      setLimitTargetUser(user);
+      setLimitValue(user.weeklyBookingLimit || 4);
+      setLimitDialogOpen(true);
+    } else {
+      applyExtraBooking(user, true);
+    }
+  };
+
+  const openEditLimitDialog = (user) => {
+    setLimitTargetUser(user);
+    setLimitValue(user.weeklyBookingLimit || 4);
+    setLimitDialogOpen(true);
+  };
+
+  const confirmLimitDialog = async () => {
+    const n = Number(limitValue);
+    if (!Number.isInteger(n) || n < 1) {
+      toast.error(t("usersAdmin.extraBooking.limitInvalid"));
+      return;
+    }
+    const targetUser = limitTargetUser;
+    setLimitDialogOpen(false);
+    await applyExtraBooking(targetUser, false, n);
   };
 
   // ---------------------------
@@ -514,36 +552,53 @@ export default function UsersAdmin() {
                   {/* ⚡ السماح بالحجز الإضافي */}
                   {/* --------------------------- */}
                   {user.role === "user" && (
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={user.allowExtraBookings}
-                          onChange={() => toggleExtraBooking(user)}
-                          disabled={user.isBlocked || user.role === "admin"}
-                          sx={{
-                            "& .MuiSwitch-switchBase.Mui-checked": {
-                              color: "#FFD700",
-                              filter:
-                                "drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))",
-                            },
-                            "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
-                              { backgroundColor: "#ffeb3b" },
-                          }}
-                        />
-                      }
-                      label={
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: theme.palette.text.secondary,
-                          }}
-                        >
-                          {t("usersAdmin.extraBooking.label")}
-                        </Typography>
-                      }
-                      sx={{ mb: 2 }}
-                    />)}
+                    <Box sx={{ mb: 2 }}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={user.allowExtraBookings}
+                            onChange={() => handleExtraBookingToggle(user)}
+                            disabled={user.isBlocked || user.role === "admin"}
+                            sx={{
+                              "& .MuiSwitch-switchBase.Mui-checked": {
+                                color: "#FFD700",
+                                filter: "drop-shadow(0 0 6px rgba(255, 215, 0, 0.7))",
+                              },
+                              "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track":
+                                { backgroundColor: "#ffeb3b" },
+                            }}
+                          />
+                        }
+                        label={
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 600, color: theme.palette.text.secondary }}
+                          >
+                            {t("usersAdmin.extraBooking.label")}
+                          </Typography>
+                        }
+                        sx={{ mb: user.allowExtraBookings ? 0 : 0.3 }}
+                      />
+
+                      {!user.allowExtraBookings && (
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 6 }}>
+                          <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+                            {t("usersAdmin.extraBooking.currentLimit", {
+                              count: user.weeklyBookingLimit || 4,
+                            })}
+                          </Typography>
+                          <Button
+                            size="small"
+                            disabled={user.isBlocked}
+                            onClick={() => openEditLimitDialog(user)}
+                            sx={{ minWidth: 0, p: 0, fontSize: 12, textTransform: "none", color: "#1976d2", fontWeight: 600 }}
+                          >
+                            {t("usersAdmin.extraBooking.editLimit")}
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                  )}
 
                   {/* --------------------------- */}
                   {/* 🔘 أزرار التحكم */}
@@ -1019,7 +1074,46 @@ export default function UsersAdmin() {
             </Button>
           </DialogActions>
         </Dialog>
+        <Dialog
+          open={limitDialogOpen}
+          onClose={() => setLimitDialogOpen(false)}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+        >
+          <DialogTitle sx={{ fontWeight: 700, color: "#1976d2", textAlign: "center" }}>
+            {t("usersAdmin.extraBooking.limitDialogTitle")}
+          </DialogTitle>
 
+          <DialogContent sx={{ display: "grid", gap: 1.5, mt: 0.5 }}>
+            <Typography align="center" variant="body2" sx={{ color: "text.secondary" }}>
+              {t("usersAdmin.extraBooking.limitDialogText", { name: limitTargetUser?.username })}
+            </Typography>
+
+            <TextField
+              fullWidth
+              type="number"
+              label={t("usersAdmin.extraBooking.limitDialogLabel")}
+              value={limitValue}
+              onChange={(e) => setLimitValue(e.target.value)}
+              inputProps={{ min: 1 }}
+              sx={textFieldStyle}
+            />
+          </DialogContent>
+
+          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
+            <Button variant="outlined" onClick={() => setLimitDialogOpen(false)} sx={{ color: "#555", borderColor: "#bbb" }}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              variant="contained"
+              onClick={confirmLimitDialog}
+              sx={{ fontWeight: 600, backgroundColor: "#1976d2", "&:hover": { backgroundColor: "#1565c0" } }}
+            >
+              {t("common.confirm")}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   );

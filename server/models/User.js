@@ -74,6 +74,7 @@ const userSchema = new mongoose.Schema(
     },
 
     allowExtraBookings: { type: Boolean, default: false },
+    weeklyBookingLimit: { type: Number, default: null, min: 1 },
     weightHistory: [weightHistorySchema],
     subscription: subscriptionSchema,
 

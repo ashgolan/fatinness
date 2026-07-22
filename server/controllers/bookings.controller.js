@@ -89,8 +89,13 @@ export const createBooking = async (req, res) => {
     const { weekStart, weekEnd } = getSundayWeekRange(slot.startAt, ZONE);
 
     const MAX_BOOKINGS = 4;
-    const allowed = user.allowExtraBookings ? Infinity : MAX_BOOKINGS;
-
+    const hasCustomLimit =
+      Number.isInteger(user.weeklyBookingLimit) && user.weeklyBookingLimit > 0;
+    const allowed = user.allowExtraBookings
+      ? Infinity
+      : hasCustomLimit
+        ? user.weeklyBookingLimit
+        : MAX_BOOKINGS;
 
     const userBookings = await Booking.find({
       user: user._id,

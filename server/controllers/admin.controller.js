@@ -222,7 +222,7 @@ export const applyTemplate = async (req, res) => {
 // =======================
 export const setUserExtraBooking = async (req, res) => {
   try {
-    const { userId, allow } = req.body;
+    const { userId, allow, weeklyLimit } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
@@ -230,6 +230,19 @@ export const setUserExtraBooking = async (req, res) => {
     }
 
     user.allowExtraBookings = !!allow;
+
+    if (!user.allowExtraBookings) {
+      if (weeklyLimit !== undefined && weeklyLimit !== null && weeklyLimit !== "") {
+        const parsedLimit = Number(weeklyLimit);
+
+        if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+          return res.status(400).json({ code: "ADMIN_INVALID_WEEKLY_LIMIT" });
+        }
+
+        user.weeklyBookingLimit = parsedLimit;
+      }
+    }
+
     await user.save();
 
     res.json({
@@ -583,7 +596,7 @@ export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find()
       .select(
-        "username email phone allowExtraBookings role isSuperAdmin isBlocked createdAt height weight age gender subscriptionEnd subscriptionStart"
+        "username email phone allowExtraBookings weeklyBookingLimit role isSuperAdmin isBlocked createdAt height weight age gender subscriptionEnd subscriptionStart"
       )
       .sort({ createdAt: -1 });
 

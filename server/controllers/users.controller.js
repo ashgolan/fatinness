@@ -50,6 +50,7 @@ export const getUserProfile = async (req, res) => {
       role: user.role,
       isSuperAdmin: user.isSuperAdmin || false,
       allowExtraBookings: user.allowExtraBookings || false,
+      weeklyBookingLimit: user.weeklyBookingLimit || null,
       notificationsOwned,
 
       subscriptionStart: user.subscriptionStart || null,

@@ -566,7 +566,13 @@
     },
     "extraBooking": {
       "label": "Unlimited bookings by default (new users)",
-      "updated": "Extra booking setting updated"
+      "updated": "Extra booking setting updated",
+      "currentLimit": "Current weekly limit: {{count}} bookings",
+      "editLimit": "Edit",
+      "limitDialogTitle": "Set Weekly Limit",
+      "limitDialogText": "How many bookings per week should be allowed for {{name}}?",
+      "limitDialogLabel": "Bookings per week",
+      "limitInvalid": "Please enter a valid number greater than zero"
     },
     "messages": {
       "updated": "Member data updated successfully",
